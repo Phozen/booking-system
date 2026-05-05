@@ -1,0 +1,244 @@
+# QA Checklist
+
+Phase 15 manual and automated QA checklist for the internal Booking System.
+
+Use this checklist after migrations are applied and the app is running with real Supabase credentials. Mark each item with the tester name, date, environment, and evidence where practical.
+
+## Preflight
+
+- [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.
+- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0009`.
+- [ ] Run `npm.cmd run lint`.
+- [ ] Run `npm.cmd test`.
+- [ ] Run `npm.cmd run build`.
+- [ ] Confirm the dev server opens at `http://localhost:3000`.
+- [ ] Confirm no private env values appear in browser source, console output, or rendered UI.
+
+## Authentication
+
+- [ ] Open `/login`; confirm email/password form renders.
+- [ ] Log in with valid employee credentials; expect `/dashboard`.
+- [ ] Log in with valid admin credentials; expect `/admin/dashboard`.
+- [ ] Try invalid credentials; expect a generic friendly error.
+- [ ] Use logout; expect redirect to `/login`.
+- [ ] Open `/reset-password`; submit a valid email; expect generic reset success messaging.
+- [ ] Confirm unauthenticated `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, and `/admin/dashboard` redirect to `/login?auth=required`.
+
+## Registration Settings
+
+- [ ] Set `registration_enabled=false` in `/admin/settings`; log out; confirm `/register` shows registration disabled.
+- [ ] Set `registration_enabled=true` and `allowed_email_domains=[]`; confirm any valid email domain can register.
+- [ ] Set `allowed_email_domains=["example.com"]`; confirm `user@example.com` can register.
+- [ ] With the same domain setting, confirm `user@gmail.com` is blocked with a friendly message.
+- [ ] Confirm duplicate email signup shows a friendly existing-account message.
+- [ ] Confirm signup rate limit errors show the wait-and-try-again message.
+
+## Role-Based Access
+
+- [ ] Employee can access `/dashboard`, `/facilities`, `/bookings/new`, and `/my-bookings`.
+- [ ] Employee cannot access `/admin/facilities`, `/admin/bookings`, `/admin/approvals`, `/admin/reports`, `/admin/audit-logs`, or `/admin/settings`.
+- [ ] Admin can access all admin pages.
+- [ ] Admin can still access employee facility browsing pages if needed.
+- [ ] Report export routes redirect or deny non-admin users.
+
+## Disabled And Pending Users
+
+- [ ] Set a test employee profile status to `disabled`; confirm login/protected pages are blocked.
+- [ ] Set a test employee profile status to `pending`; confirm protected pages are blocked.
+- [ ] Restore the test profile to `active`; confirm access returns.
+- [ ] Confirm disabled users cannot create bookings or cancel bookings through normal app flows.
+
+## Facility Browsing
+
+- [ ] Open `/facilities` as employee; confirm active non-archived facilities render.
+- [ ] Confirm the five default facilities are present.
+- [ ] Open each facility detail page; confirm name, level, type, capacity, equipment, description, status, and approval indicator display.
+- [ ] Confirm inactive or archived facilities are hidden from employee list.
+- [ ] Confirm the "Book this facility" link opens `/bookings/new?facilityId=...`.
+- [ ] Confirm placeholder/photo display does not break layout.
+
+## Admin Facility Management
+
+- [ ] Open `/admin/facilities`; confirm facility table displays code, name, level, type, capacity, status, approval, and display order.
+- [ ] Create a test facility with unique code and slug.
+- [ ] Edit the test facility fields.
+- [ ] Change facility status and confirm audit log records the update.
+- [ ] Archive or mark the test facility inactive; confirm it is no longer bookable by employees.
+- [ ] Confirm invalid capacity, duplicate code, or duplicate slug is rejected.
+
+## Booking Creation
+
+- [ ] As active employee, open `/facilities`, choose a facility, and click "Book this facility".
+- [ ] Create a valid booking with title, date, start time, end time, and attendee count.
+- [ ] Confirm redirect to `/my-bookings?created=1`.
+- [ ] Confirm booking appears in `/my-bookings`.
+- [ ] Confirm booking detail page shows facility, date/time, status, title, description, attendee count, created date, and updated date.
+- [ ] Confirm attendee count above facility capacity is rejected.
+- [ ] Confirm start time equal to or after end time is rejected.
+- [ ] Confirm booking an inactive, archived, or under-maintenance facility is rejected.
+
+## Booking Conflict Prevention
+
+- [ ] Create a booking for a facility from 10:00 to 11:00.
+- [ ] Attempt another booking for the same facility from 10:30 to 11:30; expect a friendly conflict error.
+- [ ] Confirm the second booking is not created.
+- [ ] Confirm direct SQL overlap test fails because of `bookings_no_overlapping_active`.
+- [ ] Confirm employees cannot bypass app flow with direct table insert under RLS.
+
+## Back-To-Back Booking Behavior
+
+- [ ] Create a booking from 10:00 to 11:00.
+- [ ] Create another booking for the same facility from 11:00 to 12:00.
+- [ ] Confirm both bookings succeed.
+- [ ] Confirm SQL back-to-back verification script succeeds.
+
+## My Bookings
+
+- [ ] Confirm `/my-bookings` shows only the current employee's bookings.
+- [ ] Confirm upcoming, past/history, cancelled, and pending states are distinguishable.
+- [ ] Confirm each booking links to `/bookings/[id]`.
+- [ ] Attempt to open another user's booking detail URL; expect not found or access denied.
+
+## Employee Cancellation
+
+- [ ] Cancel an own `pending` booking with a reason.
+- [ ] Cancel an own `confirmed` booking without a reason.
+- [ ] Confirm status becomes `cancelled`.
+- [ ] Confirm `cancelled_by`, `cancelled_at`, and optional `cancellation_reason` are stored.
+- [ ] Confirm audit log entry is created.
+- [ ] Confirm `booking_cancellation` email notification is queued.
+- [ ] Confirm already cancelled, rejected, completed, or expired bookings cannot be cancelled.
+
+## Admin Booking Management
+
+- [ ] Open `/admin/bookings`; confirm all bookings are visible.
+- [ ] Filter bookings by status and facility.
+- [ ] Open an admin booking detail page; confirm booking, facility, user, approval, cancellation, and timestamps display.
+- [ ] Cancel another user's pending or confirmed booking as admin with a reason.
+- [ ] Confirm audit log and cancellation email queue records are created.
+- [ ] Confirm employee users cannot perform admin booking actions by POSTing or using hidden controls.
+
+## Admin Approvals
+
+- [ ] Enable approval mode globally or for a facility.
+- [ ] As employee, create a booking; confirm status is `pending`.
+- [ ] Open `/admin/approvals`; confirm pending booking appears.
+- [ ] Approve the booking; confirm status becomes `confirmed`.
+- [ ] Confirm approval record has `approved`, `reviewed_by`, `reviewed_at`, and remarks if entered.
+- [ ] Confirm `booking_approval` notification and audit log records are created.
+- [ ] Create another pending booking and reject it; confirm status becomes `rejected`.
+- [ ] Confirm `booking_rejection` notification and audit log records are created.
+- [ ] Create an approval conflict scenario; confirm approval fails with a friendly conflict message.
+
+## Blocked Periods
+
+- [ ] Create an all-facilities blocked period.
+- [ ] Attempt to book any facility during that period; expect blocked-period error.
+- [ ] Create a selected-facility blocked period for `MR-L5-01`.
+- [ ] Confirm `MR-L5-01` is blocked during that time.
+- [ ] Confirm another facility remains bookable during that same time.
+- [ ] Edit blocked period details; confirm updated behavior and audit log.
+- [ ] Deactivate blocked period; confirm it no longer blocks bookings.
+
+## Maintenance Closures
+
+- [ ] Create a scheduled maintenance closure for one facility.
+- [ ] Attempt to book that facility during the closure; expect maintenance error.
+- [ ] Confirm other facilities remain bookable.
+- [ ] Change closure to `in_progress`; confirm it still blocks.
+- [ ] Complete the closure; confirm it no longer blocks new bookings.
+- [ ] Create another closure and cancel it; confirm it does not block.
+- [ ] Confirm each state change creates an audit log.
+
+## Email Notification Queue
+
+- [ ] Create an automatically confirmed booking; confirm `booking_confirmation` notification is queued.
+- [ ] Approve a pending booking; confirm approval notification is queued.
+- [ ] Reject a pending booking; confirm rejection notification is queued.
+- [ ] Cancel a booking; confirm cancellation notification is queued.
+- [ ] Open `/admin/email-notifications`; confirm notification records display type, status, recipient, subject, attempts, scheduled time, sent time, and errors.
+- [ ] Process queued emails with missing provider config; confirm app does not crash and records show clear failure.
+- [ ] Retry failed notifications after fixing config.
+- [ ] Optional: configure Resend and confirm a real email sends and `sent_at` is populated.
+
+## Reports
+
+- [ ] Open `/admin/reports`; confirm summary metrics render.
+- [ ] Confirm booking history, facility utilization, user booking summary, cancelled bookings, and audit log previews render.
+- [ ] Apply date range, facility, and status filters.
+- [ ] Confirm totals and tables update consistently.
+- [ ] Confirm empty states render for ranges with no data.
+
+## CSV Exports
+
+- [ ] Export booking history CSV; confirm download and readable headers.
+- [ ] Export facility utilization CSV; confirm room-level totals.
+- [ ] Export user booking summary CSV; confirm user-level totals.
+- [ ] Export cancelled bookings CSV; confirm cancellation reason column.
+- [ ] Export audit logs CSV; confirm action/entity/actor columns.
+- [ ] Confirm commas, quotes, and newlines are escaped correctly.
+- [ ] Confirm `export_logs` record is created.
+- [ ] Confirm `audit_logs` export record is created.
+- [ ] Confirm employee users cannot download report CSVs.
+
+## Audit Logs
+
+- [ ] Open `/admin/audit-logs`; confirm recent logs display.
+- [ ] Filter by date range, actor email, action, and entity type.
+- [ ] Open an audit log detail page; confirm metadata, old values, and new values render as readable JSON.
+- [ ] Perform a facility update; confirm new audit log appears.
+- [ ] Perform a booking cancellation; confirm new audit log appears.
+- [ ] Confirm employees cannot access audit log pages.
+
+## System Settings
+
+- [ ] Open `/admin/settings`; confirm seeded/default settings display.
+- [ ] Update app name or company name; confirm value persists.
+- [ ] Confirm audit log for `settings_change`.
+- [ ] Toggle `default_approval_required`; confirm future bookings follow it.
+- [ ] Toggle facility approval override; confirm global default controls when override is disabled.
+- [ ] Update reminder offsets; confirm validation accepts positive integer list.
+- [ ] Confirm secrets are not stored in `system_settings`.
+
+## RLS And Security Behavior
+
+- [ ] Confirm service role key is never used in client components.
+- [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
+- [ ] Confirm active employees can select only their own bookings.
+- [ ] Confirm employees cannot insert direct booking rows and must use `public.create_booking()`.
+- [ ] Confirm employees cannot update other users' bookings.
+- [ ] Confirm employees cannot view audit logs, export logs, email notifications, or private settings.
+- [ ] Confirm active admins can manage expected admin records.
+- [ ] Confirm storage bucket `facility-photos` is private and policies match `docs/SECURITY_CHECKLIST.md`.
+
+## Production Build
+
+- [ ] Run `npm.cmd run lint`.
+- [ ] Run `npm.cmd test`.
+- [ ] Run `npm.cmd run build`.
+- [ ] Run `npm.cmd run pages:build` before production deployment.
+- [ ] Confirm any OpenNext warning about deprecated `middleware.ts` is the documented Cloudflare compatibility shim and not a new runtime error.
+- [ ] Confirm route list includes employee, admin, auth, and export routes.
+- [ ] Confirm build does not require live email provider env vars.
+- [ ] Confirm build does not expose service role or email provider secrets.
+
+## Basic Responsive UI
+
+- [ ] Check `/login`, `/register`, `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, `/admin/bookings`, `/admin/reports`, and `/admin/settings` at mobile width.
+- [ ] Check the same pages at desktop width.
+- [ ] Confirm forms fit without clipped text.
+- [ ] Confirm tables scroll horizontally on small screens where needed.
+- [ ] Confirm buttons, inputs, labels, and status badges remain readable.
+- [ ] Confirm no major content overlap or layout shift during form errors.
+
+## Known Deferred Items
+
+- [ ] Facility photo upload UI is deferred.
+- [ ] Admin user management UI is deferred.
+- [ ] Automatic email cron/background processing is deferred.
+- [ ] Reminder scheduling automation is deferred.
+- [ ] Calendar UI is deferred.
+- [ ] PDF and Excel exports are deferred.
+- [ ] Recurring bookings are deferred.
+- [ ] Cloudflare Pages deployment is Phase 16.
+- [ ] Cloudflare Access or network-layer internal restriction is a deployment hardening option.
