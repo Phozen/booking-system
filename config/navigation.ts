@@ -2,6 +2,7 @@ import {
   BarChart3,
   Blocks,
   Building2,
+  CalendarDays,
   CalendarPlus,
   CalendarCheck,
   ClipboardCheck,
@@ -21,12 +22,14 @@ export const authNavigation = [
 export const employeeNavigation = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, match: "exact" },
   { title: "Facilities", href: "/facilities", icon: Building2, match: "prefix" },
+  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact" },
   { title: "New Booking", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
   { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact" },
 ] as const;
 
 export const adminNavigation = [
   { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, match: "exact" },
+  { title: "Calendar", href: "/admin/calendar", icon: CalendarDays, match: "exact" },
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
@@ -41,11 +44,11 @@ export const adminNavigation = [
 export const adminNavigationGroups = [
   {
     title: "Overview",
-    items: adminNavigation.slice(0, 3),
+    items: adminNavigation.slice(0, 2),
   },
   {
     title: "Operations",
-    items: adminNavigation.slice(3, 7),
+    items: adminNavigation.slice(2, 7),
   },
   {
     title: "Governance",

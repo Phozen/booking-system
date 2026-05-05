@@ -56,6 +56,7 @@ Design personality:
 | `/dashboard` | Employee overview and quick actions | Exists | Needs shared employee shell and stronger upcoming booking preview. |
 | `/facilities` | Browse active facilities | Exists | Good foundation; needs filters/search eventually. |
 | `/facilities/[slug]` | Facility details and booking entry | Exists | Good booking entry point; needs richer availability messaging later. |
+| `/calendar` | Personal booking calendar | Exists | Shows the employee's own past, current, and upcoming bookings by month. |
 | `/bookings/new` | Create booking | Exists | Needs stronger availability feedback and form error UX. |
 | `/bookings/[id]` | Employee booking detail | Exists | Should keep privacy-safe not-found/access-denied behavior. |
 | `/my-bookings` | Current user's bookings | Exists | Good grouping foundation. |
@@ -66,6 +67,7 @@ Design personality:
 | Route | Purpose | Current status | Notes |
 | --- | --- | --- | --- |
 | `/admin/dashboard` | Admin overview | Exists | Currently foundational; needs metrics and recent activity polish. |
+| `/admin/calendar` | All-bookings calendar | Exists | Admin-only calendar for reviewing bookings across facilities and users. |
 | `/admin/facilities` | Facility list and management | Exists | Needs shared admin shell and filters. |
 | `/admin/facilities/new` | Create facility | Exists | Form foundation exists. |
 | `/admin/facilities/[id]` | Edit facility | Exists | Form foundation exists; photo/equipment management deferred. |
@@ -1346,8 +1348,14 @@ Responsive table standards:
 ### Calendar/Date/Time Usability
 
 - Native date/time is acceptable.
-- Future calendar/timeline should be additive and should not replace text labels.
-- If a calendar is added, it must be keyboard navigable.
+- Calendar pages are additive navigation surfaces; they do not replace My Bookings, booking detail pages, or admin booking management.
+- Employee calendar route: `/calendar`. It shows only the signed-in employee's own bookings.
+- Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only.
+- Desktop calendar can use a month grid with compact booking links inside date cells.
+- Mobile calendar should use an agenda/list grouped by date instead of cramped month cells.
+- Booking items must be real links to the correct detail page and must include readable status text.
+- Calendar controls for previous month, next month, current month, and filters must be keyboard accessible.
+- Empty days and empty months need clear text states; do not rely on blank cells alone.
 
 ## 14. Component Inventory
 
@@ -1356,6 +1364,8 @@ Responsive table standards:
 - `FacilityCard`: card for employee facility list.
 - `FacilityDetail`: detail layout and booking CTA.
 - `BookingForm`: create booking form.
+- `BookingCalendar`: employee month grid and mobile agenda for personal bookings.
+- `BookingCalendarEvent`: linked booking item with facility, time, and status.
 - `BookingCard`: employee booking list item.
 - `BookingDetail`: employee booking details.
 - `BookingStatusBadge`: current booking badge, should become a shared status badge wrapper.
@@ -1371,6 +1381,7 @@ Responsive table standards:
 - `FilterBar`: partially exists per feature, should be standardized.
 - `FacilityForm`: exists.
 - `BookingAdminDetail`: current component is `AdminBookingDetail`.
+- `AdminBookingCalendar`: admin month grid and mobile agenda for all bookings.
 - `ApprovalActionForm`: current action form exists as admin booking action form; may need split.
 - `BlockedPeriodForm`: exists.
 - `MaintenanceForm`: exists.
@@ -1447,7 +1458,7 @@ Add only when needed and keep dependency impact low.
 
 - Facility photo upload UX.
 - Facility search and filters for employees.
-- Calendar or timeline availability view.
+- Availability timeline view that shows open time slots before booking.
 - Admin user management UI.
 - Advanced report charts.
 - Saved report filters.
@@ -1735,7 +1746,7 @@ Manual tests:
 - Profile page.
 - Admin users page.
 - Facility photo upload UX.
-- Calendar/timeline availability view.
+- Availability timeline view.
 
 ### Accessibility Risks
 
