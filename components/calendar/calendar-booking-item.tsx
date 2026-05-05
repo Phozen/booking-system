@@ -17,7 +17,7 @@ export function CalendarBookingItem({
     <Link
       href={booking.href}
       className={cn(
-        "group grid gap-2 rounded-lg border bg-background p-3 text-sm transition-colors hover:border-primary/50 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group grid gap-2 rounded-lg border border-border/70 bg-background p-3 text-sm shadow-sm transition-colors hover:border-primary/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35",
         compact ? "p-2 text-xs" : "",
       )}
     >
@@ -41,7 +41,10 @@ export function CalendarBookingItem({
           <div>{formatBookingWindow(booking.startsAt, booking.endsAt)}</div>
         )}
         <div className="inline-flex items-center gap-2">
-          <MapPin className={cn("size-4", compact ? "hidden" : "")} aria-hidden="true" />
+          <MapPin
+            className={cn("size-4", compact ? "hidden" : "")}
+            aria-hidden="true"
+          />
           <span>
             {booking.facilityName}, {booking.facilityLevel}
             {booking.facilityType ? ` - ${booking.facilityType}` : ""}

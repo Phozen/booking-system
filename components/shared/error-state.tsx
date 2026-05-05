@@ -17,17 +17,19 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        "rounded-lg border border-destructive/30 bg-destructive/5 p-5 text-destructive",
+        "rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 shadow-sm dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100",
         className,
       )}
       role="alert"
     >
       <div className="flex gap-3">
-        <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:ring-rose-900">
+          <AlertTriangle className="size-4" aria-hidden="true" />
+        </div>
         <div>
           <h2 className="font-semibold tracking-normal">{title}</h2>
           {description ? (
-            <p className="mt-1 text-sm leading-6 text-destructive/80">
+            <p className="mt-1 text-sm leading-6 text-rose-800 dark:text-rose-200">
               {description}
             </p>
           ) : null}

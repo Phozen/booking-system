@@ -205,11 +205,29 @@ Examples:
 - Prefer clear spacing, borders, and hierarchy over gradients or visual effects.
 - Keep cards at `rounded-lg` or smaller, matching current components.
 
+### Final Visual Baseline
+
+- The app should use a warm neutral page background with white/card surfaces.
+- Primary actions use blue/indigo and should be visually stronger than secondary actions.
+- Success states use emerald, pending/warning states use amber, destructive or failed states use rose, inactive/cancelled states use slate or zinc, and maintenance/info states use sky.
+- Cards, filter bars, dialogs, and tables should use soft borders and light shadows only where they improve separation.
+- The visual system should remain professional and calm for internal company use.
+
+### Color Role Guidance
+
+- `background`: quiet app canvas, slightly warmer than pure white.
+- `card`: primary content surface.
+- `primary`: main action, active navigation, current-day emphasis, key icon background.
+- `secondary` and `accent`: low-emphasis surfaces and hover states.
+- `destructive`: irreversible or risky actions.
+- `border` and `input`: visible enough to separate controls without heavy outlines.
+- `ring`: visible keyboard focus indicator.
+
 ### Card Style
 
 - Use cards for repeated items, forms, detail panels, and tables.
 - Avoid nesting cards inside cards.
-- Page sections should be unframed or simple bordered panels.
+- Page sections should be unframed or simple bordered panels with soft shadows where helpful.
 - Card padding:
   - Compact table panels: `p-4`.
   - Forms/detail panels: `p-5` or `p-6`.
@@ -218,9 +236,11 @@ Examples:
 ### Button Hierarchy
 
 - Primary button: one per main workflow section.
-- Outline button: secondary navigation/actions.
+- Primary buttons should use solid brand color and clear verb labels.
+- Outline button: secondary navigation/actions, visually clear but quieter than primary.
 - Ghost button: back links, low emphasis reset/cancel actions.
-- Destructive button: cancellation, rejection, deactivation, completing irreversible state transitions when appropriate.
+- Destructive button: cancellation, rejection, deactivation, completing irreversible state transitions when appropriate. Use rose/destructive treatment and confirmation where needed.
+- Disabled buttons must remain visibly disabled and must not rely on color alone.
 - Icon usage:
   - Use lucide icons when the action benefits from recognition.
   - Icons should be paired with visible text except very familiar compact actions.
@@ -248,6 +268,7 @@ Examples:
 ### Badge And Status Colors
 
 Status badges must use both label text and color. Color should be consistent across the app.
+Badges should also include a small dot or another non-text visual marker, but text remains the source of truth.
 
 Suggested intent:
 
@@ -257,6 +278,17 @@ Suggested intent:
 - Cancelled/inactive/archived: slate or zinc.
 - Maintenance/in progress/scheduled: sky or amber depending urgency.
 - Queued/sending: amber or sky.
+
+### Accessibility Baseline Checklist
+
+- Preserve visible focus rings on links, buttons, inputs, filters, table scroll containers, and dialogs.
+- Keep labels visible; placeholders must not be the only label.
+- Associate field-level errors with controls using `aria-invalid` and `aria-describedby`.
+- Status badges must include readable text and accessible labels.
+- Icon-only controls require `aria-label`; prefer icon plus text for destructive and primary actions.
+- Touch targets should be at least comfortable button height on mobile.
+- Alerts, empty states, and loading states should use plain text and appropriate `role` or live-region behavior.
+- Dialogs must announce title and description and return focus when closed where practical.
 
 ### Spacing Scale
 

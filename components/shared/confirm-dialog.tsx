@@ -70,7 +70,7 @@ export function ConfirmDialog({
         ref={dialogRef}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="w-[min(92vw,28rem)] rounded-lg border bg-background p-0 text-foreground shadow-xl backdrop:bg-background/70"
+        className="w-[min(92vw,28rem)] rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl backdrop:bg-slate-950/35"
       >
         <div className="grid gap-4 p-5">
           <div>

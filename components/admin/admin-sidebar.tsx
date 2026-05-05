@@ -12,9 +12,9 @@ export function AdminSidebar({
   role?: string | null;
 }) {
   return (
-    <aside className="hidden min-h-svh w-72 shrink-0 border-r bg-background lg:block">
+    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-border/70 bg-card/80 lg:block">
       <div className="sticky top-0 flex h-svh flex-col gap-6 p-4">
-        <div className="border-b pb-4">
+        <div className="border-b border-border/70 pb-4">
           <Link
             href="/admin/dashboard"
             className="rounded-sm text-base font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

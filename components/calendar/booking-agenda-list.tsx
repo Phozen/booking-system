@@ -28,7 +28,10 @@ export function BookingAgendaList({
 
       {daysWithBookings.length > 0 ? (
         daysWithBookings.map((day) => (
-          <section key={day.key} className="grid gap-3 rounded-lg border bg-card p-4">
+          <section
+            key={day.key}
+            className="grid gap-3 rounded-lg border border-border/70 bg-card p-4 shadow-sm"
+          >
             <div>
               <h3 className="font-medium tracking-normal">{day.shortLabel}</h3>
               <p className="text-sm text-muted-foreground">

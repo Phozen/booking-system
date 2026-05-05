@@ -18,8 +18,8 @@ export function MonthCalendarGrid({
   );
 
   return (
-    <section className="hidden overflow-hidden rounded-lg border bg-card md:block">
-      <div className="border-b p-4">
+    <section className="hidden overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm md:block">
+      <div className="border-b bg-muted/25 p-4">
         <h2 className="font-semibold tracking-normal">Month view</h2>
         <p className="text-sm text-muted-foreground">
           Booking items are links. Days without bookings remain visible for
@@ -36,7 +36,7 @@ export function MonthCalendarGrid({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-7 border-b bg-muted/50 text-xs font-medium uppercase text-muted-foreground">
+      <div className="grid grid-cols-7 border-b bg-secondary/70 text-xs font-semibold uppercase text-muted-foreground">
         {weekDays.map((day) => (
           <div key={day} className="border-r px-3 py-2 last:border-r-0">
             {day}
@@ -52,15 +52,17 @@ export function MonthCalendarGrid({
             <div
               key={day.key}
               className={cn(
-                "min-h-36 border-r border-t p-2 last:border-r-0",
-                !day.isCurrentMonth && "bg-muted/30 text-muted-foreground",
+                "min-h-36 border-r border-t bg-background/60 p-2 last:border-r-0",
+                !day.isCurrentMonth && "bg-muted/35 text-muted-foreground",
+                day.isToday && "bg-primary/5",
               )}
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span
                   className={cn(
-                    "inline-flex size-7 items-center justify-center rounded-full text-sm font-medium",
-                    day.isToday && "bg-primary text-primary-foreground",
+                    "inline-flex size-7 items-center justify-center rounded-full text-sm font-semibold",
+                    day.isToday &&
+                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
                   )}
                   aria-label={`${day.weekdayLabel}, ${day.shortLabel}`}
                 >

@@ -21,20 +21,25 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn("grid gap-4 border-b pb-6", className)}>
+    <header
+      className={cn(
+        "grid gap-4 rounded-lg border border-border/70 bg-card/90 p-5 shadow-sm",
+        className,
+      )}
+    >
       {breadcrumbs ? <Breadcrumbs items={breadcrumbs} /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-3xl">
           {eyebrow ? (
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-1 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-1 text-3xl font-semibold tracking-normal text-foreground">
             {title}
           </h1>
           {description ? (
-            <div className="mt-2 text-sm leading-6 text-muted-foreground">
+            <div className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               {description}
             </div>
           ) : null}

@@ -5,7 +5,7 @@ import { appConfig } from "@/config/app";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-svh items-center justify-center bg-muted/30 px-6 py-10">
+    <main className="flex min-h-svh items-center justify-center bg-background px-6 py-10">
       <div className="grid w-full max-w-md gap-6">
         <div className="text-center">
           <Link

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, CalendarPlus, ClipboardList } from "lucide-react";
+import { Building2, CalendarDays, CalendarPlus, ClipboardList } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import {
@@ -42,12 +42,14 @@ export default async function DashboardPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-4">
         <Link
           href="/facilities"
-          className="rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
         >
-          <Building2 className="size-5 text-primary" aria-hidden="true" />
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Building2 className="size-5" aria-hidden="true" />
+          </div>
           <h2 className="mt-3 font-medium tracking-normal">Browse facilities</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Compare rooms, capacity, equipment, and approval requirements.
@@ -55,19 +57,35 @@ export default async function DashboardPage() {
         </Link>
         <Link
           href="/bookings/new"
-          className="rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
         >
-          <CalendarPlus className="size-5 text-primary" aria-hidden="true" />
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <CalendarPlus className="size-5" aria-hidden="true" />
+          </div>
           <h2 className="mt-3 font-medium tracking-normal">Create booking</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Pick a facility, date, time, and purpose in one short form.
           </p>
         </Link>
         <Link
-          href="/my-bookings"
-          className="rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          href="/calendar"
+          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
         >
-          <ClipboardList className="size-5 text-primary" aria-hidden="true" />
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <CalendarDays className="size-5" aria-hidden="true" />
+          </div>
+          <h2 className="mt-3 font-medium tracking-normal">Calendar</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Scan past, current, and upcoming bookings by month.
+          </p>
+        </Link>
+        <Link
+          href="/my-bookings"
+          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+        >
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <ClipboardList className="size-5" aria-hidden="true" />
+          </div>
           <h2 className="mt-3 font-medium tracking-normal">My Bookings</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Review pending, upcoming, historical, and cancelled bookings.
@@ -75,7 +93,7 @@ export default async function DashboardPage() {
         </Link>
       </section>
 
-      <section className="rounded-lg border bg-card p-5 text-card-foreground">
+      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-medium">Upcoming bookings</h2>
@@ -91,7 +109,7 @@ export default async function DashboardPage() {
               <Link
                 key={booking.id}
                 href={`/bookings/${booking.id}`}
-                className="grid gap-2 rounded-lg border p-3 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="grid gap-2 rounded-lg border border-border/70 bg-background p-3 transition-colors hover:border-primary/30 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">{booking.title}</span>

@@ -12,13 +12,13 @@ export function LoadingState({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-2 rounded-lg border bg-card p-6 text-sm text-muted-foreground",
+        "flex items-center justify-center gap-2 rounded-lg border border-border/70 bg-card/95 p-6 text-sm text-muted-foreground shadow-sm",
         className,
       )}
       role="status"
       aria-live="polite"
     >
-      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      <Loader2 className="size-4 animate-spin text-primary" aria-hidden="true" />
       <span>{label}</span>
     </div>
   );

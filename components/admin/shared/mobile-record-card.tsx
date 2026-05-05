@@ -23,7 +23,12 @@ export function MobileRecordCard({
   className?: string;
 }) {
   return (
-    <article className={cn("grid gap-4 rounded-lg border bg-background p-4", className)}>
+    <article
+      className={cn(
+        "grid gap-4 rounded-lg border border-border/70 bg-background p-4 shadow-sm",
+        className,
+      )}
+    >
       <div className="grid gap-2">
         {eyebrow ? (
           <p className="text-xs font-medium uppercase text-muted-foreground">
@@ -47,7 +52,9 @@ export function MobileRecordCard({
         ))}
       </dl>
 
-      {actions ? <div className="flex flex-wrap gap-2 border-t pt-3">{actions}</div> : null}
+      {actions ? (
+        <div className="flex flex-wrap gap-2 border-t pt-3">{actions}</div>
+      ) : null}
     </article>
   );
 }
