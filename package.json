@@ -2,23 +2,21 @@
   "name": "booking-system",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "pages:build": "opennextjs-cloudflare build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "qa": "npm run lint && npm test && npm run build",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "qa": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@hookform/resolvers": "^5.2.2",
-    "@opennextjs/cloudflare": "^1.19.5",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "@tanstack/react-table": "^8.21.3",
@@ -46,7 +44,6 @@
     "supabase": "^2.95.6",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.5",
-    "wrangler": "^4.87.0"
+    "vitest": "^4.1.5"
   }
 }
