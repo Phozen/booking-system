@@ -141,7 +141,7 @@ export function MaintenanceForm({
             name="facilityId"
             defaultValue={maintenanceClosure?.facilityId ?? ""}
             required
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="" disabled>
               Select a facility
@@ -227,7 +227,7 @@ export function MaintenanceForm({
               id="status"
               name="status"
               defaultValue={maintenanceClosure.status}
-              className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {maintenanceStatusOptions.map((status) => (
                 <option key={status} value={status}>
@@ -258,12 +258,12 @@ export function MaintenanceForm({
           defaultValue={maintenanceClosure?.reason ?? ""}
           rows={4}
           maxLength={1000}
-          className="min-h-24 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
       </section>
 
-      <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         {canChangeStatus ? (
           <>
             <ConfirmDialog
@@ -275,6 +275,7 @@ export function MaintenanceForm({
               pendingLabel="Saving..."
               disabled={isPending}
               pending={isStatusPending}
+              triggerClassName="w-full sm:w-auto"
               onConfirm={() => runStatusAction("complete")}
             />
             <ConfirmDialog
@@ -287,6 +288,7 @@ export function MaintenanceForm({
               destructive
               disabled={isPending}
               pending={isStatusPending}
+              triggerClassName="w-full sm:w-auto"
               onConfirm={() => runStatusAction("cancel")}
             />
           </>

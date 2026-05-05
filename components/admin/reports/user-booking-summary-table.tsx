@@ -13,6 +13,9 @@ export function UserBookingSummaryTable({
           Most active users for the selected period.
         </p>
       </div>
+      <p className="px-4 pt-3 text-xs text-muted-foreground md:hidden">
+        Scroll horizontally to see all columns.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
@@ -31,7 +34,9 @@ export function UserBookingSummaryTable({
               rows.slice(0, 25).map((row) => (
                 <tr key={row.userId} className="border-t">
                   <td className="px-4 py-3 font-medium">{row.userName}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{row.email}</td>
+                  <td className="break-words px-4 py-3 text-muted-foreground">
+                    {row.email}
+                  </td>
                   <td className="px-4 py-3">{row.totalBookings}</td>
                   <td className="px-4 py-3">{row.confirmedBookings}</td>
                   <td className="px-4 py-3">{row.pendingBookings}</td>
@@ -52,4 +57,3 @@ export function UserBookingSummaryTable({
     </section>
   );
 }
-

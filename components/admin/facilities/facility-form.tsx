@@ -217,7 +217,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.type && "type-error",
             )}
             aria-invalid={Boolean(fieldErrors.type)}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {facilityTypeOptions.map((type) => (
               <option key={type} value={type}>
@@ -261,7 +261,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.status && "status-error",
             )}
             aria-invalid={Boolean(fieldErrors.status)}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {facilityStatusOptions.map((status) => (
               <option key={status} value={status}>
@@ -283,7 +283,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.requiresApproval && "requiresApproval-error",
             )}
             aria-invalid={Boolean(fieldErrors.requiresApproval)}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="inherit">Use system default</option>
             <option value="required">Required</option>
@@ -333,7 +333,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
             fieldErrors.description && "description-error",
           )}
           aria-invalid={Boolean(fieldErrors.description)}
-          className="min-h-28 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
         <FormFieldHelper id="description-helper">
           Optional. Describe the space, layout, or booking guidance.
@@ -343,7 +343,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         </FormFieldError>
       </div>
 
-      <div className="flex justify-end gap-3 border-t pt-5">
+      <div className="grid gap-3 border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button
           type="button"
           variant="outline"

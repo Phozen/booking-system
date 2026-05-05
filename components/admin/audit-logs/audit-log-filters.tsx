@@ -28,7 +28,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
 
   return (
     <AdminFilterBar className="grid gap-4">
-      <form className="grid gap-3 md:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] md:items-end">
+      <form className="grid gap-3 md:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] md:items-end [&>*]:min-w-0">
         <input type="hidden" name="page" value="1" />
 
         <div className="grid gap-2">
@@ -40,7 +40,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             name="dateFrom"
             type="date"
             defaultValue={filters.dateFrom}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -53,7 +53,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             name="dateTo"
             type="date"
             defaultValue={filters.dateTo}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -67,7 +67,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             type="search"
             defaultValue={filters.actorEmail ?? ""}
             placeholder="name@company.com"
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -79,7 +79,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             id="action"
             name="action"
             defaultValue={filters.action ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {auditActionOptions.map((action) => (
               <option key={action} value={action}>
@@ -97,7 +97,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             id="entityType"
             name="entityType"
             defaultValue={filters.entityType ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {auditEntityTypeOptions.map((entityType) => (
               <option key={entityType} value={entityType}>
@@ -107,24 +107,37 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           </select>
         </div>
 
-        <button className={buttonVariants({ variant: "outline" })} type="submit">
+        <button
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full md:w-auto",
+          })}
+          type="submit"
+        >
           <Filter data-icon="inline-start" />
           Apply
         </button>
 
         <Link
           href="/admin/audit-logs"
-          className={buttonVariants({ variant: "ghost" })}
+          className={buttonVariants({
+            variant: "ghost",
+            className: "w-full md:w-auto",
+          })}
         >
           <RotateCcw data-icon="inline-start" />
           Reset
         </Link>
       </form>
 
-      <div className="flex flex-wrap items-center gap-2 border-t pt-4">
+      <div className="grid gap-2 border-t pt-4 sm:flex sm:flex-wrap sm:items-center">
         <Link
           href={`/admin/reports/export/audit-logs?${exportParams.toString()}`}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
+          className={buttonVariants({
+            variant: "outline",
+            size: "sm",
+            className: "w-full sm:w-auto",
+          })}
         >
           <Download data-icon="inline-start" />
           Export audit CSV

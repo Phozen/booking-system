@@ -14,6 +14,9 @@ export function FacilityUtilizationTable({
           Booked hours are calculated from confirmed and completed bookings.
         </p>
       </div>
+      <p className="px-4 pt-3 text-xs text-muted-foreground md:hidden">
+        Scroll horizontally to see all columns.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
@@ -58,4 +61,3 @@ export function FacilityUtilizationTable({
     </section>
   );
 }
-

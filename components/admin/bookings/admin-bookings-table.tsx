@@ -33,7 +33,7 @@ export function AdminBookingsTable({
   return (
     <div className="grid gap-5">
       <AdminFilterBar>
-      <form className="grid gap-3 md:grid-cols-[minmax(0,220px)_minmax(0,280px)_auto_auto] md:items-end">
+      <form className="grid gap-3 md:grid-cols-[minmax(0,220px)_minmax(0,280px)_auto_auto] md:items-end [&>*]:min-w-0">
         <div className="grid gap-2">
           <label htmlFor="status" className="text-sm font-medium">
             Status
@@ -42,7 +42,7 @@ export function AdminBookingsTable({
             id="status"
             name="status"
             defaultValue={selectedStatus ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {adminBookingStatusOptions.map((status) => (
               <option key={status} value={status}>
@@ -60,7 +60,7 @@ export function AdminBookingsTable({
             id="facilityId"
             name="facilityId"
             defaultValue={selectedFacilityId ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="all">All facilities</option>
             {facilities.map((facility) => (
@@ -71,14 +71,23 @@ export function AdminBookingsTable({
           </select>
         </div>
 
-        <button className={buttonVariants({ variant: "outline" })} type="submit">
+        <button
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full md:w-auto",
+          })}
+          type="submit"
+        >
           <Filter data-icon="inline-start" />
           Apply filters
         </button>
         {hasActiveFilters ? (
           <Link
             href="/admin/bookings"
-            className={buttonVariants({ variant: "ghost" })}
+            className={buttonVariants({
+              variant: "ghost",
+              className: "w-full md:w-auto",
+            })}
           >
             <RotateCcw data-icon="inline-start" />
             Clear filters

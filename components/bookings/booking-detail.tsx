@@ -25,7 +25,7 @@ function DetailItem({
   return (
     <div>
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-medium">{children}</dd>
+      <dd className="mt-1 min-w-0 break-words font-medium">{children}</dd>
     </div>
   );
 }
@@ -48,7 +48,7 @@ export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
   const approval = booking.approvals[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <div className="grid gap-3">
         <Breadcrumbs
           items={[
@@ -68,7 +68,7 @@ export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
       <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <BookingStatusBadge status={booking.status} />
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
             {booking.title}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -80,7 +80,10 @@ export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
 
         <Link
           href="/bookings/new"
-          className={buttonVariants({ variant: "outline" })}
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
         >
           <CalendarPlus data-icon="inline-start" />
           Create another booking

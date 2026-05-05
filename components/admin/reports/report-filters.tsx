@@ -38,7 +38,7 @@ export function ReportFilters({
       title="Report filters"
       description="Apply filters before reviewing previews or exporting CSV files."
     >
-      <form className="grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto_auto] lg:items-end">
+      <form className="grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto_auto] lg:items-end [&>*]:min-w-0">
         <div className="grid gap-2">
           <label htmlFor="dateFrom" className="text-sm font-medium">
             From
@@ -48,7 +48,7 @@ export function ReportFilters({
             name="dateFrom"
             type="date"
             defaultValue={filters.dateFrom}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -61,7 +61,7 @@ export function ReportFilters({
             name="dateTo"
             type="date"
             defaultValue={filters.dateTo}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -73,7 +73,7 @@ export function ReportFilters({
             id="facilityId"
             name="facilityId"
             defaultValue={filters.facilityId ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="all">All facilities</option>
             {facilities.map((facility) => (
@@ -92,7 +92,7 @@ export function ReportFilters({
             id="status"
             name="status"
             defaultValue={filters.status ?? "all"}
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {reportBookingStatusOptions.map((status) => (
               <option key={status} value={status}>
@@ -102,23 +102,39 @@ export function ReportFilters({
           </select>
         </div>
 
-        <button className={buttonVariants({ variant: "outline" })} type="submit">
+        <button
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full lg:w-auto",
+          })}
+          type="submit"
+        >
           <Filter data-icon="inline-start" />
           Apply
         </button>
 
-        <Link href="/admin/reports" className={buttonVariants({ variant: "ghost" })}>
+        <Link
+          href="/admin/reports"
+          className={buttonVariants({
+            variant: "ghost",
+            className: "w-full lg:w-auto",
+          })}
+        >
           <RotateCcw data-icon="inline-start" />
           Reset
         </Link>
       </form>
 
-      <div className="flex flex-wrap gap-2 border-t pt-4">
+      <div className="grid gap-2 border-t pt-4 sm:flex sm:flex-wrap">
         {exports.map((item) => (
           <Link
             key={item.type}
             href={buildExportHref(item.type, filters)}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "w-full sm:w-auto",
+            })}
           >
             <Download data-icon="inline-start" />
             {item.label}

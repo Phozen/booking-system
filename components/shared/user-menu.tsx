@@ -15,7 +15,7 @@ export function UserMenu({
   return (
     <div className={className}>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium">
+        <p className="break-all text-sm font-medium">
           {email ?? "Signed in"}
         </p>
         {role ? (

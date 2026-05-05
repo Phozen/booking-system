@@ -250,7 +250,7 @@ export function BookingForm({
             )}
             aria-invalid={Boolean(fieldErrors.facilityId)}
             required
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
           >
             {facilities.map((facility) => (
               <option key={facility.id} value={facility.id}>
@@ -424,7 +424,7 @@ export function BookingForm({
             fieldErrors.description && "description-error",
           )}
           aria-invalid={Boolean(fieldErrors.description)}
-          className="min-h-28 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+          className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
         />
         <FormFieldHelper id="description-helper">
           Optional. Add setup notes or extra context for the booking.
@@ -486,7 +486,7 @@ export function BookingForm({
         </section>
       ) : null}
 
-      <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Link
           href="/facilities"
           className={buttonVariants({ variant: "outline" })}

@@ -77,11 +77,11 @@ export function AdminBookingActionForm({
           rows={4}
           maxLength={1000}
           disabled={isPending}
-          className="min-h-24 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
         />
       </div>
 
-      <div className="flex justify-end">
+      <div className="grid sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         {confirmation ? (
           <ConfirmDialog
             triggerLabel={submitLabel}
@@ -92,6 +92,7 @@ export function AdminBookingActionForm({
             pendingLabel={confirmation.pendingLabel}
             destructive={variant === "destructive"}
             pending={isPending}
+            triggerClassName="w-full sm:w-auto"
             onConfirm={() => formRef.current?.requestSubmit()}
           />
         ) : (

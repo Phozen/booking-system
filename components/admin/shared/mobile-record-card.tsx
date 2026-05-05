@@ -36,7 +36,9 @@ export function MobileRecordCard({
           </p>
         ) : null}
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <h3 className="text-base font-semibold tracking-normal">{title}</h3>
+          <h3 className="min-w-0 break-words text-base font-semibold tracking-normal">
+            {title}
+          </h3>
           {badges ? <div className="flex flex-wrap gap-2">{badges}</div> : null}
         </div>
       </div>
@@ -47,13 +49,15 @@ export function MobileRecordCard({
             <dt className="text-xs font-medium uppercase text-muted-foreground">
               {row.label}
             </dt>
-            <dd className="text-foreground">{row.value}</dd>
+            <dd className="min-w-0 break-words text-foreground">{row.value}</dd>
           </div>
         ))}
       </dl>
 
       {actions ? (
-        <div className="flex flex-wrap gap-2 border-t pt-3">{actions}</div>
+        <div className="grid gap-2 border-t pt-3 sm:flex sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">
+          {actions}
+        </div>
       ) : null}
     </article>
   );

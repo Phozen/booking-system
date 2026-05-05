@@ -31,7 +31,11 @@ export function AdminTableShell({
             <p className="text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {actions ? (
+          <div className="grid gap-2 sm:flex sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+            {actions}
+          </div>
+        ) : null}
       </div>
 
       {mobileCards ? (

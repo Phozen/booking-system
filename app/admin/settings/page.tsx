@@ -19,7 +19,7 @@ export default async function AdminSettingsPage() {
   const { settings, rows } = await getAdminSystemSettings(supabase);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Admin area"
         title="System settings"
@@ -35,7 +35,51 @@ export default async function AdminSettingsPage() {
             Read-only reference for current database-backed settings.
           </p>
         </div>
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-3 md:hidden">
+          {rows.map((row) => (
+            <article
+              key={row.key}
+              className="grid gap-3 rounded-lg border bg-background p-4 text-sm"
+            >
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">
+                  Setting
+                </p>
+                <h3 className="mt-1 break-words font-semibold tracking-normal">
+                  {row.key}
+                </h3>
+              </div>
+              <dl className="grid gap-3">
+                <div>
+                  <dt className="text-xs font-medium uppercase text-muted-foreground">
+                    Value
+                  </dt>
+                  <dd className="mt-1 break-words font-mono text-xs text-muted-foreground">
+                    {JSON.stringify(row.value)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium uppercase text-muted-foreground">
+                    Public
+                  </dt>
+                  <dd>{row.isPublic ? "Yes" : "No"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium uppercase text-muted-foreground">
+                    Updated
+                  </dt>
+                  <dd className="break-words text-muted-foreground">
+                    {row.updatedAt ?? "Default fallback"}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+        <p className="hidden px-4 pt-3 text-xs text-muted-foreground md:block lg:hidden">
+          Scroll horizontally to see all columns.
+        </p>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
               <tr>

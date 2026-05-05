@@ -27,7 +27,7 @@ export function FacilityDetail({ facility }: { facility: Facility }) {
         : "Approval follows the current system setting.";
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <div className="grid gap-3">
         <Breadcrumbs
           items={[
@@ -56,7 +56,7 @@ export function FacilityDetail({ facility }: { facility: Facility }) {
             <p className="text-sm font-medium text-muted-foreground">
               {facility.code} - {facility.level}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+            <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">
               {facility.name}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -110,7 +110,7 @@ export function FacilityDetail({ facility }: { facility: Facility }) {
         </div>
       </header>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-lg border bg-card p-5">
           <h2 className="text-lg font-semibold tracking-normal">Details</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

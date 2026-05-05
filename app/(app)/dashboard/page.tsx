@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   const upcomingBookings = await getMyUpcomingBookings(supabase, user.id, 3);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Employee area"
         title="Dashboard"

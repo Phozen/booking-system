@@ -10,6 +10,9 @@ export function AuditLogReportTable({ rows }: { rows: AuditLogReportRow[] }) {
           Recent audit activity for the selected period.
         </p>
       </div>
+      <p className="px-4 pt-3 text-xs text-muted-foreground md:hidden">
+        Scroll horizontally to see all columns.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
@@ -58,4 +61,3 @@ export function AuditLogReportTable({ rows }: { rows: AuditLogReportRow[] }) {
     </section>
   );
 }
-

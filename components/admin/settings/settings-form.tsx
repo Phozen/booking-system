@@ -189,7 +189,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
               fieldErrors.allowedEmailDomains && "allowedEmailDomains-error",
             )}
             aria-invalid={Boolean(fieldErrors.allowedEmailDomains)}
-            className="min-h-24 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           <FormFieldHelper id="allowedEmailDomains-helper" className="text-xs">
             Leave empty to allow any valid email domain.
@@ -302,7 +302,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </div>
       </section>
 
-      <div className="flex justify-end border-t pt-5">
+      <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save settings"}
         </Button>

@@ -35,7 +35,7 @@ export function PageHeader({
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-1 text-3xl font-semibold tracking-normal text-foreground">
+          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-foreground sm:text-3xl">
             {title}
           </h1>
           {description ? (
@@ -45,7 +45,7 @@ export function PageHeader({
           ) : null}
         </div>
         {primaryAction || secondaryAction ? (
-          <div className="flex flex-wrap gap-2 sm:justify-end">
+          <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
             {secondaryAction}
             {primaryAction}
           </div>

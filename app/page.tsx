@@ -9,12 +9,12 @@ export default function Home() {
   return (
     <main className="flex min-h-svh flex-1 flex-col bg-background">
       <section className="border-b">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-16 sm:px-8 lg:px-10">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-12 sm:px-8 sm:py-16 lg:px-10">
           <div className="flex max-w-3xl flex-col gap-5">
             <p className="text-sm font-medium text-muted-foreground">
               Internal facilities
             </p>
-            <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
+            <h1 className="text-3xl font-semibold tracking-normal text-foreground sm:text-5xl">
               {appConfig.name}
             </h1>
             <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -38,7 +38,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[1fr_2fr] lg:px-10">
+      <section className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1fr_2fr] lg:px-10">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <ShieldCheck className="size-4" />

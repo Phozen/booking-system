@@ -23,7 +23,7 @@ export default async function MyBookingsPage({
   const groupedBookings = groupEmployeeBookings(bookings);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Employee bookings"
         title="My Bookings"

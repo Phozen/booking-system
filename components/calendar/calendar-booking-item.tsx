@@ -22,13 +22,13 @@ export function CalendarBookingItem({
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <span className="font-medium leading-5 text-foreground">
+        <span className="min-w-0 break-words font-medium leading-5 text-foreground">
           {booking.title}
         </span>
         <StatusBadge kind="booking" status={booking.status} />
       </div>
 
-      <dl className="grid gap-1 text-muted-foreground">
+      <dl className="grid min-w-0 gap-1 break-words text-muted-foreground">
         {!compact ? (
           <div className="inline-flex items-center gap-2">
             <CalendarClock className="size-4" aria-hidden="true" />

@@ -113,7 +113,7 @@ export function CalendarControls({
           </div>
         </div>
 
-        <form className="grid gap-3 md:grid-cols-[repeat(3,minmax(0,1fr))_auto_auto] md:items-end">
+        <form className="grid gap-3 md:grid-cols-[repeat(3,minmax(0,1fr))_auto_auto] md:items-end [&>*]:min-w-0">
           <div className="grid gap-2">
             <label htmlFor="month" className="text-sm font-medium">
               Month
@@ -123,7 +123,7 @@ export function CalendarControls({
               name="month"
               type="month"
               defaultValue={selectedMonth.value}
-              className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
           </div>
 
@@ -135,7 +135,7 @@ export function CalendarControls({
               id="status"
               name="status"
               defaultValue={selectedStatus ?? "all"}
-              className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {adminBookingStatusOptions.map((status) => (
                 <option key={status} value={status}>
@@ -156,7 +156,7 @@ export function CalendarControls({
                 id="facilityId"
                 name="facilityId"
                 defaultValue={selectedFacilityId ?? "all"}
-                className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="all">All facilities</option>
                 {(facilities ?? []).map((facility) => (
@@ -170,14 +170,18 @@ export function CalendarControls({
             <input type="hidden" name="facilityId" value="all" />
           )}
 
-          <button className={buttonVariants({ size: "sm" })} type="submit">
+          <button className={buttonVariants({ size: "sm", className: "w-full md:w-auto" })} type="submit">
             <CalendarDays data-icon="inline-start" />
             Apply filters
           </button>
 
           <Link
             href={basePath}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
+            className={buttonVariants({
+              variant: "ghost",
+              size: "sm",
+              className: "w-full md:w-auto",
+            })}
           >
             Clear filters
           </Link>

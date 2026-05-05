@@ -29,7 +29,7 @@ function DetailItem({
   return (
     <div>
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-medium">{children}</dd>
+      <dd className="mt-1 min-w-0 break-words font-medium">{children}</dd>
     </div>
   );
 }
@@ -38,7 +38,7 @@ export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
   const approval = booking.approvals[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <div>
         <Link
           href="/admin/bookings"
@@ -54,7 +54,7 @@ export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
           <p className="text-sm font-medium text-muted-foreground">
             Admin booking detail
           </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-1 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
             {booking.title}
           </h1>
           <div className="mt-3">

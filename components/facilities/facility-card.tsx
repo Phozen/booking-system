@@ -55,7 +55,7 @@ export function FacilityCard({ facility }: { facility: Facility }) {
           </div>
           <div>
             <dt className="font-medium text-foreground">Equipment</dt>
-            <dd className="line-clamp-1">
+            <dd className="break-words">
               <EquipmentSummary facility={facility} />
             </dd>
           </div>

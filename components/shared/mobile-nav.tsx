@@ -42,7 +42,7 @@ export function MobileNav({
       {open ? (
         <div
           id={menuId}
-          className="absolute inset-x-4 top-full z-50 mt-2 rounded-lg border border-border/70 bg-card p-3 shadow-xl"
+          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-3 shadow-xl"
         >
           <Navigation compact onNavigate={() => setOpen(false)} />
           {footer ? <div className="mt-4 border-t pt-3">{footer}</div> : null}

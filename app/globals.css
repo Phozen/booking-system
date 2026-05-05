@@ -123,9 +123,23 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
   }
   html {
     @apply font-sans;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
   ::selection {
     @apply bg-primary/15 text-foreground;

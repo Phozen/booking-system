@@ -18,6 +18,9 @@ export function CancelledBookingsTable({
           Cancellation reasons are included when users or admins provided them.
         </p>
       </div>
+      <p className="px-4 pt-3 text-xs text-muted-foreground md:hidden">
+        Scroll horizontally to see all columns.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
@@ -41,7 +44,7 @@ export function CancelledBookingsTable({
                       ? `${row.facility.name}, ${row.facility.level}`
                       : "Unavailable"}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="break-words px-4 py-3 text-muted-foreground">
                     {row.user?.fullName || row.user?.email || "Unknown"}
                   </td>
                   <td className="px-4 py-3">{formatBookingDate(row.startsAt)}</td>
@@ -69,4 +72,3 @@ export function CancelledBookingsTable({
     </section>
   );
 }
-

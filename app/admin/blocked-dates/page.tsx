@@ -16,7 +16,7 @@ export default async function AdminBlockedDatesPage() {
   const blockedPeriods = await getAdminBlockedPeriods(supabase);
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Admin area"
         title="Blocked dates"

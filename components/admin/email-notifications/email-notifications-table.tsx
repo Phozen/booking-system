@@ -74,6 +74,7 @@ export function EmailNotificationsTable({
             cancelLabel="Do not retry"
             pendingLabel="Retrying..."
             pending={isPending}
+            triggerClassName="w-full sm:w-auto"
             onConfirm={() => runAction("retry")}
           />
           <ConfirmDialog
@@ -84,6 +85,7 @@ export function EmailNotificationsTable({
             cancelLabel="Do not process"
             pendingLabel="Processing..."
             pending={isPending}
+            triggerClassName="w-full sm:w-auto"
             onConfirm={() => runAction("process")}
           />
         </div>

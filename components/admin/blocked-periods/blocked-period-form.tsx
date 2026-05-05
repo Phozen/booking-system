@@ -152,7 +152,7 @@ export function BlockedPeriodForm({
             onChange={(event) =>
               setScope(event.target.value as BlockedPeriodScope)
             }
-            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {blockedPeriodScopeOptions.map((option) => (
               <option key={option} value={option}>
@@ -237,7 +237,7 @@ export function BlockedPeriodForm({
           defaultValue={blockedPeriod?.reason ?? ""}
           rows={4}
           maxLength={1000}
-          className="min-h-24 rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
 
@@ -280,7 +280,7 @@ export function BlockedPeriodForm({
       </label>
       </section>
 
-      <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         {blockedPeriod?.isActive ? (
           <ConfirmDialog
             triggerLabel="Deactivate"
@@ -292,6 +292,7 @@ export function BlockedPeriodForm({
             destructive
             disabled={isPending}
             pending={isStatusPending}
+            triggerClassName="w-full sm:w-auto"
             onConfirm={onDeactivate}
           />
         ) : null}
