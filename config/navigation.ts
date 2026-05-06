@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Mail,
   Settings,
+  UsersRound,
 } from "lucide-react";
 
 export const authNavigation = [
@@ -33,6 +34,7 @@ export const adminNavigation = [
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
+  { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix" },
   { title: "Blocked Dates", href: "/admin/blocked-dates", icon: Blocks, match: "prefix" },
   { title: "Maintenance", href: "/admin/maintenance", icon: Clock, match: "prefix" },
   { title: "Email Notifications", href: "/admin/email-notifications", icon: Mail, match: "prefix" },
@@ -48,10 +50,10 @@ export const adminNavigationGroups = [
   },
   {
     title: "Operations",
-    items: adminNavigation.slice(2, 7),
+    items: adminNavigation.slice(2, 8),
   },
   {
     title: "Governance",
-    items: adminNavigation.slice(7),
+    items: adminNavigation.slice(8),
   },
 ] as const;

@@ -85,7 +85,7 @@ Design personality:
 | `/admin/audit-logs` | Audit log list | Exists | Needs JSON preview/detail polish and filters. |
 | `/admin/audit-logs/[id]` | Audit log detail | Exists | Should preserve read-only treatment. |
 | `/admin/settings` | System settings | Exists | Needs clear grouping and success feedback. |
-| `/admin/users` | User management | Planned in docs/navigation, not implemented | Keep out of visible nav until implemented or show "not available yet" intentionally. |
+| `/admin/users` | User management | Exists | Admins can search users, review profiles, and update role/status/profile fields. |
 
 ## 3. Global Layout
 
@@ -171,7 +171,7 @@ Admin sidebar groups:
 - Availability: Blocked Dates, Maintenance
 - Monitoring: Email Notifications, Reports, Audit Logs
 - Configuration: Settings
-- Users: show only once `/admin/users` exists.
+- Users: `/admin/users`.
 
 Admin page header:
 
@@ -1752,7 +1752,7 @@ Manual tests:
 - No shared employee/admin layout shell yet.
 - Navigation exists in config but is not consistently rendered globally.
 - Logout appears on dashboards but not as a consistent account menu.
-- `/profile` and `/admin/users` are in navigation config but not implemented.
+- `/profile` remains planned but not implemented.
 - Status badges are not unified across all entity types.
 - Form validation is mostly alert-level, not field-level.
 - Destructive actions need a consistent confirmation dialog.
@@ -1776,7 +1776,7 @@ Manual tests:
 - Shared form field error.
 - Mobile card alternatives for admin tables.
 - Profile page.
-- Admin users page.
+- Admin users page exists; continue production QA for self-protection and role/status changes.
 - Facility photo upload UX.
 - Availability timeline view.
 

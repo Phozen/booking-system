@@ -234,7 +234,7 @@ Use this checklist after migrations are applied and the app is running with real
 ## Known Deferred Items
 
 - [ ] Facility photo upload UI is deferred.
-- [ ] Admin user management UI is deferred.
+- [ ] Admin user management UI is implemented; complete the admin users manual tests before production launch.
 - [ ] Automatic email cron/background processing is deferred.
 - [ ] Reminder scheduling automation is deferred.
 - [ ] Calendar UI is deferred.

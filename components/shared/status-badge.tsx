@@ -5,7 +5,9 @@ export type StatusBadgeKind =
   | "facility"
   | "maintenance"
   | "email"
-  | "blocked-period";
+  | "blocked-period"
+  | "user"
+  | "user-role";
 
 type StatusDefinition = {
   label: string;
@@ -175,6 +177,40 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
       dotClassName: statusDots.slate,
     },
   },
+  user: {
+    active: {
+      label: "Active",
+      description: "User can access protected app pages.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+    disabled: {
+      label: "Disabled",
+      description: "User cannot access protected app pages.",
+      className: statusClasses.rose,
+      dotClassName: statusDots.rose,
+    },
+    pending: {
+      label: "Pending",
+      description: "User is waiting for admin activation.",
+      className: statusClasses.amber,
+      dotClassName: statusDots.amber,
+    },
+  },
+  "user-role": {
+    employee: {
+      label: "Employee",
+      description: "Regular employee account.",
+      className: statusClasses.sky,
+      dotClassName: statusDots.sky,
+    },
+    admin: {
+      label: "Admin",
+      description: "Administrator account.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+  },
 };
 
 const kindLabels: Record<StatusBadgeKind, string> = {
@@ -183,6 +219,8 @@ const kindLabels: Record<StatusBadgeKind, string> = {
   maintenance: "Maintenance",
   email: "Email",
   "blocked-period": "Blocked period",
+  user: "User",
+  "user-role": "User role",
 };
 
 export function StatusBadge({

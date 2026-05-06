@@ -16,7 +16,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Admin server actions verify active admin authorization before privileged writes.
 - [x] Report export route handlers verify active admin authorization before returning CSV data.
 - [x] Employees are redirected away from `/admin/*` routes.
-- [ ] Future admin user-management actions must keep role/status changes server-side and audit logged.
+- [x] Admin user-management actions keep role/status changes server-side and audit logged.
 
 ## RLS Checklist
 
@@ -73,6 +73,6 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 ## Remaining Risks
 
 - Cloudflare Access or another network-layer internal access control is still a future deployment hardening option.
-- Admin user-management UI is not implemented yet; when added, it must use active-admin server actions and audit role/status changes.
+- Admin user-management is implemented; continue to manually verify self-protection and final-active-admin protections in production QA.
 - Automated security tests are not implemented yet; Phase 15 should turn the manual checklist into repeatable QA where practical.
 - Facility photo upload is deferred, so storage upload behavior still needs browser-level verification when that feature is built.
