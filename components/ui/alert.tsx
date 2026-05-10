@@ -8,9 +8,16 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default:
+          "border-border/70 bg-card text-card-foreground shadow-sm *:[svg]:text-primary",
         destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+          "border-rose-200 bg-rose-50 text-rose-950 shadow-sm *:data-[slot=alert-description]:text-rose-800 *:[svg]:text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100 dark:*:data-[slot=alert-description]:text-rose-200",
+        success:
+          "border-emerald-200 bg-emerald-50 text-emerald-950 shadow-sm *:data-[slot=alert-description]:text-emerald-800 *:[svg]:text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100 dark:*:data-[slot=alert-description]:text-emerald-200",
+        warning:
+          "border-amber-200 bg-amber-50 text-amber-950 shadow-sm *:data-[slot=alert-description]:text-amber-900 *:[svg]:text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100 dark:*:data-[slot=alert-description]:text-amber-200",
+        info:
+          "border-sky-200 bg-sky-50 text-sky-950 shadow-sm *:data-[slot=alert-description]:text-sky-800 *:[svg]:text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100 dark:*:data-[slot=alert-description]:text-sky-200",
       },
     },
     defaultVariants: {

@@ -98,6 +98,7 @@ export async function updateSystemSettingsAction(
 
   return {
     status: "success",
-    message: "System settings saved.",
+    message:
+      "System settings saved. New registrations and future bookings will use the updated settings.",
   };
 }

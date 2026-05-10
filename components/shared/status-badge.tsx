@@ -27,6 +27,8 @@ const statusClasses = {
     "border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-200",
   sky:
     "border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-200",
+  violet:
+    "border-violet-300 bg-violet-50 text-violet-900 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-200",
   zinc:
     "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-200",
 } as const;
@@ -37,6 +39,7 @@ const statusDots = {
   rose: "bg-rose-600",
   slate: "bg-slate-500",
   sky: "bg-sky-600",
+  violet: "bg-violet-600",
   zinc: "bg-zinc-500",
 } as const;
 
@@ -69,8 +72,8 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     completed: {
       label: "Completed",
       description: "Booking has finished.",
-      className: statusClasses.sky,
-      dotClassName: statusDots.sky,
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
     },
     expired: {
       label: "Expired",
@@ -109,8 +112,8 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     scheduled: {
       label: "Scheduled",
       description: "Maintenance is scheduled.",
-      className: statusClasses.sky,
-      dotClassName: statusDots.sky,
+      className: statusClasses.amber,
+      dotClassName: statusDots.amber,
     },
     in_progress: {
       label: "In Progress",
@@ -167,8 +170,8 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     active: {
       label: "Active",
       description: "Blocked period prevents affected bookings.",
-      className: statusClasses.amber,
-      dotClassName: statusDots.amber,
+      className: statusClasses.rose,
+      dotClassName: statusDots.rose,
     },
     inactive: {
       label: "Inactive",
@@ -207,8 +210,8 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     admin: {
       label: "Admin",
       description: "Administrator account.",
-      className: statusClasses.emerald,
-      dotClassName: statusDots.emerald,
+      className: statusClasses.violet,
+      dotClassName: statusDots.violet,
     },
   },
 };

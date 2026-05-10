@@ -61,12 +61,12 @@ export function MyBookingsList({
   return (
     <div className="grid gap-8">
       {created ? (
-        <Alert>
+        <Alert variant="success">
           <CheckCircle2 aria-hidden="true" />
           <AlertTitle>Booking saved</AlertTitle>
           <AlertDescription>
-            Your booking has been created. Confirmed bookings are ready to use;
-            pending requests are waiting for admin approval.
+            Your booking is now in My Bookings. Confirmed bookings are ready to
+            use; pending requests are waiting for admin approval.
           </AlertDescription>
         </Alert>
       ) : null}

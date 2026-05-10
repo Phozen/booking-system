@@ -172,6 +172,7 @@ export async function updateUserProfileAction(
 
   return {
     status: "success",
-    message: "User profile saved.",
+    message:
+      "User profile saved. Role and access changes take effect the next time protected pages are checked.",
   };
 }

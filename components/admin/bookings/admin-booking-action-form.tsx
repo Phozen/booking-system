@@ -64,7 +64,7 @@ export function AdminBookingActionForm({
       </div>
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "default"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

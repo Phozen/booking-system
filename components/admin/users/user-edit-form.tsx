@@ -55,65 +55,74 @@ function getConfirmCopy({
 }) {
   if (isSelf && (initialRole !== selectedRole || initialStatus !== selectedStatus)) {
     return {
+      title: "Save your profile changes?",
       triggerLabel: "Save user changes",
       confirmLabel: "Save changes",
-      cancelLabel: "Go back",
+      cancelLabel: "Review changes",
       destructive: false,
       description:
-        "Profile field changes can be saved, but your own role or status changes will be blocked for safety.",
+        "Profile field changes can be saved, but your own role and status will stay unchanged for safety.",
     };
   }
 
   if (selectedStatus === "disabled" && initialStatus !== "disabled") {
     return {
+      title: "Disable this user?",
       triggerLabel: "Disable user",
       confirmLabel: "Disable user",
-      cancelLabel: "Keep active",
+      cancelLabel: "Keep user active",
       destructive: true,
       description:
-        "This will disable the user profile. Disabled users cannot access protected employee or admin pages.",
+        "This user will no longer be able to access protected employee or admin pages until reactivated.",
     };
   }
 
   if (selectedStatus === "active" && initialStatus !== "active") {
     return {
+      title: "Reactivate this user?",
       triggerLabel: "Reactivate user",
       confirmLabel: "Reactivate user",
-      cancelLabel: "Go back",
+      cancelLabel: "Keep current status",
       destructive: false,
       description:
-        "This will set the user status to active so the account can access protected pages according to its role.",
+        "This user will regain access to protected pages according to their role.",
     };
   }
 
   if (selectedStatus === "pending" && initialStatus !== "pending") {
     return {
+      title: "Set this user to pending?",
       triggerLabel: "Set user pending",
       confirmLabel: "Set pending",
-      cancelLabel: "Go back",
+      cancelLabel: "Keep current status",
       destructive: true,
       description:
-        "This will set the user status to pending. Pending users cannot access protected employee or admin pages.",
+        "Pending users cannot access protected employee or admin pages until an admin activates them.",
     };
   }
 
   if (selectedRole !== initialRole) {
     return {
+      title:
+        selectedRole === "admin"
+          ? "Grant admin access?"
+          : "Remove admin access?",
       triggerLabel: "Save role change",
       confirmLabel: "Save role change",
-      cancelLabel: "Go back",
+      cancelLabel: "Keep current role",
       destructive: selectedRole !== "admin",
       description:
         selectedRole === "admin"
-          ? "This will grant administrator access to this user."
-          : "This will remove administrator access from this user.",
+          ? "This user will be able to manage bookings, facilities, reports, settings, audit logs, and users."
+          : "This user will lose access to admin pages and continue as an employee.",
     };
   }
 
   return {
+    title: "Save these user changes?",
     triggerLabel: "Save user changes",
     confirmLabel: "Save changes",
-    cancelLabel: "Go back",
+    cancelLabel: "Review changes",
     destructive: false,
     description: "This will update the user's editable profile fields.",
   };
@@ -188,7 +197,7 @@ export function UserEditForm({
       </div>
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "default"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -336,7 +345,7 @@ export function UserEditForm({
       <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <ConfirmDialog
           triggerLabel={isPending ? "Saving..." : confirmCopy.triggerLabel}
-          title="Confirm user update"
+          title={confirmCopy.title}
           description={
             <span>
               {confirmCopy.description} The change will be audit logged.

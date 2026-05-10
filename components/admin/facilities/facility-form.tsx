@@ -133,7 +133,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
   return (
     <form className="grid gap-5" noValidate onSubmit={onSubmit}>
       {result ? (
-        <Alert variant={result.status === "error" ? "destructive" : "default"}>
+        <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}

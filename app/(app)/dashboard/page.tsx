@@ -43,57 +43,60 @@ export default async function DashboardPage() {
       />
 
       <section className="grid gap-3 sm:grid-cols-4">
-        <Link
-          href="/facilities"
-          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
-        >
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Building2 className="size-5" aria-hidden="true" />
-          </div>
-          <h2 className="mt-3 font-medium tracking-normal">Browse facilities</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Compare rooms, capacity, equipment, and approval requirements.
-          </p>
-        </Link>
-        <Link
-          href="/bookings/new"
-          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
-        >
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <CalendarPlus className="size-5" aria-hidden="true" />
-          </div>
-          <h2 className="mt-3 font-medium tracking-normal">Create booking</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Pick a facility, date, time, and purpose in one short form.
-          </p>
-        </Link>
-        <Link
-          href="/calendar"
-          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
-        >
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <CalendarDays className="size-5" aria-hidden="true" />
-          </div>
-          <h2 className="mt-3 font-medium tracking-normal">Calendar</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Scan past, current, and upcoming bookings by month.
-          </p>
-        </Link>
-        <Link
-          href="/my-bookings"
-          className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
-        >
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <ClipboardList className="size-5" aria-hidden="true" />
-          </div>
-          <h2 className="mt-3 font-medium tracking-normal">My Bookings</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Review pending, upcoming, historical, and cancelled bookings.
-          </p>
-        </Link>
+        {[
+          {
+            href: "/facilities",
+            title: "Browse facilities",
+            description:
+              "Compare rooms, capacity, equipment, and approval requirements.",
+            icon: Building2,
+            accent: "bg-sky-50 text-sky-700 ring-sky-200",
+          },
+          {
+            href: "/bookings/new",
+            title: "Create booking",
+            description: "Pick a facility, date, time, and purpose in one short form.",
+            icon: CalendarPlus,
+            accent: "bg-primary/10 text-primary ring-primary/20",
+          },
+          {
+            href: "/calendar",
+            title: "Calendar",
+            description: "Scan past, current, and upcoming bookings by month.",
+            icon: CalendarDays,
+            accent: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+          },
+          {
+            href: "/my-bookings",
+            title: "My Bookings",
+            description: "Review pending, upcoming, historical, and cancelled bookings.",
+            icon: ClipboardList,
+            accent: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+          },
+        ].map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:bg-accent/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+            >
+              <div
+                className={`flex size-10 items-center justify-center rounded-lg ring-1 ${item.accent}`}
+              >
+                <Icon className="size-5" aria-hidden="true" />
+              </div>
+              <h2 className="mt-3 font-medium tracking-normal">{item.title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {item.description}
+              </p>
+            </Link>
+          );
+        })}
       </section>
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm">
+      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm ring-1 ring-primary/5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-medium">Upcoming bookings</h2>
@@ -109,7 +112,7 @@ export default async function DashboardPage() {
               <Link
                 key={booking.id}
                 href={`/bookings/${booking.id}`}
-                className="grid gap-2 rounded-lg border border-border/70 bg-background p-3 transition-colors hover:border-primary/30 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+                className="grid gap-2 rounded-lg border border-border/70 bg-background p-3 shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:bg-accent/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">{booking.title}</span>

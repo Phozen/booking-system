@@ -202,7 +202,8 @@ export async function createBlockedPeriodAction(
 
   return {
     status: "success",
-    message: "Blocked period created.",
+    message:
+      "Blocked period created. Affected facilities cannot be booked during this time while it is active.",
     blockedPeriodId: data.id,
   };
 }
@@ -320,7 +321,8 @@ export async function updateBlockedPeriodAction(
 
   return {
     status: "success",
-    message: "Blocked period updated.",
+    message:
+      "Blocked period updated. Future availability checks will use the saved details.",
     blockedPeriodId,
   };
 }
@@ -395,7 +397,8 @@ export async function deactivateBlockedPeriodAction(
 
   return {
     status: "success",
-    message: "Blocked period deactivated.",
+    message:
+      "Blocked period deactivated. It no longer prevents bookings for the affected facilities.",
     blockedPeriodId,
   };
 }

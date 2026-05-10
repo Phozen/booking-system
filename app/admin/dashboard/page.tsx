@@ -32,18 +32,21 @@ export default async function AdminDashboardPage() {
             description: "Review all facility reservations and cancellations.",
             href: "/admin/bookings",
             icon: CalendarCheck,
+            accent: "bg-indigo-50 text-indigo-700 ring-indigo-200",
           },
           {
             title: "Pending approvals",
             description: "Process booking requests that need admin review.",
             href: "/admin/approvals",
             icon: ClipboardCheck,
+            accent: "bg-amber-50 text-amber-700 ring-amber-200",
           },
           {
             title: "Availability controls",
             description: "Manage blocked periods and maintenance closures.",
             href: "/admin/maintenance",
             icon: Wrench,
+            accent: "bg-sky-50 text-sky-700 ring-sky-200",
           },
         ].map((item) => {
           const Icon = item.icon;
@@ -52,9 +55,11 @@ export default async function AdminDashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+              className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:bg-accent/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
             >
-              <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div
+                className={`flex size-10 items-center justify-center rounded-lg ring-1 ${item.accent}`}
+              >
                 <Icon className="size-5" aria-hidden="true" />
               </div>
               <h2 className="mt-3 font-semibold tracking-normal">
@@ -68,7 +73,7 @@ export default async function AdminDashboardPage() {
         })}
       </section>
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm">
+      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm ring-1 ring-primary/5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="font-semibold tracking-normal">

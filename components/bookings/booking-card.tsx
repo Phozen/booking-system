@@ -11,7 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function BookingCard({ booking }: { booking: EmployeeBooking }) {
   return (
-    <article className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
+    <article className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm ring-1 ring-primary/5 sm:grid-cols-[1fr_auto] sm:items-center">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <BookingStatusBadge status={booking.status} />

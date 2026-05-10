@@ -140,7 +140,7 @@ export async function createFacilityAction(
 
   return {
     status: "success",
-    message: "Facility created.",
+    message: "Facility created. Active facilities are available to employees.",
     facilityId: data.id,
   };
 }
@@ -236,7 +236,7 @@ export async function updateFacilityAction(
 
   return {
     status: "success",
-    message: "Facility updated.",
+    message: "Facility updated. Employee-facing facility pages now use the saved details.",
     facilityId,
   };
 }

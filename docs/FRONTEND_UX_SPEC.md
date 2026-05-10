@@ -246,6 +246,27 @@ Examples:
   - Icons should be paired with visible text except very familiar compact actions.
   - Icon-only buttons require accessible labels and tooltips.
 
+### Confirmation And Feedback Language
+
+- Confirmation titles should ask the exact question: "Cancel this booking?", "Reject this booking request?", "Disable this user?"
+- Descriptions should explain the consequence in one or two plain sentences.
+- Confirm buttons must name the action: "Cancel booking", "Reject booking", "Disable user".
+- Cancel buttons should reassure the user: "Keep booking", "Keep pending", "Keep user active".
+- Destructive actions use destructive button styling and rose warning treatment.
+- Success messages should say what happened and what changes next, such as whether a booking moved to cancelled history or an email was queued.
+- Error messages should avoid raw provider, database, or policy details. Explain what the user can change or retry.
+- Warning messages should be specific: conflict, blocked period, maintenance, inactive account, or permission issue.
+
+### Semantic Color Usage
+
+- Indigo/blue: primary actions, active navigation, and general system actions.
+- Emerald: successful completion, confirmed bookings, active users, sent emails.
+- Amber: pending review, queued work, scheduled maintenance, and warnings.
+- Rose: destructive actions, rejected/failed states, disabled users, active blocked periods.
+- Sky: informational states, in-progress maintenance, calendar affordances.
+- Slate/zinc: inactive, cancelled, archived, or historical states.
+- Violet/indigo: admin/configuration emphasis such as admin roles.
+
 ### Form Style
 
 - Use vertical label/input stacks.

@@ -120,7 +120,7 @@ export function MaintenanceForm({
   return (
     <form className="grid gap-6" onSubmit={onSubmit}>
       {result ? (
-        <Alert variant={result.status === "error" ? "destructive" : "default"}>
+        <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -269,7 +269,7 @@ export function MaintenanceForm({
             <ConfirmDialog
               triggerLabel="Mark completed"
               title="Mark this maintenance closure completed?"
-              description="The maintenance closure will be marked completed. Once completed, it will no longer block future bookings."
+              description="This maintenance closure will be marked completed and will stop blocking future bookings."
               confirmLabel="Mark completed"
               cancelLabel="Keep current status"
               pendingLabel="Saving..."
@@ -281,7 +281,7 @@ export function MaintenanceForm({
             <ConfirmDialog
               triggerLabel="Cancel maintenance"
               title="Cancel this maintenance closure?"
-              description="The maintenance closure will be cancelled and will no longer block bookings."
+              description="This maintenance closure will be cancelled and will stop blocking bookings for the facility."
               confirmLabel="Cancel maintenance"
               cancelLabel="Keep current status"
               pendingLabel="Cancelling..."

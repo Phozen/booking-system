@@ -63,7 +63,7 @@ export function CancelBookingForm({ bookingId }: { bookingId: string }) {
       </div>
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "default"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -92,7 +92,7 @@ export function CancelBookingForm({ bookingId }: { bookingId: string }) {
         <ConfirmDialog
           triggerLabel="Cancel booking"
           title="Cancel this booking?"
-          description="This will cancel your booking. The room and time may become available to others, and a cancellation email notification may be queued."
+          description="This booking will be cancelled and the facility may become available to others. Your cancelled booking will stay visible for reference."
           confirmLabel="Cancel booking"
           cancelLabel="Keep booking"
           pendingLabel="Cancelling..."

@@ -190,7 +190,7 @@ export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
               confirmation={{
                 title: "Reject this booking request?",
                 description:
-                  "This rejects the pending booking request. The user may receive a rejection email notification.",
+                  "The booking will be marked as rejected. The requester may receive a rejection notification, and the request cannot be approved afterward.",
                 confirmLabel: "Reject booking",
                 cancelLabel: "Keep pending",
                 pendingLabel: "Rejecting...",
@@ -210,7 +210,7 @@ export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
             confirmation={{
               title: "Cancel this user's booking?",
               description:
-                "This cancels another user's booking. The user may receive a cancellation email notification, and the room/time may become available to others.",
+                "This cancels another user's booking. The requester may receive a cancellation notification, and the facility time may become available to others.",
               confirmLabel: "Cancel booking",
               cancelLabel: "Keep booking",
               pendingLabel: "Cancelling...",

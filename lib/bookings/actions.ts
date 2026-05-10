@@ -484,6 +484,7 @@ export async function cancelBookingAction(
 
   return {
     status: "success",
-    message: "Booking cancelled.",
+    message:
+      "Booking cancelled. It will remain visible in your cancelled bookings for reference.",
   };
 }

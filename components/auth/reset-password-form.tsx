@@ -46,7 +46,7 @@ export function ResetPasswordForm() {
   return (
     <form className="grid gap-4" noValidate onSubmit={form.handleSubmit(onSubmit)}>
       {result ? (
-        <Alert variant={result.status === "error" ? "destructive" : "default"}>
+          <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}

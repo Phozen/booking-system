@@ -17,7 +17,7 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        "rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 shadow-sm dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100",
+        "rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 shadow-sm ring-1 ring-rose-100 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100 dark:ring-rose-900/40",
         className,
       )}
       role="alert"

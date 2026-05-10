@@ -18,8 +18,8 @@ export function MonthCalendarGrid({
   );
 
   return (
-    <section className="hidden overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm md:block">
-      <div className="border-b bg-muted/25 p-4">
+    <section className="hidden overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm ring-1 ring-primary/5 md:block">
+      <div className="border-b bg-muted/35 p-4">
         <h2 className="font-semibold tracking-normal">Month view</h2>
         <p className="text-sm text-muted-foreground">
           Booking items are links. Days without bookings remain visible for
@@ -54,7 +54,7 @@ export function MonthCalendarGrid({
               className={cn(
                 "min-h-36 border-r border-t bg-background/60 p-2 last:border-r-0",
                 !day.isCurrentMonth && "bg-muted/35 text-muted-foreground",
-                day.isToday && "bg-primary/5",
+                day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/20",
               )}
             >
               <div className="mb-2 flex items-center justify-between gap-2">

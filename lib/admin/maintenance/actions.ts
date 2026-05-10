@@ -175,7 +175,8 @@ export async function createMaintenanceClosureAction(
 
   return {
     status: "success",
-    message: "Maintenance closure created.",
+    message:
+      "Maintenance closure created. The selected facility cannot be booked during this window while the closure is scheduled or in progress.",
     maintenanceClosureId: data.id,
   };
 }
@@ -278,7 +279,8 @@ export async function updateMaintenanceClosureAction(
 
   return {
     status: "success",
-    message: "Maintenance closure updated.",
+    message:
+      "Maintenance closure updated. Future availability checks will use the saved details.",
     maintenanceClosureId,
   };
 }
@@ -360,7 +362,8 @@ export async function completeMaintenanceClosureAction(
 
   return {
     status: "success",
-    message: "Maintenance closure completed.",
+    message:
+      "Maintenance closure completed. It no longer blocks future bookings.",
     maintenanceClosureId,
   };
 }
@@ -440,7 +443,7 @@ export async function cancelMaintenanceClosureAction(
 
   return {
     status: "success",
-    message: "Maintenance closure cancelled.",
+    message: "Maintenance closure cancelled. It no longer blocks bookings.",
     maintenanceClosureId,
   };
 }

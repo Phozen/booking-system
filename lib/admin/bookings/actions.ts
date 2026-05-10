@@ -312,7 +312,8 @@ export async function adminCancelBookingAction(
 
   return {
     status: "success",
-    message: "Booking cancelled.",
+    message:
+      "Booking cancelled. The requester will see the updated status and a cancellation email has been queued if possible.",
   };
 }
 
@@ -477,7 +478,8 @@ export async function approveBookingAction(
 
   return {
     status: "success",
-    message: "Booking approved.",
+    message:
+      "Booking approved. The requester will see it as confirmed and an approval email has been queued if possible.",
   };
 }
 
@@ -608,6 +610,7 @@ export async function rejectBookingAction(
 
   return {
     status: "success",
-    message: "Booking rejected.",
+    message:
+      "Booking rejected. The requester will see the updated status and a rejection email has been queued if possible.",
   };
 }

@@ -81,7 +81,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
       onSubmit={validateBeforeSubmit}
     >
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "default"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

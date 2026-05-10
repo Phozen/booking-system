@@ -25,7 +25,7 @@ export function MobileRecordCard({
   return (
     <article
       className={cn(
-        "grid gap-4 rounded-lg border border-border/70 bg-background p-4 shadow-sm",
+        "grid gap-4 rounded-lg border border-border/70 bg-background p-4 shadow-sm ring-1 ring-primary/5",
         className,
       )}
     >

@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "grid gap-4 rounded-lg border border-border/70 bg-card/90 p-5 shadow-sm",
+        "grid gap-4 rounded-lg border border-border/70 bg-card/95 p-5 shadow-sm ring-1 ring-primary/5",
         className,
       )}
     >
@@ -31,7 +31,7 @@ export function PageHeader({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-3xl">
           {eyebrow ? (
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary/90">
               {eyebrow}
             </p>
           ) : null}

@@ -214,7 +214,7 @@ export function BookingForm({
       onSubmit={validateBeforeSubmit}
     >
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "default"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           {state.status === "error" ? (
             <AlertCircle aria-hidden="true" />
           ) : (

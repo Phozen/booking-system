@@ -13,11 +13,15 @@ const buttonVariants = cva(
         outline:
           "border-input bg-card text-foreground shadow-xs hover:border-primary/35 hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "border-border bg-secondary text-secondary-foreground hover:bg-secondary/85 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "text-muted-foreground hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:hover:bg-muted/50",
         destructive:
           "bg-destructive text-white shadow-sm shadow-destructive/15 hover:bg-destructive/90 hover:shadow-md hover:shadow-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
+        success:
+          "bg-emerald-600 text-white shadow-sm shadow-emerald-600/15 hover:bg-emerald-700 hover:shadow-md hover:shadow-emerald-600/20 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25",
+        warning:
+          "bg-amber-500 text-amber-950 shadow-sm shadow-amber-500/15 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/20 focus-visible:border-amber-500 focus-visible:ring-amber-500/25",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

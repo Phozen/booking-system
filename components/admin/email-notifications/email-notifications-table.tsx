@@ -69,9 +69,9 @@ export function EmailNotificationsTable({
           <ConfirmDialog
             triggerLabel="Retry failed"
             title="Retry failed email notifications?"
-            description="Failed notifications will be moved through the sending process again. This may send emails if provider settings are configured."
+            description="Failed notifications will be queued for another send attempt. Emails may be sent if provider settings are configured correctly."
             confirmLabel="Retry failed"
-            cancelLabel="Do not retry"
+            cancelLabel="Leave failed"
             pendingLabel="Retrying..."
             pending={isPending}
             triggerClassName="w-full sm:w-auto"
@@ -80,9 +80,9 @@ export function EmailNotificationsTable({
           <ConfirmDialog
             triggerLabel="Process queued emails"
             title="Process queued email notifications?"
-            description="Queued notifications scheduled for now or earlier will be sent if provider settings are configured."
+            description="Queued notifications scheduled for now or earlier will be sent if provider settings are configured. Missing provider settings will be recorded as a safe failure."
             confirmLabel="Process queued emails"
-            cancelLabel="Do not process"
+            cancelLabel="Leave queued"
             pendingLabel="Processing..."
             pending={isPending}
             triggerClassName="w-full sm:w-auto"
@@ -92,7 +92,7 @@ export function EmailNotificationsTable({
       </div>
 
       {result ? (
-        <Alert variant={result.status === "error" ? "destructive" : "default"}>
+        <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}

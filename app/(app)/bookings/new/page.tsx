@@ -66,18 +66,20 @@ export default async function NewBookingPage({
         <Alert variant="destructive">
           <AlertTitle>Booking unavailable</AlertTitle>
           <AlertDescription>
-            Your account is not active for booking.
+            Your account is not active, so booking is currently unavailable.
+            Contact an administrator if you think this is a mistake.
           </AlertDescription>
         </Alert>
       ) : loadError ? (
         <Alert variant="destructive">
           <AlertTitle>Facilities unavailable</AlertTitle>
           <AlertDescription>
-            Facilities could not be loaded. Please try again.
+            Facilities could not be loaded. Refresh the page or try again in a
+            moment.
           </AlertDescription>
         </Alert>
       ) : (
-        <section className="rounded-lg border bg-card p-5">
+        <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/5">
           <BookingForm
             facilities={facilities}
             selectedFacilityId={selectedFacilityId}

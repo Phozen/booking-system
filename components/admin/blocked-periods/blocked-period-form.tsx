@@ -118,7 +118,7 @@ export function BlockedPeriodForm({
   return (
     <form className="grid gap-6" onSubmit={onSubmit}>
       {result ? (
-        <Alert variant={result.status === "error" ? "destructive" : "default"}>
+        <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -285,7 +285,7 @@ export function BlockedPeriodForm({
           <ConfirmDialog
             triggerLabel="Deactivate"
             title="Deactivate this blocked period?"
-            description="The blocked period will no longer prevent bookings for the affected facilities. Existing bookings and audit history are preserved."
+            description="This blocked period will stop preventing bookings for the affected facilities. Existing bookings and audit history are preserved."
             confirmLabel="Deactivate blocked period"
             cancelLabel="Keep active"
             pendingLabel="Deactivating..."
