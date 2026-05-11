@@ -1520,7 +1520,7 @@ Add only when needed and keep dependency impact low.
 - Improve form validation accessibility with field-level errors and `aria-invalid`.
 - Ensure mobile employee booking flow is clean and fully usable.
 - Ensure admin pages have access-denied/not-found states that do not leak private data.
-- Keep generated `.open-next` output out of lint/source review.
+- Keep generated deployment/build output out of lint/source review.
 
 ### P1: Should Improve Before Production
 
@@ -1546,7 +1546,7 @@ Add only when needed and keep dependency impact low.
 - Saved report filters.
 - Export progress feedback for large CSVs.
 - Optional dark mode toggle if there is real user demand.
-- Cloudflare Access-specific internal access messaging.
+- Optional internal access-gate messaging for Vercel protection, Cloudflare Access, or another provider.
 
 ## 16. Implementation Plan For Frontend Polish
 

@@ -8,7 +8,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Unauthenticated users are redirected away from admin pages.
 - [x] Logged-in users with missing, pending, or disabled profiles are blocked from protected app routes.
 - [x] Auth pages remain available to unauthenticated users.
-- [x] Proxy or the Cloudflare-compatible middleware shim is used as an optimistic request gate only; pages, actions, and route handlers still perform server-side checks.
+- [x] Next.js Proxy is used as an optimistic request gate only; pages, actions, and route handlers still perform server-side checks.
 
 ## Admin Authorization Checklist
 
@@ -76,7 +76,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 ## Remaining Risks
 
-- Cloudflare Access or another network-layer internal access control is still a future deployment hardening option.
+- Vercel protection, Cloudflare Access, or another network-layer internal access control is still a future deployment hardening option.
 - Admin user-management is implemented; continue to manually verify self-protection and final-active-admin protections in production QA.
-- Automated security tests are not implemented yet; Phase 15 should turn the manual checklist into repeatable QA where practical.
+- Automated browser/security E2E tests are not implemented yet; continue using the manual QA checklist until those tests exist.
 - Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.

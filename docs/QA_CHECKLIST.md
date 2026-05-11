@@ -240,10 +240,12 @@ Use this checklist after migrations are applied and the app is running with real
 ## Production Build
 
 - [ ] Run `npm.cmd run lint`.
+- [ ] Run `npm.cmd run typecheck`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
-- [ ] Run `npm.cmd run pages:build` before production deployment.
-- [ ] Confirm any OpenNext warning about deprecated `middleware.ts` is the documented Cloudflare compatibility shim and not a new runtime error.
+- [ ] Run `npm.cmd run qa`.
+- [ ] For Vercel deployment, confirm the project build command is `npm run build` and no non-Vercel adapter build command is required.
+- [ ] If the deployment target changes away from Vercel later, add and run that host's adapter-specific build checks separately.
 - [ ] Confirm route list includes employee, admin, auth, and export routes.
 - [ ] Confirm build does not require live email provider env vars.
 - [ ] Confirm build does not expose service role or email provider secrets.
@@ -265,5 +267,5 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Reminder scheduling automation is deferred.
 - [ ] PDF and Excel exports are deferred.
 - [ ] Recurring bookings are deferred.
-- [ ] Cloudflare Pages deployment is Phase 16.
-- [ ] Cloudflare Access or network-layer internal restriction is a deployment hardening option.
+- [ ] Production deployment remains pending; keep deployment documentation aligned with the chosen host before launch.
+- [ ] Vercel protection, Cloudflare Access, or another network-layer internal restriction is a deployment hardening option.

@@ -1,108 +1,47 @@
 # Deployment Notes
 
-Phase 16 prepares the Booking System for production deployment on Cloudflare with Supabase and Resend.
+The Booking System is deployed as a full-stack Next.js App Router application on Vercel, with Supabase for auth, database, and storage.
 
-## Deployment Target Decision
+Use these notes for the current MVP deployment and handoff. Do not commit real secrets; configure production values in the Vercel dashboard.
 
-This project is a full-stack Next.js App Router application. It uses server actions, route handlers, Supabase server clients, dynamic admin pages, and authenticated CSV export routes.
+## Deployment Target
 
-Cloudflare's current Pages guide says full-stack server-side rendered Next.js applications should use the Next.js Workers guide. The Workers guide uses the OpenNext Cloudflare adapter. For that reason, this project is configured with:
+Current deployment target:
 
-- `@opennextjs/cloudflare`
-- `wrangler`
-- `wrangler.jsonc`
-- `open-next.config.ts`
+- Hosting: Vercel
+- Framework preset: Next.js
+- Build command: `npm run build`
+- Output directory: leave blank/default for Vercel Next.js
+- Install command: Vercel default, usually `npm install`
+- Node.js version: 22.x
+- Runtime entry: managed by Vercel
 
-Do not use `@cloudflare/next-on-pages` for this project. It is not the safest choice for the current Next.js 16 app.
+This app uses server actions, route handlers, authenticated admin pages, Supabase server clients, CSV export routes, and dynamic rendering. Do not configure static export.
 
-Static Cloudflare Pages deployment is not appropriate for this application because static export does not support the server-side behavior required by authentication, bookings, admin actions, and report exports.
+The repository should not require non-Vercel adapter tooling or adapter-specific build commands for the current deployment. Cloudflare can still be used later for DNS or access control if desired, but it is not the primary app hosting platform.
 
-## Cloudflare Build Setup
+## Local Verification Before Deploy
 
-Recommended Cloudflare deployment path:
+Run the full local verification stack before pushing a deployment branch:
 
-1. Push the repository to GitHub or GitLab.
-2. Connect the repository through Cloudflare Workers Builds or deploy with Wrangler.
-3. Use OpenNext to build the Next.js app into Cloudflare Worker output.
-
-Build command:
-
-```txt
-npm run pages:build
+```powershell
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd test
+npm.cmd run build
+npm.cmd run qa
 ```
 
-Preview command:
+The `qa` script runs lint, tests, and production build. `typecheck` is listed separately because the current `qa` script does not run it.
+
+## Required Vercel Environment Variables
+
+Set these in Vercel Project Settings > Environment Variables for Production. Add Preview values too if testing auth or emails from preview deployments.
+
+Public browser-exposed values:
 
 ```txt
-npm run preview
-```
-
-Deploy command:
-
-```txt
-npm run deploy
-```
-
-Worker entrypoint:
-
-```txt
-.open-next/worker.js
-```
-
-Static assets directory:
-
-```txt
-.open-next/assets
-```
-
-Wrangler config:
-
-```txt
-wrangler.jsonc
-```
-
-The `pages:build` name is kept for project vocabulary, but the output is OpenNext Cloudflare Worker output, not a static-only Pages export.
-
-## Next.js 16 Proxy Compatibility Note
-
-Next.js 16 renamed Middleware to Proxy and prefers `proxy.ts`. However, Cloudflare OpenNext currently does not support Next.js Node.js Proxy output. A direct OpenNext build with `proxy.ts` failed with:
-
-```txt
-ERROR Node.js middleware is not currently supported. Consider switching to Edge Middleware.
-```
-
-To keep Cloudflare deployment unblocked, this project uses `middleware.ts` for the request gate while preserving the same logic in `lib/supabase/middleware.ts`.
-
-Important security note: the request gate is still only an optimistic redirect/session-refresh layer. Protected pages, admin pages, route handlers, and server actions continue to enforce authorization with server-side guards such as `requireUser()` and `requireAdmin()`.
-
-Expected build warning:
-
-```txt
-The "middleware" file convention is deprecated. Please use "proxy" instead.
-```
-
-Keep this warning documented until Cloudflare OpenNext supports Next.js 16 Node.js Proxy output. Re-test `proxy.ts` when upgrading Next.js or `@opennextjs/cloudflare`.
-
-## Node.js And Tooling Requirements
-
-Use a current Node.js LTS version supported by Next.js 16 and Cloudflare tooling.
-
-Recommended production build environment:
-
-- Node.js 22 LTS, or the current Cloudflare-supported Node.js LTS
-- npm matching the Node.js installation
-- Wrangler 3.99.0 or later
-
-Local Windows note: OpenNext documents that Windows support is best-effort. If `npm run pages:build` fails locally on Windows due to filesystem or native package issues, run the deployment build in WSL, GitHub Actions, or Cloudflare's Linux build environment.
-
-## Required Environment Variables
-
-Set these in Cloudflare for Production and Preview environments. Keep local values in `.env.local`.
-
-Public browser-safe values:
-
-```txt
-NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://your-vercel-app.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
@@ -111,62 +50,105 @@ Server-only secrets:
 
 ```txt
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-EMAIL_API_KEY=your-resend-api-key
+EMAIL_API_KEY=
 ```
 
-Server-side app configuration:
+Server-side app defaults:
 
 ```txt
 APP_TIMEZONE=Asia/Kuala_Lumpur
 APP_NAME=Booking System
 COMPANY_NAME=Your Company Name
 SYSTEM_CONTACT_EMAIL=admin@example.com
-EMAIL_PROVIDER=resend
-EMAIL_FROM=Booking System <bookings@your-domain.com>
+EMAIL_PROVIDER=
+EMAIL_FROM=
 ```
 
 Security rules:
 
-- Only variables prefixed with `NEXT_PUBLIC_` are safe for browser usage.
+- Only `NEXT_PUBLIC_*` variables are browser-exposed.
 - `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
 - `EMAIL_API_KEY` must remain server-only.
-- Do not add service role keys or email API keys to `NEXT_PUBLIC_*` variables.
+- Real secrets must be entered in Vercel, never committed to the repository.
 - Do not store provider API keys in `system_settings`.
 
-## Environment Variable Groups
+Email can remain disabled for MVP testing. If `EMAIL_PROVIDER`, `EMAIL_API_KEY`, or `EMAIL_FROM` is blank, queued email processing should fail safely with a clear configuration message instead of crashing.
+
+## Environment Groups
 
 Production:
 
-- `NEXT_PUBLIC_APP_URL` must be the final HTTPS production domain.
-- Supabase URL and keys must point to the production Supabase project.
-- `EMAIL_FROM` must be verified in Resend.
+- `NEXT_PUBLIC_APP_URL` should be the production Vercel URL until a custom domain is ready.
+- Supabase URL and keys should point to the production Supabase project.
+- Email variables can remain blank until Resend is configured.
 
 Preview:
 
-- `NEXT_PUBLIC_APP_URL` should be the Cloudflare preview URL if testing auth callbacks or email links from preview.
-- Use a separate Supabase project where possible.
-- If using the production Supabase project, create clearly named preview test users and test records.
+- Use the Vercel preview URL for `NEXT_PUBLIC_APP_URL` if testing auth redirects or email links from preview.
+- Add the preview URL to Supabase Auth redirect URLs.
+- Use a separate Supabase project where possible, or clearly named test users/records if using production Supabase.
 
-Local development:
+Local:
 
 - Store values in `.env.local`.
 - Use `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
-- Leave `EMAIL_PROVIDER` and `EMAIL_API_KEY` blank unless testing real email sending.
+- Leave email provider variables blank unless testing real Resend delivery.
 
 ## Supabase Production Setup
 
-1. Confirm migrations are applied:
+1. Confirm the Supabase project is linked locally.
+2. Confirm migrations are applied:
 
 ```powershell
 npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-2. Confirm remote migrations `0001` through `0009` are applied.
-3. Confirm RLS is enabled on application tables.
-4. Confirm the `facility-photos` storage bucket exists and is private.
-5. Register the first admin user through the app.
-6. Promote the first admin in Supabase SQL Editor:
+3. Confirm remote migrations `0001` through `0009` are applied.
+4. Confirm RLS is enabled on application tables.
+5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
+6. Confirm default facilities, equipment, and seeded system settings exist.
+7. Confirm `system_settings` values are reviewed for production identity and behavior:
+   - `app_name`
+   - `company_name`
+   - `system_contact_email`
+   - `registration_enabled`
+   - `allowed_email_domains`
+   - `default_approval_required`
+   - `allow_facility_approval_override`
+   - `default_timezone`
+   - `reminder_offsets_minutes`
+
+## Facility Photo Storage
+
+The app expects a private Supabase Storage bucket:
+
+```txt
+facility-photos
+```
+
+Expected bucket settings:
+
+- Public bucket: No
+- Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`
+- App-side max upload size: 5 MB
+- Migration bucket limit: 10 MB
+- Suggested storage path: `facilities/{facility_id}/{timestamp-or-uuid}-{safe-file-name}`
+
+Storage policy expectations:
+
+- Active users can read facility photo objects.
+- Admins can upload, update, and delete facility photo objects.
+- Employee UI displays photos through signed URLs when a public URL is not stored.
+- Service role credentials are never exposed to the browser.
+
+Before launch, manually test upload, primary photo selection, delete, employee facility list display, and employee facility detail display.
+
+## First Admin Setup
+
+1. Deploy the app.
+2. Register the first user through `/register`, if registration is enabled.
+3. Promote the first admin in Supabase SQL Editor:
 
 ```sql
 update public.profiles
@@ -174,32 +156,41 @@ set role = 'admin', status = 'active'
 where email = 'YOUR_ADMIN_EMAIL@example.com';
 ```
 
+4. Log in and open `/admin/dashboard`.
+5. Use `/admin/users` for everyday role/status changes after the first admin exists.
+
 ## Supabase Auth URLs
 
-Set the Supabase Auth Site URL to the production app URL:
+For current MVP testing with the Vercel URL, set the Supabase Auth Site URL to:
 
 ```txt
-https://your-domain.com
+https://your-vercel-app.vercel.app
 ```
 
 Add redirect URLs for:
 
 ```txt
-https://your-domain.com/login
-https://your-domain.com/register
-https://your-domain.com/reset-password
-https://your-domain.com/dashboard
-https://your-domain.com/admin/dashboard
+http://localhost:3000/**
+https://your-vercel-app.vercel.app/**
 ```
 
-For previews, add the Cloudflare preview URL if testing sign-up, login, or password reset from preview deployments.
+When a custom domain is added later, add:
 
-Current project note: there is no `/auth/callback` route in this app. Password reset currently redirects to `/reset-password`.
+```txt
+https://your-domain.com/**
+https://www.your-domain.com/**
+```
 
-## Resend Email Setup
+Current project note: there is no `/auth/callback` route. Password reset currently uses `/reset-password`.
+
+## Resend Email Setup Later
+
+Real email sending is supported but can remain disabled until the sender domain is ready.
+
+When ready:
 
 1. Verify the sender domain or sender email in Resend.
-2. Set Cloudflare environment variables:
+2. Set Vercel environment variables:
 
 ```txt
 EMAIL_PROVIDER=resend
@@ -212,31 +203,33 @@ EMAIL_FROM=Booking System <bookings@your-domain.com>
 5. Click `Process queued emails`.
 6. Confirm the notification becomes `sent` and `sent_at` is populated.
 
-If `EMAIL_PROVIDER` or `EMAIL_API_KEY` is missing, processing should fail safely and record a clear error instead of crashing.
+If email variables are missing, processing should fail safely and store a clear error on notification records.
 
-## Exabytes And Cloudflare Custom Domain
+## Domain Setup Later
 
-High-level DNS path:
+No custom domain is required for current MVP testing. Use the Vercel URL first.
 
-1. Add the domain to Cloudflare.
-2. If Exabytes is currently authoritative DNS, update the domain nameservers at Exabytes to the Cloudflare nameservers.
-3. Wait for DNS propagation.
-4. Add the custom domain to the Cloudflare Worker or project deployment.
-5. Follow Cloudflare's generated DNS instructions for root/apex and `www`.
-6. Decide the canonical host:
+When an Exabytes domain is purchased or ready:
+
+1. Add the custom domain in Vercel.
+2. Follow Vercel's DNS instructions for apex/root and `www`.
+3. If using Cloudflare for DNS, point Exabytes nameservers to Cloudflare and then configure the Vercel DNS records in Cloudflare.
+4. Decide the canonical host:
    - `https://your-domain.com`
    - or `https://www.your-domain.com`
-7. Configure redirects for the non-canonical host if needed.
-8. Confirm HTTPS certificate status is active.
-9. Update `NEXT_PUBLIC_APP_URL` and Supabase Auth URLs to the canonical HTTPS domain.
+5. Configure redirects for the non-canonical host if needed.
+6. Confirm HTTPS certificate status is active.
+7. Update Vercel `NEXT_PUBLIC_APP_URL` to the canonical HTTPS URL.
+8. Update Supabase Auth Site URL and redirect URLs.
+9. Verify the domain in Resend before enabling real email delivery.
 
 ## HTTPS Checklist
 
-- [ ] Production domain opens over HTTPS.
-- [ ] HTTP redirects to HTTPS.
-- [ ] `www` and apex behavior is intentional.
+- [ ] Production URL opens over HTTPS.
+- [ ] HTTP redirects to HTTPS, if applicable.
+- [ ] `www` and apex behavior is intentional after custom domain setup.
 - [ ] Supabase Auth Site URL uses HTTPS.
-- [ ] Email templates link to the HTTPS production domain.
+- [ ] Email templates link to the HTTPS production URL.
 
 ## Post-Deployment Smoke Test Checklist
 
@@ -250,12 +243,17 @@ High-level DNS path:
 - [ ] Confirm overlapping booking is blocked.
 - [ ] Confirm back-to-back booking is allowed.
 - [ ] Open `/my-bookings`.
+- [ ] Open `/profile`.
+- [ ] Open `/calendar`.
+- [ ] Open `/admin/dashboard`.
+- [ ] Open `/admin/users`.
 - [ ] Open `/admin/bookings`.
 - [ ] Test approval flow if approval mode is enabled.
+- [ ] Upload and view a facility photo.
 - [ ] Create and test a blocked period.
 - [ ] Create and test a maintenance closure.
 - [ ] Open `/admin/email-notifications`.
-- [ ] Process queued emails with production email config.
+- [ ] Process queued emails with missing email config and confirm safe failure.
 - [ ] Open `/admin/reports`.
 - [ ] Export a CSV report.
 - [ ] Open `/admin/audit-logs`.
@@ -264,23 +262,26 @@ High-level DNS path:
 
 ## Rollback Notes
 
-- Keep the previous production deployment available in Cloudflare until smoke tests pass.
-- If deployment fails before release, roll back to the previous successful Worker version.
+- Vercel keeps prior deployments available; use Vercel rollback if a release fails smoke tests.
+- If deployment fails before release, keep the previous successful deployment active.
 - If a migration causes a production data issue, stop writes first, inspect the migration, and apply a targeted fix migration. Do not run destructive SQL without a backup.
 - Keep Supabase backups enabled for production.
 
 ## Known Limitations
 
-- Facility photo upload UI is still deferred.
-- Admin user management UI is still deferred.
+- Authenticated mobile QA still needs manual execution with real employee/admin accounts.
+- Facility photo storage needs real Supabase upload/delete verification before launch.
 - Automatic email cron/background processing is deferred.
 - Reminder scheduling automation is deferred.
 - PDF and Excel exports are deferred.
 - Recurring bookings are deferred.
-- Cloudflare Access is recommended as a future internal-only network-layer control.
+- Dark mode is deferred.
+- Collaboration/invitations are deferred.
+- Vercel protection, Cloudflare Access, or another network-layer internal access gate is a future hardening option.
 
 ## Reference Links
 
-- Cloudflare Pages Next.js guide: https://developers.cloudflare.com/pages/framework-guides/nextjs/
-- Cloudflare Workers Next.js guide: https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/
-- OpenNext Cloudflare guide: https://opennext.js.org/cloudflare/get-started
+- Vercel Next.js deployment: https://vercel.com/docs/frameworks/nextjs
+- Vercel environment variables: https://vercel.com/docs/environment-variables
+- Supabase Auth redirect URLs: https://supabase.com/docs/guides/auth/redirect-urls
+- Resend domains: https://resend.com/docs/dashboard/domains/introduction

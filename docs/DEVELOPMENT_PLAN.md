@@ -45,12 +45,12 @@ This project is intended to be developed using Codex with a step-by-step impleme
 
 ### 2.4 Hosting
 
-- Cloudflare Pages
+- Vercel
 
 ### 2.5 Domain
 
 - Custom domain purchased from Exabytes
-- DNS managed through Cloudflare
+- DNS managed through Vercel or the chosen DNS provider when a custom domain is ready
 
 ### 2.6 Email
 
@@ -174,7 +174,7 @@ booking-system/
 │  ├─ exports/
 │  ├─ validation/
 │  └─ utils.ts
-├─ middleware.ts
+├─ proxy.ts
 ├─ supabase/
 │  ├─ migrations/
 │  ├─ seed.sql
@@ -903,20 +903,20 @@ The app passes the core manual test scenarios and builds successfully.
 
 ### Goal
 
-Deploy the application to Cloudflare Pages with Supabase integration and custom domain.
+Deploy the application to Vercel with Supabase integration. Use the Vercel URL for current MVP testing; connect a custom domain later when ready.
 
 ### Tasks
 
 1. Prepare production Supabase project.
 2. Apply production database migrations.
-3. Add production environment variables to Cloudflare Pages.
-4. Configure build command.
-5. Configure output settings.
+3. Add production environment variables to Vercel.
+4. Configure Vercel build command.
+5. Keep Vercel output settings at the framework default.
 6. Deploy preview.
 7. Test authentication in preview.
 8. Test booking flow in preview.
-9. Connect custom domain.
-10. Configure DNS through Cloudflare.
+9. Connect custom domain later when ready.
+10. Configure DNS through Vercel or the chosen DNS provider.
 11. Enable HTTPS.
 12. Test production deployment.
 13. Create initial admin user.
@@ -996,7 +996,7 @@ The MVP should include enough functionality for real internal use.
 19. Booking history.
 20. Basic audit logs.
 21. CSV booking export.
-22. Cloudflare Pages deployment.
+22. Vercel deployment.
 
 ### MVP Can Defer
 
@@ -1005,7 +1005,7 @@ The MVP should include enough functionality for real internal use.
 3. Recurring bookings.
 4. Calendar integrations.
 5. SSO.
-6. Cloudflare Access.
+6. Vercel protection, Cloudflare Access, or another internal access gate.
 7. Advanced analytics.
 8. QR check-in.
 9. Native mobile app.
@@ -1119,7 +1119,7 @@ Mitigation:
 * Store provider secrets in environment variables.
 * Avoid provider-specific logic throughout the app.
 
-### Risk 4: Cloudflare Pages Compatibility
+### Risk 4: Vercel Deployment Configuration
 
 Potential issue:
 
@@ -1127,8 +1127,8 @@ Some Next.js server features may require configuration.
 
 Mitigation:
 
-* Confirm Cloudflare Pages compatibility early.
-* Use the Cloudflare adapter if needed.
+* Confirm Vercel build and runtime configuration early.
+* Avoid static export because the app depends on server actions and route handlers.
 * Test deployment before the project is complete.
 * Avoid Node-only APIs where possible.
 
@@ -1242,7 +1242,7 @@ Includes:
 * Security hardening
 * RLS review
 * Testing
-* Cloudflare Pages deployment
+* Vercel deployment
 * Custom domain setup
 
 ---
@@ -1295,8 +1295,8 @@ Codex should fix TypeScript, linting, and build errors before moving to the next
 
 The development plan is complete when:
 
-1. The app is deployed to Cloudflare Pages.
-2. The app is accessible through the custom domain.
+1. The app is deployed to Vercel.
+2. The app is accessible through the Vercel URL, with custom domain setup available later.
 3. Email/password authentication works.
 4. Employees can book facilities.
 5. The system prevents overlapping bookings.

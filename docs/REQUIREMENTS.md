@@ -22,7 +22,7 @@ The system will be developed using:
 - Tailwind CSS
 - shadcn/ui
 
-The application will be hosted on Cloudflare Pages and connected to a custom domain purchased from Exabytes.
+The application will be hosted on Vercel for MVP deployment and can later be connected to a custom domain purchased from Exabytes.
 
 ---
 
@@ -938,19 +938,19 @@ Since the system is internal-only, access should be restricted using one or more
 - Authentication
 - Approved email domains
 - Admin-created accounts
-- Cloudflare Access, optional future enhancement
+- Vercel protection, Cloudflare Access, or another internal access gate as an optional future enhancement
 
 ---
 
 ## 18. Deployment Requirements
 
-The system will be hosted on Cloudflare Pages.
+The system will be hosted on Vercel for the current MVP deployment.
 
 ### 18.1 Hosting
 
 Deployment target:
 
-- Cloudflare Pages
+- Vercel
 
 ### 18.2 Domain
 
@@ -959,7 +959,7 @@ The system will use a custom domain purchased from Exabytes.
 Domain setup should include:
 
 - DNS configuration
-- Cloudflare Pages custom domain connection
+- Vercel custom domain connection, when a custom domain is ready
 - HTTPS enabled
 - Redirect rules if needed
 
@@ -1089,7 +1089,7 @@ The first working version should include:
 11. Booking history.
 12. Basic audit logs.
 13. CSV export for bookings.
-14. Cloudflare Pages deployment.
+14. Vercel deployment.
 
 ---
 
@@ -1103,7 +1103,7 @@ The system should be designed so the following can be added later:
 * Room display screens
 * Mobile app
 * Advanced analytics
-* Cloudflare Access integration
+* Vercel protection, Cloudflare Access, or another internal access gate
 * SSO login
 * Department-based booking permissions
 * Booking quotas
@@ -1127,7 +1127,7 @@ The following assumptions are used for this requirement document:
 6. The system is internal-only.
 7. Calendar integration is not required.
 8. Email notifications are required.
-9. Cloudflare Pages will be used for hosting.
+9. Vercel will be used for hosting.
 10. Supabase will be used for auth, database, and likely storage.
 11. PostgreSQL will be the primary database.
 12. CSV export is required.
@@ -1174,8 +1174,8 @@ The requirements are considered satisfied when:
 12. Audit logs are created for key actions.
 13. Admins can view reports.
 14. Admins can export booking data to CSV.
-15. The application is deployed successfully to Cloudflare Pages.
-16. The application uses the custom domain.
+15. The application is deployed successfully to Vercel.
+16. The application uses the Vercel URL for MVP testing and can use a custom domain later.
 17. Internal-only access is enforced.
 
 ```
