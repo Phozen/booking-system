@@ -106,7 +106,24 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm `/my-bookings` shows only the current employee's bookings.
 - [ ] Confirm upcoming, past/history, cancelled, and pending states are distinguishable.
 - [ ] Confirm each booking links to `/bookings/[id]`.
+- [ ] Confirm invited meetings are surfaced separately with a link to `/invitations` when invitations exist.
 - [ ] Attempt to open another user's booking detail URL; expect not found or access denied.
+
+## Booking Invitations
+
+- [ ] As a booking owner, open an owned booking and invite another active internal user.
+- [ ] Confirm the invited attendee appears as `Pending`.
+- [ ] Confirm duplicate invitations are blocked with a friendly message.
+- [ ] Confirm the booking owner cannot invite themselves.
+- [ ] Confirm disabled and pending users cannot be invited.
+- [ ] As the invited user, open `/invitations`; confirm pending, accepted, and declined groups render.
+- [ ] Accept a pending invitation; confirm status changes to `Accepted` and an audit log is created.
+- [ ] Decline another pending invitation; confirm status changes to `Declined` and an audit log is created.
+- [ ] Open the invited booking detail; confirm the invitee sees safe details and cannot cancel or manage attendees.
+- [ ] As owner, remove an invited attendee; confirm the attendee no longer appears on the booking detail.
+- [ ] Confirm invitation-created, accepted, declined, and removed actions create audit log records.
+- [ ] Confirm invitation email notification records are queued when the invitation email enum values are applied.
+- [ ] Check `/invitations` and invited booking detail on mobile and in dark mode.
 
 ## Profile
 
@@ -137,6 +154,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Cancel another user's pending or confirmed booking as admin with a reason.
 - [ ] Confirm audit log and cancellation email queue records are created.
 - [ ] Confirm employee users cannot perform admin booking actions by POSTing or using hidden controls.
+- [ ] Open an admin booking detail page and confirm invited attendee names, emails, statuses, and response dates are visible.
 
 ## Admin Approvals
 
@@ -230,9 +248,11 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Confirm service role key is never used in client components.
 - [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
-- [ ] Confirm active employees can select only their own bookings.
+- [ ] Confirm active employees can select their own bookings and safe invited booking details only.
 - [ ] Confirm employees cannot insert direct booking rows and must use `public.create_booking()`.
 - [ ] Confirm employees cannot update other users' bookings.
+- [ ] Confirm employees cannot view or update invitations for unrelated bookings.
+- [ ] Confirm invited employees can view only their own invitations and safe booking details.
 - [ ] Confirm employees cannot view audit logs, export logs, email notifications, or private settings.
 - [ ] Confirm active admins can manage expected admin records.
 - [ ] Confirm storage bucket `facility-photos` is private and policies match `docs/SECURITY_CHECKLIST.md`.
@@ -252,7 +272,7 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Basic Responsive UI
 
-- [ ] Check `/login`, `/register`, `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, `/admin/bookings`, `/admin/reports`, and `/admin/settings` at mobile width.
+- [ ] Check `/login`, `/register`, `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, `/invitations`, `/admin/bookings`, `/admin/reports`, and `/admin/settings` at mobile width.
 - [ ] Check the same pages at desktop width.
 - [ ] Confirm forms fit without clipped text.
 - [ ] Confirm tables scroll horizontally on small screens where needed.
@@ -267,7 +287,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Refresh after changing theme and confirm the selected preference persists.
 - [ ] Log in and confirm the signed-in user menu exposes Light, Dark, and System options.
 - [ ] Check homepage, login, register, and reset password in dark mode.
-- [ ] Check employee dashboard, facilities, facility detail, booking form, My Bookings, booking detail, calendar, and profile in dark mode.
+- [ ] Check employee dashboard, facilities, facility detail, booking form, My Bookings, invitations, booking detail, calendar, and profile in dark mode.
 - [ ] Check admin dashboard, users, facilities, bookings, approvals, calendar, blocked dates, maintenance, email notifications, reports, audit logs, and settings in dark mode.
 - [ ] Confirm buttons, status badges, dialogs, forms, cards, tables, alerts, empty states, and calendar events have readable contrast.
 - [ ] Confirm focus rings remain visible in dark mode.

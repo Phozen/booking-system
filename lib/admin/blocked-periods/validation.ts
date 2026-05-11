@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { zonedDateTimeToUtc } from "@/lib/calendar/date-range";
+
 export const blockedPeriodScopeOptions = [
   "all_facilities",
   "selected_facilities",
@@ -53,8 +55,19 @@ export function getOptionalAdminFormValue(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function getFormDateTimeIso(date: string, time: string) {
-  const parsed = new Date(`${date}T${time}:00+08:00`);
+export function getFormDateTimeIso(date: string, time: string, timeZone?: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const parsed = zonedDateTimeToUtc(
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    0,
+    timeZone,
+  );
+
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 

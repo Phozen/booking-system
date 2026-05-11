@@ -3,7 +3,10 @@ export type EmailNotificationType =
   | "booking_approval"
   | "booking_rejection"
   | "booking_cancellation"
-  | "booking_reminder";
+  | "booking_reminder"
+  | "booking_invitation"
+  | "booking_invitation_accepted"
+  | "booking_invitation_declined";
 
 export type EmailNotificationStatus =
   | "queued"

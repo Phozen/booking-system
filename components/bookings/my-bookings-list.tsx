@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarPlus, CheckCircle2 } from "lucide-react";
+import { CalendarPlus, CheckCircle2, UserPlus } from "lucide-react";
 
 import type { GroupedEmployeeBookings } from "@/lib/bookings/grouping";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
@@ -50,9 +50,11 @@ function BookingSection({
 export function MyBookingsList({
   groupedBookings,
   created,
+  invitationSummary,
 }: {
   groupedBookings: GroupedEmployeeBookings;
   created?: boolean;
+  invitationSummary?: { pending: number; accepted: number; total: number };
 }) {
   const hasAnyBookings = Object.values(groupedBookings).some(
     (bookings) => bookings.length > 0,
@@ -69,6 +71,34 @@ export function MyBookingsList({
             use; pending requests are waiting for admin approval.
           </AlertDescription>
         </Alert>
+      ) : null}
+
+      {invitationSummary && invitationSummary.total > 0 ? (
+        <section className="grid gap-3 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sky-950 shadow-sm ring-1 ring-sky-200/60 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="inline-flex items-center gap-2 font-semibold tracking-normal">
+                <UserPlus className="size-4" aria-hidden="true" />
+                Invited meetings
+              </h2>
+              <p className="mt-1 text-sm text-sky-800 dark:text-sky-200">
+                You have {invitationSummary.pending} pending and{" "}
+                {invitationSummary.accepted} accepted invitation
+                {invitationSummary.total === 1 ? "" : "s"}.
+              </p>
+            </div>
+            <Link
+              href="/invitations"
+              className={buttonVariants({
+                variant: "outline",
+                className:
+                  "w-full border-sky-300 bg-card text-foreground hover:bg-sky-100 sm:w-auto dark:border-sky-800 dark:hover:bg-sky-950/60",
+              })}
+            >
+              View invitations
+            </Link>
+          </div>
+        </section>
       ) : null}
 
       {!hasAnyBookings ? (

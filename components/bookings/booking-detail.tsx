@@ -9,10 +9,17 @@ import {
   isCancellableBooking,
 } from "@/lib/bookings/format";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
+import type {
+  BookingInvitation,
+  InviteCandidate,
+} from "@/lib/bookings/invitations/types";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
+import { InvitationList } from "@/components/bookings/invitations/invitation-list";
+import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 
 function DetailItem({
@@ -44,30 +51,52 @@ function formatApprovalStatus(approval?: EmployeeBooking["approvals"][number]) {
   return labels[approval.status];
 }
 
-export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
+export function BookingDetail({
+  booking,
+  viewerMode = "owner",
+  invitations = [],
+  inviteCandidates = [],
+  viewerInvitation,
+}: {
+  booking: EmployeeBooking;
+  viewerMode?: "owner" | "invitee";
+  invitations?: BookingInvitation[];
+  inviteCandidates?: InviteCandidate[];
+  viewerInvitation?: BookingInvitation | null;
+}) {
   const approval = booking.approvals[0];
+  const isOwnerView = viewerMode === "owner";
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <div className="grid gap-3">
         <Breadcrumbs
           items={[
-            { label: "My Bookings", href: "/my-bookings" },
+            isOwnerView
+              ? { label: "My Bookings", href: "/my-bookings" }
+              : { label: "Invitations", href: "/invitations" },
             { label: booking.title },
           ]}
         />
         <Link
-          href="/my-bookings"
+          href={isOwnerView ? "/my-bookings" : "/invitations"}
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
-          My Bookings
+          {isOwnerView ? "My Bookings" : "Invitations"}
         </Link>
       </div>
 
       <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <BookingStatusBadge status={booking.status} />
+          {!isOwnerView && viewerInvitation ? (
+            <StatusBadge
+              kind="invitation"
+              status={viewerInvitation.status}
+              className="ml-2"
+            />
+          ) : null}
           <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
             {booking.title}
           </h1>
@@ -102,7 +131,9 @@ export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
             {booking.facility?.level ?? "Unavailable"}
           </DetailItem>
           <DetailItem label="Type">
-            {booking.facility ? formatFacilityType(booking.facility.type) : "Unavailable"}
+            {booking.facility
+              ? formatFacilityType(booking.facility.type)
+              : "Unavailable"}
           </DetailItem>
           <DetailItem label="Date">
             {formatBookingDate(booking.startsAt)}
@@ -150,7 +181,41 @@ export function BookingDetail({ booking }: { booking: EmployeeBooking }) {
         </section>
       ) : null}
 
-      {isCancellableBooking(booking.status) ? (
+      {!isOwnerView && viewerInvitation ? (
+        <section className="grid gap-4 rounded-lg border bg-card p-5">
+          <div>
+            <h2 className="text-lg font-semibold tracking-normal">
+              Your invitation
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              You can view this booking because you were invited. Only the
+              organizer can cancel or manage the booking.
+            </p>
+          </div>
+          {viewerInvitation.status === "pending" ? (
+            <InvitationResponseActions invitationId={viewerInvitation.id} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Your response is recorded as{" "}
+              <span className="font-medium text-foreground">
+                {viewerInvitation.status}
+              </span>
+              .
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {isOwnerView ? (
+        <InvitationList
+          bookingId={booking.id}
+          invitations={invitations}
+          candidates={inviteCandidates}
+          canManage
+        />
+      ) : null}
+
+      {isOwnerView && isCancellableBooking(booking.status) ? (
         <section className="grid gap-4 rounded-lg border border-destructive/30 bg-card p-5">
           <div>
             <h2 className="text-lg font-semibold tracking-normal">

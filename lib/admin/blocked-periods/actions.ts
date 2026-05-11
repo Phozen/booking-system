@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   blockedPeriodFormSchema,
@@ -128,8 +129,17 @@ export async function createBlockedPeriodAction(
     };
   }
 
-  const startsAt = getFormDateTimeIso(parsed.data.startDate, parsed.data.startTime);
-  const endsAt = getFormDateTimeIso(parsed.data.endDate, parsed.data.endTime);
+  const settings = await getAppSettings();
+  const startsAt = getFormDateTimeIso(
+    parsed.data.startDate,
+    parsed.data.startTime,
+    settings.defaultTimezone,
+  );
+  const endsAt = getFormDateTimeIso(
+    parsed.data.endDate,
+    parsed.data.endTime,
+    settings.defaultTimezone,
+  );
 
   if (!startsAt || !endsAt) {
     return {
@@ -232,8 +242,17 @@ export async function updateBlockedPeriodAction(
     };
   }
 
-  const startsAt = getFormDateTimeIso(parsed.data.startDate, parsed.data.startTime);
-  const endsAt = getFormDateTimeIso(parsed.data.endDate, parsed.data.endTime);
+  const settings = await getAppSettings();
+  const startsAt = getFormDateTimeIso(
+    parsed.data.startDate,
+    parsed.data.startTime,
+    settings.defaultTimezone,
+  );
+  const endsAt = getFormDateTimeIso(
+    parsed.data.endDate,
+    parsed.data.endTime,
+    settings.defaultTimezone,
+  );
 
   if (!startsAt || !endsAt) {
     return {

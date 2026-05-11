@@ -59,6 +59,9 @@ export function CalendarBookingItem({
             <span>{booking.userLabel}</span>
           </div>
         ) : null}
+        {booking.contextLabel ? (
+          <div className="font-medium text-primary">{booking.contextLabel}</div>
+        ) : null}
         {typeof booking.approvalRequired === "boolean" ? (
           <div>
             Approval {booking.approvalRequired ? "required" : "not required"}

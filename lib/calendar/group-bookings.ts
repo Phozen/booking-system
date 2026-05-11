@@ -15,6 +15,7 @@ export type CalendarBooking = {
   facilityLevel: string;
   facilityType?: string;
   userLabel?: string;
+  contextLabel?: string;
   approvalRequired?: boolean;
 };
 

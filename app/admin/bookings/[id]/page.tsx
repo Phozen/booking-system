@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminBookingById } from "@/lib/admin/bookings/queries";
+import { getInvitationsForBooking } from "@/lib/bookings/invitations/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AdminBookingDetail } from "@/components/admin/bookings/admin-booking-detail";
 
@@ -23,11 +24,14 @@ export default async function AdminBookingDetailPage({
   }
 
   const supabase = await createClient();
-  const booking = await getAdminBookingById(supabase, id);
+  const [booking, invitations] = await Promise.all([
+    getAdminBookingById(supabase, id),
+    getInvitationsForBooking(supabase, id),
+  ]);
 
   if (!booking) {
     notFound();
   }
 
-  return <AdminBookingDetail booking={booking} />;
+  return <AdminBookingDetail booking={booking} invitations={invitations} />;
 }

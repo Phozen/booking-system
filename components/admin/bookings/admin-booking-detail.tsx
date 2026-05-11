@@ -8,6 +8,7 @@ import {
   rejectBookingAction,
 } from "@/lib/admin/bookings/actions";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
+import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import {
   formatBookingDate,
   formatBookingDateTime,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/bookings/format";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
+import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -34,7 +36,13 @@ function DetailItem({
   );
 }
 
-export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
+export function AdminBookingDetail({
+  booking,
+  invitations = [],
+}: {
+  booking: AdminBooking;
+  invitations?: BookingInvitation[];
+}) {
   const approval = booking.approvals[0];
 
   return (
@@ -129,6 +137,12 @@ export function AdminBookingDetail({ booking }: { booking: AdminBooking }) {
           {booking.description || "No description was provided."}
         </p>
       </section>
+
+      <InvitationList
+        bookingId={booking.id}
+        invitations={invitations}
+        canManage={false}
+      />
 
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-lg border bg-card p-5">

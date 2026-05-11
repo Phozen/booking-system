@@ -11,6 +11,7 @@ import {
   resetPasswordSchema,
 } from "@/lib/auth/validation";
 import {
+  formatRegistrationDisabledMessage,
   getRegistrationSettings,
   isEmailAllowedByDomain,
 } from "@/lib/settings/queries";
@@ -28,6 +29,7 @@ function setupMessage() {
 function friendlyAuthError(
   fallback: string,
   error?: { code?: string; message?: string; status?: number },
+  registrationDisabledMessage = "Registration is currently disabled. Contact an administrator for access.",
 ) {
   if (!error) {
     return fallback;
@@ -52,7 +54,7 @@ function friendlyAuthError(
     error.code === "signup_disabled" ||
     error.message?.toLowerCase().includes("signups not allowed")
   ) {
-    return "Registration is currently disabled. Contact an administrator for access.";
+    return registrationDisabledMessage;
   }
 
   if (error.code === "weak_password") {
@@ -126,7 +128,7 @@ export async function registerAction(
     if (!registrationSettings.registrationEnabled) {
       return {
         status: "error",
-        message: "Registration is currently disabled. Contact an administrator for access.",
+        message: formatRegistrationDisabledMessage(registrationSettings),
       };
     }
 
@@ -165,6 +167,7 @@ export async function registerAction(
         message: friendlyAuthError(
           "Registration could not be completed.",
           error,
+          formatRegistrationDisabledMessage(registrationSettings),
         ),
       };
     }

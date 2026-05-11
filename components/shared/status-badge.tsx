@@ -7,7 +7,8 @@ export type StatusBadgeKind =
   | "email"
   | "blocked-period"
   | "user"
-  | "user-role";
+  | "user-role"
+  | "invitation";
 
 type StatusDefinition = {
   label: string;
@@ -214,6 +215,32 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
       dotClassName: statusDots.violet,
     },
   },
+  invitation: {
+    pending: {
+      label: "Pending",
+      description: "Invitation is waiting for a response.",
+      className: statusClasses.amber,
+      dotClassName: statusDots.amber,
+    },
+    accepted: {
+      label: "Accepted",
+      description: "Invitation has been accepted.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+    declined: {
+      label: "Declined",
+      description: "Invitation has been declined.",
+      className: statusClasses.rose,
+      dotClassName: statusDots.rose,
+    },
+    removed: {
+      label: "Removed",
+      description: "Invitation has been removed.",
+      className: statusClasses.slate,
+      dotClassName: statusDots.slate,
+    },
+  },
 };
 
 const kindLabels: Record<StatusBadgeKind, string> = {
@@ -224,6 +251,7 @@ const kindLabels: Record<StatusBadgeKind, string> = {
   "blocked-period": "Blocked period",
   user: "User",
   "user-role": "User role",
+  invitation: "Invitation",
 };
 
 export function StatusBadge({

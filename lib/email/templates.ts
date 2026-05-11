@@ -98,6 +98,9 @@ export function renderEmailTemplate(
     input.templateData,
     "cancellationReason",
   );
+  const invitationStatus = getStringValue(input.templateData, "invitationStatus");
+  const actorName = getStringValue(input.templateData, "actorName");
+  const actorEmail = getStringValue(input.templateData, "actorEmail");
   const link = getBookingLink(input.appUrl, bookingId);
   const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
   const startTime = startsAt ? formatBookingTime(startsAt) : null;
@@ -111,6 +114,8 @@ export function renderEmailTemplate(
     { label: "Start time", value: startTime },
     { label: "End time", value: endTime },
     { label: "Status", value: status },
+    { label: "Invitation status", value: invitationStatus },
+    { label: "Responded by", value: actorName ?? actorEmail },
     { label: "Rejection reason", value: rejectionReason },
     { label: "Cancellation reason", value: cancellationReason },
   ];
@@ -121,6 +126,9 @@ export function renderEmailTemplate(
     booking_rejection: "Your booking has been rejected.",
     booking_cancellation: "Your booking has been cancelled.",
     booking_reminder: "This is a reminder for your upcoming booking.",
+    booking_invitation: "You have been invited to a booking.",
+    booking_invitation_accepted: "A booking invitation has been accepted.",
+    booking_invitation_declined: "A booking invitation has been declined.",
   };
 
   const headingByType: Record<EmailNotificationType, string> = {
@@ -129,6 +137,9 @@ export function renderEmailTemplate(
     booking_rejection: `Booking rejected: ${title}`,
     booking_cancellation: `Booking cancelled: ${title}`,
     booking_reminder: `Booking reminder: ${title}`,
+    booking_invitation: `Booking invitation: ${title}`,
+    booking_invitation_accepted: `Invitation accepted: ${title}`,
+    booking_invitation_declined: `Invitation declined: ${title}`,
   };
   const heading = headingByType[input.type];
   const intro = input.body || introByType[input.type];

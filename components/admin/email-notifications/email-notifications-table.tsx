@@ -26,6 +26,9 @@ function formatNotificationType(type: EmailNotificationType) {
     booking_rejection: "Booking Rejection",
     booking_cancellation: "Booking Cancellation",
     booking_reminder: "Booking Reminder",
+    booking_invitation: "Booking Invitation",
+    booking_invitation_accepted: "Invitation Accepted",
+    booking_invitation_declined: "Invitation Declined",
   };
 
   return labels[type];

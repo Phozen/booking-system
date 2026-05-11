@@ -14,6 +14,7 @@ import {
   groupCalendarBookingsByDay,
   type CalendarBooking,
 } from "@/lib/calendar/group-bookings";
+import { getInvitationContextLabel } from "@/lib/bookings/invitations/validation";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
@@ -49,6 +50,9 @@ function toCalendarBooking(booking: EmployeeCalendarBooking): CalendarBooking {
     facilityName: booking.facility?.name ?? "Facility unavailable",
     facilityLevel: booking.facility?.level ?? "Level unavailable",
     approvalRequired: booking.approvalRequired,
+    contextLabel: booking.invitationStatus
+      ? getInvitationContextLabel(booking.invitationStatus)
+      : undefined,
   };
 }
 
@@ -78,8 +82,8 @@ export default async function EmployeeCalendarPage({
         title="Booking Calendar"
         description={
           selectedStatus
-            ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-            : `Showing your bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
+            ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
+            : `Showing your owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
         }
       />
 

@@ -3,6 +3,7 @@ import { CalendarPlus } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import { groupEmployeeBookings } from "@/lib/bookings/grouping";
+import { getMyInvitationSummary } from "@/lib/bookings/invitations/queries";
 import { getMyBookings } from "@/lib/bookings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { MyBookingsList } from "@/components/bookings/my-bookings-list";
@@ -19,7 +20,10 @@ export default async function MyBookingsPage({
   const { user } = await requireUser();
   const { created } = await searchParams;
   const supabase = await createClient();
-  const bookings = await getMyBookings(supabase, user.id);
+  const [bookings, invitationSummary] = await Promise.all([
+    getMyBookings(supabase, user.id),
+    getMyInvitationSummary(supabase, user.id),
+  ]);
   const groupedBookings = groupEmployeeBookings(bookings);
 
   return (
@@ -36,7 +40,11 @@ export default async function MyBookingsPage({
         }
       />
 
-      <MyBookingsList groupedBookings={groupedBookings} created={created === "1"} />
+      <MyBookingsList
+        groupedBookings={groupedBookings}
+        created={created === "1"}
+        invitationSummary={invitationSummary}
+      />
     </main>
   );
 }

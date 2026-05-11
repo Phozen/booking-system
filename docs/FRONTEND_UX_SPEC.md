@@ -57,6 +57,7 @@ Design personality:
 | `/facilities` | Browse active facilities | Exists | Good foundation; needs filters/search eventually. |
 | `/facilities/[slug]` | Facility details and booking entry | Exists | Good booking entry point; needs richer availability messaging later. |
 | `/calendar` | Personal booking calendar | Exists | Shows the employee's own past, current, and upcoming bookings by month. |
+| `/invitations` | Booking invitations | Exists | Shows meetings the employee was invited to, with accept/decline actions. |
 | `/bookings/new` | Create booking | Exists | Needs stronger availability feedback and form error UX. |
 | `/bookings/[id]` | Employee booking detail | Exists | Should keep privacy-safe not-found/access-denied behavior. |
 | `/my-bookings` | Current user's bookings | Exists | Good grouping foundation. |
@@ -142,6 +143,8 @@ Required employee nav links:
 
 - Dashboard: `/dashboard`
 - Facilities: `/facilities`
+- Calendar: `/calendar`
+- Invitations: `/invitations`
 - New Booking: `/bookings/new`
 - My Bookings: `/my-bookings`
 - Profile: `/profile`.
@@ -696,6 +699,8 @@ Key components:
 - BookingDetail.
 - BookingStatusBadge.
 - CancelBookingForm.
+- InvitationList for owned bookings.
+- InvitationResponseActions for invited safe-detail views.
 - Approval/cancellation sections.
 
 Empty/error state:
@@ -706,6 +711,39 @@ Mobile behavior:
 
 - Details stack into definition-list sections.
 - Cancel form appears after core details.
+
+### `/invitations`
+
+Purpose:
+
+- Let invited employees accept or decline booking invitations without mixing those meetings into owned-booking management.
+
+Primary actions:
+
+- Accept invitation.
+- Decline invitation.
+
+Secondary actions:
+
+- View safe booking detail.
+- Back to calendar or My Bookings.
+
+Key components:
+
+- InvitationsPageList.
+- InvitationResponseActions.
+- StatusBadge with invitation statuses.
+
+Permissions:
+
+- Only active signed-in users can access the page.
+- Users see only invitations addressed to their own profile.
+- Invited users can view safe booking details but cannot cancel the booking or manage attendees.
+
+Mobile behavior:
+
+- Invitation cards stack in pending, accepted, and declined sections.
+- Actions are full-width or comfortably tappable on narrow screens.
 
 ## 7. Admin User Experience
 
@@ -1443,7 +1481,8 @@ Responsive table standards:
 
 - Native date/time is acceptable.
 - Calendar pages are additive navigation surfaces; they do not replace My Bookings, booking detail pages, or admin booking management.
-- Employee calendar route: `/calendar`. It shows only the signed-in employee's own bookings.
+- Employee calendar route: `/calendar`. It shows the signed-in employee's own bookings and may also include pending/accepted invited bookings with visible text such as "Pending invitation" or "Accepted invitation".
+- Employee invitations route: `/invitations`. It shows only invitations addressed to the signed-in employee and groups them by pending, accepted, and declined.
 - Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only.
 - Desktop calendar can use a month grid with compact booking links inside date cells.
 - Mobile calendar should use an agenda/list grouped by date instead of cramped month cells.
@@ -1462,6 +1501,10 @@ Responsive table standards:
 - `BookingCalendarEvent`: linked booking item with facility, time, and status.
 - `BookingCard`: employee booking list item.
 - `BookingDetail`: employee booking details.
+- `InvitationList`: owner/admin attendee invitation list.
+- `InviteUserForm`: owner invitation form for active internal users.
+- `InvitationResponseActions`: invitee accept/decline actions.
+- `InvitationsPageList`: grouped invitation inbox.
 - `BookingStatusBadge`: current booking badge, should become a shared status badge wrapper.
 - `EmptyState`: missing, should be added.
 - `PageHeader`: missing, should be added.

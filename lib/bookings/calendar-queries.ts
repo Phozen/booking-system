@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { BookingStatus } from "@/lib/bookings/queries";
+import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
 import type { CalendarDateRange } from "@/lib/calendar/date-range";
 import type { FacilityType } from "@/lib/facilities/validation";
 
@@ -31,6 +32,15 @@ type EmployeeCalendarBookingRecord = {
   facilities?: EmployeeCalendarFacilityRecord;
 };
 
+type InvitedCalendarBookingRecord = {
+  id: string;
+  status: BookingInvitationStatus;
+  bookings?:
+    | EmployeeCalendarBookingRecord
+    | EmployeeCalendarBookingRecord[]
+    | null;
+};
+
 export type EmployeeCalendarBooking = {
   id: string;
   facilityId: string;
@@ -46,6 +56,7 @@ export type EmployeeCalendarBooking = {
     level: string;
     type: FacilityType;
   } | null;
+  invitationStatus?: Exclude<BookingInvitationStatus, "removed">;
 };
 
 export type EmployeeCalendarFilters = {
@@ -69,8 +80,17 @@ const employeeCalendarSelect = `
   )
 `;
 
+const invitedCalendarSelect = `
+  id,
+  status,
+  bookings!booking_invitations_booking_id_fkey!inner (
+    ${employeeCalendarSelect}
+  )
+`;
+
 function mapEmployeeCalendarBooking(
   record: EmployeeCalendarBookingRecord,
+  invitationStatus?: Exclude<BookingInvitationStatus, "removed">,
 ): EmployeeCalendarBooking {
   const facilityRecord = Array.isArray(record.facilities)
     ? record.facilities[0]
@@ -93,7 +113,12 @@ function mapEmployeeCalendarBooking(
           type: facilityRecord.type,
         }
       : null,
+    invitationStatus,
   };
+}
+
+function firstRecord<T>(record: T | T[] | null | undefined) {
+  return Array.isArray(record) ? record[0] : record ?? null;
 }
 
 export async function getEmployeeCalendarBookings(
@@ -120,7 +145,44 @@ export async function getEmployeeCalendarBookings(
     throw new Error("Unable to load calendar bookings.");
   }
 
-  return ((data as unknown as EmployeeCalendarBookingRecord[] | null) ?? []).map(
-    mapEmployeeCalendarBooking,
+  const ownedBookings = (
+    (data as unknown as EmployeeCalendarBookingRecord[] | null) ?? []
+  ).map((booking) => mapEmployeeCalendarBooking(booking));
+
+  let invitationQuery = supabase
+    .from("booking_invitations")
+    .select(invitedCalendarSelect)
+    .eq("invited_user_id", userId)
+    .in("status", ["pending", "accepted"])
+    .lt("bookings.starts_at", range.endsAt)
+    .gt("bookings.ends_at", range.startsAt);
+
+  if (filters.status) {
+    invitationQuery = invitationQuery.eq("bookings.status", filters.status);
+  }
+
+  const { data: invitedData, error: invitedError } = await invitationQuery;
+
+  if (invitedError) {
+    throw new Error("Unable to load invited calendar bookings.");
+  }
+
+  const invitedBookings = (
+    (invitedData as unknown as InvitedCalendarBookingRecord[] | null) ?? []
+  )
+    .map((invitation) => {
+      const booking = firstRecord(invitation.bookings);
+
+      return booking
+        ? mapEmployeeCalendarBooking(
+            booking,
+            invitation.status === "removed" ? undefined : invitation.status,
+          )
+        : null;
+    })
+    .filter((booking): booking is EmployeeCalendarBooking => Boolean(booking));
+
+  return [...ownedBookings, ...invitedBookings].sort((a, b) =>
+    a.startsAt.localeCompare(b.startsAt),
   );
 }

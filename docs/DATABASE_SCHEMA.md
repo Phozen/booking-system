@@ -128,7 +128,17 @@ create type email_notification_type as enum (
   'booking_approval',
   'booking_rejection',
   'booking_cancellation',
-  'booking_reminder'
+  'booking_reminder',
+  'booking_invitation',
+  'booking_invitation_accepted',
+  'booking_invitation_declined'
+);
+
+create type booking_invitation_status as enum (
+  'pending',
+  'accepted',
+  'declined',
+  'removed'
 );
 
 create type audit_action_type as enum (
@@ -174,6 +184,7 @@ Core tables:
 | `facility_equipment`        | Many-to-many relationship between facilities and equipment |
 | `bookings`                  | Main booking records                                       |
 | `booking_approvals`         | Approval/rejection history                                 |
+| `booking_invitations`       | Internal booking attendee invitations and RSVP status      |
 | `blocked_periods`           | Admin-created unavailable periods                          |
 | `blocked_period_facilities` | Facilities affected by blocked periods                     |
 | `maintenance_closures`      | Facility maintenance closures                              |
@@ -474,6 +485,47 @@ create index booking_approvals_status_idx on public.booking_approvals(status);
 create index booking_approvals_requested_by_idx on public.booking_approvals(requested_by);
 create index booking_approvals_reviewed_by_idx on public.booking_approvals(reviewed_by);
 ```
+
+---
+
+## 12A. Booking Invitations Table
+
+Tracks internal attendee invitations for booking collaboration v1.
+
+```sql
+create table public.booking_invitations (
+  id uuid primary key default extensions.uuid_generate_v4(),
+  booking_id uuid not null references public.bookings(id) on delete cascade,
+  invited_user_id uuid not null references public.profiles(id) on delete cascade,
+  invited_by uuid not null references public.profiles(id) on delete restrict,
+  status booking_invitation_status not null default 'pending',
+  response_message text,
+  responded_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint booking_invitations_unique_invitee unique (booking_id, invited_user_id),
+  constraint booking_invitations_response_message_length
+    check (response_message is null or char_length(response_message) <= 500)
+);
+```
+
+### Indexes
+
+```sql
+create index booking_invitations_booking_id_idx on public.booking_invitations(booking_id);
+create index booking_invitations_invited_user_id_idx on public.booking_invitations(invited_user_id);
+create index booking_invitations_status_idx on public.booking_invitations(status);
+create index booking_invitations_created_at_idx on public.booking_invitations(created_at desc);
+```
+
+### Notes
+
+* Only active internal users can be invited.
+* Booking owners can invite and remove attendees for their own bookings.
+* Invited users can accept or decline only their own pending invitations.
+* Invited users can view a safe booking detail view but cannot cancel or manage the booking.
+* Admins can view invitation status on admin booking detail pages.
 
 ---
 
