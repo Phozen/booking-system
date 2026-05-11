@@ -16,7 +16,10 @@ import {
   getBookingDateRange,
   normalizeAttendeeCount,
 } from "@/lib/bookings/validation";
-import { getBookingApprovalRequired } from "@/lib/settings/queries";
+import {
+  getAppSettings,
+  getEffectiveApprovalRequired,
+} from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -275,7 +278,8 @@ export async function createBookingAction(
   }
 
   const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
-  const dateRange = getBookingDateRange(parsed.data);
+  const settings = await getAppSettings();
+  const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
 
   if (!dateRange.startsAt || !dateRange.endsAt || dateRange.message) {
     return {
@@ -309,8 +313,9 @@ export async function createBookingAction(
     };
   }
 
-  const approvalRequired = await getBookingApprovalRequired(
+  const approvalRequired = getEffectiveApprovalRequired(
     availability.facility.requiresApproval,
+    settings,
   );
 
   const { data, error } = await supabase.rpc("create_booking", {

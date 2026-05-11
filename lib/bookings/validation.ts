@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { zonedDateTimeToUtc } from "@/lib/calendar/date-range";
+
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export const bookingFormSchema = z.object({
@@ -64,11 +66,28 @@ export function normalizeAttendeeCount(
 export function getBookingDateRange(values: Pick<
   BookingFormValues,
   "date" | "startTime" | "endTime"
->) {
-  // Phase 6 stores form times in the app timezone. Malaysia has no DST, so +08:00
-  // keeps local booking form values stable even if the server runs in UTC.
-  const startsAt = new Date(`${values.date}T${values.startTime}:00+08:00`);
-  const endsAt = new Date(`${values.date}T${values.endTime}:00+08:00`);
+>, timeZone?: string) {
+  const [year, month, day] = values.date.split("-").map(Number);
+  const [startHour, startMinute] = values.startTime.split(":").map(Number);
+  const [endHour, endMinute] = values.endTime.split(":").map(Number);
+  const startsAt = zonedDateTimeToUtc(
+    year,
+    month,
+    day,
+    startHour,
+    startMinute,
+    0,
+    timeZone,
+  );
+  const endsAt = zonedDateTimeToUtc(
+    year,
+    month,
+    day,
+    endHour,
+    endMinute,
+    0,
+    timeZone,
+  );
 
   if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
     return {
