@@ -36,8 +36,10 @@ Use this checklist after migrations are applied and the app is running with real
 ## Role-Based Access
 
 - [ ] Employee can access `/dashboard`, `/facilities`, `/bookings/new`, and `/my-bookings`.
+- [ ] Employee can access `/profile`.
 - [ ] Employee cannot access `/admin/facilities`, `/admin/bookings`, `/admin/approvals`, `/admin/reports`, `/admin/audit-logs`, or `/admin/settings`.
 - [ ] Admin can access all admin pages.
+- [ ] Admin can access `/profile` and update only their own safe profile fields.
 - [ ] Admin can still access employee facility browsing pages if needed.
 - [ ] Report export routes redirect or deny non-admin users.
 
@@ -105,6 +107,17 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm upcoming, past/history, cancelled, and pending states are distinguishable.
 - [ ] Confirm each booking links to `/bookings/[id]`.
 - [ ] Attempt to open another user's booking detail URL; expect not found or access denied.
+
+## Profile
+
+- [ ] Open `/profile` as an employee; confirm full name, email, role, status, department, phone, last login, created date, and updated date display.
+- [ ] Update full name, department, and phone; confirm values persist after refresh.
+- [ ] Confirm email, role, status, user ID, created date, updated date, and auth provider fields are read-only.
+- [ ] Open `/profile` as an admin; confirm admin can update only their own safe profile fields.
+- [ ] Confirm profile update creates an audit log entry with action `update` and entity type `user`.
+- [ ] Confirm logged-out `/profile` redirects to `/login?auth=required`.
+- [ ] Confirm disabled or pending users cannot access `/profile`.
+- [ ] Check `/profile` at mobile width; confirm the form and read-only details fit without horizontal overflow.
 
 ## Employee Cancellation
 

@@ -22,6 +22,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 - [x] RLS is enabled on application tables.
 - [x] Employees can select their own bookings only.
+- [x] Active users can view and update only their own safe profile fields through the self-service profile page.
 - [x] Employees cannot directly insert bookings into `public.bookings`; booking creation must use `public.create_booking()`.
 - [x] Employee booking cancellation policy only permits transition to `cancelled` for the owner.
 - [x] Booking immutability during employee cancellation is backed by a database trigger.
@@ -66,6 +67,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Visit `/dashboard`, `/my-bookings`, `/admin/dashboard`, and `/admin/reports` while logged out; expect `/login?auth=required`.
 - [ ] Log in as employee and visit `/admin/facilities`, `/admin/bookings`, `/admin/settings`, and `/admin/audit-logs`; expect redirect or access denied.
 - [ ] Log in as employee and open an owned booking; expect access.
+- [ ] Log in as employee and update `/profile`; confirm only full name, department, and phone can change.
 - [ ] Attempt another user's booking detail as employee; expect not found or access denied.
 - [ ] Set a profile status to `disabled`; confirm protected pages are blocked.
 - [ ] Log in as admin; confirm admin pages still work.

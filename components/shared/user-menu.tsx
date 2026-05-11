@@ -1,7 +1,8 @@
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export function UserMenu({
   email,
@@ -22,12 +23,21 @@ export function UserMenu({
           <p className="text-xs capitalize text-muted-foreground">{role}</p>
         ) : null}
       </div>
-      <form action={logoutAction}>
-        <Button type="submit" variant="outline" size="sm">
-          <LogOut data-icon="inline-start" />
-          Log out
-        </Button>
-      </form>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link
+          href="/profile"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          <UserRound data-icon="inline-start" />
+          Profile
+        </Link>
+        <form action={logoutAction}>
+          <Button type="submit" variant="outline" size="sm">
+            <LogOut data-icon="inline-start" />
+            Log out
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

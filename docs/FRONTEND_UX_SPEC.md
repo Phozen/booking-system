@@ -60,7 +60,7 @@ Design personality:
 | `/bookings/new` | Create booking | Exists | Needs stronger availability feedback and form error UX. |
 | `/bookings/[id]` | Employee booking detail | Exists | Should keep privacy-safe not-found/access-denied behavior. |
 | `/my-bookings` | Current user's bookings | Exists | Good grouping foundation. |
-| `/profile` | User profile | Planned in navigation, not implemented | Should be added later or removed from visible nav until implemented. |
+| `/profile` | User profile | Exists | Users can view account details and update safe contact fields only. |
 
 ### Admin Pages
 
@@ -144,7 +144,7 @@ Required employee nav links:
 - Facilities: `/facilities`
 - New Booking: `/bookings/new`
 - My Bookings: `/my-bookings`
-- Profile: only when `/profile` exists.
+- Profile: `/profile`.
 
 ### Admin Layout
 
@@ -1814,7 +1814,6 @@ Manual tests:
 - Shared confirm dialog.
 - Shared form field error.
 - Mobile card alternatives for admin tables.
-- Profile page.
 - Admin users page exists; continue production QA for self-protection and role/status changes.
 - Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop.
 - Availability timeline view.
