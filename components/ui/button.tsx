@@ -17,7 +17,7 @@ const buttonVariants = cva(
         ghost:
           "text-muted-foreground hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive text-white shadow-sm shadow-destructive/15 hover:bg-destructive/90 hover:shadow-md hover:shadow-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-destructive-foreground shadow-sm shadow-destructive/15 hover:bg-destructive/90 hover:shadow-md hover:shadow-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
         success:
           "bg-emerald-600 text-white shadow-sm shadow-emerald-600/15 hover:bg-emerald-700 hover:shadow-md hover:shadow-emerald-600/20 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25",
         warning:

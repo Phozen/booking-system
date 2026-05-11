@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { getCompanyDisplayName } from "@/lib/settings/app-settings";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AuthShell({
   appName,
@@ -25,6 +26,7 @@ export function AuthShell({
           <p className="mt-2 text-sm text-muted-foreground">
             Internal facilities for {getCompanyDisplayName({ companyName })}
           </p>
+          <ThemeToggle className="mx-auto mt-4 max-w-xs text-left" />
         </div>
         {children}
       </div>

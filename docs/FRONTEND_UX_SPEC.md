@@ -311,6 +311,18 @@ Suggested intent:
 - Alerts, empty states, and loading states should use plain text and appropriate `role` or live-region behavior.
 - Dialogs must announce title and description and return focus when closed where practical.
 
+### Dark Mode
+
+- The app supports Light, Dark, and System theme preferences.
+- System is the default and should respect `prefers-color-scheme`.
+- The theme preference is controlled through the shared theme toggle in auth pages and the signed-in user menu.
+- Theme state is client-side only and must not change product behavior, authorization, database writes, or server actions.
+- Global color tokens should drive dark mode surfaces: `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, and `ring`.
+- Avoid hardcoded light-only classes such as `bg-white`, `text-black`, and unpaired gray backgrounds in new UI.
+- Status badges, alerts, buttons, dialogs, forms, tables, calendars, and code/JSON blocks must remain readable in both light and dark themes.
+- Color is supplemental; labels and icons must still communicate status and action meaning.
+- Focus rings must remain clearly visible in dark mode.
+
 ### Spacing Scale
 
 Use existing Tailwind scale:

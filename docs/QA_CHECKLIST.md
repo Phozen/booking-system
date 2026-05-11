@@ -259,6 +259,21 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm buttons, inputs, labels, and status badges remain readable.
 - [ ] Confirm no major content overlap or layout shift during form errors.
 
+## Dark Mode
+
+- [ ] Set theme to Light from the auth-page toggle and confirm the preference is applied.
+- [ ] Set theme to Dark from the auth-page toggle and confirm the preference is applied.
+- [ ] Set theme to System and confirm it follows the operating system preference.
+- [ ] Refresh after changing theme and confirm the selected preference persists.
+- [ ] Log in and confirm the signed-in user menu exposes Light, Dark, and System options.
+- [ ] Check homepage, login, register, and reset password in dark mode.
+- [ ] Check employee dashboard, facilities, facility detail, booking form, My Bookings, booking detail, calendar, and profile in dark mode.
+- [ ] Check admin dashboard, users, facilities, bookings, approvals, calendar, blocked dates, maintenance, email notifications, reports, audit logs, and settings in dark mode.
+- [ ] Confirm buttons, status badges, dialogs, forms, cards, tables, alerts, empty states, and calendar events have readable contrast.
+- [ ] Confirm focus rings remain visible in dark mode.
+- [ ] Confirm status labels do not rely only on color in dark mode.
+- [ ] Confirm mobile menu, dialogs, booking form, calendar, and admin cards remain usable in dark mode.
+
 ## Known Deferred Items
 
 - [ ] Admin user management UI is implemented; complete the admin users manual tests before production launch.

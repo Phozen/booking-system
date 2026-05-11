@@ -3,6 +3,7 @@ import { LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function UserMenu({
   email,
@@ -38,6 +39,7 @@ export function UserMenu({
           </Button>
         </form>
       </div>
+      <ThemeToggle compact />
     </div>
   );
 }
