@@ -24,6 +24,7 @@ Use this checklist before and after the first production deployment.
 - [ ] Default facilities are present.
 - [ ] Default equipment is present.
 - [ ] Default system settings are present.
+- [ ] App identity settings (`app_name`, `company_name`, `system_contact_email`, `default_timezone`) are reviewed for production.
 
 ## Cloudflare Environment Variables
 
@@ -35,6 +36,7 @@ Use this checklist before and after the first production deployment.
 - [ ] `APP_NAME` is set.
 - [ ] `COMPANY_NAME` is set.
 - [ ] `SYSTEM_CONTACT_EMAIL` is set.
+- [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 - [ ] `EMAIL_PROVIDER=resend`, if real email sending is enabled.
 - [ ] `EMAIL_API_KEY` is set as a server-only secret, if real email sending is enabled.
 - [ ] `EMAIL_FROM` is set to a verified sender, if real email sending is enabled.

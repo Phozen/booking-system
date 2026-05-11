@@ -1,16 +1,17 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { appConfig } from "@/config/app";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { UserMenu } from "@/components/shared/user-menu";
 
 export function AdminShell({
+  appName,
   email,
   role,
   children,
 }: {
+  appName: string;
   email?: string | null;
   role?: string | null;
   children: ReactNode;
@@ -25,7 +26,7 @@ export function AdminShell({
 
   return (
     <div className="flex min-h-svh bg-background">
-      <AdminSidebar email={email} role={role} />
+      <AdminSidebar appName={appName} email={email} role={role} />
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 shadow-sm backdrop-blur lg:hidden">
           <div className="relative flex min-h-16 items-center justify-between gap-4 px-4">
@@ -34,7 +35,7 @@ export function AdminShell({
                 href="/admin/dashboard"
                 className="rounded-sm font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {appConfig.name}
+                {appName}
               </Link>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Admin console

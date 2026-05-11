@@ -1385,6 +1385,17 @@ Responsive table standards:
 - Message: "Your account profile is not ready. Contact an administrator."
 - Avoid letting missing-profile users reach booking/admin flows.
 
+### App Identity And Settings Wiring
+
+- App identity should resolve from `system_settings` first, then environment fallbacks, then safe defaults.
+- The app name should appear consistently on the homepage, auth shell, employee header, admin shell, and metadata fallback.
+- Company name should appear only where it adds context; if blank, use a neutral phrase such as "your company".
+- Support/contact messaging should use `system_contact_email` when configured. If it is blank, use "contact an administrator" rather than showing an empty label.
+- Timezone helper copy should use `default_timezone` from settings, falling back to `APP_TIMEZONE` and then `Asia/Kuala_Lumpur`.
+- Registration-disabled and account-inactive messages should be plain language and contact-aware.
+- Facility and booking approval copy should describe the effective approval behavior, including whether the global default or facility override controls the result.
+- Secrets such as service role keys and email API keys must remain environment-only and must never appear in settings UI.
+
 ## 13. Responsive And Mobile UX
 
 ### Desktop

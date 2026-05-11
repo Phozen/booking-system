@@ -9,22 +9,34 @@ import {
 
 import {
   formatFacilityType,
-  formatRequiresApproval,
 } from "@/lib/facilities/format";
 import type { Facility } from "@/lib/facilities/queries";
+import {
+  formatEffectiveApprovalCopy,
+  formatEffectiveApprovalLabel,
+  type AppSettings,
+} from "@/lib/settings/app-settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 
-export function FacilityDetail({ facility }: { facility: Facility }) {
+export function FacilityDetail({
+  facility,
+  settings,
+}: {
+  facility: Facility;
+  settings: AppSettings;
+}) {
   const canBook = facility.status === "active" && !facility.isArchived;
-  const approvalCopy =
-    facility.requiresApproval === true
-      ? "Bookings for this facility require admin approval."
-      : facility.requiresApproval === false
-        ? "Bookings for this facility are confirmed automatically when available."
-        : "Approval follows the current system setting.";
+  const approvalLabel = formatEffectiveApprovalLabel(
+    facility.requiresApproval,
+    settings,
+  );
+  const approvalCopy = formatEffectiveApprovalCopy(
+    facility.requiresApproval,
+    settings,
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -86,7 +98,7 @@ export function FacilityDetail({ facility }: { facility: Facility }) {
               <dt className="text-muted-foreground">Approval</dt>
               <dd className="inline-flex items-center gap-2 font-medium">
                 <ShieldCheck className="size-4" aria-hidden="true" />
-                {formatRequiresApproval(facility.requiresApproval)}
+                {approvalLabel}
               </dd>
               <p className="mt-1 text-xs text-muted-foreground">{approvalCopy}</p>
             </div>

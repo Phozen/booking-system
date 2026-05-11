@@ -14,6 +14,7 @@ import {
   groupCalendarBookingsByDay,
   type CalendarBooking,
 } from "@/lib/calendar/group-bookings";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
@@ -58,16 +59,17 @@ export default async function EmployeeCalendarPage({
 }) {
   const { user } = await requireUser();
   const params = await searchParams;
-  const selectedMonth = parseCalendarMonth(params.month);
+  const settings = await getAppSettings();
+  const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
-  const range = getCalendarMonthRange(selectedMonth);
+  const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const supabase = await createClient();
   const bookings = await getEmployeeCalendarBookings(supabase, user.id, range, {
     status: selectedStatus,
   });
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
-  const days = getCalendarMonthDays(selectedMonth);
+  const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -76,8 +78,8 @@ export default async function EmployeeCalendarPage({
         title="Booking Calendar"
         description={
           selectedStatus
-            ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}.`
-            : `Showing your bookings for ${selectedMonth.label}.`
+            ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
+            : `Showing your bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
         }
       />
 
@@ -85,6 +87,7 @@ export default async function EmployeeCalendarPage({
         basePath="/calendar"
         selectedMonth={selectedMonth}
         selectedStatus={selectedStatus}
+        timezone={settings.defaultTimezone}
       />
 
       <MonthCalendarGrid days={days} groupedBookings={groupedBookings} />

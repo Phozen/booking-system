@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { appConfig } from "@/config/app";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Booking System",
-  description: "Internal company facility booking system",
+  title: appConfig.name,
+  description: appConfig.description,
 };
 
 export default function RootLayout({

@@ -23,11 +23,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
-const formTimeZone = "Asia/Kuala_Lumpur";
-
-function toDateTimeInputs(value: string) {
+function toDateTimeInputs(value: string, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: formTimeZone,
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -51,9 +49,11 @@ function toDateTimeInputs(value: string) {
 export function BlockedPeriodForm({
   blockedPeriod,
   facilities,
+  timezone,
 }: {
   blockedPeriod?: BlockedPeriod;
   facilities: Facility[];
+  timezone: string;
 }) {
   const router = useRouter();
   const [result, setResult] = useState<BlockedPeriodActionResult | null>(null);
@@ -69,10 +69,10 @@ export function BlockedPeriodForm({
     [blockedPeriod],
   );
   const startsAt = blockedPeriod
-    ? toDateTimeInputs(blockedPeriod.startsAt)
+    ? toDateTimeInputs(blockedPeriod.startsAt, timezone)
     : { date: "", time: "" };
   const endsAt = blockedPeriod
-    ? toDateTimeInputs(blockedPeriod.endsAt)
+    ? toDateTimeInputs(blockedPeriod.endsAt, timezone)
     : { date: "", time: "" };
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -168,8 +168,7 @@ export function BlockedPeriodForm({
         <div>
           <h2 className="font-semibold tracking-normal">Schedule</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Times are shown in Asia/Kuala_Lumpur. The start must be before the
-            end.
+            Times are shown in {timezone}. The start must be before the end.
           </p>
         </div>
 

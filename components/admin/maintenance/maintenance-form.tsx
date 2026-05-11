@@ -23,11 +23,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
-const formTimeZone = "Asia/Kuala_Lumpur";
-
-function toDateTimeInputs(value: string) {
+function toDateTimeInputs(value: string, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: formTimeZone,
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -51,9 +49,11 @@ function toDateTimeInputs(value: string) {
 export function MaintenanceForm({
   maintenanceClosure,
   facilities,
+  timezone,
 }: {
   maintenanceClosure?: MaintenanceClosure;
   facilities: Facility[];
+  timezone: string;
 }) {
   const router = useRouter();
   const [result, setResult] = useState<MaintenanceClosureActionResult | null>(
@@ -63,10 +63,10 @@ export function MaintenanceForm({
   const [isStatusPending, setIsStatusPending] = useState(false);
   const isBusy = isPending || isStatusPending;
   const startsAt = maintenanceClosure
-    ? toDateTimeInputs(maintenanceClosure.startsAt)
+    ? toDateTimeInputs(maintenanceClosure.startsAt, timezone)
     : { date: "", time: "" };
   const endsAt = maintenanceClosure
-    ? toDateTimeInputs(maintenanceClosure.endsAt)
+    ? toDateTimeInputs(maintenanceClosure.endsAt, timezone)
     : { date: "", time: "" };
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -171,7 +171,7 @@ export function MaintenanceForm({
           <h2 className="font-semibold tracking-normal">Schedule</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Scheduled and in-progress maintenance prevents bookings during this
-            window.
+            window. Times are shown in {timezone}.
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminMaintenanceClosureById } from "@/lib/admin/maintenance/queries";
 import { getAdminFacilities } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { MaintenanceForm } from "@/components/admin/maintenance/maintenance-form";
 import { PageHeader } from "@/components/shared/page-header";
@@ -29,9 +30,10 @@ export default async function EditMaintenanceClosurePage({
   }
 
   const supabase = await createClient();
-  const [maintenanceClosure, facilities] = await Promise.all([
+  const [maintenanceClosure, facilities, settings] = await Promise.all([
     getAdminMaintenanceClosureById(supabase, id),
     getAdminFacilities(supabase),
+    getAppSettings(),
   ]);
 
   if (!maintenanceClosure) {
@@ -82,6 +84,7 @@ export default async function EditMaintenanceClosurePage({
         <MaintenanceForm
           maintenanceClosure={maintenanceClosure}
           facilities={facilities}
+          timezone={settings.defaultTimezone}
         />
       </section>
     </main>

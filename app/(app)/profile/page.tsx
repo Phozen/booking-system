@@ -2,6 +2,10 @@ import { LockKeyhole } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getOwnProfile } from "@/lib/profile/queries";
+import {
+  formatContactAdministratorMessage,
+  getAppSettings,
+} from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProfileDetail } from "@/components/profile/profile-detail";
@@ -13,7 +17,10 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   const { user } = await requireUser();
   const supabase = await createClient();
-  const profile = await getOwnProfile(supabase, user.id);
+  const [profile, settings] = await Promise.all([
+    getOwnProfile(supabase, user.id),
+    getAppSettings(),
+  ]);
 
   if (!profile) {
     return (
@@ -21,7 +28,7 @@ export default async function ProfilePage() {
         <PageHeader
           eyebrow="Account"
           title="Profile unavailable"
-          description="Your account profile could not be loaded. Contact an administrator if this continues."
+          description={`Your account profile could not be loaded. ${formatContactAdministratorMessage(settings)}`}
         />
       </main>
     );
@@ -44,8 +51,7 @@ export default async function ProfilePage() {
             <LockKeyhole className="size-4" aria-hidden="true" />
             <AlertDescription>
               Email, password, role, and account status are managed separately
-              for security. Contact an administrator if those details need to
-              change.
+              for security. {formatContactAdministratorMessage(settings)}
             </AlertDescription>
           </Alert>
         </div>
@@ -53,4 +59,3 @@ export default async function ProfilePage() {
     </main>
   );
 }
-

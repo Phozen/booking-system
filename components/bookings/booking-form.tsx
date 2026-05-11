@@ -17,8 +17,12 @@ import {
 import type { Facility } from "@/lib/facilities/queries";
 import {
   formatFacilityType,
-  formatRequiresApproval,
 } from "@/lib/facilities/format";
+import {
+  formatEffectiveApprovalCopy,
+  formatEffectiveApprovalLabel,
+  type AppSettings,
+} from "@/lib/settings/app-settings";
 import {
   Alert,
   AlertDescription,
@@ -108,9 +112,11 @@ function getBookingAlertCopy(state: BookingActionResult) {
 export function BookingForm({
   facilities,
   selectedFacilityId,
+  settings,
 }: {
   facilities: Facility[];
   selectedFacilityId?: string;
+  settings: AppSettings;
 }) {
   const [state, formAction, isPending] = useActionState(
     createBookingAction,
@@ -176,7 +182,10 @@ export function BookingForm({
       nextErrors.description = getFirstError(errors.description);
       nextErrors.attendeeCount = getFirstError(errors.attendeeCount);
     } else {
-      const dateRange = getBookingDateRange(parsed.data);
+      const dateRange = getBookingDateRange(
+        parsed.data,
+        settings.defaultTimezone,
+      );
 
       if (dateRange.message) {
         nextErrors.endTime = dateRange.message;
@@ -292,9 +301,18 @@ export function BookingForm({
             <div className="inline-flex items-start gap-2 text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4" aria-hidden="true" />
               <span>
-                {formatRequiresApproval(selectedFacilityDetails.requiresApproval)}
+                {formatEffectiveApprovalLabel(
+                  selectedFacilityDetails.requiresApproval,
+                  settings,
+                )}
               </span>
             </div>
+            <p className="text-xs text-muted-foreground">
+              {formatEffectiveApprovalCopy(
+                selectedFacilityDetails.requiresApproval,
+                settings,
+              )}
+            </p>
           </aside>
         ) : null}
 
@@ -313,7 +331,7 @@ export function BookingForm({
             required
           />
           <FormFieldHelper id="date-helper">
-            Booking times use Asia/Kuala_Lumpur.
+            Booking times use {settings.defaultTimezone}.
           </FormFieldHelper>
           <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>

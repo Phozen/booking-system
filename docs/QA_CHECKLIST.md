@@ -214,9 +214,15 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Open `/admin/settings`; confirm seeded/default settings display.
 - [ ] Update app name or company name; confirm value persists.
+- [ ] Confirm updated app name appears on the homepage, auth shell, employee header, and admin shell after refresh.
+- [ ] Confirm company name appears in auth/homepage copy, or a neutral fallback appears when blank.
+- [ ] Set `system_contact_email`; confirm registration-disabled, inactive-account, empty facility/contact messages use the email.
+- [ ] Clear `system_contact_email`; confirm messages fall back to "contact an administrator" without a blank label.
+- [ ] Change `default_timezone`; confirm booking, calendar, blocked-period, and maintenance helper text uses the configured timezone.
 - [ ] Confirm audit log for `settings_change`.
 - [ ] Toggle `default_approval_required`; confirm future bookings follow it.
 - [ ] Toggle facility approval override; confirm global default controls when override is disabled.
+- [ ] Confirm facility detail and booking form approval copy matches the effective approval setting.
 - [ ] Update reminder offsets; confirm validation accepts positive integer list.
 - [ ] Confirm secrets are not stored in `system_settings`.
 

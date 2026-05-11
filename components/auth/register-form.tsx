@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { registerAction, type AuthActionResult } from "@/lib/auth/actions";
+import { formatAllowedEmailDomains } from "@/lib/settings/app-settings";
 import { registerSchema, type RegisterValues } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,8 @@ export function RegisterForm({
       {allowedEmailDomains.length > 0 ? (
         <Alert>
           <AlertDescription>
-            Registration is limited to: {allowedEmailDomains.join(", ")}
+            Registration is limited to these domains:{" "}
+            {formatAllowedEmailDomains(allowedEmailDomains)}
           </AlertDescription>
         </Alert>
       ) : null}

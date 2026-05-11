@@ -1,13 +1,14 @@
 import Link from "next/link";
 
-import { appConfig } from "@/config/app";
 import { AdminNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
 
 export function AdminSidebar({
+  appName,
   email,
   role,
 }: {
+  appName: string;
   email?: string | null;
   role?: string | null;
 }) {
@@ -19,7 +20,7 @@ export function AdminSidebar({
             href="/admin/dashboard"
             className="rounded-sm text-base font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {appConfig.name}
+            {appName}
           </Link>
           <p className="mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Admin console

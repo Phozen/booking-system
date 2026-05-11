@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminFacilities } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { MaintenanceForm } from "@/components/admin/maintenance/maintenance-form";
 import { PageHeader } from "@/components/shared/page-header";
@@ -13,7 +14,10 @@ export const dynamic = "force-dynamic";
 export default async function NewMaintenanceClosurePage() {
   await requireAdmin();
   const supabase = await createClient();
-  const facilities = await getAdminFacilities(supabase);
+  const [facilities, settings] = await Promise.all([
+    getAdminFacilities(supabase),
+    getAppSettings(),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -43,7 +47,10 @@ export default async function NewMaintenanceClosurePage() {
           Scheduled and in-progress closures block bookings; completed and
           cancelled closures do not.
         </div>
-        <MaintenanceForm facilities={facilities} />
+        <MaintenanceForm
+          facilities={facilities}
+          timezone={settings.defaultTimezone}
+        />
       </section>
     </main>
   );

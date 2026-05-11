@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getEmployeeFacilityBySlug } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityDetail } from "@/components/facilities/facility-detail";
 
@@ -15,11 +16,14 @@ export default async function FacilityDetailPage({
   await requireUser();
   const { slug } = await params;
   const supabase = await createClient();
-  const facility = await getEmployeeFacilityBySlug(supabase, slug);
+  const [facility, settings] = await Promise.all([
+    getEmployeeFacilityBySlug(supabase, slug),
+    getAppSettings(),
+  ]);
 
   if (!facility) {
     notFound();
   }
 
-  return <FacilityDetail facility={facility} />;
+  return <FacilityDetail facility={facility} settings={settings} />;
 }

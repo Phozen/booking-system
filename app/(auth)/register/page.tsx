@@ -5,14 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getRegistrationSettings } from "@/lib/settings/queries";
+import {
+  formatRegistrationDisabledMessage,
+  getAppSettings,
+} from "@/lib/settings/queries";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RegisterForm } from "@/components/auth/register-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
-  const registrationSettings = await getRegistrationSettings();
+  const settings = await getAppSettings();
 
   return (
     <Card>
@@ -24,15 +27,14 @@ export default async function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {registrationSettings.registrationEnabled ? (
+        {settings.registrationEnabled ? (
           <RegisterForm
-            allowedEmailDomains={registrationSettings.allowedEmailDomains}
+            allowedEmailDomains={settings.allowedEmailDomains}
           />
         ) : (
           <Alert>
             <AlertDescription>
-              Registration is currently disabled. Contact an administrator for
-              access.
+              {formatRegistrationDisabledMessage(settings)}
             </AlertDescription>
           </Alert>
         )}

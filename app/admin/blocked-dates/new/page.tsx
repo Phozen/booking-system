@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminFacilities } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BlockedPeriodForm } from "@/components/admin/blocked-periods/blocked-period-form";
 import { PageHeader } from "@/components/shared/page-header";
@@ -13,7 +14,10 @@ export const dynamic = "force-dynamic";
 export default async function NewBlockedPeriodPage() {
   await requireAdmin();
   const supabase = await createClient();
-  const facilities = await getAdminFacilities(supabase);
+  const [facilities, settings] = await Promise.all([
+    getAdminFacilities(supabase),
+    getAppSettings(),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -42,7 +46,10 @@ export default async function NewBlockedPeriodPage() {
           Use blocked periods for office closures, company events, or temporary
           restrictions. Inactive blocked periods do not prevent new bookings.
         </div>
-        <BlockedPeriodForm facilities={facilities} />
+        <BlockedPeriodForm
+          facilities={facilities}
+          timezone={settings.defaultTimezone}
+        />
       </section>
     </main>
   );

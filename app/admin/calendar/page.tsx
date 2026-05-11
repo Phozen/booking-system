@@ -17,6 +17,7 @@ import {
 } from "@/lib/calendar/group-bookings";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { getAdminFacilities } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
 import { CalendarControls } from "@/components/calendar/calendar-controls";
@@ -87,22 +88,25 @@ export default async function AdminCalendarPage({
   await requireAdmin();
   const params = await searchParams;
   const supabase = await createClient();
-  const facilities = await getAdminFacilities(supabase);
+  const [facilities, settings] = await Promise.all([
+    getAdminFacilities(supabase),
+    getAppSettings(),
+  ]);
   const validFacilityIds = new Set(facilities.map((facility) => facility.id));
-  const selectedMonth = parseCalendarMonth(params.month);
+  const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
   const selectedFacilityId = parseFacilityId(
     params.facilityId,
     validFacilityIds,
   );
-  const range = getCalendarMonthRange(selectedMonth);
+  const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const bookings = await getAdminCalendarBookings(supabase, range, {
     status: selectedStatus,
     facilityId: selectedFacilityId,
   });
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
-  const days = getCalendarMonthDays(selectedMonth);
+  const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -111,8 +115,8 @@ export default async function AdminCalendarPage({
         title="Booking Calendar"
         description={
           selectedStatus
-            ? `Showing ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}.`
-            : `Showing all bookings for ${selectedMonth.label}.`
+            ? `Showing ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
+            : `Showing all bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
         }
       />
 
@@ -121,6 +125,7 @@ export default async function AdminCalendarPage({
         selectedMonth={selectedMonth}
         selectedStatus={selectedStatus}
         selectedFacilityId={selectedFacilityId}
+        timezone={settings.defaultTimezone}
         facilities={facilities}
         showFacilityFilter
       />

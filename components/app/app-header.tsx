@@ -1,14 +1,15 @@
 import Link from "next/link";
 
-import { appConfig } from "@/config/app";
 import { EmployeeNavigation } from "@/components/shared/nav-links";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { UserMenu } from "@/components/shared/user-menu";
 
 export function AppHeader({
+  appName,
   email,
   role,
 }: {
+  appName: string;
   email?: string | null;
   role?: string | null;
 }) {
@@ -28,7 +29,7 @@ export function AppHeader({
             href="/dashboard"
             className="shrink-0 rounded-sm text-base font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {appConfig.name}
+            {appName}
           </Link>
           <div className="hidden md:block">
             <EmployeeNavigation />

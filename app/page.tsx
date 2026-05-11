@@ -2,20 +2,27 @@ import Link from "next/link";
 
 import { ArrowRight, Building2, CalendarCheck, ShieldCheck } from "lucide-react";
 
-import { appConfig, defaultFacilities } from "@/config/app";
+import { defaultFacilities } from "@/config/app";
+import { getCompanyDisplayName } from "@/lib/settings/app-settings";
+import { getAppSettings } from "@/lib/settings/queries";
 import { buttonVariants } from "@/components/ui/button";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const settings = await getAppSettings();
+  const companyName = getCompanyDisplayName(settings);
+
   return (
     <main className="flex min-h-svh flex-1 flex-col bg-background">
       <section className="border-b">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-12 sm:px-8 sm:py-16 lg:px-10">
           <div className="flex max-w-3xl flex-col gap-5">
             <p className="text-sm font-medium text-muted-foreground">
-              Internal facilities
+              Internal facilities for {companyName}
             </p>
             <h1 className="text-3xl font-semibold tracking-normal text-foreground sm:text-5xl">
-              {appConfig.name}
+              {settings.appName}
             </h1>
             <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
               Book meeting rooms and company facilities, review your schedule,

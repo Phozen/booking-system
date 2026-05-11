@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminBlockedPeriodById } from "@/lib/admin/blocked-periods/queries";
 import { getAdminFacilities } from "@/lib/facilities/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BlockedPeriodForm } from "@/components/admin/blocked-periods/blocked-period-form";
 import { PageHeader } from "@/components/shared/page-header";
@@ -29,9 +30,10 @@ export default async function EditBlockedPeriodPage({
   }
 
   const supabase = await createClient();
-  const [blockedPeriod, facilities] = await Promise.all([
+  const [blockedPeriod, facilities, settings] = await Promise.all([
     getAdminBlockedPeriodById(supabase, id),
     getAdminFacilities(supabase),
+    getAppSettings(),
   ]);
 
   if (!blockedPeriod) {
@@ -79,6 +81,7 @@ export default async function EditBlockedPeriodPage({
         <BlockedPeriodForm
           blockedPeriod={blockedPeriod}
           facilities={facilities}
+          timezone={settings.defaultTimezone}
         />
       </section>
     </main>

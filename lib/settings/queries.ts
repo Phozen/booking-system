@@ -2,172 +2,43 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { appConfig } from "@/config/app";
+import {
+  baseDefaultAppSettings,
+  mapSettingsRowsToAppSettings as mapRowsToSettings,
+  normalizeDomain,
+  type AppSettings,
+  type SystemSettingRow,
+} from "@/lib/settings/app-settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type AppSettings = {
-  appName: string;
-  companyName: string;
-  systemContactEmail: string;
-  registrationEnabled: boolean;
-  allowedEmailDomains: string[];
-  defaultApprovalRequired: boolean;
-  allowFacilityApprovalOverride: boolean;
-  defaultTimezone: string;
-  reminderOffsetsMinutes: number[];
-};
+export type { AppSettings } from "@/lib/settings/app-settings";
+export {
+  appSettingsToRows,
+  formatAccountInactiveMessage,
+  formatAllowedEmailDomains,
+  formatContactAdministratorMessage,
+  formatEffectiveApprovalCopy,
+  formatEffectiveApprovalLabel,
+  formatRegistrationDisabledMessage,
+  getCompanyDisplayName,
+  getEffectiveApprovalRequired,
+  getSystemContactEmail,
+} from "@/lib/settings/app-settings";
 
 export const defaultAppSettings: AppSettings = {
-  appName: "Booking System",
-  companyName: "",
-  systemContactEmail: "",
-  registrationEnabled: true,
-  allowedEmailDomains: [],
-  defaultApprovalRequired: false,
-  allowFacilityApprovalOverride: true,
-  defaultTimezone: "Asia/Kuala_Lumpur",
-  reminderOffsetsMinutes: [1440, 60],
+  ...baseDefaultAppSettings,
+  appName: appConfig.name || baseDefaultAppSettings.appName,
+  companyName: appConfig.companyName || baseDefaultAppSettings.companyName,
+  systemContactEmail:
+    appConfig.supportEmail || baseDefaultAppSettings.systemContactEmail,
+  defaultTimezone: appConfig.timezone || baseDefaultAppSettings.defaultTimezone,
 };
-
-const settingKeyMap = {
-  appName: "app_name",
-  companyName: "company_name",
-  systemContactEmail: "system_contact_email",
-  registrationEnabled: "registration_enabled",
-  allowedEmailDomains: "allowed_email_domains",
-  defaultApprovalRequired: "default_approval_required",
-  allowFacilityApprovalOverride: "facility_approval_override_enabled",
-  defaultTimezone: "default_timezone",
-  reminderOffsetsMinutes: "reminder_offsets_minutes",
-} as const;
-
-type SystemSettingRow = {
-  key: string;
-  value: unknown;
-};
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
-function isPositiveIntegerArray(value: unknown): value is number[] {
-  return (
-    Array.isArray(value) &&
-    value.every((item) => Number.isInteger(item) && item > 0)
-  );
-}
-
-function normalizeDomain(value: string) {
-  return value.trim().toLowerCase().replace(/^@/, "");
-}
 
 export function mapSettingsRowsToAppSettings(
   rows: SystemSettingRow[],
 ): AppSettings {
-  const values = new Map(rows.map((row) => [row.key, row.value]));
-  const approvalOverride =
-    values.get(settingKeyMap.allowFacilityApprovalOverride) ??
-    values.get("allow_facility_approval_override");
-  const allowedEmailDomains = values.get(settingKeyMap.allowedEmailDomains);
-  const reminderOffsets = values.get(settingKeyMap.reminderOffsetsMinutes);
-
-  return {
-    appName:
-      typeof values.get(settingKeyMap.appName) === "string" &&
-      String(values.get(settingKeyMap.appName)).trim()
-        ? String(values.get(settingKeyMap.appName)).trim()
-        : defaultAppSettings.appName,
-    companyName:
-      typeof values.get(settingKeyMap.companyName) === "string"
-        ? String(values.get(settingKeyMap.companyName)).trim()
-        : defaultAppSettings.companyName,
-    systemContactEmail:
-      typeof values.get(settingKeyMap.systemContactEmail) === "string"
-        ? String(values.get(settingKeyMap.systemContactEmail)).trim()
-        : defaultAppSettings.systemContactEmail,
-    registrationEnabled:
-      typeof values.get(settingKeyMap.registrationEnabled) === "boolean"
-        ? Boolean(values.get(settingKeyMap.registrationEnabled))
-        : defaultAppSettings.registrationEnabled,
-    allowedEmailDomains: isStringArray(allowedEmailDomains)
-      ? allowedEmailDomains.map(normalizeDomain).filter(Boolean)
-      : defaultAppSettings.allowedEmailDomains,
-    defaultApprovalRequired:
-      typeof values.get(settingKeyMap.defaultApprovalRequired) === "boolean"
-        ? Boolean(values.get(settingKeyMap.defaultApprovalRequired))
-        : defaultAppSettings.defaultApprovalRequired,
-    allowFacilityApprovalOverride:
-      typeof approvalOverride === "boolean"
-        ? approvalOverride
-        : defaultAppSettings.allowFacilityApprovalOverride,
-    defaultTimezone:
-      typeof values.get(settingKeyMap.defaultTimezone) === "string" &&
-      String(values.get(settingKeyMap.defaultTimezone)).trim()
-        ? String(values.get(settingKeyMap.defaultTimezone)).trim()
-        : defaultAppSettings.defaultTimezone,
-    reminderOffsetsMinutes: isPositiveIntegerArray(reminderOffsets)
-      ? [...new Set(reminderOffsets)].sort((a, b) => b - a)
-      : defaultAppSettings.reminderOffsetsMinutes,
-  };
-}
-
-export function appSettingsToRows(settings: AppSettings) {
-  return [
-    {
-      key: settingKeyMap.appName,
-      value: settings.appName,
-      description: "Application display name.",
-      is_public: true,
-    },
-    {
-      key: settingKeyMap.companyName,
-      value: settings.companyName,
-      description: "Company display name.",
-      is_public: true,
-    },
-    {
-      key: settingKeyMap.systemContactEmail,
-      value: settings.systemContactEmail,
-      description: "Contact email shown for booking support.",
-      is_public: true,
-    },
-    {
-      key: settingKeyMap.registrationEnabled,
-      value: settings.registrationEnabled,
-      description: "Whether employee self-registration is enabled.",
-      is_public: false,
-    },
-    {
-      key: settingKeyMap.allowedEmailDomains,
-      value: settings.allowedEmailDomains,
-      description:
-        "Allowed registration email domains. Empty means unrestricted until configured.",
-      is_public: false,
-    },
-    {
-      key: settingKeyMap.defaultApprovalRequired,
-      value: settings.defaultApprovalRequired,
-      description: "Whether new bookings require approval by default.",
-      is_public: false,
-    },
-    {
-      key: settingKeyMap.allowFacilityApprovalOverride,
-      value: settings.allowFacilityApprovalOverride,
-      description: "Whether facilities can override the default approval setting.",
-      is_public: false,
-    },
-    {
-      key: settingKeyMap.defaultTimezone,
-      value: settings.defaultTimezone,
-      description: "Default timezone for displaying booking times.",
-      is_public: true,
-    },
-    {
-      key: settingKeyMap.reminderOffsetsMinutes,
-      value: settings.reminderOffsetsMinutes,
-      description: "Reminder offsets before a confirmed booking starts.",
-      is_public: false,
-    },
-  ];
+  return mapRowsToSettings(rows, defaultAppSettings);
 }
 
 export async function getAppSettings(supabase?: SupabaseClient) {
@@ -216,6 +87,7 @@ export async function getRegistrationSettings() {
   return {
     registrationEnabled: settings.registrationEnabled,
     allowedEmailDomains: settings.allowedEmailDomains,
+    systemContactEmail: settings.systemContactEmail,
   };
 }
 
@@ -235,4 +107,3 @@ export function isEmailAllowedByDomain(email: string, allowedDomains: string[]) 
     return domain === normalized || domain.endsWith(`.${normalized}`);
   });
 }
-

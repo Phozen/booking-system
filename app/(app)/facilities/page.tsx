@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getEmployeeFacilities } from "@/lib/facilities/queries";
+import {
+  formatContactAdministratorMessage,
+  getAppSettings,
+} from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityCard } from "@/components/facilities/facility-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -13,7 +17,10 @@ export const dynamic = "force-dynamic";
 export default async function FacilitiesPage() {
   await requireUser();
   const supabase = await createClient();
-  const facilities = await getEmployeeFacilities(supabase);
+  const [facilities, settings] = await Promise.all([
+    getEmployeeFacilities(supabase),
+    getAppSettings(),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -32,7 +39,7 @@ export default async function FacilitiesPage() {
       ) : (
         <EmptyState
           title="No active facilities are available"
-          description="Facilities may be inactive, archived, or temporarily unavailable. Contact an administrator if you need help."
+          description={`Facilities may be inactive, archived, or temporarily unavailable. ${formatContactAdministratorMessage(settings)}`}
           action={
             <Link
               href="/dashboard"

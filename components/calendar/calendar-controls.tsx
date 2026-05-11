@@ -43,6 +43,7 @@ export function CalendarControls({
   selectedMonth,
   selectedStatus,
   selectedFacilityId,
+  timezone,
   facilities,
   showFacilityFilter,
 }: {
@@ -50,12 +51,13 @@ export function CalendarControls({
   selectedMonth: CalendarMonth;
   selectedStatus?: BookingStatus;
   selectedFacilityId?: string;
+  timezone?: string;
   facilities?: Facility[];
   showFacilityFilter?: boolean;
 }) {
-  const previousMonth = shiftCalendarMonth(selectedMonth, -1);
-  const nextMonth = shiftCalendarMonth(selectedMonth, 1);
-  const currentMonth = getCurrentCalendarMonth();
+  const previousMonth = shiftCalendarMonth(selectedMonth, -1, timezone);
+  const nextMonth = shiftCalendarMonth(selectedMonth, 1, timezone);
+  const currentMonth = getCurrentCalendarMonth(new Date(), timezone);
 
   return (
     <AdminFilterBar

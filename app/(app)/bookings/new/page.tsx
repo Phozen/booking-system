@@ -4,6 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
+import {
+  formatContactAdministratorMessage,
+  getAppSettings,
+} from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BookingForm } from "@/components/bookings/booking-form";
 import { PageHeader } from "@/components/shared/page-header";
@@ -23,6 +27,7 @@ export default async function NewBookingPage({
 }) {
   const { profile } = await requireUser();
   const { facilityId } = await searchParams;
+  const settings = await getAppSettings();
 
   let facilities: Facility[] = [];
   let loadError = false;
@@ -67,7 +72,8 @@ export default async function NewBookingPage({
           <AlertTitle>Booking unavailable</AlertTitle>
           <AlertDescription>
             Your account is not active, so booking is currently unavailable.
-            Contact an administrator if you think this is a mistake.
+            {" "}
+            {formatContactAdministratorMessage(settings)}
           </AlertDescription>
         </Alert>
       ) : loadError ? (
@@ -83,6 +89,7 @@ export default async function NewBookingPage({
           <BookingForm
             facilities={facilities}
             selectedFacilityId={selectedFacilityId}
+            settings={settings}
           />
         </section>
       )}
