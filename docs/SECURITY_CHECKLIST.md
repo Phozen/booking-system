@@ -49,7 +49,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `facility-photos` bucket is configured as private in the storage migration.
 - [x] Active users can read facility photo objects.
 - [x] Admins can upload, update, and delete facility photo objects.
-- [ ] Photo upload UI is deferred; verify signed/private URL behavior when upload is implemented.
+- [x] Facility photo management is admin-only and validates file type and size server-side.
+- [x] Employee photo display uses signed URLs for the private bucket instead of exposing service-role credentials.
+- [ ] Browser-level storage verification is still required after deploying the photo upload UI.
 
 ## Database Function Checklist
 
@@ -75,4 +77,4 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Cloudflare Access or another network-layer internal access control is still a future deployment hardening option.
 - Admin user-management is implemented; continue to manually verify self-protection and final-active-admin protections in production QA.
 - Automated security tests are not implemented yet; Phase 15 should turn the manual checklist into repeatable QA where practical.
-- Facility photo upload is deferred, so storage upload behavior still needs browser-level verification when that feature is built.
+- Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.

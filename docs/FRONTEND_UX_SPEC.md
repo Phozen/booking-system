@@ -70,7 +70,7 @@ Design personality:
 | `/admin/calendar` | All-bookings calendar | Exists | Admin-only calendar for reviewing bookings across facilities and users. |
 | `/admin/facilities` | Facility list and management | Exists | Needs shared admin shell and filters. |
 | `/admin/facilities/new` | Create facility | Exists | Form foundation exists. |
-| `/admin/facilities/[id]` | Edit facility | Exists | Form foundation exists; photo/equipment management deferred. |
+| `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details plus admin photo management. Equipment management remains data-backed rather than a dedicated UI. |
 | `/admin/bookings` | All bookings | Exists | Status/facility filters exist; needs broader filters and responsive pattern. |
 | `/admin/bookings/[id]` | Admin booking detail/actions | Exists | Needs consistent destructive confirmation UX. |
 | `/admin/approvals` | Pending approvals | Exists | Should emphasize time-sensitive pending work. |
@@ -348,10 +348,28 @@ Use:
 Facility photos should:
 
 - Keep a stable aspect ratio: `4/3` for cards, `16/9` for detail hero.
+- Prefer the primary photo when one exists.
+- Use signed URLs for the private `facility-photos` storage bucket.
 - Show a neutral placeholder with building/photo icon if missing.
 - Include alt text or `role="img"` with an accessible label when rendered as background.
 - Avoid dark blurred stock-like placeholders.
 - Do not block booking comprehension if photos are missing.
+
+### Facility Photo Management
+
+Admin facility edit pages should include a `Facility Photos` section.
+
+Requirements:
+
+- Upload JPEG, PNG, or WebP images up to 5 MB.
+- Validate file type and size server-side before storage writes.
+- Store images in `facility-photos` using `facilities/{facility_id}/...` paths.
+- Show existing photos in a responsive grid with alt text, primary state, storage path preview, and clear actions.
+- Allow admins to set one primary photo per facility.
+- Confirm before deleting a photo.
+- If the primary photo is deleted and another photo exists, the next remaining photo should become primary.
+- Employee facility cards and details should show the primary photo first and fall back to the placeholder when no photo exists.
+- Photo management must remain admin-only; employees only view photos.
 
 ## 5. Accessibility Requirements
 
@@ -1509,7 +1527,7 @@ Add only when needed and keep dependency impact low.
 
 ### P2: Nice To Have After Launch
 
-- Facility photo upload UX.
+- Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop.
 - Facility search and filters for employees.
 - Availability timeline view that shows open time slots before booking.
 - Admin user management UI.
@@ -1798,7 +1816,7 @@ Manual tests:
 - Mobile card alternatives for admin tables.
 - Profile page.
 - Admin users page exists; continue production QA for self-protection and role/status changes.
-- Facility photo upload UX.
+- Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop.
 - Availability timeline view.
 
 ### Accessibility Risks

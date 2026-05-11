@@ -4,6 +4,7 @@ import type { FacilityStatus, FacilityType } from "@/lib/facilities/validation";
 
 type FacilityPhotoRecord = {
   id: string;
+  storage_bucket: string;
   public_url: string | null;
   storage_path: string;
   alt_text: string | null;
@@ -51,6 +52,7 @@ type FacilityRecord = {
 
 export type FacilityPhoto = {
   id: string;
+  storageBucket: string;
   publicUrl: string | null;
   storagePath: string;
   altText: string | null;
@@ -103,6 +105,7 @@ const facilitySelect = `
   updated_at,
   facility_photos (
     id,
+    storage_bucket,
     public_url,
     storage_path,
     alt_text,
@@ -132,6 +135,7 @@ function mapFacility(record: FacilityRecord): Facility {
     })
     .map((photo) => ({
       id: photo.id,
+      storageBucket: photo.storage_bucket,
       publicUrl: photo.public_url,
       storagePath: photo.storage_path,
       altText: photo.alt_text,
@@ -181,6 +185,41 @@ function mapFacility(record: FacilityRecord): Facility {
   };
 }
 
+async function addSignedPhotoUrls(
+  supabase: SupabaseClient,
+  facilities: Facility[],
+) {
+  return Promise.all(
+    facilities.map(async (facility) => {
+      const photos = await Promise.all(
+        facility.photos.map(async (photo) => {
+          if (photo.publicUrl) {
+            return photo;
+          }
+
+          const { data, error } = await supabase.storage
+            .from(photo.storageBucket)
+            .createSignedUrl(photo.storagePath, 60 * 60);
+
+          if (error || !data?.signedUrl) {
+            return photo;
+          }
+
+          return {
+            ...photo,
+            publicUrl: data.signedUrl,
+          };
+        }),
+      );
+
+      return {
+        ...facility,
+        photos,
+      };
+    }),
+  );
+}
+
 export async function getEmployeeFacilities(supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from("facilities")
@@ -194,7 +233,10 @@ export async function getEmployeeFacilities(supabase: SupabaseClient) {
     throw new Error("Unable to load facilities.");
   }
 
-  return ((data as unknown as FacilityRecord[] | null) ?? []).map(mapFacility);
+  return addSignedPhotoUrls(
+    supabase,
+    ((data as unknown as FacilityRecord[] | null) ?? []).map(mapFacility),
+  );
 }
 
 export async function getEmployeeFacilityBySlug(
@@ -213,7 +255,15 @@ export async function getEmployeeFacilityBySlug(
     throw new Error("Unable to load facility.");
   }
 
-  return data ? mapFacility(data as unknown as FacilityRecord) : null;
+  if (!data) {
+    return null;
+  }
+
+  const [facility] = await addSignedPhotoUrls(supabase, [
+    mapFacility(data as unknown as FacilityRecord),
+  ]);
+
+  return facility;
 }
 
 export async function getAdminFacilities(supabase: SupabaseClient) {
@@ -227,7 +277,10 @@ export async function getAdminFacilities(supabase: SupabaseClient) {
     throw new Error("Unable to load facilities.");
   }
 
-  return ((data as unknown as FacilityRecord[] | null) ?? []).map(mapFacility);
+  return addSignedPhotoUrls(
+    supabase,
+    ((data as unknown as FacilityRecord[] | null) ?? []).map(mapFacility),
+  );
 }
 
 export async function getAdminFacilityById(
@@ -244,5 +297,13 @@ export async function getAdminFacilityById(
     throw new Error("Unable to load facility.");
   }
 
-  return data ? mapFacility(data as unknown as FacilityRecord) : null;
+  if (!data) {
+    return null;
+  }
+
+  const [facility] = await addSignedPhotoUrls(supabase, [
+    mapFacility(data as unknown as FacilityRecord),
+  ]);
+
+  return facility;
 }

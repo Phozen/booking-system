@@ -65,6 +65,13 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Change facility status and confirm audit log records the update.
 - [ ] Archive or mark the test facility inactive; confirm it is no longer bookable by employees.
 - [ ] Confirm invalid capacity, duplicate code, or duplicate slug is rejected.
+- [ ] Upload a valid JPEG, PNG, or WebP facility photo up to 5 MB from `/admin/facilities/[id]`.
+- [ ] Confirm invalid file types and files over 5 MB show friendly errors.
+- [ ] Upload two photos and set the second photo as primary; confirm only one photo is primary.
+- [ ] Delete a non-primary photo; confirm it is removed from the grid.
+- [ ] Delete a primary photo; confirm another remaining photo becomes primary or the placeholder appears if none remain.
+- [ ] Confirm facility photo upload, primary change, and delete actions create audit log records.
+- [ ] Confirm employees can view facility photos on `/facilities` and `/facilities/[slug]` but cannot access photo management controls.
 
 ## Booking Creation
 
@@ -233,11 +240,10 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Known Deferred Items
 
-- [ ] Facility photo upload UI is deferred.
 - [ ] Admin user management UI is implemented; complete the admin users manual tests before production launch.
+- [ ] Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop is deferred.
 - [ ] Automatic email cron/background processing is deferred.
 - [ ] Reminder scheduling automation is deferred.
-- [ ] Calendar UI is deferred.
 - [ ] PDF and Excel exports are deferred.
 - [ ] Recurring bookings are deferred.
 - [ ] Cloudflare Pages deployment is Phase 16.
