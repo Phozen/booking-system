@@ -21,6 +21,27 @@ function getFriendlyFacilityError() {
   return "Facility could not be saved. Check for duplicate codes or slugs, then try again.";
 }
 
+function getFriendlyFacilityArchiveError() {
+  return "Facility could not be archived. Please reload the page and try again.";
+}
+
+function logFacilityArchiveError({
+  stage,
+  facilityId,
+  error,
+}: {
+  stage: string;
+  facilityId?: string;
+  error: unknown;
+}) {
+  console.error("Facility archive failed", {
+    stage,
+    facilityId,
+    name: error instanceof Error ? error.name : undefined,
+    message: error instanceof Error ? error.message : String(error),
+  });
+}
+
 function formDataToValues(formData: FormData) {
   return {
     code: getOptionalFormValue(formData, "code"),
@@ -243,97 +264,143 @@ export async function updateFacilityAction(
 export async function archiveFacilityAction(
   facilityId: string,
 ): Promise<FacilityActionResult> {
-  const { user } = await requireAdmin();
+  try {
+    const { user } = await requireAdmin();
 
-  if (!user) {
-    return {
-      status: "error",
-      message: "You must be signed in as an admin.",
+    if (!user) {
+      return {
+        status: "error",
+        message: "You must be signed in as an admin.",
+      };
+    }
+
+    const supabase = await createClient();
+    const { data: existing, error: existingError } = await supabase
+      .from("facilities")
+      .select(
+        "id,code,name,slug,status,is_archived,requires_approval,display_order",
+      )
+      .eq("id", facilityId)
+      .maybeSingle();
+
+    if (existingError) {
+      logFacilityArchiveError({
+        stage: "lookup",
+        facilityId,
+        error: existingError,
+      });
+
+      return {
+        status: "error",
+        message: "Facility could not be found.",
+      };
+    }
+
+    if (!existing) {
+      return {
+        status: "error",
+        message: "Facility could not be found.",
+      };
+    }
+
+    if (existing.status === "archived" || existing.is_archived) {
+      return {
+        status: "error",
+        message: "This facility is already archived.",
+      };
+    }
+
+    const facilityPayload = {
+      status: "archived" as const,
+      is_archived: true,
+      updated_by: user.id,
     };
-  }
 
-  const supabase = await createClient();
-  const { data: existing, error: existingError } = await supabase
-    .from("facilities")
-    .select(
-      "id,code,name,slug,status,is_archived,requires_approval,display_order",
-    )
-    .eq("id", facilityId)
-    .maybeSingle();
+    const { error } = await supabase
+      .from("facilities")
+      .update(facilityPayload)
+      .eq("id", facilityId);
 
-  if (existingError || !existing) {
-    return {
-      status: "error",
-      message: "Facility could not be found.",
-    };
-  }
+    if (error) {
+      logFacilityArchiveError({
+        stage: "update",
+        facilityId,
+        error,
+      });
 
-  if (existing.status === "archived" || existing.is_archived) {
-    return {
-      status: "error",
-      message: "This facility is already archived.",
-    };
-  }
+      return {
+        status: "error",
+        message: getFriendlyFacilityArchiveError(),
+      };
+    }
 
-  const facilityPayload = {
-    status: "archived" as const,
-    is_archived: true,
-    updated_by: user.id,
-  };
-
-  const { error } = await supabase
-    .from("facilities")
-    .update(facilityPayload)
-    .eq("id", facilityId);
-
-  if (error) {
-    console.error("Facility archive failed", {
+    await insertAuditLog({
+      action: "update",
       facilityId,
-      code: error.code,
-      message: error.message,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Facility archived: ${existing.code}.`,
+      oldValues: existing,
+      newValues: facilityPayload,
+    });
+
+    try {
+      revalidatePath("/facilities");
+      revalidatePath(`/facilities/${existing.slug}`);
+      revalidatePath("/admin/facilities");
+      revalidatePath(`/admin/facilities/${facilityId}`);
+    } catch (error) {
+      logFacilityArchiveError({
+        stage: "revalidate",
+        facilityId,
+        error,
+      });
+    }
+
+    return {
+      status: "success",
+      message:
+        "Facility archived. It is hidden from employee booking pages while historical records are preserved.",
+      facilityId,
+    };
+  } catch (error) {
+    logFacilityArchiveError({
+      stage: "unexpected",
+      facilityId,
+      error,
     });
 
     return {
       status: "error",
-      message: "Facility could not be archived. Please try again.",
+      message: getFriendlyFacilityArchiveError(),
     };
   }
-
-  await insertAuditLog({
-    action: "update",
-    facilityId,
-    actorUserId: user.id,
-    actorEmail: user.email,
-    summary: `Facility archived: ${existing.code}.`,
-    oldValues: existing,
-    newValues: facilityPayload,
-  });
-
-  revalidatePath("/facilities");
-  revalidatePath(`/facilities/${existing.slug}`);
-  revalidatePath("/admin/facilities");
-  revalidatePath(`/admin/facilities/${facilityId}`);
-
-  return {
-    status: "success",
-    message:
-      "Facility archived. It is hidden from employee booking pages while historical records are preserved.",
-    facilityId,
-  };
 }
 
 export async function archiveFacilityFormAction(
   _previousState: FacilityActionResult,
   formData: FormData,
 ): Promise<FacilityActionResult> {
-  const facilityId = getOptionalFormValue(formData, "facilityId");
+  try {
+    const facilityId = getOptionalFormValue(formData, "facilityId");
 
-  if (!facilityId) {
+    if (!facilityId) {
+      return {
+        status: "error",
+        message: "Facility could not be found.",
+      };
+    }
+
+    return archiveFacilityAction(facilityId);
+  } catch (error) {
+    logFacilityArchiveError({
+      stage: "form",
+      error,
+    });
+
     return {
       status: "error",
-      message: "Facility could not be found.",
+      message: getFriendlyFacilityArchiveError(),
     };
   }
-
-  return archiveFacilityAction(facilityId);
 }

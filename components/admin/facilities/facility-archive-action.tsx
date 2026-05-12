@@ -34,7 +34,7 @@ export function FacilityArchiveAction({
 
   useEffect(() => {
     if (state.status === "success") {
-      router.refresh();
+      router.replace("/admin/facilities");
     }
   }, [router, state.status]);
 
