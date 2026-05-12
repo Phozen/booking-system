@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   doesDateRangeOverlap,
   formatCalendarDateKey,
+  getCalendarMonthDays,
   getCalendarMonthRange,
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
@@ -52,6 +53,39 @@ describe("calendar date ranges", () => {
     expect(
       formatCalendarDateKey(new Date("2026-05-01T02:00:00.000Z"), appTimeZone),
     ).toBe("2026-05-01");
+  });
+
+  it("returns only selected-month days for the month grid", () => {
+    const days = getCalendarMonthDays(
+      parseCalendarMonth("2026-05", appTimeZone),
+      appTimeZone,
+    );
+
+    expect(days).toHaveLength(31);
+    expect(days[0]).toMatchObject({
+      key: "2026-05-01",
+      dateNumber: 1,
+      weekdayIndex: 5,
+      isCurrentMonth: true,
+    });
+    expect(days.at(-1)).toMatchObject({
+      key: "2026-05-31",
+      dateNumber: 31,
+      weekdayIndex: 0,
+      isCurrentMonth: true,
+    });
+    expect(days.some((day) => day.key === "2026-06-01")).toBe(false);
+  });
+
+  it("handles leap-year February without adjacent-month dates", () => {
+    const days = getCalendarMonthDays(
+      parseCalendarMonth("2024-02", appTimeZone),
+      appTimeZone,
+    );
+
+    expect(days).toHaveLength(29);
+    expect(days[0].key).toBe("2024-02-01");
+    expect(days.at(-1)?.key).toBe("2024-02-29");
   });
 });
 

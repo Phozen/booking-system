@@ -19,6 +19,7 @@ export type CalendarDateRange = {
 export type CalendarDay = {
   key: string;
   dateNumber: number;
+  weekdayIndex: number;
   weekdayLabel: string;
   shortLabel: string;
   isCurrentMonth: boolean;
@@ -78,6 +79,19 @@ function getTimeZoneOffsetMs(date: Date, timeZone = defaultCalendarTimeZone) {
   );
 
   return asUtc - date.getTime();
+}
+
+function getWeekdayIndex(date: Date, timeZone = defaultCalendarTimeZone) {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone,
+  }).format(date);
+
+  const weekdayIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(
+    weekday,
+  );
+
+  return weekdayIndex >= 0 ? weekdayIndex : date.getUTCDay();
 }
 
 export function zonedDateTimeToUtc(
@@ -212,31 +226,29 @@ export function getCalendarMonthDays(
   month: CalendarMonth,
   timeZone = defaultCalendarTimeZone,
 ) {
-  const firstDayUtc = zonedDateTimeToUtc(
-    month.year,
-    month.month,
-    1,
-    12,
-    0,
-    0,
-    timeZone,
-  );
-  const firstDayOfWeek = firstDayUtc.getUTCDay();
   const daysInMonth = new Date(
     Date.UTC(month.year, month.month, 0, 12),
   ).getUTCDate();
-  const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
   const todayKey = formatCalendarDateKey(new Date(), timeZone);
 
-  return Array.from({ length: totalCells }, (_, index): CalendarDay => {
-    const dayOffset = index - firstDayOfWeek + 1;
-    const date = new Date(Date.UTC(month.year, month.month - 1, dayOffset, 12));
+  return Array.from({ length: daysInMonth }, (_, index): CalendarDay => {
+    const dayNumber = index + 1;
+    const date = zonedDateTimeToUtc(
+      month.year,
+      month.month,
+      dayNumber,
+      12,
+      0,
+      0,
+      timeZone,
+    );
     const parts = getDateParts(date, timeZone);
     const key = `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
 
     return {
       key,
       dateNumber: parts.day,
+      weekdayIndex: getWeekdayIndex(date, timeZone),
       weekdayLabel: new Intl.DateTimeFormat("en-MY", {
         weekday: "long",
         timeZone,

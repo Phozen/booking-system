@@ -1512,6 +1512,7 @@ Responsive table standards:
 - Employee invitations route: `/invitations`. It shows only invitations addressed to the signed-in employee and groups them by pending, accepted, and declined.
 - Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only. Admins can toggle between "My bookings" and "All bookings"; all admin-visible booking items can link to admin booking detail.
 - Desktop calendar can use a month grid with compact booking links inside date cells.
+- Month grids should show only dates from the selected month. Leading weekday alignment cells may be blank and decorative, but previous-month and next-month date numbers should not be rendered because they can imply incomplete adjacent-month booking visibility.
 - Mobile calendar should use an agenda/list grouped by date instead of cramped month cells.
 - Booking items must be real links to the correct detail page and must include readable status text.
 - Calendar controls for previous month, next month, current month, and filters must be keyboard accessible.
