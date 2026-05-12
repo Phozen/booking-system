@@ -39,6 +39,7 @@ export function AppHeader({
           <UserMenu
             email={email}
             role={role}
+            showIdentity={false}
             className="flex items-center gap-3"
           />
         </div>

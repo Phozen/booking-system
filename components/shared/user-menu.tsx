@@ -9,21 +9,28 @@ export function UserMenu({
   email,
   role,
   className,
+  showIdentity = true,
 }: {
   email?: string | null;
   role?: string | null;
   className?: string;
+  showIdentity?: boolean;
 }) {
   return (
     <div className={className}>
-      <div className="min-w-0 max-w-44">
-        <p className="truncate text-sm font-medium" title={email ?? "Signed in"}>
-          {email ?? "Signed in"}
-        </p>
-        {role ? (
-          <p className="text-xs capitalize text-muted-foreground">{role}</p>
-        ) : null}
-      </div>
+      {showIdentity ? (
+        <div className="min-w-0 max-w-44">
+          <p
+            className="truncate text-sm font-medium"
+            title={email ?? "Signed in"}
+          >
+            {email ?? "Signed in"}
+          </p>
+          {role ? (
+            <p className="text-xs capitalize text-muted-foreground">{role}</p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-2 sm:flex-row">
         <Link
           href="/profile"
