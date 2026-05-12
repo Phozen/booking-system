@@ -32,7 +32,6 @@ function formDataToValues(formData: FormData) {
     description: getOptionalFormValue(formData, "description"),
     status: getOptionalFormValue(formData, "status"),
     requiresApproval: getOptionalFormValue(formData, "requiresApproval"),
-    displayOrder: getOptionalFormValue(formData, "displayOrder"),
   };
 }
 
@@ -102,7 +101,7 @@ export async function createFacilityAction(
     description: parsed.data.description || null,
     status: parsed.data.status,
     requires_approval: parseRequiresApproval(parsed.data.requiresApproval),
-    display_order: parsed.data.displayOrder,
+    display_order: 0,
     is_archived: parsed.data.status === "archived",
     created_by: user.id,
     updated_by: user.id,
@@ -193,7 +192,7 @@ export async function updateFacilityAction(
     description: parsed.data.description || null,
     status: parsed.data.status,
     requires_approval: parseRequiresApproval(parsed.data.requiresApproval),
-    display_order: parsed.data.displayOrder,
+    display_order: existing.display_order,
     is_archived: parsed.data.status === "archived",
     updated_by: user.id,
   };
@@ -237,6 +236,88 @@ export async function updateFacilityAction(
   return {
     status: "success",
     message: "Facility updated. Employee-facing facility pages now use the saved details.",
+    facilityId,
+  };
+}
+
+export async function archiveFacilityAction(
+  facilityId: string,
+): Promise<FacilityActionResult> {
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: existing, error: existingError } = await supabase
+    .from("facilities")
+    .select(
+      "id,code,name,slug,status,is_archived,requires_approval,display_order",
+    )
+    .eq("id", facilityId)
+    .maybeSingle();
+
+  if (existingError || !existing) {
+    return {
+      status: "error",
+      message: "Facility could not be found.",
+    };
+  }
+
+  if (existing.status === "archived" || existing.is_archived) {
+    return {
+      status: "error",
+      message: "This facility is already archived.",
+    };
+  }
+
+  const facilityPayload = {
+    status: "archived" as const,
+    is_archived: true,
+    updated_by: user.id,
+  };
+
+  const { error } = await supabase
+    .from("facilities")
+    .update(facilityPayload)
+    .eq("id", facilityId);
+
+  if (error) {
+    console.error("Facility archive failed", {
+      facilityId,
+      code: error.code,
+      message: error.message,
+    });
+
+    return {
+      status: "error",
+      message: "Facility could not be archived. Please try again.",
+    };
+  }
+
+  await insertAuditLog({
+    action: "update",
+    facilityId,
+    actorUserId: user.id,
+    actorEmail: user.email,
+    summary: `Facility archived: ${existing.code}.`,
+    oldValues: existing,
+    newValues: facilityPayload,
+  });
+
+  revalidatePath("/facilities");
+  revalidatePath(`/facilities/${existing.slug}`);
+  revalidatePath("/admin/facilities");
+  revalidatePath(`/admin/facilities/${facilityId}`);
+
+  return {
+    status: "success",
+    message:
+      "Facility archived. It is hidden from employee booking pages while historical records are preserved.",
     facilityId,
   };
 }

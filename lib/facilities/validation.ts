@@ -33,7 +33,6 @@ export const facilityFormSchema = z.object({
   description: z.string().trim().max(2000).optional(),
   status: z.enum(facilityStatusOptions),
   requiresApproval: z.enum(["inherit", "required", "not_required"]),
-  displayOrder: z.coerce.number().int().min(0).max(100000),
 });
 
 export type FacilityFormValues = z.infer<typeof facilityFormSchema>;

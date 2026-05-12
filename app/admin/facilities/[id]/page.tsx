@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminFacilityById } from "@/lib/facilities/queries";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityForm } from "@/components/admin/facilities/facility-form";
+import { FacilityArchiveAction } from "@/components/admin/facilities/facility-archive-action";
 import { FacilityPhotoManager } from "@/components/admin/facilities/facility-photo-manager";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -53,6 +54,12 @@ export default async function EditFacilityPage({
       </section>
 
       <FacilityPhotoManager facility={facility} />
+
+      <FacilityArchiveAction
+        facilityId={facility.id}
+        facilityName={facility.name}
+        isArchived={facility.isArchived || facility.status === "archived"}
+      />
     </main>
   );
 }

@@ -226,8 +226,10 @@ export async function getEmployeeFacilities(supabase: SupabaseClient) {
     .select(facilitySelect)
     .eq("status", "active")
     .eq("is_archived", false)
-    .order("display_order", { ascending: true })
-    .order("name", { ascending: true });
+    .order("level", { ascending: true })
+    .order("type", { ascending: true })
+    .order("name", { ascending: true })
+    .order("code", { ascending: true });
 
   if (error) {
     throw new Error("Unable to load facilities.");
@@ -270,8 +272,10 @@ export async function getAdminFacilities(supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from("facilities")
     .select(facilitySelect)
-    .order("display_order", { ascending: true })
-    .order("name", { ascending: true });
+    .order("level", { ascending: true })
+    .order("type", { ascending: true })
+    .order("name", { ascending: true })
+    .order("code", { ascending: true });
 
   if (error) {
     throw new Error("Unable to load facilities.");

@@ -266,6 +266,7 @@ create table public.facilities (
 | `slug`              | URL-friendly identifier                                       |
 | `requires_approval` | Nullable to allow fallback to global setting                  |
 | `status`            | Controls whether facility is bookable                         |
+| `display_order`     | Legacy/internal ordering field; not admin-managed in the UI    |
 | `is_archived`       | Allows hiding old facilities while preserving booking history |
 
 ### Indexes

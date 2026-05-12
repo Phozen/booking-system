@@ -52,8 +52,7 @@ type FacilityFieldId =
   | "capacity"
   | "description"
   | "status"
-  | "requiresApproval"
-  | "displayOrder";
+  | "requiresApproval";
 
 type FacilityFieldErrors = Partial<Record<FacilityFieldId, string>>;
 
@@ -77,7 +76,6 @@ function formDataToFacilityValues(formData: FormData) {
     description: getValue("description"),
     status: getValue("status"),
     requiresApproval: getValue("requiresApproval"),
-    displayOrder: getValue("displayOrder"),
   };
 }
 
@@ -106,7 +104,6 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         description: getFirstError(errors.description),
         status: getFirstError(errors.status),
         requiresApproval: getFirstError(errors.requiresApproval),
-        displayOrder: getFirstError(errors.displayOrder),
       });
       return;
     }
@@ -297,28 +294,6 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
           </FormFieldError>
         </div>
 
-        <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="displayOrder">Display order</Label>
-          <Input
-            id="displayOrder"
-            name="displayOrder"
-            type="number"
-            min={0}
-            defaultValue={facility?.displayOrder ?? 0}
-            aria-describedby={getFieldDescribedBy(
-              "displayOrder-helper",
-              fieldErrors.displayOrder && "displayOrder-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.displayOrder)}
-            required
-          />
-          <FormFieldHelper id="displayOrder-helper">
-            Lower numbers appear earlier in facility lists.
-          </FormFieldHelper>
-          <FormFieldError id="displayOrder-error">
-            {fieldErrors.displayOrder}
-          </FormFieldError>
-        </div>
       </div>
 
       <div className="grid gap-2">

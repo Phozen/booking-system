@@ -824,7 +824,6 @@ Table columns:
 - Capacity.
 - Status.
 - Approval.
-- Display order.
 - Actions.
 
 Filters:
@@ -859,7 +858,6 @@ Form fields:
 - Description.
 - Status.
 - Requires approval.
-- Display order.
 
 Primary action:
 
@@ -868,6 +866,15 @@ Primary action:
 Secondary actions:
 
 - Cancel/back to facilities.
+- Archive facility from a clearly separated danger zone on edit pages.
+
+Delete/archive behavior:
+
+- Facility delete is implemented as archive: `status = archived` and `is_archived = true`.
+- Archived facilities are hidden from employee booking pages and cannot be booked.
+- Admins can still see archived facilities for operational history.
+- Historical bookings, reports, photos, and audit logs remain preserved.
+- Display Order is not admin-managed; facility lists should use stable ordering by level, type, name, and code.
 
 Error states:
 

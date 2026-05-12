@@ -972,7 +972,6 @@ Admin
 * Description
 * Status
 * Requires approval
-* Display order
 * Equipment
 * Photos
 
@@ -989,7 +988,7 @@ Admin
 1. Admin opens facility edit page.
 2. Admin selects archive.
 3. System asks for confirmation.
-4. System marks facility as archived.
+4. System sets facility status to `archived` and `is_archived` to true.
 5. System hides facility from employee booking views.
 6. Existing booking history remains preserved.
 7. System creates audit log.

@@ -64,6 +64,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `public.is_active_user()` requires active profile status.
 - [x] `public.create_booking()` checks active user, ownership, active facility, capacity, blocked periods, maintenance closures, and valid time range.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
+- [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 
 ## Manual Test Checklist
 

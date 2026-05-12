@@ -61,11 +61,13 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Admin Facility Management
 
-- [ ] Open `/admin/facilities`; confirm facility table displays code, name, level, type, capacity, status, approval, and display order.
+- [ ] Open `/admin/facilities`; confirm facility table displays code, name, level, type, capacity, status, approval, and edit actions.
 - [ ] Create a test facility with unique code and slug.
 - [ ] Edit the test facility fields.
 - [ ] Change facility status and confirm audit log records the update.
 - [ ] Archive or mark the test facility inactive; confirm it is no longer bookable by employees.
+- [ ] Use the danger-zone archive action from `/admin/facilities/[id]`; confirm the dialog explains that historical bookings and reports are preserved.
+- [ ] Confirm archived facilities remain visible to admins with `Archived` status and are hidden from employee facility browsing.
 - [ ] Confirm invalid capacity, duplicate code, or duplicate slug is rejected.
 - [ ] Upload a valid JPEG, PNG, or WebP facility photo up to 5 MB from `/admin/facilities/[id]`.
 - [ ] Confirm invalid file types and files over 5 MB show friendly errors.

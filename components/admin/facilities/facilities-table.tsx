@@ -42,7 +42,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
                   label: "Approval setting",
                   value: formatRequiresApproval(facility.requiresApproval),
                 },
-                { label: "Display order", value: facility.displayOrder },
               ]}
               actions={
                 <Link
@@ -77,7 +76,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
               <th className="px-4 py-3 font-medium">Capacity</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Approval</th>
-              <th className="px-4 py-3 font-medium">Order</th>
               <th className="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
           </thead>
@@ -100,7 +98,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatRequiresApproval(facility.requiresApproval)}
                   </td>
-                  <td className="px-4 py-3">{facility.displayOrder}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/facilities/${facility.id}`}
@@ -117,7 +114,7 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
               ))
             ) : (
               <tr>
-                <td className="px-4 py-8" colSpan={9}>
+                <td className="px-4 py-8" colSpan={8}>
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No facilities found"
