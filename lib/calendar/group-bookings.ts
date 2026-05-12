@@ -6,7 +6,7 @@ import type { BookingStatus } from "@/lib/bookings/queries";
 
 export type CalendarBooking = {
   id: string;
-  href: string;
+  href?: string;
   title: string;
   status: BookingStatus;
   startsAt: string;
@@ -17,6 +17,7 @@ export type CalendarBooking = {
   userLabel?: string;
   contextLabel?: string;
   approvalRequired?: boolean;
+  isManageable?: boolean;
 };
 
 export type GroupedCalendarBookings = Record<string, CalendarBooking[]>;

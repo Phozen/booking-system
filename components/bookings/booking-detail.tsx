@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarPlus } from "lucide-react";
+import { ArrowLeft, CalendarPlus, CheckCircle2, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -20,6 +20,11 @@ import { InvitationList } from "@/components/bookings/invitations/invitation-lis
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { StatusBadge } from "@/components/shared/status-badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 
 function DetailItem({
@@ -57,12 +62,16 @@ export function BookingDetail({
   invitations = [],
   inviteCandidates = [],
   viewerInvitation,
+  justCreated,
+  highlightInvitations,
 }: {
   booking: EmployeeBooking;
   viewerMode?: "owner" | "invitee";
   invitations?: BookingInvitation[];
   inviteCandidates?: InviteCandidate[];
   viewerInvitation?: BookingInvitation | null;
+  justCreated?: boolean;
+  highlightInvitations?: boolean;
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
@@ -118,6 +127,68 @@ export function BookingDetail({
           Create another booking
         </Link>
       </header>
+
+      {isOwnerView && justCreated ? (
+        <Alert variant="success">
+          <CheckCircle2 aria-hidden="true" />
+          <AlertTitle>
+            {booking.status === "pending"
+              ? "Booking request submitted"
+              : "Booking created"}
+          </AlertTitle>
+          <AlertDescription className="grid gap-3">
+            <span>
+              {booking.status === "pending"
+                ? "Booking request submitted and pending approval."
+                : "Booking created."}{" "}
+              Invite attendees now if other internal users should join this
+              meeting.
+            </span>
+            <span className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Link
+                href="#invite-attendees"
+                className={buttonVariants({
+                  size: "sm",
+                  className: "w-full sm:w-auto",
+                })}
+              >
+                <UserPlus data-icon="inline-start" />
+                Invite users
+              </Link>
+              <Link
+                href={`/bookings/${booking.id}`}
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "w-full sm:w-auto",
+                })}
+              >
+                Skip for now
+              </Link>
+              <Link
+                href="/my-bookings"
+                className={buttonVariants({
+                  variant: "ghost",
+                  size: "sm",
+                  className: "w-full sm:w-auto",
+                })}
+              >
+                Back to My Bookings
+              </Link>
+              <Link
+                href="/calendar"
+                className={buttonVariants({
+                  variant: "ghost",
+                  size: "sm",
+                  className: "w-full sm:w-auto",
+                })}
+              >
+                View Calendar
+              </Link>
+            </span>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
         <h2 className="text-lg font-semibold tracking-normal">
@@ -212,6 +283,7 @@ export function BookingDetail({
           invitations={invitations}
           candidates={inviteCandidates}
           canManage
+          highlight={highlightInvitations}
         />
       ) : null}
 

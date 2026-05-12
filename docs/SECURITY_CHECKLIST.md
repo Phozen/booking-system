@@ -23,6 +23,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] RLS is enabled on application tables.
 - [x] Employees can select their own bookings and safe invited booking details only.
 - [x] Invited employees can view only safe details for bookings they were invited to.
+- [x] Employee all-company calendar visibility is settings-gated and shows limited details for unrelated bookings without management/detail links.
 - [x] Booking invitation RLS allows owners to invite/remove, invitees to respond, and admins to view/manage.
 - [x] Active users can view and update only their own safe profile fields through the self-service profile page.
 - [x] Employees cannot directly insert bookings into `public.bookings`; booking creation must use `public.create_booking()`.
@@ -76,6 +77,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Attempt to respond to another user's invitation; expect denial.
 - [ ] Log in as employee and update `/profile`; confirm only full name, department, and phone can change.
 - [ ] Attempt another user's booking detail as employee; expect not found or access denied.
+- [ ] Enable all-company calendar visibility and confirm unrelated employee calendar items show limited details only and do not link to booking detail.
 - [ ] Set a profile status to `disabled`; confirm protected pages are blocked.
 - [ ] Log in as admin; confirm admin pages still work.
 - [ ] Confirm no client component imports `createAdminClient()`.

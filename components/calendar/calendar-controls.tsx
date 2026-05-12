@@ -7,6 +7,7 @@ import {
   type CalendarMonth,
 } from "@/lib/calendar/date-range";
 import type { BookingStatus } from "@/lib/bookings/queries";
+import type { CalendarViewMode } from "@/lib/calendar/visibility";
 import type { Facility } from "@/lib/facilities/queries";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
@@ -17,15 +18,21 @@ function buildHref({
   month,
   status,
   facilityId,
+  view,
 }: {
   basePath: string;
   month: CalendarMonth;
   status?: BookingStatus;
   facilityId?: string;
+  view?: CalendarViewMode;
 }) {
   const params = new URLSearchParams({
     month: month.value,
   });
+
+  if (view) {
+    params.set("view", view);
+  }
 
   if (status) {
     params.set("status", status);
@@ -46,6 +53,8 @@ export function CalendarControls({
   timezone,
   facilities,
   showFacilityFilter,
+  selectedView,
+  showViewToggle,
 }: {
   basePath: string;
   selectedMonth: CalendarMonth;
@@ -54,6 +63,8 @@ export function CalendarControls({
   timezone?: string;
   facilities?: Facility[];
   showFacilityFilter?: boolean;
+  selectedView?: CalendarViewMode;
+  showViewToggle?: boolean;
 }) {
   const previousMonth = shiftCalendarMonth(selectedMonth, -1, timezone);
   const nextMonth = shiftCalendarMonth(selectedMonth, 1, timezone);
@@ -82,6 +93,7 @@ export function CalendarControls({
                 month: previousMonth,
                 status: selectedStatus,
                 facilityId: selectedFacilityId,
+                view: selectedView,
               })}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
@@ -94,6 +106,7 @@ export function CalendarControls({
                 month: currentMonth,
                 status: selectedStatus,
                 facilityId: selectedFacilityId,
+                view: selectedView,
               })}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
@@ -106,6 +119,7 @@ export function CalendarControls({
                 month: nextMonth,
                 status: selectedStatus,
                 facilityId: selectedFacilityId,
+                view: selectedView,
               })}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
@@ -115,7 +129,56 @@ export function CalendarControls({
           </div>
         </div>
 
+        {showViewToggle ? (
+          <nav
+            aria-label="Calendar visibility"
+            className="flex flex-col gap-2 rounded-lg border border-border/70 bg-background/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-sm text-muted-foreground">
+              All bookings shows room usage across the company. You can only
+              manage bookings you own or are invited to.
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <Link
+                href={buildHref({
+                  basePath,
+                  month: selectedMonth,
+                  status: selectedStatus,
+                  facilityId: selectedFacilityId,
+                  view: "my",
+                })}
+                className={buttonVariants({
+                  variant: selectedView === "my" ? "default" : "outline",
+                  size: "sm",
+                })}
+                aria-current={selectedView === "my" ? "page" : undefined}
+              >
+                My bookings
+              </Link>
+              <Link
+                href={buildHref({
+                  basePath,
+                  month: selectedMonth,
+                  status: selectedStatus,
+                  facilityId: selectedFacilityId,
+                  view: "all",
+                })}
+                className={buttonVariants({
+                  variant: selectedView === "all" ? "default" : "outline",
+                  size: "sm",
+                })}
+                aria-current={selectedView === "all" ? "page" : undefined}
+              >
+                All bookings
+              </Link>
+            </div>
+          </nav>
+        ) : null}
+
         <form className="grid gap-3 md:grid-cols-[repeat(3,minmax(0,1fr))_auto_auto] md:items-end [&>*]:min-w-0">
+          {selectedView ? (
+            <input type="hidden" name="view" value={selectedView} />
+          ) : null}
           <div className="grid gap-2">
             <label htmlFor="month" className="text-sm font-medium">
               Month

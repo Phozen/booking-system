@@ -361,8 +361,10 @@ export async function createBookingAction(
   revalidatePath("/facilities");
   revalidatePath(`/facilities/${availability.facility.slug}`);
   revalidatePath("/my-bookings");
+  revalidatePath(`/bookings/${booking.id}`);
+  revalidatePath("/calendar");
 
-  redirect("/my-bookings?created=1");
+  redirect(`/bookings/${booking.id}?created=1&invite=1`);
 }
 
 export async function cancelBookingAction(

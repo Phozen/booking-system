@@ -81,7 +81,9 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] As active employee, open `/facilities`, choose a facility, and click "Book this facility".
 - [ ] Create a valid booking with title, date, start time, end time, and attendee count.
-- [ ] Confirm redirect to `/my-bookings?created=1`.
+- [ ] Confirm redirect to `/bookings/[id]?created=1&invite=1`.
+- [ ] Confirm booking detail shows the created/pending success alert and highlights the invitation form.
+- [ ] Confirm the post-booking prompt offers Invite users, Skip for now, Back to My Bookings, and View Calendar.
 - [ ] Confirm booking appears in `/my-bookings`.
 - [ ] Confirm booking detail page shows facility, date/time, status, title, description, attendee count, created date, and updated date.
 - [ ] Confirm attendee count above facility capacity is rejected.
@@ -113,6 +115,7 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Booking Invitations
 
+- [ ] After creating a booking, invite an active user directly from the highlighted booking detail invitation form.
 - [ ] As a booking owner, open an owned booking and invite another active internal user.
 - [ ] Confirm the invited attendee appears as `Pending`.
 - [ ] Confirm duplicate invitations are blocked with a friendly message.
@@ -242,6 +245,8 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm audit log for `settings_change`.
 - [ ] Toggle `default_approval_required`; confirm future bookings follow it.
 - [ ] Toggle facility approval override; confirm global default controls when override is disabled.
+- [ ] Set calendar visibility to `my_bookings_only`; confirm employees cannot choose All bookings on `/calendar`.
+- [ ] Set calendar visibility to `all_company_bookings`; confirm employees can toggle My bookings / All bookings on `/calendar`.
 - [ ] Confirm facility detail and booking form approval copy matches the effective approval setting.
 - [ ] Update reminder offsets; confirm validation accepts positive integer list.
 - [ ] Confirm secrets are not stored in `system_settings`.
@@ -255,6 +260,8 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm employees cannot update other users' bookings.
 - [ ] Confirm employees cannot view or update invitations for unrelated bookings.
 - [ ] Confirm invited employees can view only their own invitations and safe booking details.
+- [ ] Confirm employee all-company calendar view shows limited unrelated booking details and does not link to `/bookings/[id]` for unrelated bookings.
+- [ ] Confirm employees cannot cancel, manage, or open detail pages for unrelated all-company calendar bookings.
 - [ ] Confirm employees cannot view audit logs, export logs, email notifications, or private settings.
 - [ ] Confirm active admins can manage expected admin records.
 - [ ] Confirm storage bucket `facility-photos` is private and policies match `docs/SECURITY_CHECKLIST.md`.

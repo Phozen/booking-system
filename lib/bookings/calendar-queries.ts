@@ -20,6 +20,19 @@ type EmployeeCalendarFacilityRecord =
     }[]
   | null;
 
+type EmployeeCalendarProfileRecord =
+  | {
+      id: string;
+      email: string;
+      full_name: string | null;
+    }
+  | {
+      id: string;
+      email: string;
+      full_name: string | null;
+    }[]
+  | null;
+
 type EmployeeCalendarBookingRecord = {
   id: string;
   facility_id: string;
@@ -30,6 +43,7 @@ type EmployeeCalendarBookingRecord = {
   ends_at: string;
   approval_required: boolean;
   facilities?: EmployeeCalendarFacilityRecord;
+  profiles?: EmployeeCalendarProfileRecord;
 };
 
 type InvitedCalendarBookingRecord = {
@@ -57,10 +71,17 @@ export type EmployeeCalendarBooking = {
     type: FacilityType;
   } | null;
   invitationStatus?: Exclude<BookingInvitationStatus, "removed">;
+  user?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  } | null;
+  visibilityContext?: "owned" | "invited" | "other";
 };
 
 export type EmployeeCalendarFilters = {
   status?: BookingStatus;
+  facilityId?: string;
 };
 
 const employeeCalendarSelect = `
@@ -80,6 +101,28 @@ const employeeCalendarSelect = `
   )
 `;
 
+const companyCalendarSelect = `
+  id,
+  facility_id,
+  user_id,
+  title,
+  status,
+  starts_at,
+  ends_at,
+  approval_required,
+  facilities (
+    id,
+    name,
+    level,
+    type
+  ),
+  profiles!bookings_user_id_fkey (
+    id,
+    email,
+    full_name
+  )
+`;
+
 const invitedCalendarSelect = `
   id,
   status,
@@ -91,10 +134,14 @@ const invitedCalendarSelect = `
 function mapEmployeeCalendarBooking(
   record: EmployeeCalendarBookingRecord,
   invitationStatus?: Exclude<BookingInvitationStatus, "removed">,
+  visibilityContext?: "owned" | "invited" | "other",
 ): EmployeeCalendarBooking {
   const facilityRecord = Array.isArray(record.facilities)
     ? record.facilities[0]
     : record.facilities;
+  const profileRecord = Array.isArray(record.profiles)
+    ? record.profiles[0]
+    : record.profiles;
 
   return {
     id: record.id,
@@ -114,6 +161,16 @@ function mapEmployeeCalendarBooking(
         }
       : null,
     invitationStatus,
+    user: profileRecord
+      ? {
+          id: profileRecord.id,
+          email: profileRecord.email,
+          fullName: profileRecord.full_name,
+        }
+      : null,
+    visibilityContext:
+      visibilityContext ??
+      (invitationStatus ? "invited" : undefined),
   };
 }
 
@@ -140,6 +197,10 @@ export async function getEmployeeCalendarBookings(
     query = query.eq("status", filters.status);
   }
 
+  if (filters.facilityId) {
+    query = query.eq("facility_id", filters.facilityId);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -160,6 +221,10 @@ export async function getEmployeeCalendarBookings(
 
   if (filters.status) {
     invitationQuery = invitationQuery.eq("bookings.status", filters.status);
+  }
+
+  if (filters.facilityId) {
+    invitationQuery = invitationQuery.eq("bookings.facility_id", filters.facilityId);
   }
 
   const { data: invitedData, error: invitedError } = await invitationQuery;
@@ -186,4 +251,72 @@ export async function getEmployeeCalendarBookings(
   return [...ownedBookings, ...invitedBookings].sort((a, b) =>
     a.startsAt.localeCompare(b.startsAt),
   );
+}
+
+export async function getCompanyCalendarBookings(
+  supabase: SupabaseClient,
+  currentUserId: string,
+  range: Pick<CalendarDateRange, "startsAt" | "endsAt">,
+  filters: EmployeeCalendarFilters = {},
+) {
+  let query = supabase
+    .from("bookings")
+    .select(companyCalendarSelect)
+    .lt("starts_at", range.endsAt)
+    .gt("ends_at", range.startsAt)
+    .order("starts_at", { ascending: true });
+
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  if (filters.facilityId) {
+    query = query.eq("facility_id", filters.facilityId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error("Unable to load company calendar bookings.");
+  }
+
+  const records =
+    (data as unknown as EmployeeCalendarBookingRecord[] | null) ?? [];
+  const bookingIds = records.map((booking) => booking.id);
+  const invitationStatusByBookingId = new Map<
+    string,
+    Exclude<BookingInvitationStatus, "removed">
+  >();
+
+  if (bookingIds.length > 0) {
+    const { data: invitationData, error: invitationError } = await supabase
+      .from("booking_invitations")
+      .select("booking_id,status")
+      .eq("invited_user_id", currentUserId)
+      .in("status", ["pending", "accepted"])
+      .in("booking_id", bookingIds);
+
+    if (invitationError) {
+      throw new Error("Unable to load company calendar invitation context.");
+    }
+
+    for (const invitation of
+      (invitationData as
+        | { booking_id: string; status: Exclude<BookingInvitationStatus, "removed"> }[]
+        | null) ?? []) {
+      invitationStatusByBookingId.set(invitation.booking_id, invitation.status);
+    }
+  }
+
+  return records.map((booking) => {
+    const invitationStatus = invitationStatusByBookingId.get(booking.id);
+    const context =
+      booking.user_id === currentUserId
+        ? "owned"
+        : invitationStatus
+          ? "invited"
+          : "other";
+
+    return mapEmployeeCalendarBooking(booking, invitationStatus, context);
+  });
 }

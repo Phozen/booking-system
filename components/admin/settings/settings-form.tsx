@@ -244,6 +244,27 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             </span>
           </label>
         </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="calendarVisibilityMode">Calendar visibility</Label>
+          <select
+            id="calendarVisibilityMode"
+            name="calendarVisibilityMode"
+            defaultValue={settings.calendarVisibilityMode}
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="my_bookings_only">
+              Only show each user their own bookings
+            </option>
+            <option value="all_company_bookings">
+              Allow users to view all company bookings
+            </option>
+          </select>
+          <FormFieldHelper id="calendarVisibilityMode-helper">
+            All company bookings helps employees see room usage and
+            availability. Other users&apos; booking details remain limited.
+          </FormFieldHelper>
+        </div>
       </section>
 
       <section className="grid gap-5 rounded-lg border bg-card p-5">

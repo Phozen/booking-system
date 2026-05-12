@@ -1505,13 +1505,25 @@ Responsive table standards:
 - Native date/time is acceptable.
 - Calendar pages are additive navigation surfaces; they do not replace My Bookings, booking detail pages, or admin booking management.
 - Employee calendar route: `/calendar`. It shows the signed-in employee's own bookings and may also include pending/accepted invited bookings with visible text such as "Pending invitation" or "Accepted invitation".
+- Employee calendar visibility is controlled by the admin setting `calendar_visibility_mode`.
+- When `calendar_visibility_mode` is `my_bookings_only`, employees see only owned and invited bookings.
+- When `calendar_visibility_mode` is `all_company_bookings`, employees can toggle between "My bookings" and "All bookings".
+- Employee "All bookings" shows room usage across the company with limited details for unrelated bookings: facility, date/time, status, and booked-by label where available. Unrelated bookings must not link to employee booking detail or expose descriptions, cancellation reasons, approval internals, or invitation lists.
 - Employee invitations route: `/invitations`. It shows only invitations addressed to the signed-in employee and groups them by pending, accepted, and declined.
-- Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only.
+- Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only. Admins can toggle between "My bookings" and "All bookings"; all admin-visible booking items can link to admin booking detail.
 - Desktop calendar can use a month grid with compact booking links inside date cells.
 - Mobile calendar should use an agenda/list grouped by date instead of cramped month cells.
 - Booking items must be real links to the correct detail page and must include readable status text.
 - Calendar controls for previous month, next month, current month, and filters must be keyboard accessible.
 - Empty days and empty months need clear text states; do not rely on blank cells alone.
+
+### Post-Booking Invitation Flow
+
+- After successful booking creation, redirect to `/bookings/[id]?created=1&invite=1`.
+- The booking detail page should show a success alert: "Booking created." or "Booking request submitted and pending approval."
+- The owner should see a clear "Invite attendees to this meeting?" prompt with actions for Invite users, Skip for now, Back to My Bookings, and View Calendar.
+- The invited attendees section should be highlighted when arriving from booking creation.
+- Existing invitation permissions still apply: only the booking owner can invite active internal users, and duplicate, disabled, pending, inactive, and self-invites remain blocked.
 
 ## 14. Component Inventory
 

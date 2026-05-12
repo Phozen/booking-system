@@ -13,14 +13,8 @@ export function CalendarBookingItem({
   booking: CalendarBooking;
   compact?: boolean;
 }) {
-  return (
-    <Link
-      href={booking.href}
-      className={cn(
-        "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/40 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35",
-        compact ? "p-2 text-xs" : "",
-      )}
-    >
+  const content = (
+    <>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <span className="min-w-0 break-words font-medium leading-5 text-foreground">
           {booking.title}
@@ -71,10 +65,40 @@ export function CalendarBookingItem({
 
       {!compact ? (
         <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
-          View details
-          <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+          {booking.href ? "View details" : "Limited calendar item"}
+          {booking.href ? (
+            <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+          ) : null}
         </span>
       ) : null}
+    </>
+  );
+
+  const className = cn(
+    "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all",
+    booking.href
+      ? "hover:border-primary/40 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+      : "cursor-default",
+    compact ? "p-2 text-xs" : "",
+  );
+
+  if (!booking.href) {
+    return (
+      <div className={className} aria-label={`${booking.title} calendar item`}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={booking.href}
+      className={cn(
+        "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/40 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35",
+        compact ? "p-2 text-xs" : "",
+      )}
+    >
+      {content}
     </Link>
   );
 }

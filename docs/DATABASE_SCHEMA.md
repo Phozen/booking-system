@@ -528,6 +528,25 @@ create index booking_invitations_created_at_idx on public.booking_invitations(cr
 * Invited users can view a safe booking detail view but cannot cancel or manage the booking.
 * Admins can view invitation status on admin booking detail pages.
 
+## 12B. Calendar Visibility Setting
+
+`system_settings` includes `calendar_visibility_mode` for employee calendar privacy.
+
+Allowed values:
+
+```txt
+my_bookings_only
+all_company_bookings
+```
+
+Default:
+
+```txt
+my_bookings_only
+```
+
+When enabled as `all_company_bookings`, employees can view company-wide room usage on `/calendar`, but unrelated bookings must expose limited details only and must not allow employee management actions.
+
 ---
 
 ## 13. Blocked Periods Table

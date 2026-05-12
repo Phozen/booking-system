@@ -7,6 +7,7 @@ import { InviteUserForm } from "@/components/bookings/invitations/invite-user-fo
 import { RemoveInvitationButton } from "@/components/bookings/invitations/remove-invitation-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
 
 function getProfileLabel(profile: { fullName: string | null; email: string } | null) {
   if (!profile) {
@@ -21,17 +22,26 @@ export function InvitationList({
   invitations,
   candidates = [],
   canManage,
+  highlight,
 }: {
   bookingId: string;
   invitations: BookingInvitation[];
   candidates?: InviteCandidate[];
   canManage?: boolean;
+  highlight?: boolean;
 }) {
   return (
-    <section className="grid gap-4 rounded-lg border bg-card p-5">
+    <section
+      id="invite-attendees"
+      className={cn(
+        "scroll-mt-24 grid gap-4 rounded-lg border bg-card p-5",
+        highlight &&
+          "border-primary/40 bg-primary/5 shadow-sm shadow-primary/10 ring-2 ring-primary/25",
+      )}
+    >
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
-          Invited attendees
+          {highlight ? "Invite attendees to this meeting?" : "Invited attendees"}
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {canManage

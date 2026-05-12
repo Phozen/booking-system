@@ -53,11 +53,14 @@ function invitedBookingToEmployeeBooking(
 
 export default async function BookingDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string; invite?: string }>;
 }) {
   const { user } = await requireUser();
   const { id } = await params;
+  const query = await searchParams;
 
   if (!user || !uuidPattern.test(id)) {
     notFound();
@@ -79,6 +82,8 @@ export default async function BookingDetailPage({
         invitations={invitations}
         inviteCandidates={inviteCandidates}
         viewerMode="owner"
+        justCreated={query.created === "1"}
+        highlightInvitations={query.invite === "1"}
       />
     );
   }

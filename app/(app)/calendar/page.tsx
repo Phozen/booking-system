@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth/guards";
 import { formatBookingStatus } from "@/lib/bookings/format";
 import {
+  getCompanyCalendarBookings,
   getEmployeeCalendarBookings,
   type EmployeeCalendarBooking,
 } from "@/lib/bookings/calendar-queries";
@@ -10,6 +11,10 @@ import {
   getCalendarMonthRange,
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
+import {
+  canUseAllCompanyCalendar,
+  parseCalendarViewMode,
+} from "@/lib/calendar/visibility";
 import {
   groupCalendarBookingsByDay,
   type CalendarBooking,
@@ -41,43 +46,71 @@ function parseStatus(value: string | string[] | undefined): BookingStatus | unde
 }
 
 function toCalendarBooking(booking: EmployeeCalendarBooking): CalendarBooking {
+  const isOther = booking.visibilityContext === "other";
+  const contextLabel = isOther
+    ? "Other booking"
+    : booking.invitationStatus
+      ? getInvitationContextLabel(booking.invitationStatus)
+      : "Owned";
+  const userLabel =
+    booking.user?.fullName && booking.user.email
+      ? `${booking.user.fullName} (${booking.user.email})`
+      : booking.user?.email || booking.user?.fullName || undefined;
+
   return {
     id: booking.id,
-    href: `/bookings/${booking.id}`,
-    title: booking.title,
+    href: isOther ? undefined : `/bookings/${booking.id}`,
+    title: isOther ? "Booked time" : booking.title,
     status: booking.status,
     startsAt: booking.startsAt,
     endsAt: booking.endsAt,
     facilityName: booking.facility?.name ?? "Facility unavailable",
     facilityLevel: booking.facility?.level ?? "Level unavailable",
     approvalRequired: booking.approvalRequired,
-    contextLabel: booking.invitationStatus
-      ? getInvitationContextLabel(booking.invitationStatus)
-      : undefined,
+    userLabel,
+    contextLabel,
+    isManageable: !isOther,
   };
 }
 
 export default async function EmployeeCalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string | string[]; status?: string | string[] }>;
+  searchParams: Promise<{
+    month?: string | string[];
+    status?: string | string[];
+    view?: string | string[];
+  }>;
 }) {
   const { user } = await requireUser();
   const params = await searchParams;
   const settings = await getAppSettings();
+  const allowAllBookings = canUseAllCompanyCalendar(
+    settings.calendarVisibilityMode,
+  );
+  const selectedView = parseCalendarViewMode({
+    value: params.view,
+    allowAll: allowAllBookings,
+  });
   const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
   const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const supabase = await createClient();
-  const bookings = await getEmployeeCalendarBookings(
-    supabase,
-    user.id,
-    range,
-    {
-      status: selectedStatus,
-    },
-    createAdminClient(),
-  );
+  const adminSupabase = createAdminClient();
+  const bookings =
+    selectedView === "all"
+      ? await getCompanyCalendarBookings(adminSupabase, user.id, range, {
+          status: selectedStatus,
+        })
+      : await getEmployeeCalendarBookings(
+          supabase,
+          user.id,
+          range,
+          {
+            status: selectedStatus,
+          },
+          adminSupabase,
+        );
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
@@ -90,7 +123,9 @@ export default async function EmployeeCalendarPage({
         description={
           selectedStatus
             ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-            : `Showing your owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
+            : selectedView === "all"
+              ? `Showing company booking visibility for ${selectedMonth.label}. Other users' booking items show limited details. Times use ${settings.defaultTimezone}.`
+              : `Showing your owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
         }
       />
 
@@ -98,6 +133,8 @@ export default async function EmployeeCalendarPage({
         basePath="/calendar"
         selectedMonth={selectedMonth}
         selectedStatus={selectedStatus}
+        selectedView={selectedView}
+        showViewToggle={allowAllBookings}
         timezone={settings.defaultTimezone}
       />
 

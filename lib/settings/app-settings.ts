@@ -1,3 +1,8 @@
+import {
+  parseCalendarVisibilityMode,
+  type CalendarVisibilityMode,
+} from "@/lib/calendar/visibility";
+
 export type AppSettings = {
   appName: string;
   companyName: string;
@@ -6,6 +11,7 @@ export type AppSettings = {
   allowedEmailDomains: string[];
   defaultApprovalRequired: boolean;
   allowFacilityApprovalOverride: boolean;
+  calendarVisibilityMode: CalendarVisibilityMode;
   defaultTimezone: string;
   reminderOffsetsMinutes: number[];
 };
@@ -23,6 +29,7 @@ export const baseDefaultAppSettings: AppSettings = {
   allowedEmailDomains: [],
   defaultApprovalRequired: false,
   allowFacilityApprovalOverride: true,
+  calendarVisibilityMode: "my_bookings_only",
   defaultTimezone: "Asia/Kuala_Lumpur",
   reminderOffsetsMinutes: [1440, 60],
 };
@@ -35,6 +42,7 @@ export const settingKeyMap = {
   allowedEmailDomains: "allowed_email_domains",
   defaultApprovalRequired: "default_approval_required",
   allowFacilityApprovalOverride: "facility_approval_override_enabled",
+  calendarVisibilityMode: "calendar_visibility_mode",
   defaultTimezone: "default_timezone",
   reminderOffsetsMinutes: "reminder_offsets_minutes",
 } as const;
@@ -94,6 +102,10 @@ export function mapSettingsRowsToAppSettings(
       typeof approvalOverride === "boolean"
         ? approvalOverride
         : fallback.allowFacilityApprovalOverride,
+    calendarVisibilityMode: parseCalendarVisibilityMode(
+      values.get(settingKeyMap.calendarVisibilityMode) ??
+        fallback.calendarVisibilityMode,
+    ),
     defaultTimezone:
       typeof values.get(settingKeyMap.defaultTimezone) === "string" &&
       String(values.get(settingKeyMap.defaultTimezone)).trim()
@@ -148,6 +160,13 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.allowFacilityApprovalOverride,
       value: settings.allowFacilityApprovalOverride,
       description: "Whether facilities can override the default approval setting.",
+      is_public: false,
+    },
+    {
+      key: settingKeyMap.calendarVisibilityMode,
+      value: settings.calendarVisibilityMode,
+      description:
+        "Whether employees can view all company bookings on the employee calendar.",
       is_public: false,
     },
     {

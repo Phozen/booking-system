@@ -52,6 +52,7 @@ export async function updateSystemSettingsAction(
     allowedEmailDomains: parsed.data.allowedEmailDomainsText,
     defaultApprovalRequired: parsed.data.defaultApprovalRequired,
     allowFacilityApprovalOverride: parsed.data.allowFacilityApprovalOverride,
+    calendarVisibilityMode: parsed.data.calendarVisibilityMode,
     defaultTimezone: parsed.data.defaultTimezone,
     reminderOffsetsMinutes: parsed.data.reminderOffsetsMinutesText,
   };
@@ -95,6 +96,8 @@ export async function updateSystemSettingsAction(
   revalidatePath("/admin/settings");
   revalidatePath("/register");
   revalidatePath("/bookings/new");
+  revalidatePath("/calendar");
+  revalidatePath("/admin/calendar");
 
   return {
     status: "success",

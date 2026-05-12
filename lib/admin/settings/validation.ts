@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { calendarVisibilityModes } from "@/lib/calendar/visibility";
+
 const domainPattern =
   /^(?!-)(?:[a-z0-9-]{1,63}\.)+[a-z]{2,63}$/i;
 
@@ -43,6 +45,7 @@ export const settingsFormSchema = z.object({
     }),
   defaultApprovalRequired: z.boolean(),
   allowFacilityApprovalOverride: z.boolean(),
+  calendarVisibilityMode: z.enum(calendarVisibilityModes),
   defaultTimezone: z.string().trim().min(1, "Enter a default timezone."),
   reminderOffsetsMinutesText: z
     .string()
@@ -75,6 +78,7 @@ export function formDataToSettingsValues(formData: FormData) {
       formData,
       "allowFacilityApprovalOverride",
     ),
+    calendarVisibilityMode: getTextValue(formData, "calendarVisibilityMode"),
     defaultTimezone: getTextValue(formData, "defaultTimezone"),
     reminderOffsetsMinutesText: getTextValue(
       formData,
@@ -82,4 +86,3 @@ export function formDataToSettingsValues(formData: FormData) {
     ),
   };
 }
-
