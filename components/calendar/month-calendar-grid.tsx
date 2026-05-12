@@ -18,8 +18,8 @@ export function MonthCalendarGrid({
   );
 
   return (
-    <section className="hidden overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm ring-1 ring-primary/5 md:block">
-      <div className="border-b bg-muted/35 p-4">
+    <section className="hidden overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm shadow-primary/5 ring-1 ring-primary/10 md:block">
+      <div className="border-b border-border/70 bg-gradient-to-r from-sky-50 via-card to-card p-4 dark:from-sky-950/25">
         <h2 className="font-semibold tracking-normal">Month view</h2>
         <p className="text-sm text-muted-foreground">
           Booking items are links. Days without bookings remain visible for
@@ -36,7 +36,7 @@ export function MonthCalendarGrid({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-7 border-b bg-secondary/70 text-xs font-semibold uppercase text-muted-foreground">
+      <div className="grid grid-cols-7 border-b border-border/70 bg-secondary/80 text-xs font-semibold uppercase text-muted-foreground">
         {weekDays.map((day) => (
           <div key={day} className="border-r px-3 py-2 last:border-r-0">
             {day}
@@ -52,9 +52,9 @@ export function MonthCalendarGrid({
             <div
               key={day.key}
               className={cn(
-                "min-h-36 border-r border-t bg-background/60 p-2 last:border-r-0",
+                "min-h-36 border-r border-t border-border/70 bg-background/70 p-2 last:border-r-0",
                 !day.isCurrentMonth && "bg-muted/35 text-muted-foreground",
-                day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/20",
+                day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/30",
               )}
             >
               <div className="mb-2 flex items-center justify-between gap-2">

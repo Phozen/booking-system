@@ -279,6 +279,17 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm buttons, inputs, labels, and status badges remain readable.
 - [ ] Confirm no major content overlap or layout shift during form errors.
 
+## Visual Design And Contrast
+
+- [ ] In light mode, check dashboard, facilities, booking form, calendar, profile, admin dashboard, admin users, admin bookings, and admin settings for clear section/card separation.
+- [ ] In dark mode, check the same pages and confirm accents remain readable without becoming overly saturated.
+- [ ] Confirm primary, secondary, outline, ghost, destructive, success, and warning buttons are visually distinct and keep visible focus rings.
+- [ ] Confirm status badges for bookings, facilities, invitations, users, email notifications, maintenance, and blocked periods are distinguishable by text plus color.
+- [ ] Confirm employee quick action cards and admin operational cards use purposeful accents without looking playful.
+- [ ] Confirm table/filter panels, mobile record cards, empty states, loading states, and error states have enough contrast against the page background.
+- [ ] Confirm calendar today marker, booking events, invited booking labels, and mobile agenda cards are easy to scan.
+- [ ] Confirm accent changes do not introduce horizontal overflow or cramped controls on mobile.
+
 ## Dark Mode
 
 - [ ] Confirm the auth-page theme toggle sits in the top-right corner outside the form card.

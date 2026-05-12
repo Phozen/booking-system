@@ -226,6 +226,16 @@ Examples:
 - `border` and `input`: visible enough to separate controls without heavy outlines.
 - `ring`: visible keyboard focus indicator.
 
+### Corporate Accent Rules
+
+- Use blue/indigo as the primary corporate accent for navigation, primary actions, keyboard focus, and important workflow entry points.
+- Use semantic status accents consistently: emerald for success/confirmed, amber for pending/warning, rose for rejected/failed/destructive, sky for information/calendar/maintenance, violet for admin/configuration, and slate/zinc for inactive or historical states.
+- Use accent treatments sparingly: a left border, top header strip, soft icon container, or subtle tinted section background is enough.
+- Interactive cards may use a colored left border or icon container to clarify purpose, but should still read as calm internal dashboard surfaces.
+- Admin surfaces may use violet/indigo accents to distinguish operational configuration from employee booking flows.
+- Avoid assigning unrelated colors to every card; color should communicate purpose, status, or area.
+- Light and dark themes must use matching semantic intent, with dark-mode colors softened rather than saturated.
+
 ### Card Style
 
 - Use cards for repeated items, forms, detail panels, and tables.
@@ -243,6 +253,8 @@ Examples:
 - Outline button: secondary navigation/actions, visually clear but quieter than primary.
 - Ghost button: back links, low emphasis reset/cancel actions.
 - Destructive button: cancellation, rejection, deactivation, completing irreversible state transitions when appropriate. Use rose/destructive treatment and confirmation where needed.
+- Success buttons should be reserved for affirmative operational actions such as approve/reactivate when that styling improves clarity.
+- Warning buttons should be reserved for cautionary non-destructive state transitions; avoid using warning as a decorative alternative.
 - Disabled buttons must remain visibly disabled and must not rely on color alone.
 - Icon usage:
   - Use lucide icons when the action benefits from recognition.
@@ -284,6 +296,7 @@ Examples:
 - Table panels use bordered `bg-card` containers.
 - Header area includes table title, count, and primary action if any.
 - Filters sit above table in a bordered filter bar.
+- Table and filter headers may use a subtle muted-to-card gradient or primary ring to distinguish dense operational panels.
 - Table headers use small uppercase muted text.
 - Rows use `border-t`, clear row actions, and hover state where clickable.
 - All table actions should have visible text and icon where useful.
@@ -293,6 +306,7 @@ Examples:
 
 Status badges must use both label text and color. Color should be consistent across the app.
 Badges should also include a small dot or another non-text visual marker, but text remains the source of truth.
+Badge backgrounds, borders, and text must be tuned for contrast in both light and dark mode; dots are supplemental only.
 
 Suggested intent:
 

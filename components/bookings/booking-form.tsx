@@ -279,7 +279,7 @@ export function BookingForm({
         </div>
 
         {selectedFacilityDetails ? (
-          <aside className="grid gap-3 rounded-lg border bg-muted/40 p-4 text-sm sm:col-span-2">
+          <aside className="grid gap-3 rounded-lg border border-sky-200 bg-sky-50/70 p-4 text-sm text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 sm:col-span-2 dark:border-sky-900 dark:bg-sky-950/25 dark:text-sky-100">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-medium uppercase text-muted-foreground">
@@ -293,12 +293,12 @@ export function BookingForm({
                   {formatFacilityType(selectedFacilityDetails.type)}
                 </p>
               </div>
-              <div className="inline-flex items-center gap-2 text-muted-foreground">
+              <div className="inline-flex items-center gap-2 text-sky-800 dark:text-sky-200">
                 <Users className="size-4" aria-hidden="true" />
                 Capacity {selectedFacilityDetails.capacity}
               </div>
             </div>
-            <div className="inline-flex items-start gap-2 text-muted-foreground">
+            <div className="inline-flex items-start gap-2 text-sky-800 dark:text-sky-200">
               <ShieldCheck className="mt-0.5 size-4" aria-hidden="true" />
               <span>
                 {formatEffectiveApprovalLabel(
@@ -307,7 +307,7 @@ export function BookingForm({
                 )}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-sky-800 dark:text-sky-200">
               {formatEffectiveApprovalCopy(
                 selectedFacilityDetails.requiresApproval,
                 settings,
@@ -453,7 +453,7 @@ export function BookingForm({
       </div>
 
       {hasPreviewDetails ? (
-        <section className="grid gap-3 rounded-lg border bg-muted/40 p-4">
+        <section className="grid gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <div className="flex items-start gap-3">
             <CalendarClock
               className="mt-0.5 size-4 text-muted-foreground"

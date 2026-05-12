@@ -40,11 +40,11 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         compact ? "w-full" : "h-9",
         active
-          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          ? "border-primary/20 bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+          : "text-muted-foreground hover:border-primary/20 hover:bg-accent/80 hover:text-accent-foreground",
       )}
     >
       <Icon className="size-4" aria-hidden="true" />

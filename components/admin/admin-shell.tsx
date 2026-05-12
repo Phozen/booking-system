@@ -28,7 +28,7 @@ export function AdminShell({
     <div className="flex min-h-svh bg-background">
       <AdminSidebar appName={appName} email={email} role={role} />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 shadow-sm backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-40 border-b border-border/70 bg-card/92 shadow-sm shadow-primary/5 backdrop-blur lg:hidden">
           <div className="relative flex min-h-16 items-center justify-between gap-4 px-4">
             <div>
               <Link

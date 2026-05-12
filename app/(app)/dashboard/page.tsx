@@ -52,6 +52,7 @@ export default async function DashboardPage() {
             icon: Building2,
             accent:
               "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/40 dark:text-sky-200 dark:ring-sky-900",
+            border: "border-l-sky-500",
           },
           {
             href: "/bookings/new",
@@ -60,6 +61,7 @@ export default async function DashboardPage() {
             icon: CalendarPlus,
             accent:
               "bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-200 dark:ring-indigo-900",
+            border: "border-l-indigo-500",
           },
           {
             href: "/calendar",
@@ -68,6 +70,7 @@ export default async function DashboardPage() {
             icon: CalendarDays,
             accent:
               "bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-200 dark:ring-violet-900",
+            border: "border-l-violet-500",
           },
           {
             href: "/my-bookings",
@@ -76,6 +79,7 @@ export default async function DashboardPage() {
             icon: ClipboardList,
             accent:
               "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900",
+            border: "border-l-emerald-500",
           },
         ].map((item) => {
           const Icon = item.icon;
@@ -84,7 +88,7 @@ export default async function DashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:bg-accent/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+              className={`rounded-lg border border-l-4 border-border/70 ${item.border} bg-card p-4 text-card-foreground shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/35 hover:bg-accent/60 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35`}
             >
               <div
                 className={`flex size-10 items-center justify-center rounded-lg ring-1 ${item.accent}`}
@@ -100,7 +104,7 @@ export default async function DashboardPage() {
         })}
       </section>
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm ring-1 ring-primary/5">
+      <section className="rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-sm shadow-primary/5 ring-1 ring-primary/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-medium">Upcoming bookings</h2>
@@ -116,7 +120,7 @@ export default async function DashboardPage() {
               <Link
                 key={booking.id}
                 href={`/bookings/${booking.id}`}
-                className="grid gap-2 rounded-lg border border-border/70 bg-background p-3 shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:bg-accent/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+                className="grid gap-2 rounded-lg border border-border/70 bg-card p-3 shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/35 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">{booking.title}</span>

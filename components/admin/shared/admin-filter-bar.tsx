@@ -16,7 +16,7 @@ export function AdminFilterBar({
   return (
     <section
       className={cn(
-        "rounded-lg border border-border/70 bg-card/95 p-4 shadow-sm ring-1 ring-primary/5",
+        "rounded-lg border border-border/70 bg-card/95 p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10",
         className,
       )}
     >

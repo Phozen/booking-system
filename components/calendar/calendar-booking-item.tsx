@@ -17,7 +17,7 @@ export function CalendarBookingItem({
     <Link
       href={booking.href}
       className={cn(
-        "group grid gap-2 rounded-lg border border-border/70 bg-background p-3 text-sm shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/40 hover:bg-accent/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35",
+        "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/40 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35",
         compact ? "p-2 text-xs" : "",
       )}
     >

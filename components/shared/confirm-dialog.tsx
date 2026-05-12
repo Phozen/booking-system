@@ -75,7 +75,7 @@ export function ConfirmDialog({
         ref={dialogRef}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="max-h-[90dvh] w-[min(92vw,30rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl ring-1 ring-primary/10 backdrop:bg-slate-950/35"
+        className="max-h-[90dvh] w-[min(92vw,30rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl ring-1 ring-primary/15 backdrop:bg-slate-950/45"
       >
         <div className="grid gap-4 p-5">
           <div className="flex gap-3">
@@ -83,7 +83,7 @@ export function ConfirmDialog({
               className={
                 destructive
                   ? "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 ring-1 ring-rose-200"
-                  : "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20"
+                  : "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/25"
               }
             >
               <Icon className="size-4" aria-hidden="true" />

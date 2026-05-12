@@ -119,7 +119,7 @@ export function BookingDetail({
         </Link>
       </header>
 
-      <section className="rounded-lg border bg-card p-5">
+      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
         <h2 className="text-lg font-semibold tracking-normal">
           Booking details
         </h2>
@@ -163,7 +163,7 @@ export function BookingDetail({
         </dl>
       </section>
 
-      <section className="rounded-lg border bg-card p-5">
+      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
         <h2 className="text-lg font-semibold tracking-normal">Description</h2>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {booking.description || "No description was provided."}
@@ -171,7 +171,7 @@ export function BookingDetail({
       </section>
 
       {booking.cancellationReason ? (
-        <section className="rounded-lg border bg-card p-5">
+        <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <h2 className="text-lg font-semibold tracking-normal">
             Cancellation reason
           </h2>
@@ -182,7 +182,7 @@ export function BookingDetail({
       ) : null}
 
       {!isOwnerView && viewerInvitation ? (
-        <section className="grid gap-4 rounded-lg border bg-card p-5">
+        <section className="grid gap-4 rounded-lg border border-sky-200 bg-sky-50/70 p-5 text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 dark:border-sky-800 dark:bg-sky-950/25 dark:text-sky-100">
           <div>
             <h2 className="text-lg font-semibold tracking-normal">
               Your invitation
@@ -216,7 +216,7 @@ export function BookingDetail({
       ) : null}
 
       {isOwnerView && isCancellableBooking(booking.status) ? (
-        <section className="grid gap-4 rounded-lg border border-destructive/30 bg-card p-5">
+        <section className="grid gap-4 rounded-lg border border-destructive/35 bg-rose-50/60 p-5 text-rose-950 shadow-sm shadow-rose-500/10 ring-1 ring-rose-200/60 dark:border-rose-900 dark:bg-rose-950/25 dark:text-rose-100">
           <div>
             <h2 className="text-lg font-semibold tracking-normal">
               Cancel booking

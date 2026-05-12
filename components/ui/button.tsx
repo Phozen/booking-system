@@ -9,19 +9,19 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-sm shadow-primary/15 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20",
+          "bg-primary text-primary-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/10 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/25",
         outline:
-          "border-input bg-card text-foreground shadow-xs hover:border-primary/35 hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-input bg-card/95 text-foreground shadow-xs hover:border-primary/40 hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-input/35 dark:hover:bg-input/55",
         secondary:
-          "border-border bg-secondary text-secondary-foreground hover:bg-secondary/85 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "border-border/80 bg-secondary text-secondary-foreground shadow-xs hover:border-primary/25 hover:bg-secondary/85 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
-          "text-muted-foreground hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:hover:bg-muted/50",
+          "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:hover:bg-muted/55",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm shadow-destructive/15 hover:bg-destructive/90 hover:shadow-md hover:shadow-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-destructive-foreground shadow-sm shadow-destructive/20 ring-1 ring-destructive/10 hover:bg-destructive/90 hover:shadow-md hover:shadow-destructive/25 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
         success:
-          "bg-emerald-600 text-white shadow-sm shadow-emerald-600/15 hover:bg-emerald-700 hover:shadow-md hover:shadow-emerald-600/20 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25",
+          "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 ring-1 ring-emerald-500/15 hover:bg-emerald-700 hover:shadow-md hover:shadow-emerald-600/25 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400",
         warning:
-          "bg-amber-500 text-amber-950 shadow-sm shadow-amber-500/15 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/20 focus-visible:border-amber-500 focus-visible:ring-amber-500/25",
+          "bg-amber-500 text-amber-950 shadow-sm shadow-amber-500/20 ring-1 ring-amber-500/15 hover:bg-amber-400 hover:shadow-md hover:shadow-amber-500/25 focus-visible:border-amber-500 focus-visible:ring-amber-500/25 dark:bg-amber-400 dark:text-amber-950 dark:hover:bg-amber-300",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

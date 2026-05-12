@@ -57,13 +57,13 @@ export function FacilityDetail({
       </div>
 
       <header className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-        <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <div className="aspect-[16/9] bg-muted">
             <FacilityPhoto facility={facility} priority />
           </div>
         </div>
 
-        <div className="flex flex-col gap-5 rounded-lg border bg-card p-5">
+        <div className="flex flex-col gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
               {facility.code} - {facility.level}
@@ -123,14 +123,14 @@ export function FacilityDetail({
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="rounded-lg border bg-card p-5">
+        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <h2 className="text-lg font-semibold tracking-normal">Details</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
             {facility.description || "No description has been added yet."}
           </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-5">
+        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <h2 className="text-lg font-semibold tracking-normal">Equipment</h2>
           {facility.equipment.length > 0 ? (
             <ul className="mt-4 grid gap-3 text-sm">
@@ -156,7 +156,7 @@ export function FacilityDetail({
       </section>
 
       {facility.photos.length > 1 ? (
-        <section className="rounded-lg border bg-card p-5">
+        <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <h2 className="text-lg font-semibold tracking-normal">Photos</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {facility.photos.map((photo) => (

@@ -25,14 +25,16 @@ export function MobileRecordCard({
   return (
     <article
       className={cn(
-        "grid gap-4 rounded-lg border border-border/70 bg-background p-4 shadow-sm ring-1 ring-primary/5",
+        "grid gap-4 rounded-lg border border-border/70 bg-card p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10",
         className,
       )}
     >
       <div className="grid gap-2">
         {eyebrow ? (
           <p className="text-xs font-medium uppercase text-muted-foreground">
-            {eyebrow}
+            <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-primary ring-1 ring-primary/15">
+              {eyebrow}
+            </span>
           </p>
         ) : null}
         <div className="flex flex-wrap items-start justify-between gap-2">

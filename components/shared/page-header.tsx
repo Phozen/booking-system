@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "grid gap-4 rounded-lg border border-border/70 bg-card/95 p-5 shadow-sm ring-1 ring-primary/5",
+        "relative grid gap-4 overflow-hidden rounded-lg border border-border/70 bg-card/95 p-5 shadow-sm ring-1 ring-primary/10 before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-gradient-to-r before:from-primary before:via-sky-500 before:to-violet-500",
         className,
       )}
     >

@@ -23,14 +23,14 @@ function EquipmentSummary({ facility }: { facility: Facility }) {
 
 export function FacilityCard({ facility }: { facility: Facility }) {
   return (
-    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground shadow-sm ring-1 ring-primary/5 transition-all hover:border-primary/30 hover:shadow-md sm:grid-cols-[220px_1fr]">
+    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/35 hover:shadow-md hover:shadow-primary/10 sm:grid-cols-[220px_1fr]">
       <div className="aspect-[4/3] bg-muted sm:aspect-auto">
         <FacilityPhoto facility={facility} />
       </div>
 
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+          <div className="min-w-0 border-l-4 border-sky-500 pl-3">
             <p className="text-sm font-medium text-muted-foreground">
               {facility.code} - {facility.level}
             </p>

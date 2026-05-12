@@ -25,9 +25,11 @@ function BookingSection({
 }) {
   return (
     <section className="grid gap-3">
-      <div className="flex items-center justify-between border-b pb-2">
+      <div className="flex items-center justify-between border-b border-border/70 pb-2">
         <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
-        <span className="text-sm text-muted-foreground">{bookings.length}</span>
+        <span className="rounded-full border border-border/70 bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground">
+          {bookings.length}
+        </span>
       </div>
 
       {bookings.length > 0 ? (

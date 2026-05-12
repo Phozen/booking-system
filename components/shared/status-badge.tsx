@@ -19,19 +19,19 @@ type StatusDefinition = {
 
 const statusClasses = {
   amber:
-    "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200",
+    "border-amber-300 bg-amber-50 text-amber-950 shadow-xs shadow-amber-500/10 dark:border-amber-800 dark:bg-amber-950/45 dark:text-amber-100",
   emerald:
-    "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200",
+    "border-emerald-300 bg-emerald-50 text-emerald-950 shadow-xs shadow-emerald-500/10 dark:border-emerald-800 dark:bg-emerald-950/45 dark:text-emerald-100",
   rose:
-    "border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200",
+    "border-rose-300 bg-rose-50 text-rose-950 shadow-xs shadow-rose-500/10 dark:border-rose-800 dark:bg-rose-950/45 dark:text-rose-100",
   slate:
-    "border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-200",
+    "border-slate-300 bg-slate-50 text-slate-800 shadow-xs shadow-slate-500/10 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100",
   sky:
-    "border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-200",
+    "border-sky-300 bg-sky-50 text-sky-950 shadow-xs shadow-sky-500/10 dark:border-sky-800 dark:bg-sky-950/45 dark:text-sky-100",
   violet:
-    "border-violet-300 bg-violet-50 text-violet-900 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-200",
+    "border-violet-300 bg-violet-50 text-violet-950 shadow-xs shadow-violet-500/10 dark:border-violet-800 dark:bg-violet-950/45 dark:text-violet-100",
   zinc:
-    "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-200",
+    "border-zinc-300 bg-zinc-50 text-zinc-800 shadow-xs shadow-zinc-500/10 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-100",
 } as const;
 
 const statusDots = {
