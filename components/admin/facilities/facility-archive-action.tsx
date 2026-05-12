@@ -4,10 +4,8 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
 import { Archive } from "lucide-react";
 
-import {
-  archiveFacilityFormAction,
-  type FacilityActionResult,
-} from "@/lib/facilities/actions";
+import { archiveFacilityFormAction } from "@/lib/facilities/actions";
+import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 

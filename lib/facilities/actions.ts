@@ -9,13 +9,8 @@ import {
   getOptionalFormValue,
   parseRequiresApproval,
 } from "@/lib/facilities/validation";
+import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import { createClient } from "@/lib/supabase/server";
-
-export type FacilityActionResult = {
-  status: "idle" | "error" | "success";
-  message: string;
-  facilityId?: string;
-};
 
 function getFriendlyFacilityError() {
   return "Facility could not be saved. Check for duplicate codes or slugs, then try again.";

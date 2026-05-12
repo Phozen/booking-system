@@ -7,8 +7,8 @@ import { useState, useTransition } from "react";
 import {
   createFacilityAction,
   updateFacilityAction,
-  type FacilityActionResult,
 } from "@/lib/facilities/actions";
+import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import {
   facilityStatusOptions,
   facilityFormSchema,
