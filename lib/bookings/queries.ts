@@ -94,7 +94,7 @@ export type EmployeeBooking = {
   }[];
 };
 
-const employeeBookingSelect = `
+const employeeBookingBaseSelect = `
   id,
   facility_id,
   user_id,
@@ -115,7 +115,11 @@ const employeeBookingSelect = `
     slug,
     level,
     type
-  ),
+  )
+`;
+
+const employeeBookingSelect = `
+  ${employeeBookingBaseSelect},
   booking_approvals (
     id,
     status,
@@ -124,6 +128,22 @@ const employeeBookingSelect = `
     remarks
   )
 `;
+
+function logEmployeeBookingLookupError({
+  scope,
+  error,
+}: {
+  scope: string;
+  error: { code?: string; message?: string; details?: string | null; hint?: string | null };
+}) {
+  console.error("Employee booking lookup failed", {
+    scope,
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+  });
+}
 
 function mapBooking(record: BookingRecord): EmployeeBooking {
   const facilityRecord = Array.isArray(record.facilities)
@@ -175,7 +195,25 @@ export async function getMyBookings(
     .order("starts_at", { ascending: false });
 
   if (error) {
-    throw new Error("Unable to load bookings.");
+    logEmployeeBookingLookupError({ scope: "my-bookings", error });
+
+    const fallback = await supabase
+      .from("bookings")
+      .select(employeeBookingBaseSelect)
+      .eq("user_id", userId)
+      .order("starts_at", { ascending: false });
+
+    if (fallback.error) {
+      logEmployeeBookingLookupError({
+        scope: "my-bookings-fallback",
+        error: fallback.error,
+      });
+      throw new Error("Unable to load bookings.");
+    }
+
+    return (
+      (fallback.data as unknown as BookingRecord[] | null) ?? []
+    ).map(mapBooking);
   }
 
   return ((data as unknown as BookingRecord[] | null) ?? []).map(mapBooking);
@@ -188,7 +226,7 @@ export async function getMyUpcomingBookings(
 ) {
   const { data, error } = await supabase
     .from("bookings")
-    .select(employeeBookingSelect)
+    .select(employeeBookingBaseSelect)
     .eq("user_id", userId)
     .in("status", ["pending", "confirmed"])
     .gte("ends_at", new Date().toISOString())
@@ -196,6 +234,7 @@ export async function getMyUpcomingBookings(
     .limit(limit);
 
   if (error) {
+    logEmployeeBookingLookupError({ scope: "upcoming-bookings", error });
     throw new Error("Unable to load upcoming bookings.");
   }
 
@@ -215,7 +254,26 @@ export async function getMyBookingById(
     .maybeSingle();
 
   if (error) {
-    throw new Error("Unable to load booking.");
+    logEmployeeBookingLookupError({ scope: "booking-detail", error });
+
+    const fallback = await supabase
+      .from("bookings")
+      .select(employeeBookingBaseSelect)
+      .eq("id", bookingId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fallback.error) {
+      logEmployeeBookingLookupError({
+        scope: "booking-detail-fallback",
+        error: fallback.error,
+      });
+      throw new Error("Unable to load booking.");
+    }
+
+    return fallback.data
+      ? mapBooking(fallback.data as unknown as BookingRecord)
+      : null;
   }
 
   return data ? mapBooking(data as unknown as BookingRecord) : null;
