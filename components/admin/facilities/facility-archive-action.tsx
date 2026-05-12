@@ -1,15 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Archive } from "lucide-react";
 
 import {
-  archiveFacilityAction,
+  archiveFacilityFormAction,
   type FacilityActionResult,
 } from "@/lib/facilities/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+
+const initialState: FacilityActionResult = {
+  status: "idle",
+  message: "",
+};
 
 export function FacilityArchiveAction({
   facilityId,
@@ -21,7 +26,17 @@ export function FacilityArchiveAction({
   isArchived: boolean;
 }) {
   const router = useRouter();
-  const [result, setResult] = useState<FacilityActionResult | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, isPending] = useActionState(
+    archiveFacilityFormAction,
+    initialState,
+  );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      router.refresh();
+    }
+  }, [router, state.status]);
 
   return (
     <section className="grid gap-4 rounded-lg border border-destructive/35 bg-rose-50/60 p-5 text-rose-950 shadow-sm shadow-rose-500/10 ring-1 ring-rose-200/60 dark:border-rose-900 dark:bg-rose-950/25 dark:text-rose-100">
@@ -37,38 +52,35 @@ export function FacilityArchiveAction({
             bookings, reports, photos, and audit logs.
           </p>
         </div>
-        <ConfirmDialog
-          triggerLabel={isArchived ? "Facility archived" : "Archive facility"}
-          title="Archive this facility?"
-          description={
-            <>
-              <span className="font-medium">{facilityName}</span> will be
-              hidden from employee booking pages and cannot be used for new
-              bookings. Historical records will remain available.
-            </>
-          }
-          confirmLabel="Archive facility"
-          cancelLabel="Keep facility"
-          pendingLabel="Archiving..."
-          destructive
-          disabled={isArchived}
-          onConfirm={async () => {
-            const nextResult = await archiveFacilityAction(facilityId);
-            setResult(nextResult);
-
-            if (nextResult.status === "success") {
-              router.refresh();
+        <form ref={formRef} action={formAction}>
+          <input type="hidden" name="facilityId" value={facilityId} />
+          <ConfirmDialog
+            triggerLabel={isArchived ? "Facility archived" : "Archive facility"}
+            title="Archive this facility?"
+            description={
+              <>
+                <span className="font-medium">{facilityName}</span> will be
+                hidden from employee booking pages and cannot be used for new
+                bookings. Historical records will remain available.
+              </>
             }
-          }}
-        />
+            confirmLabel="Archive facility"
+            cancelLabel="Keep facility"
+            pendingLabel="Archiving..."
+            destructive
+            disabled={isArchived}
+            pending={isPending}
+            onConfirm={() => formRef.current?.requestSubmit()}
+          />
+        </form>
       </div>
 
-      {result ? (
-        <Alert variant={result.status === "success" ? "success" : "destructive"}>
+      {state.status !== "idle" ? (
+        <Alert variant={state.status === "success" ? "success" : "destructive"}>
           <AlertTitle>
-            {result.status === "success" ? "Facility archived" : "Archive failed"}
+            {state.status === "success" ? "Facility archived" : "Archive failed"}
           </AlertTitle>
-          <AlertDescription>{result.message}</AlertDescription>
+          <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
     </section>

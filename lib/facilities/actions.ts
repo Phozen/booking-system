@@ -12,7 +12,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 
 export type FacilityActionResult = {
-  status: "error" | "success";
+  status: "idle" | "error" | "success";
   message: string;
   facilityId?: string;
 };
@@ -320,4 +320,20 @@ export async function archiveFacilityAction(
       "Facility archived. It is hidden from employee booking pages while historical records are preserved.",
     facilityId,
   };
+}
+
+export async function archiveFacilityFormAction(
+  _previousState: FacilityActionResult,
+  formData: FormData,
+): Promise<FacilityActionResult> {
+  const facilityId = getOptionalFormValue(formData, "facilityId");
+
+  if (!facilityId) {
+    return {
+      status: "error",
+      message: "Facility could not be found.",
+    };
+  }
+
+  return archiveFacilityAction(facilityId);
 }
