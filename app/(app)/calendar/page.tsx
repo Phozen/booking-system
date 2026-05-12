@@ -16,6 +16,7 @@ import {
 } from "@/lib/calendar/group-bookings";
 import { getInvitationContextLabel } from "@/lib/bookings/invitations/validation";
 import { getAppSettings } from "@/lib/settings/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
@@ -68,9 +69,15 @@ export default async function EmployeeCalendarPage({
   const selectedStatus = parseStatus(params.status);
   const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const supabase = await createClient();
-  const bookings = await getEmployeeCalendarBookings(supabase, user.id, range, {
-    status: selectedStatus,
-  });
+  const bookings = await getEmployeeCalendarBookings(
+    supabase,
+    user.id,
+    range,
+    {
+      status: selectedStatus,
+    },
+    createAdminClient(),
+  );
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);

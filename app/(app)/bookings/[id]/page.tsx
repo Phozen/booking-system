@@ -83,7 +83,11 @@ export default async function BookingDetailPage({
     );
   }
 
-  const invitedBooking = await getInvitedBookingById(supabase, id, user.id);
+  const invitedBooking = await getInvitedBookingById(
+    createAdminClient(),
+    id,
+    user.id,
+  );
 
   if (!invitedBooking) {
     notFound();

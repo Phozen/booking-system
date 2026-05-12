@@ -126,6 +126,7 @@ export async function getEmployeeCalendarBookings(
   userId: string,
   range: Pick<CalendarDateRange, "startsAt" | "endsAt">,
   filters: EmployeeCalendarFilters = {},
+  invitationSupabase: SupabaseClient = supabase,
 ) {
   let query = supabase
     .from("bookings")
@@ -149,7 +150,7 @@ export async function getEmployeeCalendarBookings(
     (data as unknown as EmployeeCalendarBookingRecord[] | null) ?? []
   ).map((booking) => mapEmployeeCalendarBooking(booking));
 
-  let invitationQuery = supabase
+  let invitationQuery = invitationSupabase
     .from("booking_invitations")
     .select(invitedCalendarSelect)
     .eq("invited_user_id", userId)

@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth/guards";
 import { getMyInvitations } from "@/lib/bookings/invitations/queries";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { InvitationsPageList } from "@/components/bookings/invitations/invitations-page-list";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InvitationsPage() {
   const { user } = await requireUser();
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const invitations = await getMyInvitations(supabase, user.id);
 
   return (
