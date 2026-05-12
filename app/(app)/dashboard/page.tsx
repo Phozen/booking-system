@@ -50,28 +50,32 @@ export default async function DashboardPage() {
             description:
               "Compare rooms, capacity, equipment, and approval requirements.",
             icon: Building2,
-            accent: "bg-sky-50 text-sky-700 ring-sky-200",
+            accent:
+              "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/40 dark:text-sky-200 dark:ring-sky-900",
           },
           {
             href: "/bookings/new",
             title: "Create booking",
             description: "Pick a facility, date, time, and purpose in one short form.",
             icon: CalendarPlus,
-            accent: "bg-primary/10 text-primary ring-primary/20",
+            accent:
+              "bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-200 dark:ring-indigo-900",
           },
           {
             href: "/calendar",
             title: "Calendar",
             description: "Scan past, current, and upcoming bookings by month.",
             icon: CalendarDays,
-            accent: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+            accent:
+              "bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-200 dark:ring-violet-900",
           },
           {
             href: "/my-bookings",
             title: "My Bookings",
             description: "Review pending, upcoming, historical, and cancelled bookings.",
             icon: ClipboardList,
-            accent: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+            accent:
+              "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900",
           },
         ].map((item) => {
           const Icon = item.icon;
