@@ -316,15 +316,17 @@ Suggested intent:
 
 ### Dark Mode
 
-- The app supports Light, Dark, and System theme preferences.
-- System is the default and should respect `prefers-color-scheme`.
-- The theme preference is controlled through the shared theme toggle in auth pages and the signed-in user menu.
+- The app supports explicit Light and Dark theme preferences.
+- Light is the default when no preference exists; the System option is intentionally not shown.
+- If an older stored preference is `system`, the UI should gracefully treat it as Light until the user toggles to an explicit Light or Dark preference.
+- The theme preference is controlled through the shared theme toggle in the auth-page top-right corner and the signed-in user menu.
 - Theme state is client-side only and must not change product behavior, authorization, database writes, or server actions.
 - Global color tokens should drive dark mode surfaces: `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, and `ring`.
 - Avoid hardcoded light-only classes such as `bg-white`, `text-black`, and unpaired gray backgrounds in new UI.
 - Status badges, alerts, buttons, dialogs, forms, tables, calendars, and code/JSON blocks must remain readable in both light and dark themes.
 - Color is supplemental; labels and icons must still communicate status and action meaning.
 - Focus rings must remain clearly visible in dark mode.
+- The auth-page toggle should sit outside the form card so login, registration, and password reset flows remain uncluttered.
 
 ### Spacing Scale
 

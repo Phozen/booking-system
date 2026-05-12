@@ -281,11 +281,12 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Dark Mode
 
+- [ ] Confirm the auth-page theme toggle sits in the top-right corner outside the form card.
 - [ ] Set theme to Light from the auth-page toggle and confirm the preference is applied.
 - [ ] Set theme to Dark from the auth-page toggle and confirm the preference is applied.
-- [ ] Set theme to System and confirm it follows the operating system preference.
 - [ ] Refresh after changing theme and confirm the selected preference persists.
-- [ ] Log in and confirm the signed-in user menu exposes Light, Dark, and System options.
+- [ ] Log in and confirm the signed-in user menu exposes a Light/Dark toggle.
+- [ ] Confirm no visible System theme option appears in auth or signed-in UI.
 - [ ] Check homepage, login, register, and reset password in dark mode.
 - [ ] Check employee dashboard, facilities, facility detail, booking form, My Bookings, invitations, booking detail, calendar, and profile in dark mode.
 - [ ] Check admin dashboard, users, facilities, bookings, approvals, calendar, blocked dates, maintenance, email notifications, reports, audit logs, and settings in dark mode.

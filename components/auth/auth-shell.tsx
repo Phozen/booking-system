@@ -14,7 +14,10 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-svh items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-10">
+    <main className="relative flex min-h-svh items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-10">
+      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        <ThemeToggle compact />
+      </div>
       <div className="grid w-full max-w-md gap-6">
         <div className="text-center">
           <Link
@@ -26,7 +29,6 @@ export function AuthShell({
           <p className="mt-2 text-sm text-muted-foreground">
             Internal facilities for {getCompanyDisplayName({ companyName })}
           </p>
-          <ThemeToggle className="mx-auto mt-4 max-w-xs text-left" />
         </div>
         {children}
       </div>
