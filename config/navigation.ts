@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   Mail,
   Settings,
-  UserRound,
   UserPlus,
   UsersRound,
 } from "lucide-react";
@@ -29,7 +28,6 @@ export const employeeNavigation = [
   { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
   { title: "New Booking", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
   { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact" },
-  { title: "Profile", href: "/profile", icon: UserRound, match: "exact" },
 ] as const;
 
 export const adminNavigation = [
