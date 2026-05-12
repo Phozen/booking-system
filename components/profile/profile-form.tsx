@@ -4,10 +4,8 @@ import { useActionState, useState } from "react";
 import type { FormEvent } from "react";
 import { Save } from "lucide-react";
 
-import {
-  profileActionInitialState,
-  updateOwnProfileAction,
-} from "@/lib/profile/actions";
+import { updateOwnProfileAction } from "@/lib/profile/actions";
+import { profileActionInitialState } from "@/lib/profile/action-state";
 import type { UserProfile } from "@/lib/profile/queries";
 import {
   formDataToProfileUpdateInput,
@@ -150,4 +148,3 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
     </form>
   );
 }
-

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
+import type { InvitationActionResult } from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
 import {
   canInviteUser,
@@ -15,16 +16,6 @@ import {
   inviteUserSchema,
 } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-export type InvitationActionResult = {
-  status: "idle" | "error" | "success";
-  message: string;
-};
-
-export const invitationActionInitialState: InvitationActionResult = {
-  status: "idle",
-  message: "",
-};
 
 type BookingForInvitation = {
   id: string;

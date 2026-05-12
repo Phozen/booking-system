@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { UserPlus } from "lucide-react";
 
-import {
-  invitationActionInitialState,
-  inviteUserToBookingAction,
-} from "@/lib/bookings/invitations/actions";
+import { inviteUserToBookingAction } from "@/lib/bookings/invitations/actions";
+import { invitationActionInitialState } from "@/lib/bookings/invitations/action-state";
 import type { InviteCandidate } from "@/lib/bookings/invitations/types";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { Alert, AlertDescription } from "@/components/ui/alert";

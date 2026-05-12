@@ -5,9 +5,9 @@ import { CheckCircle2, ImageIcon, Star } from "lucide-react";
 
 import {
   deleteFacilityPhotoAction,
-  facilityPhotoActionInitialState,
   setFacilityPhotoPrimaryAction,
 } from "@/lib/admin/facilities/photo-actions";
+import { facilityPhotoActionInitialState } from "@/lib/admin/facilities/photo-action-state";
 import type { Facility, FacilityPhoto } from "@/lib/facilities/queries";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";

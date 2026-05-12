@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 
-import {
-  invitationActionInitialState,
-  respondToInvitationAction,
-} from "@/lib/bookings/invitations/actions";
+import { respondToInvitationAction } from "@/lib/bookings/invitations/actions";
+import { invitationActionInitialState } from "@/lib/bookings/invitations/action-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 

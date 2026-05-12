@@ -10,18 +10,9 @@ import {
   formDataToProfileUpdateInput,
   profileUpdateSchema,
 } from "@/lib/profile/validation";
+import type { ProfileActionResult } from "@/lib/profile/action-state";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-
-export type ProfileActionResult = {
-  status: "idle" | "error" | "success";
-  message: string;
-};
-
-export const profileActionInitialState: ProfileActionResult = {
-  status: "idle",
-  message: "",
-};
 
 export async function updateOwnProfileAction(
   _previousState: ProfileActionResult,
@@ -102,4 +93,3 @@ export async function updateOwnProfileAction(
     message: "Profile updated. Your contact details are now saved.",
   };
 }
-

@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { ImagePlus } from "lucide-react";
 
-import {
-  facilityPhotoActionInitialState,
-  uploadFacilityPhotoAction,
-} from "@/lib/admin/facilities/photo-actions";
+import { uploadFacilityPhotoAction } from "@/lib/admin/facilities/photo-actions";
+import { facilityPhotoActionInitialState } from "@/lib/admin/facilities/photo-action-state";
 import { facilityPhotoMaxBytes } from "@/lib/admin/facilities/photo-validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -88,4 +86,3 @@ export function FacilityPhotoUploadForm({
     </form>
   );
 }
-

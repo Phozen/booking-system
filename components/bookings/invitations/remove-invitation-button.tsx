@@ -2,10 +2,8 @@
 
 import { useActionState, useRef } from "react";
 
-import {
-  invitationActionInitialState,
-  removeInvitationAction,
-} from "@/lib/bookings/invitations/actions";
+import { removeInvitationAction } from "@/lib/bookings/invitations/actions";
+import { invitationActionInitialState } from "@/lib/bookings/invitations/action-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 

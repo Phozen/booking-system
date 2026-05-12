@@ -14,20 +14,9 @@ import {
   facilityPhotoIdSchema,
   validateFacilityPhotoFile,
 } from "@/lib/admin/facilities/photo-validation";
+import type { FacilityPhotoActionResult } from "@/lib/admin/facilities/photo-action-state";
 import { getAdminFacilityById, type Facility, type FacilityPhoto } from "@/lib/facilities/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-export type FacilityPhotoActionResult = {
-  status: "idle" | "error" | "success";
-  message: string;
-};
-
-const initialPhotoActionState: FacilityPhotoActionResult = {
-  status: "idle",
-  message: "",
-};
-
-export const facilityPhotoActionInitialState = initialPhotoActionState;
 
 function getStringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -449,4 +438,3 @@ export async function deleteFacilityPhotoAction(
       : "Photo removed. The facility will use the placeholder until another photo is uploaded.",
   };
 }
-
