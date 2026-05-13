@@ -104,7 +104,7 @@ npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-3. Confirm remote migrations `0001` through `0009` are applied.
+3. Confirm remote migrations `0001` through `0012` are applied.
 4. Confirm RLS is enabled on application tables.
 5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
 6. Confirm default facilities, equipment, and seeded system settings exist.

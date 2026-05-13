@@ -63,7 +63,7 @@ Security reminders:
 ## Supabase
 
 - [ ] Production Supabase project is selected.
-- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0009`.
+- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0012`.
 - [ ] `npx.cmd supabase db push` has been run successfully.
 - [ ] RLS is enabled on application tables.
 - [ ] `bookings_no_overlapping_active` exclusion constraint exists.
