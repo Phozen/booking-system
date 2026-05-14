@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-export const userRoleOptions = ["all", "employee", "admin"] as const;
-export const editableUserRoleOptions = ["employee", "admin"] as const;
+export const userRoleOptions = ["all", "employee", "admin", "super_admin"] as const;
+export const editableUserRoleOptions = ["employee", "admin", "super_admin"] as const;
 
 export const userStatusOptions = ["all", "active", "disabled", "pending"] as const;
 export const editableUserStatusOptions = ["active", "disabled", "pending"] as const;
@@ -128,14 +128,20 @@ export function removesActiveAdminAccess({
   nextStatus: UserStatus;
 }) {
   return (
-    existingRole === "admin" &&
+    existingRole === "super_admin" &&
     existingStatus === "active" &&
-    (nextRole !== "admin" || nextStatus !== "active")
+    (nextRole !== "super_admin" || nextStatus !== "active")
   );
 }
 
 export function formatUserRole(role: UserRole) {
-  return role === "admin" ? "Admin" : "Employee";
+  const labels: Record<UserRole, string> = {
+    employee: "Employee",
+    admin: "Admin",
+    super_admin: "Super Admin",
+  };
+
+  return labels[role];
 }
 
 export function formatUserStatus(status: UserStatus) {

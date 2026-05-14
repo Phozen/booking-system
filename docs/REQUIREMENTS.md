@@ -90,12 +90,11 @@ Employees are regular users who can:
 
 ### 4.2 Admin
 
-Admins can manage the whole system.
+Admins are operational staff for daily booking administration.
 
 Admins can:
 
 - Manage rooms and halls.
-- Manage users.
 - Manage bookings.
 - Approve or reject bookings if approval mode is enabled.
 - Cancel bookings.
@@ -105,9 +104,19 @@ Admins can:
 - View reports.
 - Export reports.
 - View audit logs.
-- Configure system settings.
 
-### 4.3 Configurable Access
+### 4.3 Super Admin
+
+Super Admins are IT/system-owner users with full system control.
+
+Super Admins can:
+
+- Do everything an admin can do.
+- Manage users and roles.
+- Configure system settings.
+- Manage security-sensitive access settings.
+
+### 4.4 Configurable Access
 
 The system must make employee access configurable.
 
@@ -556,7 +565,7 @@ The admin dashboard should show:
 
 ### 11.2 User Management
 
-Admins must be able to:
+Super Admins must be able to:
 
 - View users
 - Search users
@@ -747,7 +756,7 @@ The system should allow admins to configure:
 
 Settings should be stored in the database.
 
-Settings should be editable by admins only.
+Settings should be editable by super admins only.
 
 Sensitive settings such as API keys must not be stored in normal database settings.
 
@@ -917,9 +926,9 @@ The system must ensure:
 
 - Employees can only manage their own bookings.
 - Employees cannot access admin pages.
-- Admins can manage system-wide data.
-- Only admins can change system settings.
-- Only admins can view audit logs.
+- Admins can manage operational system-wide data.
+- Super admins can manage users, roles, and system settings.
+- Admins and super admins can view audit logs.
 
 ### 17.4 Data Protection
 
@@ -1165,7 +1174,7 @@ The requirements are considered satisfied when:
 3. Employees can view and cancel their own bookings.
 4. The system prevents overlapping bookings.
 5. Admins can manage facilities.
-6. Admins can manage users.
+6. Super Admins can manage users and roles.
 7. Admins can manage bookings.
 8. Admins can approve or reject bookings when approval mode is enabled.
 9. Admins can create blocked dates and maintenance closures.

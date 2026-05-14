@@ -104,7 +104,7 @@ npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-3. Confirm remote migrations `0001` through `0012` are applied.
+3. Confirm remote migrations `0001` through `0013` are applied.
 4. Confirm RLS is enabled on application tables.
 5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
 6. Confirm default facilities, equipment, and seeded system settings exist.
@@ -144,20 +144,20 @@ Storage policy expectations:
 
 Before launch, manually test upload, primary photo selection, delete, employee facility list display, and employee facility detail display.
 
-## First Admin Setup
+## First Super Admin Setup
 
 1. Deploy the app.
 2. Register the first user through `/register`, if registration is enabled.
-3. Promote the first admin in Supabase SQL Editor:
+3. Promote the first super admin in Supabase SQL Editor:
 
 ```sql
 update public.profiles
-set role = 'admin', status = 'active'
+set role = 'super_admin', status = 'active'
 where email = 'YOUR_ADMIN_EMAIL@example.com';
 ```
 
 4. Log in and open `/admin/dashboard`.
-5. Use `/admin/users` for everyday role/status changes after the first admin exists.
+5. Use `/admin/users` for everyday role/status changes after the first super admin exists.
 
 ## Supabase Auth URLs
 

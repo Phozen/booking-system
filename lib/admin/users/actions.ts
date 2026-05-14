@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import {
-  countOtherActiveAdmins,
+  countOtherActiveSuperAdmins,
   getAdminUserById,
 } from "@/lib/admin/users/queries";
 import {
@@ -30,12 +30,12 @@ export async function updateUserProfileAction(
   _previousState: UserActionResult,
   formData: FormData,
 ): Promise<UserActionResult> {
-  const { user } = await requireAdmin();
+  const { user } = await requireSuperAdmin();
 
   if (!user) {
     return {
       status: "error",
-      message: "You must be signed in as an active admin.",
+      message: "You must be signed in as an active super admin.",
     };
   }
 
@@ -82,12 +82,12 @@ export async function updateUserProfileAction(
       nextStatus: parsed.data.status,
     })
   ) {
-    const otherActiveAdmins = await countOtherActiveAdmins(supabase, existing.id);
+    const otherActiveSuperAdmins = await countOtherActiveSuperAdmins(supabase, existing.id);
 
-    if (otherActiveAdmins < 1) {
+    if (otherActiveSuperAdmins < 1) {
       return {
         status: "error",
-        message: "This change would remove the final active admin. Add or activate another admin first.",
+        message: "This change would remove the final active super admin. Add or activate another super admin first.",
       };
     }
   }

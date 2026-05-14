@@ -110,19 +110,19 @@ export async function getAdminUserById(
   return data ? mapUserProfile(data as unknown as UserProfileRecord) : null;
 }
 
-export async function countOtherActiveAdmins(
+export async function countOtherActiveSuperAdmins(
   supabase: SupabaseClient,
   targetUserId: string,
 ) {
   const { count, error } = await supabase
     .from("profiles")
     .select("id", { count: "exact", head: true })
-    .eq("role", "admin")
+    .eq("role", "super_admin")
     .eq("status", "active")
     .neq("id", targetUserId);
 
   if (error) {
-    throw new Error("Unable to verify active admin coverage.");
+    throw new Error("Unable to verify active super admin coverage.");
   }
 
   return count ?? 0;

@@ -11,14 +11,17 @@ docs/USER_FLOWS.md
 
 This document describes the main user flows for the internal Booking System.
 
-The system supports two primary user groups:
+The system supports three user groups:
 
 1. Employees
 2. Admins
+3. Super Admins
 
 Employees use the system to view facilities, create bookings, manage their own bookings, and receive booking notifications.
 
-Admins manage facilities, users, bookings, approvals, blocked periods, maintenance closures, reports, exports, audit logs, and system settings.
+Admins manage operational booking workflows such as facilities, bookings, approvals, blocked periods, maintenance closures, reports, exports, audit logs, and email notifications.
+
+Super Admins have full system-owner access, including user/role management and system settings.
 
 ---
 
@@ -43,7 +46,6 @@ An admin can:
 
 - Do everything an employee can do
 - Manage all facilities
-- Manage all users
 - Manage all bookings
 - Approve bookings when approval mode is enabled
 - Reject bookings when approval mode is enabled
@@ -54,7 +56,16 @@ An admin can:
 - View reports
 - Export reports
 - View audit logs
+
+## 2.3 Super Admin
+
+A super admin can:
+
+- Do everything an admin can do
+- Manage all users
+- Change user roles and statuses
 - Manage system settings
+- Promote users to admin or super admin
 
 ---
 
@@ -92,7 +103,8 @@ After successful login, redirect based on role:
 | Role     | Redirect                                                                  |
 | -------- | ------------------------------------------------------------------------- |
 | Employee | `/dashboard`                                                              |
-| Admin    | `/admin/dashboard` or `/dashboard` depending on implementation preference |
+| Admin    | `/admin/dashboard`                                                        |
+| Super Admin | `/admin/dashboard`                                                     |
 
 Recommended behavior:
 
@@ -765,7 +777,7 @@ booking cancel
 
 ### Actor
 
-Admin
+Super Admin
 
 ### Entry Point
 
@@ -822,7 +834,7 @@ Admin
 
 ### Success Result
 
-Admin can view system users.
+Super Admin can view system users.
 
 ---
 
@@ -830,7 +842,7 @@ Admin can view system users.
 
 ### Actor
 
-Admin
+Super Admin
 
 ### Steps
 
@@ -846,6 +858,7 @@ Admin
 ```txt
 employee
 admin
+super_admin
 ```
 
 ### Audit Log
@@ -860,7 +873,7 @@ user role_change
 
 ### Actor
 
-Admin
+Super Admin
 
 ### Steps
 
@@ -1653,7 +1666,7 @@ Admin can review system activity.
 
 ### Actor
 
-Admin
+Super Admin
 
 ### Entry Point
 
@@ -1685,7 +1698,7 @@ Admin
 
 ### Actor
 
-Admin
+Super Admin
 
 ### Steps
 
@@ -2059,8 +2072,8 @@ Use this checklist after implementation.
 * [ ] Admin can edit facility.
 * [ ] Admin can upload facility photos.
 * [ ] Admin can archive facility.
-* [ ] Admin can change user role.
-* [ ] Admin can disable user.
+* [ ] Super Admin can change user role.
+* [ ] Super Admin can disable user.
 
 ### Approvals
 
@@ -2113,7 +2126,7 @@ The user flows are implemented when:
 8. Employees can manage their own bookings.
 9. Admins can manage all bookings.
 10. Admins can manage facilities.
-11. Admins can manage users.
+11. Super Admins can manage users.
 12. Admins can approve and reject bookings when approval mode is enabled.
 13. Required email notifications are created or sent.
 14. Reports and CSV exports work.

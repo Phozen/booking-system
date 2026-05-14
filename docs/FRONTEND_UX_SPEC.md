@@ -85,8 +85,8 @@ Design personality:
 | `/admin/reports` | Report views and CSV exports | Exists | Needs consistent export placement and responsive data display. |
 | `/admin/audit-logs` | Audit log list | Exists | Needs JSON preview/detail polish and filters. |
 | `/admin/audit-logs/[id]` | Audit log detail | Exists | Should preserve read-only treatment. |
-| `/admin/settings` | System settings | Exists | Needs clear grouping and success feedback. |
-| `/admin/users` | User management | Exists | Admins can search users, review profiles, and update role/status/profile fields. |
+| `/admin/settings` | System settings | Exists | Super Admin only. Needs clear grouping and success feedback. |
+| `/admin/users` | User management | Exists | Super Admin only. Super Admins can search users, review profiles, and update role/status/profile fields. |
 
 ## 3. Global Layout
 
@@ -175,6 +175,12 @@ Admin sidebar groups:
 - Monitoring: Email Notifications, Reports, Audit Logs
 - Configuration: Settings
 - Users: `/admin/users`.
+
+Navigation visibility:
+
+- `admin` users see operational navigation only.
+- `super_admin` users see all admin navigation, including Users and Settings.
+- Hidden super-admin-only routes should be omitted from the nav rather than shown disabled.
 
 Admin page header:
 
@@ -1435,6 +1441,14 @@ Responsive table standards:
 - See admin shell on `/admin/*`.
 - May still access employee facility browsing and booking pages if needed.
 - Account menu should clearly show admin role.
+- Admins cannot access `/admin/users` or `/admin/settings`.
+
+### Super Admins
+
+- See admin shell on `/admin/*`.
+- Can access all admin operational pages.
+- Can access super-admin-only pages: `/admin/users` and `/admin/settings`.
+- Account menu should clearly show Super Admin role.
 
 ### Disabled Or Pending Users
 

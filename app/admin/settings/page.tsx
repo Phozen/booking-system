@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getAdminSystemSettings } from "@/lib/admin/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SettingsForm } from "@/components/admin/settings/settings-form";
@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/shared/page-header";
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const { profile } = await requireAdmin();
+  const { profile } = await requireSuperAdmin();
 
   if (profile?.status !== "active") {
     redirect("/login?error=disabled");
@@ -21,7 +21,7 @@ export default async function AdminSettingsPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Admin area"
+        eyebrow="Super admin area"
         title="System settings"
         description="Configure registration, approval behavior, app identity, timezone, and reminder defaults. Secrets and provider API keys stay in environment variables, not system settings."
       />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
+import { formatAppRole } from "@/lib/auth/profile";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -27,7 +28,7 @@ export function UserMenu({
             {email ?? "Signed in"}
           </p>
           {role ? (
-            <p className="text-xs capitalize text-muted-foreground">{role}</p>
+            <p className="text-xs text-muted-foreground">{formatAppRole(role)}</p>
           ) : null}
         </div>
       ) : null}

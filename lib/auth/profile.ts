@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type AppRole = "employee" | "admin";
+export type AppRole = "employee" | "admin" | "super_admin";
 
 export type ProfileSession = {
   role: AppRole;
@@ -8,7 +8,25 @@ export type ProfileSession = {
 };
 
 export function getDashboardPathForRole(role: AppRole) {
-  return role === "admin" ? "/admin/dashboard" : "/dashboard";
+  return isAdminRole(role) ? "/admin/dashboard" : "/dashboard";
+}
+
+export function isAdminRole(role: string | null | undefined): role is "admin" | "super_admin" {
+  return role === "admin" || role === "super_admin";
+}
+
+export function isSuperAdminRole(role: string | null | undefined): role is "super_admin" {
+  return role === "super_admin";
+}
+
+export function formatAppRole(role: string | null | undefined) {
+  const labels: Record<AppRole, string> = {
+    employee: "Employee",
+    admin: "Admin",
+    super_admin: "Super Admin",
+  };
+
+  return labels[role as AppRole] ?? "Employee";
 }
 
 export async function getProfileSession(
@@ -27,7 +45,7 @@ export async function getProfileSession(
     return null;
   }
 
-  const role = data.role === "admin" ? "admin" : "employee";
+  const role = isAdminRole(data.role) ? data.role : "employee";
   const status =
     data.status === "disabled" || data.status === "pending"
       ? data.status

@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   getDashboardPathForRole,
   getProfileSession,
+  isAdminRole,
 } from "@/lib/auth/profile";
 
 const authPaths = new Set(["/login", "/register", "/reset-password"]);
@@ -114,7 +115,7 @@ export async function updateSession(request: NextRequest) {
     );
   }
 
-  if (pathname.startsWith("/admin") && role !== "admin") {
+  if (pathname.startsWith("/admin") && !isAdminRole(role)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

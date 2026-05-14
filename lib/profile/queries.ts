@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type ProfileRole = "employee" | "admin";
+export type ProfileRole = "employee" | "admin" | "super_admin";
 export type ProfileStatus = "active" | "disabled" | "pending";
 
 type ProfileRecord = {
@@ -75,4 +75,3 @@ export async function getOwnProfile(
 
   return data ? mapUserProfile(data as unknown as ProfileRecord) : null;
 }
-

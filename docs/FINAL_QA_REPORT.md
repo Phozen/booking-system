@@ -95,9 +95,17 @@ Employees:
 
 Admins:
 
-- Can access admin routes and admin actions.
+- Can access operational admin routes and admin actions.
 - Can access employee routes if required for operational use.
-- Can manage users, facilities/photos, bookings, approvals, blocked dates, maintenance, reports, audit logs, settings, and email queue processing.
+- Can manage facilities/photos, bookings, approvals, blocked dates, maintenance, reports, audit logs, and email queue processing.
+- Cannot manage users/roles or system settings.
+
+Super Admins:
+
+- Can access all admin routes and actions.
+- Can manage users, roles, statuses, and system settings.
+- Cannot demote or disable themselves through user management.
+- Cannot remove the final active super admin.
 
 Disabled or pending users:
 
@@ -109,11 +117,11 @@ Disabled or pending users:
 Reviewed critical action paths:
 
 - Profile updates use `requireUser()`, update only the current user's safe profile fields, and audit the update.
-- Admin user management uses `requireAdmin()`, validates input, blocks self role/status changes, protects final active admin access, and audits changes.
+- Admin user management uses `requireSuperAdmin()`, validates input, blocks self role/status changes, protects final active super admin access, and audits changes.
 - Facility photo upload/set-primary/delete use `requireAdmin()`, validate IDs, validate file type and size, use sanitized storage paths, and audit photo changes.
 - Employee booking creation and cancellation use `requireUser()`, active profile checks, server validation, ownership checks, and database-backed conflict protection.
 - Admin booking approve/reject/cancel actions use `requireAdmin()`, validate remarks, check booking state, and audit/email side effects.
-- Settings updates use `requireAdmin()`, validate settings, update `system_settings`, and write `settings_change` audit logs.
+- Settings updates use `requireSuperAdmin()`, validate settings, update `system_settings`, and write `settings_change` audit logs.
 - Email queue processing and retry actions use `requireAdmin()` and audit processing activity.
 - Report export route helpers use active-admin authorization before generating CSV and export audit records.
 

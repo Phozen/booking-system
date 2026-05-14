@@ -205,12 +205,18 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     employee: {
       label: "Employee",
       description: "Regular employee account.",
-      className: statusClasses.sky,
-      dotClassName: statusDots.sky,
+      className: statusClasses.slate,
+      dotClassName: statusDots.slate,
     },
     admin: {
       label: "Admin",
-      description: "Administrator account.",
+      description: "Operational administrator account.",
+      className: statusClasses.violet,
+      dotClassName: statusDots.violet,
+    },
+    super_admin: {
+      label: "Super Admin",
+      description: "System owner account with full administrative access.",
       className: statusClasses.violet,
       dotClassName: statusDots.violet,
     },

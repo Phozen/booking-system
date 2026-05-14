@@ -63,7 +63,7 @@ Security reminders:
 ## Supabase
 
 - [ ] Production Supabase project is selected.
-- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0012`.
+- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0013`.
 - [ ] `npx.cmd supabase db push` has been run successfully.
 - [ ] RLS is enabled on application tables.
 - [ ] `bookings_no_overlapping_active` exclusion constraint exists.
@@ -77,19 +77,19 @@ Security reminders:
 - [ ] Allowed email domains are reviewed.
 - [ ] Default approval settings are reviewed.
 
-## First Admin
+## First Super Admin
 
 - [ ] First user account is registered.
-- [ ] First admin has been promoted through Supabase SQL Editor:
+- [ ] First super admin has been promoted through Supabase SQL Editor:
 
 ```sql
 update public.profiles
-set role = 'admin', status = 'active'
+set role = 'super_admin', status = 'active'
 where email = 'YOUR_ADMIN_EMAIL@example.com';
 ```
 
 - [ ] Admin can log in and open `/admin/dashboard`.
-- [ ] Admin can use `/admin/users` for everyday role/status changes after first promotion.
+- [ ] Super Admin can use `/admin/users` for everyday role/status changes after first promotion.
 
 ## Supabase Auth
 

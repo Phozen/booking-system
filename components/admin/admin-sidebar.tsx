@@ -27,7 +27,7 @@ export function AdminSidebar({
           </p>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <AdminNavigation />
+          <AdminNavigation role={role} />
         </div>
         <UserMenu email={email} role={role} className="grid gap-3 border-t border-sidebar-border pt-4" />
       </div>

@@ -2,7 +2,7 @@
 
 Internal company facility booking system built with Next.js, Supabase, and Resend-ready email notifications.
 
-The app lets employees browse facilities, create bookings, manage their own bookings, respond to invitations, and view calendars. Admins can manage facilities, users, bookings, approvals, availability blocks, maintenance closures, reports, audit logs, settings, email notifications, and facility photos.
+The app lets employees browse facilities, create bookings, manage their own bookings, respond to invitations, and view calendars. Admins manage daily booking operations, facilities, approvals, availability blocks, maintenance closures, reports, audit logs, email notifications, and facility photos. Super Admins have full system-owner access, including user/role management and system settings.
 
 ## Stack
 
@@ -42,10 +42,6 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Filter by status/facility.
   - Approve, reject, or cancel bookings where allowed.
   - View attendee invitations.
-- User management:
-  - Search and filter users.
-  - Update role, status, and safe profile fields.
-  - Prevent unsafe self-disable and self-demotion flows.
 - Availability management:
   - Create, update, and deactivate blocked dates.
   - Create, update, complete, and cancel maintenance closures.
@@ -60,6 +56,14 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Cancelled bookings.
   - Audit logs.
 - Audit log search and detail views.
+### Super Admin Features
+
+- All admin operational features.
+- User management:
+  - Search and filter users.
+  - Update role, status, and safe profile fields.
+  - Promote users to Admin or Super Admin.
+  - Prevent unsafe self-disable and final-super-admin removal flows.
 - System settings:
   - App name, company name, contact email.
   - Registration and allowed email domains.
@@ -76,13 +80,13 @@ The app lets employees browse facilities, create bookings, manage their own book
 | Bookings | Create own, read own/invited, cancel own eligible bookings | Read all, approve, reject, cancel |
 | Invitations | Invite users to own bookings, accept/decline own invitations | View attendee status on booking detail |
 | Calendar | View own/invited bookings; optionally view limited all-company bookings | View all bookings or own bookings |
-| Users/profiles | Read/update own safe profile fields | Read/search/update users, roles, statuses, safe profile fields |
+| Users/profiles | Read/update own safe profile fields | Super Admin only: read/search/update users, roles, statuses, safe profile fields |
 | Blocked dates | Read active availability impact indirectly through booking validation | Create, read, update, deactivate |
 | Maintenance closures | Read active availability impact indirectly through booking validation | Create, read, update, complete, cancel |
 | Email notifications | No direct access | Read, process queued, retry failed |
 | Reports/exports | No direct access | Read reports, export CSV |
 | Audit logs | No direct access | Read and filter |
-| Settings | No direct access | Read/update non-secret system settings |
+| Settings | No direct access | Super Admin only: read/update non-secret system settings |
 
 ## Key Routes
 
@@ -192,6 +196,7 @@ Current migration set:
 0010_booking_invitations.sql
 0011_fix_booking_invitation_rls_recursion.sql
 0012_calendar_visibility_setting.sql
+0013_split_admin_roles.sql
 ```
 
 Typical commands:
@@ -221,17 +226,17 @@ Expected behavior:
 
 See `docs/STORAGE_SETUP.md` for full bucket setup and manual verification.
 
-### First Admin Setup
+### First Super Admin Setup
 
 After the first user registers, promote that profile in Supabase SQL Editor:
 
 ```sql
 update public.profiles
-set role = 'admin', status = 'active'
+set role = 'super_admin', status = 'active'
 where email = 'YOUR_ADMIN_EMAIL@example.com';
 ```
 
-After that, use `/admin/users` for everyday role and status management.
+After that, use `/admin/users` for everyday role and status management. Use `admin` for operational staff and `super_admin` for system owners.
 
 ### Run Locally
 
@@ -296,11 +301,12 @@ See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environmen
 
 - Supabase Auth handles identity.
 - `public.profiles` stores app role and status.
-- Active employee/admin status is required for protected areas.
+- Active employee/admin/super-admin status is required for protected areas.
 - Employees cannot access `/admin/*`.
 - Employees can manage only their own bookings and invitations.
 - Employee all-company calendar visibility is settings-gated and shows limited details for unrelated bookings.
-- Admin operations require active admin authorization.
+- Operational admin pages require active `admin` or `super_admin` authorization.
+- `/admin/users` and `/admin/settings` require active `super_admin` authorization.
 - Supabase RLS remains enabled on application tables.
 - Critical actions create audit logs where applicable.
 - Booking creation uses database-backed conflict prevention to protect against race conditions.

@@ -67,7 +67,8 @@ Create enum types for consistent status and role values.
 ```sql
 create type user_role as enum (
   'employee',
-  'admin'
+  'admin',
+  'super_admin'
 );
 
 create type user_status as enum (
@@ -221,6 +222,8 @@ create table public.profiles (
 
 * `id` must match `auth.users.id`.
 * Role-based authorization should use this table.
+* `admin` is for daily operational administration.
+* `super_admin` is for IT/system owners and security-sensitive configuration.
 * Disabled users should not be able to access protected pages.
 
 ### Indexes
@@ -889,14 +892,14 @@ for each row execute function public.handle_new_user();
 
 ### Notes
 
-* The first admin may need to be promoted manually in Supabase SQL editor.
-* Later, admins can manage roles through the admin UI.
+* The first super admin may need to be promoted manually in Supabase SQL editor.
+* Later, super admins can manage roles through the admin UI.
 
-Example first-admin promotion:
+Example first-super-admin promotion:
 
 ```sql
 update public.profiles
-set role = 'admin'
+set role = 'super_admin'
 where email = 'admin@example.com';
 ```
 
@@ -1193,7 +1196,7 @@ alter table public.export_logs enable row level security;
 
 ---
 
-## 26. Helper Function: Is Admin
+## 26. Helper Functions: Admin Roles
 
 ```sql
 create or replace function public.is_admin()
@@ -1206,11 +1209,34 @@ as $$
     select 1
     from public.profiles
     where id = auth.uid()
-      and role = 'admin'
+      and role::text in ('admin', 'super_admin')
       and status = 'active'
   );
 $$;
 ```
+
+`public.is_admin()` returns true for active `admin` and `super_admin` profiles. Use it for operational admin policies.
+
+Post-MVP role split adds a super-admin-only helper:
+
+```sql
+create or replace function public.is_super_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role::text = 'super_admin'
+      and status = 'active'
+  );
+$$;
+```
+
+Use `public.is_super_admin()` for user/role management and system settings policies.
 
 ---
 
@@ -1260,11 +1286,11 @@ with check (
   and role = role
 );
 
-create policy "Admins can update profiles"
+create policy "Super admins can update profiles"
 on public.profiles
 for update
-using (public.is_admin())
-with check (public.is_admin());
+using (public.is_super_admin())
+with check (public.is_super_admin());
 ```
 
 ### 28.2 Facilities
@@ -1493,16 +1519,16 @@ using (
   and is_public = true
 );
 
-create policy "Admins can view all settings"
+create policy "Super admins can view all settings"
 on public.system_settings
 for select
-using (public.is_admin());
+using (public.is_super_admin());
 
-create policy "Admins can manage settings"
+create policy "Super admins can manage settings"
 on public.system_settings
 for all
-using (public.is_admin())
-with check (public.is_admin());
+using (public.is_super_admin())
+with check (public.is_super_admin());
 ```
 
 ### 28.14 Export Logs
@@ -1682,7 +1708,7 @@ lib/
 10. Treat email sending as a queue/history system, not just a direct function call.
 11. Store email provider API keys only in environment variables.
 12. Use seed data for the initial five facilities.
-13. The first admin can be manually promoted through SQL.
+13. The first super admin can be manually promoted through SQL.
 14. Add indexes before building reports.
 15. Run `npm run build` after implementing database-dependent TypeScript code.
 

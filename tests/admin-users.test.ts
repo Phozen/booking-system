@@ -12,12 +12,12 @@ describe("admin user management validation", () => {
     expect(
       parseUserFilters({
         search: "  jane@example.com  ",
-        role: "admin",
+        role: "super_admin",
         status: "active",
       }),
     ).toEqual({
       search: "jane@example.com",
-      role: "admin",
+      role: "super_admin",
       status: "active",
     });
   });
@@ -32,7 +32,7 @@ describe("admin user management validation", () => {
       fullName: "Jane Employee",
       department: "Operations",
       phone: "+60 12 345 6789",
-      role: "employee",
+      role: "super_admin",
       status: "active",
     });
 
@@ -44,7 +44,7 @@ describe("admin user management validation", () => {
       isSelfRoleOrStatusChange({
         actorUserId: "user-1",
         targetUserId: "user-1",
-        existingRole: "admin",
+        existingRole: "super_admin",
         existingStatus: "active",
         nextRole: "employee",
         nextStatus: "active",
@@ -55,7 +55,7 @@ describe("admin user management validation", () => {
       isSelfRoleOrStatusChange({
         actorUserId: "user-1",
         targetUserId: "user-2",
-        existingRole: "admin",
+        existingRole: "super_admin",
         existingStatus: "active",
         nextRole: "employee",
         nextStatus: "disabled",
@@ -63,10 +63,10 @@ describe("admin user management validation", () => {
     ).toBe(false);
   });
 
-  it("detects changes that remove active admin access", () => {
+  it("detects changes that remove active super admin access", () => {
     expect(
       removesActiveAdminAccess({
-        existingRole: "admin",
+        existingRole: "super_admin",
         existingStatus: "active",
         nextRole: "employee",
         nextStatus: "active",
@@ -75,7 +75,7 @@ describe("admin user management validation", () => {
 
     expect(
       removesActiveAdminAccess({
-        existingRole: "admin",
+        existingRole: "super_admin",
         existingStatus: "active",
         nextRole: "admin",
         nextStatus: "disabled",
@@ -84,10 +84,10 @@ describe("admin user management validation", () => {
 
     expect(
       removesActiveAdminAccess({
-        existingRole: "employee",
+        existingRole: "admin",
         existingStatus: "active",
-        nextRole: "admin",
-        nextStatus: "active",
+        nextRole: "employee",
+        nextStatus: "disabled",
       }),
     ).toBe(false);
   });

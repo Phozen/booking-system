@@ -45,6 +45,7 @@ export function AdminShell({
               variant="admin"
               label="Menu"
               footer={mobileFooter}
+              role={role}
               className="lg:hidden"
             />
           </div>

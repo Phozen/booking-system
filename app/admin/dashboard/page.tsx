@@ -9,20 +9,43 @@ import {
 } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
+import { isSuperAdminRole } from "@/lib/auth/profile";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const { user } = await requireAdmin();
+  const { user, profile } = await requireAdmin();
+  const isSuperAdmin = isSuperAdminRole(profile.role);
+  const shortcuts = [
+    {
+      href: "/admin/email-notifications",
+      label: "Email queue",
+      icon: Mail,
+    },
+    {
+      href: "/admin/reports",
+      label: "Reports",
+      icon: BarChart3,
+    },
+    ...(isSuperAdmin
+      ? [
+          {
+            href: "/admin/settings",
+            label: "Settings",
+            icon: Settings,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Admin area"
         title="Admin dashboard"
-        description={`Signed in as ${user.email}. Use the admin navigation to manage facilities, bookings, approvals, reports, and settings.`}
+        description={`Signed in as ${user.email}. Use the admin navigation to manage facilities, bookings, approvals, reports, and operational workflows.`}
       />
 
       <section className="grid gap-3 md:grid-cols-3">
@@ -87,32 +110,25 @@ export default async function AdminDashboardPage() {
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               Use these sections for monitoring, exports, notifications, and
-              system configuration.
+              daily operational follow-up.
             </p>
           </div>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link
-            href="/admin/email-notifications"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <Mail data-icon="inline-start" />
-            Email queue
-          </Link>
-          <Link
-            href="/admin/reports"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <BarChart3 data-icon="inline-start" />
-            Reports
-          </Link>
-          <Link
-            href="/admin/settings"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <Settings data-icon="inline-start" />
-            Settings
-          </Link>
+          {shortcuts.map((shortcut) => {
+            const Icon = shortcut.icon;
+
+            return (
+              <Link
+                key={shortcut.href}
+                href={shortcut.href}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                <Icon data-icon="inline-start" />
+                {shortcut.label}
+              </Link>
+            );
+          })}
         </div>
       </section>
     </main>

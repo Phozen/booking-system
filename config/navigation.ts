@@ -36,26 +36,51 @@ export const adminNavigation = [
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
-  { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix" },
+  { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix", superAdminOnly: true },
   { title: "Blocked Dates", href: "/admin/blocked-dates", icon: Blocks, match: "prefix" },
   { title: "Maintenance", href: "/admin/maintenance", icon: Clock, match: "prefix" },
   { title: "Email Notifications", href: "/admin/email-notifications", icon: Mail, match: "prefix" },
   { title: "Reports", href: "/admin/reports", icon: BarChart3, match: "prefix" },
   { title: "Audit Logs", href: "/admin/audit-logs", icon: FileClock, match: "prefix" },
-  { title: "Settings", href: "/admin/settings", icon: Settings, match: "prefix" },
+  { title: "Settings", href: "/admin/settings", icon: Settings, match: "prefix", superAdminOnly: true },
 ] as const;
 
-export const adminNavigationGroups = [
-  {
-    title: "Overview",
-    items: adminNavigation.slice(0, 2),
-  },
-  {
-    title: "Operations",
-    items: adminNavigation.slice(2, 8),
-  },
-  {
-    title: "Governance",
-    items: adminNavigation.slice(8),
-  },
-] as const;
+export function getAdminNavigationGroups(role?: string | null) {
+  const isSuperAdmin = role === "super_admin";
+  const visibleItems = adminNavigation.filter(
+    (item) => !("superAdminOnly" in item) || !item.superAdminOnly || isSuperAdmin,
+  );
+
+  return [
+    {
+      title: "Overview",
+      items: visibleItems.slice(0, 2),
+    },
+    {
+      title: "Operations",
+      items: visibleItems.filter((item) =>
+        [
+          "/admin/bookings",
+          "/admin/approvals",
+          "/admin/facilities",
+          "/admin/users",
+          "/admin/blocked-dates",
+          "/admin/maintenance",
+        ].includes(item.href),
+      ),
+    },
+    {
+      title: "Governance",
+      items: visibleItems.filter((item) =>
+        [
+          "/admin/email-notifications",
+          "/admin/reports",
+          "/admin/audit-logs",
+          "/admin/settings",
+        ].includes(item.href),
+      ),
+    },
+  ].filter((group) => group.items.length > 0);
+}
+
+export const adminNavigationGroups = getAdminNavigationGroups("super_admin");

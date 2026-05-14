@@ -13,10 +13,13 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 ## Admin Authorization Checklist
 
 - [x] Admin pages call `requireAdmin()` or an equivalent active-admin helper before loading privileged data.
+- [x] Super-admin-only pages call `requireSuperAdmin()` or an equivalent active-super-admin helper before loading user/setting management data.
 - [x] Admin server actions verify active admin authorization before privileged writes.
+- [x] User-management and settings server actions verify active super admin authorization before privileged writes.
 - [x] Report export route handlers verify active admin authorization before returning CSV data.
 - [x] Employees are redirected away from `/admin/*` routes.
 - [x] Admin user-management actions keep role/status changes server-side and audit logged.
+- [x] Admin users cannot access `/admin/users` or `/admin/settings`; only super admins can.
 
 ## RLS Checklist
 
@@ -31,6 +34,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Booking immutability during employee cancellation is backed by a database trigger.
 - [x] Employees cannot view audit logs, email notifications, system settings, or export logs except public settings where intended.
 - [x] Admins can manage required operational data through admin-only policies and server-side actions.
+- [x] Super admins can manage users, roles, statuses, and system settings through super-admin-only policies and server-side actions.
 
 ## Service Role Checklist
 
@@ -61,7 +65,8 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 ## Database Function Checklist
 
 - [x] Security definer functions set `search_path = public`.
-- [x] `public.is_admin()` requires active admin profile status.
+- [x] `public.is_admin()` requires active admin or super admin profile status.
+- [x] `public.is_super_admin()` requires active super admin profile status.
 - [x] `public.is_active_user()` requires active profile status.
 - [x] `public.create_booking()` checks active user, ownership, active facility, capacity, blocked periods, maintenance closures, and valid time range.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
@@ -80,6 +85,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Enable all-company calendar visibility and confirm unrelated employee calendar items show limited details only and do not link to booking detail.
 - [ ] Set a profile status to `disabled`; confirm protected pages are blocked.
 - [ ] Log in as admin; confirm admin pages still work.
+- [ ] Log in as admin; confirm `/admin/users` and `/admin/settings` are hidden and denied.
+- [ ] Log in as super admin; confirm `/admin/users` and `/admin/settings` are available.
+- [ ] Attempt to demote or disable the final active super admin; expect denial.
 - [ ] Confirm no client component imports `createAdminClient()`.
 - [ ] Confirm report CSV export is blocked for non-admin users.
 

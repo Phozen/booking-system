@@ -7,7 +7,7 @@ Use this checklist after migrations are applied and the app is running with real
 ## Preflight
 
 - [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.
-- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0009`.
+- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0013`.
 - [ ] Run `npm.cmd run lint`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
@@ -18,7 +18,7 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Open `/login`; confirm email/password form renders.
 - [ ] Log in with valid employee credentials; expect `/dashboard`.
-- [ ] Log in with valid admin credentials; expect `/admin/dashboard`.
+- [ ] Log in with valid admin or super admin credentials; expect `/admin/dashboard`.
 - [ ] Try invalid credentials; expect a generic friendly error.
 - [ ] Use logout; expect redirect to `/login`.
 - [ ] Open `/reset-password`; submit a valid email; expect generic reset success messaging.
@@ -38,7 +38,10 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Employee can access `/dashboard`, `/facilities`, `/bookings/new`, and `/my-bookings`.
 - [ ] Employee can access `/profile`.
 - [ ] Employee cannot access `/admin/facilities`, `/admin/bookings`, `/admin/approvals`, `/admin/reports`, `/admin/audit-logs`, or `/admin/settings`.
-- [ ] Admin can access all admin pages.
+- [ ] Admin can access operational admin pages: bookings, approvals, facilities, calendar, blocked dates, maintenance, email notifications, reports, and audit logs.
+- [ ] Admin cannot access `/admin/users` or `/admin/settings`.
+- [ ] Admin navigation does not show Users or Settings.
+- [ ] Super Admin can access all admin pages, including `/admin/users` and `/admin/settings`.
 - [ ] Admin can access `/profile` and update only their own safe profile fields.
 - [ ] Admin can still access employee facility browsing pages if needed.
 - [ ] Report export routes redirect or deny non-admin users.
@@ -235,7 +238,8 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## System Settings
 
-- [ ] Open `/admin/settings`; confirm seeded/default settings display.
+- [ ] Open `/admin/settings` as Super Admin; confirm seeded/default settings display.
+- [ ] Open `/admin/settings` as Admin; confirm access is denied or redirected.
 - [ ] Update app name or company name; confirm value persists.
 - [ ] Confirm updated app name appears on the homepage, auth shell, employee header, and admin shell after refresh.
 - [ ] Confirm company name appears in auth/homepage copy, or a neutral fallback appears when blank.
@@ -265,6 +269,9 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm employees cannot cancel, manage, or open detail pages for unrelated all-company calendar bookings.
 - [ ] Confirm employees cannot view audit logs, export logs, email notifications, or private settings.
 - [ ] Confirm active admins can manage expected admin records.
+- [ ] Confirm only super admins can update profiles through user management.
+- [ ] Confirm only super admins can update system settings.
+- [ ] Confirm the final active super admin cannot be demoted or disabled.
 - [ ] Confirm storage bucket `facility-photos` is private and policies match `docs/SECURITY_CHECKLIST.md`.
 
 ## Production Build

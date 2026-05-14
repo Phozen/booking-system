@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   adminNavigationGroups,
   employeeNavigation,
+  getAdminNavigationGroups,
 } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
@@ -77,13 +78,17 @@ export function EmployeeNavigation({
 export function AdminNavigation({
   compact = true,
   onNavigate,
+  role,
 }: {
   compact?: boolean;
   onNavigate?: () => void;
+  role?: string | null;
 }) {
+  const navigationGroups = getAdminNavigationGroups(role);
+
   return (
     <nav aria-label="Admin navigation" className="grid gap-5">
-      {adminNavigationGroups.map((group) => (
+      {navigationGroups.map((group) => (
         <div key={group.title} className="grid gap-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {group.title}

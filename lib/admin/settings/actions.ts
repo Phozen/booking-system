@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLog } from "@/lib/audit/log";
 import {
   appSettingsToRows,
@@ -24,12 +24,12 @@ export async function updateSystemSettingsAction(
   _previousState: SettingsActionResult,
   formData: FormData,
 ): Promise<SettingsActionResult> {
-  const { user, profile } = await requireAdmin();
+  const { user, profile } = await requireSuperAdmin();
 
   if (!user || profile?.status !== "active") {
     return {
       status: "error",
-      message: "You must be signed in as an active admin.",
+      message: "You must be signed in as an active super admin.",
     };
   }
 

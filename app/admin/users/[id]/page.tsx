@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getAdminUserById } from "@/lib/admin/users/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UserDetail } from "@/components/admin/users/user-detail";
@@ -17,7 +17,7 @@ export default async function AdminUserDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { user: currentUser } = await requireAdmin();
+  const { user: currentUser } = await requireSuperAdmin();
   const { id } = await params;
   const supabase = createAdminClient();
   const user = await getAdminUserById(supabase, id);
@@ -29,7 +29,7 @@ export default async function AdminUserDetailPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Admin area"
+        eyebrow="Super admin area"
         title={user.fullName || user.email}
         description={
           <span className="break-all">

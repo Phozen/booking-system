@@ -102,18 +102,23 @@ function getConfirmCopy({
   }
 
   if (selectedRole !== initialRole) {
+    const grantsSuperAdmin = selectedRole === "super_admin";
+    const grantsAdmin = selectedRole === "admin";
+
     return {
-      title:
-        selectedRole === "admin"
+      title: grantsSuperAdmin
+        ? "Grant super admin access?"
+        : grantsAdmin
           ? "Grant admin access?"
           : "Remove admin access?",
       triggerLabel: "Save role change",
       confirmLabel: "Save role change",
       cancelLabel: "Keep current role",
-      destructive: selectedRole !== "admin",
-      description:
-        selectedRole === "admin"
-          ? "This user will be able to manage bookings, facilities, reports, settings, audit logs, and users."
+      destructive: selectedRole === "employee",
+      description: grantsSuperAdmin
+        ? "This user will be able to manage users, roles, settings, and all operational admin workflows."
+        : grantsAdmin
+          ? "This user will be able to manage daily booking operations, facilities, approvals, reports, and audit logs."
           : "This user will lose access to admin pages and continue as an employee.",
     };
   }
@@ -305,8 +310,8 @@ export function UserEditForm({
               ))}
             </select>
             <FormFieldHelper id="role-helper">
-              Admin users can manage bookings, facilities, reports, settings,
-              audit logs, and users.
+              Admin users manage daily operations. Super Admin users can also
+              manage users, roles, and system settings.
             </FormFieldHelper>
             <FormFieldError id="role-error">{fieldErrors.role}</FormFieldError>
           </div>

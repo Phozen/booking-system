@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getAdminUsers } from "@/lib/admin/users/queries";
 import { parseUserFilters } from "@/lib/admin/users/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,7 +17,7 @@ export default async function AdminUsersPage({
     status?: string | string[];
   }>;
 }) {
-  await requireAdmin();
+  await requireSuperAdmin();
   const filters = parseUserFilters(await searchParams);
   const supabase = createAdminClient();
   const users = await getAdminUsers(supabase, filters);
@@ -26,7 +26,7 @@ export default async function AdminUsersPage({
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Admin area"
+        eyebrow="Super admin area"
         title="User management"
         description="Search users, review account status, and update roles or access status without using the Supabase SQL editor."
       />

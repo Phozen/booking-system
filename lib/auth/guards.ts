@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 
-import { getDashboardPathForRole } from "@/lib/auth/profile";
+import {
+  getDashboardPathForRole,
+  isAdminRole,
+  isSuperAdminRole,
+} from "@/lib/auth/profile";
 import { getCurrentAuthState, type AuthState } from "@/lib/auth/session";
 
 type ActiveAuthState = AuthState & {
@@ -30,7 +34,18 @@ export async function requireAdmin() {
   const authState = await requireUser();
   const role = authState.profile?.role ?? "employee";
 
-  if (role !== "admin") {
+  if (!isAdminRole(role)) {
+    redirect(getDashboardPathForRole(role));
+  }
+
+  return authState;
+}
+
+export async function requireSuperAdmin() {
+  const authState = await requireUser();
+  const role = authState.profile?.role ?? "employee";
+
+  if (!isSuperAdminRole(role)) {
     redirect(getDashboardPathForRole(role));
   }
 
