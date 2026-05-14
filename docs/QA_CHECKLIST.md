@@ -206,6 +206,10 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Process queued emails with missing provider config; confirm app does not crash and records show clear failure.
 - [ ] Retry failed notifications after fixing config.
 - [ ] Optional: configure Resend and confirm a real email sends and `sent_at` is populated.
+- [ ] Optional: configure SMTP locally or in Vercel and confirm a real email sends and `sent_at` is populated.
+- [ ] Optional Microsoft 365 SMTP values: `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, `SMTP_USER=<service-mailbox>`, `SMTP_PASSWORD=<secret>`.
+- [ ] If Microsoft 365 SMTP fails, confirm `last_error` is safe and mentions authentication, connection, or TLS without exposing the SMTP password.
+- [ ] Confirm Supabase Auth emails are understood as separate from the app email queue and are configured in Supabase Dashboard if needed.
 
 ## Reports
 
@@ -260,6 +264,7 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Confirm service role key is never used in client components.
 - [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
+- [ ] Confirm `SMTP_PASSWORD` is not exposed to browser bundles.
 - [ ] Confirm active employees can select their own bookings and safe invited booking details only.
 - [ ] Confirm employees cannot insert direct booking rows and must use `public.create_booking()`.
 - [ ] Confirm employees cannot update other users' bookings.

@@ -1089,6 +1089,7 @@ Mobile behavior:
 Purpose:
 
 - Monitor and manually process queued/failed email notifications.
+- Provider configuration is environment-based. The UI may show provider/status outcomes such as Resend, SMTP, or configuration missing, but must never expose provider secrets.
 
 Primary actions:
 
@@ -1122,6 +1123,7 @@ Empty state:
 Mobile behavior:
 
 - Cards with status, recipient, subject, attempts, and error preview.
+- Error previews should be safe, plain-language messages for provider configuration, SMTP authentication, connection, or TLS failures.
 
 ### `/admin/reports`
 

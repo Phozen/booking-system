@@ -539,12 +539,20 @@ Implementation should support a configurable email provider.
 Potential providers:
 
 - Resend
+- SMTP provider
 - SendGrid
 - Mailgun
-- SMTP provider
 - Supabase Edge Function with SMTP integration
 
 Email provider settings must be stored securely in environment variables.
+
+Current app notification providers:
+
+- `EMAIL_PROVIDER=resend` for Resend.
+- `EMAIL_PROVIDER=smtp` for SMTP providers such as Microsoft 365.
+- Blank or `EMAIL_PROVIDER=none` keeps delivery disabled while preserving queued notification records.
+
+Supabase Auth emails such as signup confirmation and password reset are configured separately in Supabase Auth settings.
 
 ---
 

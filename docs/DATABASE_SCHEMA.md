@@ -649,6 +649,8 @@ create index maintenance_closures_time_range_gist_idx on public.maintenance_clos
 
 Tracks queued, sent, and failed notification emails.
 
+The `provider` field records the app notification provider used for a send attempt, such as `resend`, `smtp`, or `noop`. Provider credentials are not stored in the database; Resend and SMTP secrets are environment variables only.
+
 ```sql
 create table public.email_notifications (
   id uuid primary key default uuid_generate_v4(),

@@ -2,10 +2,12 @@ import "server-only";
 
 import { Resend } from "resend";
 
+import { createSmtpProvider } from "@/lib/email/providers/smtp";
+import { normalizeEmailProviderName } from "@/lib/email/smtp-config";
 import type { EmailMessage, EmailProvider, EmailSendResult } from "@/lib/email/types";
 
 function configuredProviderName() {
-  return (process.env.EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  return normalizeEmailProviderName(process.env.EMAIL_PROVIDER);
 }
 
 function configErrorProvider(message: string): EmailProvider {
@@ -67,23 +69,29 @@ export function getEmailProvider(): EmailProvider {
   const provider = configuredProviderName();
   const apiKey = process.env.EMAIL_API_KEY?.trim();
 
-  if (!provider) {
+  if (provider === "none") {
     return configErrorProvider(
-      "Email provider is not configured. Set EMAIL_PROVIDER=resend, EMAIL_API_KEY, and EMAIL_FROM.",
-    );
-  }
-
-  if (!apiKey) {
-    return configErrorProvider(
-      "Email API key is missing. EMAIL_API_KEY must be configured server-side.",
+      "Email provider is not configured. Set EMAIL_PROVIDER=resend or EMAIL_PROVIDER=smtp, then configure EMAIL_FROM and provider credentials.",
     );
   }
 
   if (provider === "resend") {
+    if (!apiKey) {
+      return configErrorProvider(
+        "Email API key is missing. EMAIL_API_KEY must be configured server-side for Resend.",
+      );
+    }
+
     return createResendProvider(apiKey);
   }
 
-  return configErrorProvider(`Unsupported email provider: ${provider}.`);
+  if (provider === "smtp") {
+    return createSmtpProvider();
+  }
+
+  return configErrorProvider(
+    "Unsupported email provider configured. Use EMAIL_PROVIDER=resend, EMAIL_PROVIDER=smtp, or leave it blank.",
+  );
 }
 
 export function getEmailFromAddress() {

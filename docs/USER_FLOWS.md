@@ -1806,6 +1806,18 @@ Email provider fails to send email.
 
 A successful booking should not be rolled back only because an email failed.
 
+### Provider Configuration
+
+Booking and invitation notifications use the app email queue. The app queue can run with:
+
+```txt
+EMAIL_PROVIDER=resend
+EMAIL_PROVIDER=smtp
+EMAIL_PROVIDER=none
+```
+
+Supabase Auth messages such as signup confirmation and password reset are separate and are configured in Supabase Dashboard Authentication SMTP settings.
+
 ---
 
 ## 21. Booking Status Lifecycle

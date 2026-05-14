@@ -1,6 +1,6 @@
 # Booking System
 
-Internal company facility booking system built with Next.js, Supabase, and Resend-ready email notifications.
+Internal company facility booking system built with Next.js, Supabase, and Resend/SMTP-ready email notifications.
 
 The app lets employees browse facilities, create bookings, manage their own bookings, respond to invitations, and view calendars. Admins manage daily booking operations, facilities, approvals, availability blocks, maintenance closures, reports, audit logs, email notifications, and facility photos. Super Admins have full system-owner access, including user/role management and system settings.
 
@@ -10,7 +10,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - React 19
 - Supabase Auth, Postgres, RLS, and Storage
 - Tailwind CSS and shadcn/ui-style components
-- Resend-ready email notification queue
+- Resend or SMTP-ready email notification queue
 - Vitest for unit tests
 - Vercel for deployment
 
@@ -167,15 +167,24 @@ SYSTEM_CONTACT_EMAIL=
 EMAIL_PROVIDER=
 EMAIL_API_KEY=
 EMAIL_FROM=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_REQUIRE_TLS=
+SMTP_USER=
+SMTP_PASSWORD=
 ```
 
 Security notes:
 
 - `NEXT_PUBLIC_*` values are browser-exposed.
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be used in client components.
-- `EMAIL_API_KEY` is server-only.
+- `EMAIL_API_KEY` is server-only and used by Resend.
+- `SMTP_PASSWORD` is server-only and used by the SMTP provider.
 - Real secrets belong in `.env.local` locally and the Vercel dashboard in production. Do not commit them.
-- Email variables can stay blank until Resend is configured. Email processing will fail safely with a configuration message.
+- `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`.
+- Email variables can stay blank until a provider is configured. Email processing will fail safely with a configuration message.
+- Microsoft 365 SMTP commonly uses `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, and a dedicated service mailbox.
 
 ### Database Setup
 
@@ -284,6 +293,12 @@ SYSTEM_CONTACT_EMAIL
 EMAIL_PROVIDER
 EMAIL_API_KEY
 EMAIL_FROM
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_REQUIRE_TLS
+SMTP_USER
+SMTP_PASSWORD
 ```
 
 Supabase Auth should include redirect URLs for:
@@ -296,6 +311,8 @@ https://your-vercel-app.vercel.app/**
 Add future custom-domain URLs when a domain is ready.
 
 See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environment variables, Supabase setup, first-admin promotion, storage checks, smoke tests, and rollback notes.
+
+App notification emails and Supabase Auth emails are configured separately. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there.
 
 ## Security Model
 
@@ -325,7 +342,7 @@ See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environmen
 
 ## Deferred Or Optional Items
 
-- Real email sending requires Resend configuration and a verified sender/domain.
+- Real email sending requires Resend or SMTP configuration and a verified sender/mailbox.
 - Automatic email cron/background processing is deferred.
 - Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
 - Recurring bookings are deferred.

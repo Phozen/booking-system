@@ -50,6 +50,8 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Browser code uses only `NEXT_PUBLIC_*` variables.
 - [x] `SUPABASE_SERVICE_ROLE_KEY` is server-only.
 - [x] `EMAIL_API_KEY` is server-only.
+- [x] `SMTP_PASSWORD` is server-only.
+- [x] SMTP provider errors are sanitized before being stored in email notification records.
 - [x] `.env.local` and `.env*` files are ignored by Git.
 - [x] Secrets are not displayed in UI.
 

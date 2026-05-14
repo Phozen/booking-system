@@ -21,6 +21,18 @@ export async function sendNotificationEmail({
   body: string | null;
   templateData: EmailTemplateData;
 }): Promise<EmailSendResult> {
+  const provider = getEmailProvider();
+
+  if (provider.name === "noop") {
+    return provider.send({
+      to: recipientEmail,
+      from: getEmailFromAddress(),
+      subject,
+      html: "",
+      text: "",
+    });
+  }
+
   const from = getEmailFromAddress();
 
   if (!from) {
@@ -29,10 +41,9 @@ export async function sendNotificationEmail({
       provider: "noop",
       error:
         "Email sender is missing. EMAIL_FROM must be a verified sender or domain in the chosen provider.",
-    };
+      };
   }
 
-  const provider = getEmailProvider();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const rendered = renderEmailTemplate({
     type,

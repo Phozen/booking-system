@@ -42,6 +42,7 @@ Server-only variables:
 
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is set as a server-only secret.
 - [ ] `EMAIL_API_KEY` is blank until Resend is ready, or set as a server-only secret after Resend setup.
+- [ ] `SMTP_PASSWORD` is blank until SMTP is ready, or set as a server-only secret after SMTP setup.
 
 Server-side app defaults:
 
@@ -49,8 +50,13 @@ Server-side app defaults:
 - [ ] `APP_NAME` is set.
 - [ ] `COMPANY_NAME` is set or intentionally blank.
 - [ ] `SYSTEM_CONTACT_EMAIL` is set or intentionally blank.
-- [ ] `EMAIL_PROVIDER` is blank until Resend is ready, or set to `resend`.
-- [ ] `EMAIL_FROM` is blank until Resend is ready, or set to a verified sender.
+- [ ] `EMAIL_PROVIDER` is blank/`none` until a provider is ready, or set to `resend` or `smtp`.
+- [ ] `EMAIL_FROM` is blank until email is ready, or set to a verified sender/mailbox.
+- [ ] `SMTP_HOST` is blank until SMTP is ready, or set to the SMTP server host.
+- [ ] `SMTP_PORT` is blank until SMTP is ready, or set to the SMTP server port.
+- [ ] `SMTP_SECURE` is blank until SMTP is ready, or set intentionally.
+- [ ] `SMTP_REQUIRE_TLS` is blank until SMTP is ready, or set intentionally.
+- [ ] `SMTP_USER` is blank until SMTP is ready, or set to the SMTP mailbox username.
 - [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 
 Security reminders:
@@ -58,6 +64,7 @@ Security reminders:
 - [ ] `NEXT_PUBLIC_*` values are safe for browser exposure.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is never exposed to client code.
 - [ ] `EMAIL_API_KEY` is never exposed to client code.
+- [ ] `SMTP_PASSWORD` is never exposed to client code.
 - [ ] Real secrets are entered in Vercel dashboard, not committed.
 
 ## Supabase
@@ -113,9 +120,13 @@ Email can stay disabled for MVP testing.
 - [ ] Queued notifications are created by booking flows.
 - [ ] Processing queued emails with blank provider config fails safely with a clear error.
 - [ ] Resend sender domain or sender email is verified before real sending.
+- [ ] If using SMTP, SMTP host/port/TLS/user/password are configured in Vercel as server-side variables.
+- [ ] If using Microsoft 365 SMTP, SMTP AUTH is enabled for the dedicated service mailbox.
+- [ ] If using Microsoft 365 SMTP, recommended values are `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and `SMTP_REQUIRE_TLS=true`.
 - [ ] `EMAIL_FROM` matches a verified sender before real sending.
-- [ ] Queued email processing works from `/admin/email-notifications` after Resend is configured.
+- [ ] Queued email processing works from `/admin/email-notifications` after Resend or SMTP is configured.
 - [ ] Sent notifications populate provider name, provider message ID when available, and `sent_at`.
+- [ ] Supabase Auth emails are reviewed separately in Supabase Dashboard > Authentication > SMTP settings if branded signup/password-reset emails are required.
 
 ## Domain And HTTPS
 
@@ -132,7 +143,7 @@ When the Exabytes/custom domain is ready:
 - [ ] HTTPS certificate is active.
 - [ ] `NEXT_PUBLIC_APP_URL` matches the canonical production URL.
 - [ ] Supabase Auth URLs match the canonical production URL.
-- [ ] Resend domain verification is completed before enabling real emails.
+- [ ] Resend domain verification or SMTP service-mailbox setup is completed before enabling real emails.
 
 ## Security
 
@@ -144,6 +155,7 @@ When the Exabytes/custom domain is ready:
 - [ ] Disabled users cannot access protected pages.
 - [ ] Service role key is not exposed in browser code.
 - [ ] Email API key is not exposed in browser code.
+- [ ] SMTP password is not exposed in browser code.
 - [ ] `.env.local` and `.env*` files are not committed.
 - [ ] Vercel protection, Cloudflare Access, or another internal-only control has been considered.
 

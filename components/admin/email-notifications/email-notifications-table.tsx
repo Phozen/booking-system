@@ -34,6 +34,28 @@ function formatNotificationType(type: EmailNotificationType) {
   return labels[type];
 }
 
+function formatProvider(provider: string | null) {
+  if (!provider) {
+    return "None";
+  }
+
+  const normalized = provider.toLowerCase();
+
+  if (normalized === "smtp") {
+    return "SMTP";
+  }
+
+  if (normalized === "resend") {
+    return "Resend";
+  }
+
+  if (normalized === "noop") {
+    return "Not configured";
+  }
+
+  return provider;
+}
+
 export function EmailNotificationsTable({
   notifications,
 }: {
@@ -120,6 +142,10 @@ export function EmailNotificationsTable({
                     value: `${notification.attempts}/${notification.maxAttempts}`,
                   },
                   {
+                    label: "Provider",
+                    value: formatProvider(notification.provider),
+                  },
+                  {
                     label: "Scheduled",
                     value: formatBookingDateTime(notification.scheduledFor),
                   },
@@ -162,7 +188,7 @@ export function EmailNotificationsTable({
           )
         }
       >
-          <table className="w-full min-w-[1320px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1400px] border-collapse text-left text-sm">
             <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Type</th>
@@ -171,6 +197,7 @@ export function EmailNotificationsTable({
                 <th className="px-4 py-3 font-medium">Subject</th>
                 <th className="px-4 py-3 font-medium">Related booking</th>
                 <th className="px-4 py-3 font-medium">Attempts</th>
+                <th className="px-4 py-3 font-medium">Provider</th>
                 <th className="px-4 py-3 font-medium">Scheduled</th>
                 <th className="px-4 py-3 font-medium">Sent</th>
                 <th className="px-4 py-3 font-medium">Last error</th>
@@ -212,6 +239,9 @@ export function EmailNotificationsTable({
                       {notification.attempts}/{notification.maxAttempts}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
+                      {formatProvider(notification.provider)}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatBookingDateTime(notification.scheduledFor)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
@@ -231,7 +261,7 @@ export function EmailNotificationsTable({
                 <tr>
                   <td
                     className="px-4 py-8"
-                    colSpan={10}
+                    colSpan={11}
                   >
                     <EmptyState
                       className="border-0 bg-transparent py-4"

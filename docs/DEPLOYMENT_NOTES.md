@@ -51,6 +51,7 @@ Server-only secrets:
 ```txt
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 EMAIL_API_KEY=
+SMTP_PASSWORD=
 ```
 
 Server-side app defaults:
@@ -62,17 +63,23 @@ COMPANY_NAME=Your Company Name
 SYSTEM_CONTACT_EMAIL=admin@example.com
 EMAIL_PROVIDER=
 EMAIL_FROM=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_REQUIRE_TLS=
+SMTP_USER=
 ```
 
 Security rules:
 
 - Only `NEXT_PUBLIC_*` variables are browser-exposed.
 - `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
-- `EMAIL_API_KEY` must remain server-only.
+- `EMAIL_API_KEY` must remain server-only and is used by Resend.
+- `SMTP_PASSWORD` must remain server-only and is used by the SMTP provider.
 - Real secrets must be entered in Vercel, never committed to the repository.
 - Do not store provider API keys in `system_settings`.
 
-Email can remain disabled for MVP testing. If `EMAIL_PROVIDER`, `EMAIL_API_KEY`, or `EMAIL_FROM` is blank, queued email processing should fail safely with a clear configuration message instead of crashing.
+Email can remain disabled for MVP testing. `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`. If provider configuration is missing, queued email processing should fail safely with a clear configuration message instead of crashing.
 
 ## Environment Groups
 
@@ -80,7 +87,7 @@ Production:
 
 - `NEXT_PUBLIC_APP_URL` should be the production Vercel URL until a custom domain is ready.
 - Supabase URL and keys should point to the production Supabase project.
-- Email variables can remain blank until Resend is configured.
+- Email variables can remain blank until Resend or SMTP is configured.
 
 Preview:
 
@@ -92,7 +99,7 @@ Local:
 
 - Store values in `.env.local`.
 - Use `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
-- Leave email provider variables blank unless testing real Resend delivery.
+- Leave email provider variables blank unless testing real Resend or SMTP delivery.
 
 ## Supabase Production Setup
 
@@ -183,7 +190,21 @@ https://www.your-domain.com/**
 
 Current project note: there is no `/auth/callback` route. Password reset currently uses `/reset-password`.
 
-## Resend Email Setup Later
+## App Notification Email Setup
+
+The app has its own email notification queue for booking and invitation emails. It is separate from Supabase Auth email delivery.
+
+Supported app providers:
+
+```txt
+EMAIL_PROVIDER=none
+EMAIL_PROVIDER=resend
+EMAIL_PROVIDER=smtp
+```
+
+`EMAIL_FROM` is shared by all real providers and should be a verified sender or mailbox identity.
+
+### Resend Setup
 
 Real email sending is supported but can remain disabled until the sender domain is ready.
 
@@ -205,6 +226,44 @@ EMAIL_FROM=Booking System <bookings@your-domain.com>
 
 If email variables are missing, processing should fail safely and store a clear error on notification records.
 
+### SMTP Setup For Microsoft 365
+
+SMTP is supported for Microsoft 365 and other SMTP providers.
+
+Example Vercel environment values:
+
+```txt
+EMAIL_PROVIDER=smtp
+EMAIL_FROM=Booking System <noreply-or-service-mailbox@company.com>
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=noreply-or-service-mailbox@company.com
+SMTP_PASSWORD=mailbox-password-or-app-password
+```
+
+Microsoft 365 notes:
+
+- SMTP AUTH may need to be enabled for the specific mailbox.
+- Prefer a dedicated service mailbox such as `noreply@company.com`.
+- Avoid using a personal user mailbox for app notifications.
+- Do not commit SMTP credentials.
+
+Manual SMTP smoke test:
+
+1. Configure the SMTP environment variables in Vercel or `.env.local`.
+2. Restart the app.
+3. Create or queue a booking notification.
+4. Open `/admin/email-notifications`.
+5. Click `Process queued emails`.
+6. Confirm the notification becomes `sent`, or review the safe `last_error` message.
+7. Test invalid credentials only in a controlled environment and confirm secrets are not shown.
+
+### Supabase Auth Email Is Separate
+
+Supabase Auth emails include signup confirmation, password reset, and email-change messages. Configure those in Supabase Dashboard > Authentication > SMTP settings if the company wants Microsoft 365 or another branded SMTP sender for auth emails. The app `EMAIL_PROVIDER` settings do not control Supabase Auth email delivery.
+
 ## Domain Setup Later
 
 No custom domain is required for current MVP testing. Use the Vercel URL first.
@@ -221,7 +280,7 @@ When an Exabytes domain is purchased or ready:
 6. Confirm HTTPS certificate status is active.
 7. Update Vercel `NEXT_PUBLIC_APP_URL` to the canonical HTTPS URL.
 8. Update Supabase Auth Site URL and redirect URLs.
-9. Verify the domain in Resend before enabling real email delivery.
+9. Verify the domain in Resend or configure the SMTP service mailbox before enabling real email delivery.
 
 ## HTTPS Checklist
 
