@@ -269,6 +269,16 @@ npm run qa
 
 The `qa` script runs lint, tests, and production build. Run `typecheck` separately.
 
+Playwright browser smoke tests are available separately:
+
+```bash
+npm run e2e
+npm run e2e:ui
+npm run e2e:headed
+```
+
+Install browsers first with `npx playwright install chromium`. Authenticated E2E tests require dedicated test users and `E2E_*` environment variables. See `docs/E2E_TESTING.md`.
+
 ## Deployment
 
 Current deployment target is Vercel.
@@ -339,6 +349,7 @@ App notification emails and Supabase Auth emails are configured separately. Book
 - `docs/DEPLOYMENT_NOTES.md` - Vercel, Supabase, email, domain, and production notes.
 - `docs/PRODUCTION_CHECKLIST.md` - pre-launch checklist.
 - `docs/STORAGE_SETUP.md` - facility photo storage setup.
+- `docs/E2E_TESTING.md` - Playwright setup, credentials, and browser smoke-test strategy.
 
 ## Deferred Or Optional Items
 

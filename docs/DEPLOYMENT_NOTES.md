@@ -34,6 +34,14 @@ npm.cmd run qa
 
 The `qa` script runs lint, tests, and production build. `typecheck` is listed separately because the current `qa` script does not run it.
 
+Browser E2E tests are available separately through Playwright:
+
+```powershell
+npm.cmd run e2e
+```
+
+See `docs/E2E_TESTING.md` for browser installation, required test users, and local versus deployed E2E configuration. E2E is not part of `qa` by default because it requires dedicated credentials and a live Supabase-backed environment.
+
 ## Required Vercel Environment Variables
 
 Set these in Vercel Project Settings > Environment Variables for Production. Add Preview values too if testing auth or emails from preview deployments.

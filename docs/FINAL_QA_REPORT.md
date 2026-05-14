@@ -175,7 +175,7 @@ Pre-deployment documentation note:
 
 - Authenticated browser QA still needs to be executed with real employee and admin accounts.
 - Facility photo storage behavior still needs real upload/delete verification against Supabase Storage.
-- Automated browser/mobile E2E tests are not implemented.
+- Playwright browser/mobile E2E foundation is implemented, but authenticated runs still require dedicated E2E credentials and browser installation.
 - Email sending requires production Resend environment variables and verified sender/domain before real delivery can be tested.
 
 ## Pre-Deployment Sign-Off Checklist

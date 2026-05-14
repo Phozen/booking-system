@@ -11,6 +11,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Run `npm.cmd run lint`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
+- [ ] Optional browser regression: run `npm.cmd run e2e` after Playwright browsers and E2E test credentials are configured.
 - [ ] Confirm the dev server opens at `http://localhost:3000`.
 - [ ] Confirm no private env values appear in browser source, console output, or rendered UI.
 
@@ -23,6 +24,16 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Use logout; expect redirect to `/login`.
 - [ ] Open `/reset-password`; submit a valid email; expect generic reset success messaging.
 - [ ] Confirm unauthenticated `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, and `/admin/dashboard` redirect to `/login?auth=required`.
+
+## Playwright E2E Smoke Tests
+
+- [ ] Install browsers with `npx.cmd playwright install chromium`.
+- [ ] Set `E2E_BASE_URL`, or leave it blank to use `http://localhost:3000`.
+- [ ] Set dedicated test user credentials: `E2E_EMPLOYEE_EMAIL`, `E2E_EMPLOYEE_PASSWORD`, `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_SUPER_ADMIN_EMAIL`, `E2E_SUPER_ADMIN_PASSWORD`.
+- [ ] Run `npm.cmd run e2e`.
+- [ ] Confirm public/auth and logged-out redirect tests pass.
+- [ ] Confirm authenticated tests either pass or skip with clear missing-credential messages.
+- [ ] Do not run destructive E2E flows against production unless a disposable test dataset is available.
 
 ## Registration Settings
 
