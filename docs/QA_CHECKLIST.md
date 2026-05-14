@@ -276,6 +276,10 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm service role key is never used in client components.
 - [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
 - [ ] Confirm `SMTP_PASSWORD` is not exposed to browser bundles.
+- [ ] Confirm `MICROSOFT_CLIENT_SECRET` is not exposed to browser bundles.
+- [ ] Confirm Microsoft 365 Calendar sync remains disabled unless Stage 2 implementation is intentionally being tested.
+- [ ] Confirm employees cannot access Microsoft 365 sync tracking records.
+- [ ] Confirm only admins/super admins can view future sync status, and only super admins can manage future retry/repair records.
 - [ ] Confirm active employees can select their own bookings and safe invited booking details only.
 - [ ] Confirm employees cannot insert direct booking rows and must use `public.create_booking()`.
 - [ ] Confirm employees cannot update other users' bookings.
@@ -302,6 +306,19 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm route list includes employee, admin, auth, and export routes.
 - [ ] Confirm build does not require live email provider env vars.
 - [ ] Confirm build does not expose service role or email provider secrets.
+- [ ] Confirm build does not expose Microsoft 365 calendar sync secrets.
+
+## Microsoft 365 Calendar Sync Groundwork
+
+- [ ] Confirm `.env.example` includes Microsoft 365 calendar sync variables.
+- [ ] Confirm `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` by default.
+- [ ] Confirm `MICROSOFT_SYNC_MODE=disabled` by default.
+- [ ] Confirm Microsoft Graph sync is documented separately from Microsoft 365 SMTP email.
+- [ ] Confirm migration `0014_microsoft_calendar_sync_groundwork.sql` is applied before enabling future sync.
+- [ ] Confirm `booking_calendar_syncs` RLS denies employees direct access.
+- [ ] Confirm only sanitized sync errors are documented for `last_error`.
+- [ ] Confirm no real Microsoft Graph calls are made in Stage 1.
+- [ ] Confirm `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed before Stage 2 work begins.
 
 ## Basic Responsive UI
 

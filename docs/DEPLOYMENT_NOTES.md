@@ -60,6 +60,7 @@ Server-only secrets:
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 EMAIL_API_KEY=
 SMTP_PASSWORD=
+MICROSOFT_CLIENT_SECRET=
 ```
 
 Server-side app defaults:
@@ -76,6 +77,12 @@ SMTP_PORT=
 SMTP_SECURE=
 SMTP_REQUIRE_TLS=
 SMTP_USER=
+MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
+MICROSOFT_TENANT_ID=
+MICROSOFT_CLIENT_ID=
+MICROSOFT_DEFAULT_CALENDAR_ID=
+MICROSOFT_SYNC_MODE=disabled
+MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 ```
 
 Security rules:
@@ -84,10 +91,13 @@ Security rules:
 - `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
 - `EMAIL_API_KEY` must remain server-only and is used by Resend.
 - `SMTP_PASSWORD` must remain server-only and is used by the SMTP provider.
+- `MICROSOFT_CLIENT_SECRET` must remain server-only and is used by the future Microsoft Graph Calendar sync.
 - Real secrets must be entered in Vercel, never committed to the repository.
 - Do not store provider API keys in `system_settings`.
 
 Email can remain disabled for MVP testing. `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`. If provider configuration is missing, queued email processing should fail safely with a clear configuration message instead of crashing.
+
+Microsoft 365 Calendar sync is separate from SMTP email delivery. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until the Microsoft Graph sync implementation is deployed and verified. See `docs/MICROSOFT_365_CALENDAR_SYNC.md`.
 
 ## Environment Groups
 
@@ -96,6 +106,7 @@ Production:
 - `NEXT_PUBLIC_APP_URL` should be the production Vercel URL until a custom domain is ready.
 - Supabase URL and keys should point to the production Supabase project.
 - Email variables can remain blank until Resend or SMTP is configured.
+- Microsoft 365 Calendar sync variables can remain disabled/blank until Stage 2 sync is ready.
 
 Preview:
 
@@ -108,6 +119,7 @@ Local:
 - Store values in `.env.local`.
 - Use `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
 - Leave email provider variables blank unless testing real Resend or SMTP delivery.
+- Leave Microsoft 365 Calendar sync disabled unless testing the future Graph implementation.
 
 ## Supabase Production Setup
 
@@ -119,7 +131,7 @@ npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-3. Confirm remote migrations `0001` through `0013` are applied.
+3. Confirm remote migrations `0001` through `0014` are applied.
 4. Confirm RLS is enabled on application tables.
 5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
 6. Confirm default facilities, equipment, and seeded system settings exist.
@@ -133,6 +145,37 @@ npx.cmd supabase db push
    - `allow_facility_approval_override`
    - `default_timezone`
    - `reminder_offsets_minutes`
+8. Confirm `booking_calendar_syncs` exists if Microsoft 365 Calendar sync groundwork has been applied.
+
+## Microsoft 365 Calendar Sync Groundwork
+
+The Booking System has groundwork for future one-way Microsoft 365 Calendar sync:
+
+```txt
+Booking System -> Microsoft 365 Calendar
+```
+
+This is Microsoft Graph integration, not SMTP. SMTP variables are only for app notification email delivery.
+
+Current recommended v1 architecture is a central booking calendar mailbox, such as:
+
+```txt
+booking-calendar@company.com
+```
+
+Required future Microsoft Graph values:
+
+```txt
+MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
+MICROSOFT_TENANT_ID=
+MICROSOFT_CLIENT_ID=
+MICROSOFT_CLIENT_SECRET=
+MICROSOFT_DEFAULT_CALENDAR_ID=
+MICROSOFT_SYNC_MODE=disabled
+MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
+```
+
+Keep sync disabled until Stage 2 implements token fetching, Graph calls, event creation, and event cancellation. See `docs/MICROSOFT_365_CALENDAR_SYNC.md` for the Microsoft Entra app registration checklist and security model.
 
 ## Facility Photo Storage
 

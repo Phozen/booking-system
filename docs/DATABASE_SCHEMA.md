@@ -190,6 +190,7 @@ Core tables:
 | `blocked_period_facilities` | Facilities affected by blocked periods                     |
 | `maintenance_closures`      | Facility maintenance closures                              |
 | `email_notifications`       | Email queue/history                                        |
+| `booking_calendar_syncs`    | Future outbound Microsoft 365 Calendar sync tracking       |
 | `audit_logs`                | System action logs                                         |
 | `system_settings`           | Admin-configurable system behavior                         |
 | `export_logs`               | Optional export tracking                                   |
@@ -684,6 +685,58 @@ create index email_notifications_scheduled_for_idx on public.email_notifications
 create index email_notifications_related_booking_id_idx on public.email_notifications(related_booking_id);
 create index email_notifications_recipient_user_id_idx on public.email_notifications(recipient_user_id);
 ```
+
+---
+
+## 16A. Booking Calendar Syncs Table
+
+Tracks future outbound Microsoft 365 Calendar sync state for bookings.
+
+This table is groundwork only. It does not call Microsoft Graph, request tokens, or create/cancel calendar events by itself.
+
+```sql
+create table public.booking_calendar_syncs (
+  id uuid primary key default uuid_generate_v4(),
+  booking_id uuid not null references public.bookings(id) on delete cascade,
+  provider text not null default 'microsoft_365',
+  external_calendar_id text,
+  external_event_id text,
+  sync_status text not null default 'pending',
+  sync_direction text not null default 'outbound',
+  last_synced_at timestamptz,
+  last_error text,
+  attempts integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint booking_calendar_syncs_booking_provider_unique unique (booking_id, provider),
+  constraint booking_calendar_syncs_provider_check check (provider = 'microsoft_365'),
+  constraint booking_calendar_syncs_status_check
+    check (sync_status in ('pending', 'synced', 'failed', 'skipped', 'cancelled')),
+  constraint booking_calendar_syncs_direction_check check (sync_direction = 'outbound'),
+  constraint booking_calendar_syncs_attempts_check check (attempts >= 0),
+  constraint booking_calendar_syncs_last_error_length
+    check (last_error is null or char_length(last_error) <= 2000)
+);
+```
+
+### Indexes
+
+```sql
+create index booking_calendar_syncs_booking_id_idx on public.booking_calendar_syncs(booking_id);
+create index booking_calendar_syncs_sync_status_idx on public.booking_calendar_syncs(sync_status);
+create index booking_calendar_syncs_provider_idx on public.booking_calendar_syncs(provider);
+create index booking_calendar_syncs_last_synced_at_idx on public.booking_calendar_syncs(last_synced_at desc);
+```
+
+### Notes
+
+* `external_calendar_id` and `external_event_id` are opaque Microsoft Graph identifiers for future Stage 2 sync.
+* `last_error` must store sanitized provider error summaries only.
+* Do not store Microsoft client secrets, access tokens, refresh tokens, or raw stack traces.
+* Employees do not directly access this table.
+* Admins and Super Admins may view sync status in future tooling.
+* Super Admins may manage/retry sync records in future tooling.
 
 ---
 
@@ -1191,6 +1244,7 @@ alter table public.blocked_periods enable row level security;
 alter table public.blocked_period_facilities enable row level security;
 alter table public.maintenance_closures enable row level security;
 alter table public.email_notifications enable row level security;
+alter table public.booking_calendar_syncs enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.system_settings enable row level security;
 alter table public.export_logs enable row level security;
@@ -1496,7 +1550,22 @@ using (public.is_admin())
 with check (public.is_admin());
 ```
 
-### 28.12 Audit Logs
+### 28.12 Booking Calendar Syncs
+
+```sql
+create policy "Admins can view booking calendar syncs"
+on public.booking_calendar_syncs
+for select
+using (public.is_admin());
+
+create policy "Super admins can manage booking calendar syncs"
+on public.booking_calendar_syncs
+for all
+using (public.is_super_admin())
+with check (public.is_super_admin());
+```
+
+### 28.13 Audit Logs
 
 ```sql
 create policy "Admins can view audit logs"
@@ -1510,7 +1579,7 @@ for insert
 with check (public.is_admin());
 ```
 
-### 28.13 System Settings
+### 28.14 System Settings
 
 ```sql
 create policy "Active users can view public settings"
@@ -1533,7 +1602,7 @@ using (public.is_super_admin())
 with check (public.is_super_admin());
 ```
 
-### 28.14 Export Logs
+### 28.15 Export Logs
 
 ```sql
 create policy "Admins can manage export logs"

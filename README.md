@@ -11,6 +11,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Supabase Auth, Postgres, RLS, and Storage
 - Tailwind CSS and shadcn/ui-style components
 - Resend or SMTP-ready email notification queue
+- Microsoft 365 Calendar sync groundwork for future one-way outbound sync
 - Vitest for unit tests
 - Vercel for deployment
 
@@ -70,6 +71,9 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Approval defaults and facility override setting.
   - Timezone and reminder offsets.
   - Employee calendar visibility mode.
+- Integration groundwork:
+  - Microsoft 365 Calendar sync planning and tracking table.
+  - Future sync configuration remains server-side and Super Admin-oriented.
 
 ## CRUD And Operations Summary
 
@@ -87,6 +91,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 | Reports/exports | No direct access | Read reports, export CSV |
 | Audit logs | No direct access | Read and filter |
 | Settings | No direct access | Super Admin only: read/update non-secret system settings |
+| Microsoft 365 calendar sync | No direct access | Future status visibility; Super Admin configuration/retry model |
 
 ## Key Routes
 
@@ -173,6 +178,13 @@ SMTP_SECURE=
 SMTP_REQUIRE_TLS=
 SMTP_USER=
 SMTP_PASSWORD=
+MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
+MICROSOFT_TENANT_ID=
+MICROSOFT_CLIENT_ID=
+MICROSOFT_CLIENT_SECRET=
+MICROSOFT_DEFAULT_CALENDAR_ID=
+MICROSOFT_SYNC_MODE=disabled
+MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 ```
 
 Security notes:
@@ -181,10 +193,12 @@ Security notes:
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be used in client components.
 - `EMAIL_API_KEY` is server-only and used by Resend.
 - `SMTP_PASSWORD` is server-only and used by the SMTP provider.
+- `MICROSOFT_CLIENT_SECRET` is server-only and will be used by the future Microsoft Graph Calendar sync.
 - Real secrets belong in `.env.local` locally and the Vercel dashboard in production. Do not commit them.
 - `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`.
 - Email variables can stay blank until a provider is configured. Email processing will fail safely with a configuration message.
 - Microsoft 365 SMTP commonly uses `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, and a dedicated service mailbox.
+- Microsoft 365 Calendar sync uses Microsoft Graph, not SMTP. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until the sync implementation stage is deployed.
 
 ### Database Setup
 
@@ -206,6 +220,7 @@ Current migration set:
 0011_fix_booking_invitation_rls_recursion.sql
 0012_calendar_visibility_setting.sql
 0013_split_admin_roles.sql
+0014_microsoft_calendar_sync_groundwork.sql
 ```
 
 Typical commands:
@@ -309,6 +324,13 @@ SMTP_SECURE
 SMTP_REQUIRE_TLS
 SMTP_USER
 SMTP_PASSWORD
+MICROSOFT_365_CALENDAR_SYNC_ENABLED
+MICROSOFT_TENANT_ID
+MICROSOFT_CLIENT_ID
+MICROSOFT_CLIENT_SECRET
+MICROSOFT_DEFAULT_CALENDAR_ID
+MICROSOFT_SYNC_MODE
+MICROSOFT_GRAPH_BASE_URL
 ```
 
 Supabase Auth should include redirect URLs for:
@@ -322,7 +344,7 @@ Add future custom-domain URLs when a domain is ready.
 
 See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environment variables, Supabase setup, first-admin promotion, storage checks, smoke tests, and rollback notes.
 
-App notification emails and Supabase Auth emails are configured separately. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there.
+App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and remains disabled until the implementation stage.
 
 ## Security Model
 
@@ -350,6 +372,7 @@ App notification emails and Supabase Auth emails are configured separately. Book
 - `docs/PRODUCTION_CHECKLIST.md` - pre-launch checklist.
 - `docs/STORAGE_SETUP.md` - facility photo storage setup.
 - `docs/E2E_TESTING.md` - Playwright setup, credentials, and browser smoke-test strategy.
+- `docs/MICROSOFT_365_CALENDAR_SYNC.md` - Microsoft 365 Calendar sync architecture, setup, security, and Stage 2 plan.
 
 ## Deferred Or Optional Items
 
@@ -357,5 +380,5 @@ App notification emails and Supabase Auth emails are configured separately. Book
 - Automatic email cron/background processing is deferred.
 - Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
 - Recurring bookings are deferred.
-- External guest invitations and calendar sync are deferred.
+- External guest invitations and live Microsoft 365 event sync are deferred.
 - Network-layer internal access protection, such as Vercel protection or Cloudflare Access, is an optional deployment hardening step.

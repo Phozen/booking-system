@@ -33,8 +33,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Employee booking cancellation policy only permits transition to `cancelled` for the owner.
 - [x] Booking immutability during employee cancellation is backed by a database trigger.
 - [x] Employees cannot view audit logs, email notifications, system settings, or export logs except public settings where intended.
+- [x] Employees cannot directly access Microsoft 365 calendar sync tracking records.
 - [x] Admins can manage required operational data through admin-only policies and server-side actions.
 - [x] Super admins can manage users, roles, statuses, and system settings through super-admin-only policies and server-side actions.
+- [x] Admins can view future calendar sync records; only super admins can manage future retry/repair records.
 
 ## Service Role Checklist
 
@@ -51,7 +53,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `SUPABASE_SERVICE_ROLE_KEY` is server-only.
 - [x] `EMAIL_API_KEY` is server-only.
 - [x] `SMTP_PASSWORD` is server-only.
+- [x] `MICROSOFT_CLIENT_SECRET` is server-only.
+- [x] Microsoft Graph tokens must never be exposed to client components or browser storage when sync is implemented.
 - [x] SMTP provider errors are sanitized before being stored in email notification records.
+- [x] Future Microsoft 365 calendar sync errors must be sanitized before being stored in sync tracking records.
 - [x] `.env.local` and `.env*` files are ignored by Git.
 - [x] Secrets are not displayed in UI.
 
@@ -73,6 +78,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `public.create_booking()` checks active user, ownership, active facility, capacity, blocked periods, maintenance closures, and valid time range.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
+- [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.
 
 ## Manual Test Checklist
 
@@ -92,6 +98,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Attempt to demote or disable the final active super admin; expect denial.
 - [ ] Confirm no client component imports `createAdminClient()`.
 - [ ] Confirm report CSV export is blocked for non-admin users.
+- [ ] Confirm employees cannot select `booking_calendar_syncs` records.
+- [ ] Confirm admins can view future sync records only through approved admin tooling.
+- [ ] Confirm Microsoft 365 Calendar sync remains disabled until Stage 2 implementation is deployed.
+- [ ] Confirm Microsoft client secrets and future Graph tokens are not exposed in browser bundles or UI.
 
 ## Remaining Risks
 
@@ -99,3 +109,4 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Admin user-management is implemented; continue to manually verify self-protection and final-active-admin protections in production QA.
 - Automated browser/security E2E tests are not implemented yet; continue using the manual QA checklist until those tests exist.
 - Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.
+- Microsoft 365 Calendar sync is groundwork only; live Graph event creation and cancellation are not implemented yet.

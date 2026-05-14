@@ -43,6 +43,7 @@ Server-only variables:
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is set as a server-only secret.
 - [ ] `EMAIL_API_KEY` is blank until Resend is ready, or set as a server-only secret after Resend setup.
 - [ ] `SMTP_PASSWORD` is blank until SMTP is ready, or set as a server-only secret after SMTP setup.
+- [ ] `MICROSOFT_CLIENT_SECRET` is blank until Microsoft 365 Calendar sync is ready, or set as a server-only secret after Microsoft Entra setup.
 
 Server-side app defaults:
 
@@ -57,6 +58,12 @@ Server-side app defaults:
 - [ ] `SMTP_SECURE` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_REQUIRE_TLS` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_USER` is blank until SMTP is ready, or set to the SMTP mailbox username.
+- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Graph sync is implemented and verified.
+- [ ] `MICROSOFT_TENANT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
+- [ ] `MICROSOFT_CLIENT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
+- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID.
+- [ ] `MICROSOFT_SYNC_MODE=disabled` until Stage 2 sync is ready.
+- [ ] `MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0`, unless a different Microsoft Graph endpoint is intentionally required.
 - [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 
 Security reminders:
@@ -65,14 +72,16 @@ Security reminders:
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is never exposed to client code.
 - [ ] `EMAIL_API_KEY` is never exposed to client code.
 - [ ] `SMTP_PASSWORD` is never exposed to client code.
+- [ ] `MICROSOFT_CLIENT_SECRET` is never exposed to client code.
 - [ ] Real secrets are entered in Vercel dashboard, not committed.
 
 ## Supabase
 
 - [ ] Production Supabase project is selected.
-- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0013`.
+- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0014`.
 - [ ] `npx.cmd supabase db push` has been run successfully.
 - [ ] RLS is enabled on application tables.
+- [ ] `booking_calendar_syncs` exists after migration `0014`.
 - [ ] `bookings_no_overlapping_active` exclusion constraint exists.
 - [ ] `facility-photos` storage bucket exists and is private.
 - [ ] Storage policies allow active-user reads and admin writes for facility photos.
@@ -127,6 +136,17 @@ Email can stay disabled for MVP testing.
 - [ ] Queued email processing works from `/admin/email-notifications` after Resend or SMTP is configured.
 - [ ] Sent notifications populate provider name, provider message ID when available, and `sent_at`.
 - [ ] Supabase Auth emails are reviewed separately in Supabase Dashboard > Authentication > SMTP settings if branded signup/password-reset emails are required.
+
+## Microsoft 365 Calendar Sync
+
+Microsoft 365 Calendar sync is separate from SMTP email delivery and remains disabled until Stage 2 implementation is ready.
+
+- [ ] Recommended v1 target is a central booking calendar mailbox.
+- [ ] Microsoft Graph calendar sync is not confused with Microsoft 365 SMTP email settings.
+- [ ] Microsoft Entra app registration and permissions are reviewed by IT before enabling sync.
+- [ ] `MICROSOFT_CLIENT_SECRET` is stored only in Vercel environment variables.
+- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Graph token fetching and event sync are deployed.
+- [ ] `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed by the deployment owner and IT.
 
 ## Domain And HTTPS
 
