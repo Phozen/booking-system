@@ -9,6 +9,10 @@ import { checkBookingAvailability } from "@/lib/bookings/availability";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import { getMyBookingById, type BookingStatus } from "@/lib/bookings/queries";
 import {
+  cancelMicrosoftCalendarEventForBooking,
+  syncConfirmedBookingToMicrosoftCalendar,
+} from "@/lib/integrations/microsoft-365-calendar/sync";
+import {
   bookingFormSchema,
   cancellationFormSchema,
   formDataToBookingValues,
@@ -248,6 +252,35 @@ async function insertBookingCancellationSideEffects({
   }
 }
 
+async function runMicrosoftCalendarSyncSafely({
+  bookingId,
+  action,
+}: {
+  bookingId: string;
+  action: "confirm" | "cancel";
+}) {
+  try {
+    const result =
+      action === "confirm"
+        ? await syncConfirmedBookingToMicrosoftCalendar(bookingId)
+        : await cancelMicrosoftCalendarEventForBooking(bookingId);
+
+    if (result.status === "failed") {
+      console.error("Microsoft calendar sync side effect failed", {
+        bookingId,
+        action,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error("Microsoft calendar sync side effect unavailable", {
+      bookingId,
+      action,
+      error,
+    });
+  }
+}
+
 export async function createBookingAction(
   _previousState: BookingActionResult,
   formData: FormData,
@@ -356,6 +389,12 @@ export async function createBookingAction(
     recipientEmail: user.email,
     facilityName: availability.facility.name,
   });
+  if (booking.status === "confirmed") {
+    await runMicrosoftCalendarSyncSafely({
+      bookingId: booking.id,
+      action: "confirm",
+    });
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/facilities");
@@ -484,6 +523,12 @@ export async function cancelBookingAction(
       cancelledAt: existing.cancelledAt,
     },
   });
+  if (existing.status === "confirmed") {
+    await runMicrosoftCalendarSyncSafely({
+      bookingId,
+      action: "cancel",
+    });
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/my-bookings");

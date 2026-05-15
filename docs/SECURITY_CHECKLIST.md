@@ -79,6 +79,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 - [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.
+- [x] Microsoft Graph writes are performed server-side only after successful booking state changes or Super Admin retry.
 
 ## Manual Test Checklist
 
@@ -100,8 +101,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Confirm report CSV export is blocked for non-admin users.
 - [ ] Confirm employees cannot select `booking_calendar_syncs` records.
 - [ ] Confirm admins can view future sync records only through approved admin tooling.
-- [ ] Confirm Microsoft 365 Calendar sync remains disabled until Stage 2 implementation is deployed.
+- [ ] Confirm Microsoft 365 Calendar sync remains disabled until Microsoft Entra setup and manual Graph sync QA are ready.
 - [ ] Confirm Microsoft client secrets and future Graph tokens are not exposed in browser bundles or UI.
+- [ ] Confirm `/admin/integrations/microsoft-calendar` is Super Admin only.
+- [ ] Confirm booking creation/approval/cancellation still succeeds if Microsoft Graph sync fails.
 
 ## Remaining Risks
 
@@ -109,4 +112,4 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Admin user-management is implemented; continue to manually verify self-protection and final-active-admin protections in production QA.
 - Automated browser/security E2E tests are not implemented yet; continue using the manual QA checklist until those tests exist.
 - Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.
-- Microsoft 365 Calendar sync is groundwork only; live Graph event creation and cancellation are not implemented yet.
+- Microsoft 365 Calendar sync is outbound-only; inbound import, delegated OAuth, personal calendars, and two-way sync are not implemented.

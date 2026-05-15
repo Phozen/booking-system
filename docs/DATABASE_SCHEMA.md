@@ -690,9 +690,9 @@ create index email_notifications_recipient_user_id_idx on public.email_notificat
 
 ## 16A. Booking Calendar Syncs Table
 
-Tracks future outbound Microsoft 365 Calendar sync state for bookings.
+Tracks outbound Microsoft 365 Calendar sync state for bookings.
 
-This table is groundwork only. It does not call Microsoft Graph, request tokens, or create/cancel calendar events by itself.
+This table stores sync status, external event identifiers, attempts, and sanitized errors. Microsoft Graph calls happen in server-side integration code, not in database triggers.
 
 ```sql
 create table public.booking_calendar_syncs (
@@ -731,12 +731,12 @@ create index booking_calendar_syncs_last_synced_at_idx on public.booking_calenda
 
 ### Notes
 
-* `external_calendar_id` and `external_event_id` are opaque Microsoft Graph identifiers for future Stage 2 sync.
+* `external_calendar_id` and `external_event_id` are opaque Microsoft Graph identifiers.
 * `last_error` must store sanitized provider error summaries only.
 * Do not store Microsoft client secrets, access tokens, refresh tokens, or raw stack traces.
 * Employees do not directly access this table.
-* Admins and Super Admins may view sync status in future tooling.
-* Super Admins may manage/retry sync records in future tooling.
+* Admins and Super Admins may view sync status.
+* Super Admins may manage/retry sync records through `/admin/integrations/microsoft-calendar`.
 
 ---
 

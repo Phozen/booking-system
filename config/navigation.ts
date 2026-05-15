@@ -10,6 +10,7 @@ import {
   FileClock,
   LayoutDashboard,
   Mail,
+  PlugZap,
   Settings,
   UserPlus,
   UsersRound,
@@ -42,6 +43,7 @@ export const adminNavigation = [
   { title: "Email Notifications", href: "/admin/email-notifications", icon: Mail, match: "prefix" },
   { title: "Reports", href: "/admin/reports", icon: BarChart3, match: "prefix" },
   { title: "Audit Logs", href: "/admin/audit-logs", icon: FileClock, match: "prefix" },
+  { title: "Integrations", href: "/admin/integrations/microsoft-calendar", icon: PlugZap, match: "prefix", superAdminOnly: true },
   { title: "Settings", href: "/admin/settings", icon: Settings, match: "prefix", superAdminOnly: true },
 ] as const;
 
@@ -76,6 +78,7 @@ export function getAdminNavigationGroups(role?: string | null) {
           "/admin/email-notifications",
           "/admin/reports",
           "/admin/audit-logs",
+          "/admin/integrations/microsoft-calendar",
           "/admin/settings",
         ].includes(item.href),
       ),

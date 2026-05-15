@@ -97,7 +97,7 @@ Security rules:
 
 Email can remain disabled for MVP testing. `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`. If provider configuration is missing, queued email processing should fail safely with a clear configuration message instead of crashing.
 
-Microsoft 365 Calendar sync is separate from SMTP email delivery. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until the Microsoft Graph sync implementation is deployed and verified. See `docs/MICROSOFT_365_CALENDAR_SYNC.md`.
+Microsoft 365 Calendar sync is separate from SMTP email delivery. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra app registration, Graph permissions, and the central calendar target are configured and verified. See `docs/MICROSOFT_365_CALENDAR_SYNC.md`.
 
 ## Environment Groups
 
@@ -175,7 +175,17 @@ MICROSOFT_SYNC_MODE=disabled
 MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 ```
 
-Keep sync disabled until Stage 2 implements token fetching, Graph calls, event creation, and event cancellation. See `docs/MICROSOFT_365_CALENDAR_SYNC.md` for the Microsoft Entra app registration checklist and security model.
+The app uses Microsoft Graph client credentials when sync is enabled. The v1 event endpoint model treats `MICROSOFT_DEFAULT_CALENDAR_ID` as the central booking calendar mailbox user ID or user principal name and writes to `/users/{MICROSOFT_DEFAULT_CALENDAR_ID}/events`.
+
+Keep sync disabled until:
+
+- migration `0014` has been applied,
+- Microsoft Entra app registration is complete,
+- the app has the required Microsoft Graph calendar permissions and admin consent,
+- the central booking calendar mailbox is ready,
+- manual sync QA is scheduled.
+
+See `docs/MICROSOFT_365_CALENDAR_SYNC.md` for the setup checklist, status/retry page, and security model.
 
 ## Facility Photo Storage
 

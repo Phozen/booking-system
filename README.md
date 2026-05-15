@@ -11,7 +11,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Supabase Auth, Postgres, RLS, and Storage
 - Tailwind CSS and shadcn/ui-style components
 - Resend or SMTP-ready email notification queue
-- Microsoft 365 Calendar sync groundwork for future one-way outbound sync
+- Microsoft 365 Calendar one-way outbound sync support
 - Vitest for unit tests
 - Vercel for deployment
 
@@ -72,8 +72,8 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Timezone and reminder offsets.
   - Employee calendar visibility mode.
 - Integration groundwork:
-  - Microsoft 365 Calendar sync planning and tracking table.
-  - Future sync configuration remains server-side and Super Admin-oriented.
+  - Microsoft 365 Calendar sync status and retry page.
+  - Server-side Microsoft Graph configuration through environment variables.
 
 ## CRUD And Operations Summary
 
@@ -91,7 +91,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 | Reports/exports | No direct access | Read reports, export CSV |
 | Audit logs | No direct access | Read and filter |
 | Settings | No direct access | Super Admin only: read/update non-secret system settings |
-| Microsoft 365 calendar sync | No direct access | Future status visibility; Super Admin configuration/retry model |
+| Microsoft 365 calendar sync | No direct access | Super Admin only: view sync status and retry |
 
 ## Key Routes
 
@@ -127,6 +127,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - `/admin/email-notifications`
 - `/admin/reports`
 - `/admin/audit-logs`
+- `/admin/integrations/microsoft-calendar`
 - `/admin/settings`
 
 ## Local Development
@@ -198,7 +199,7 @@ Security notes:
 - `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`.
 - Email variables can stay blank until a provider is configured. Email processing will fail safely with a configuration message.
 - Microsoft 365 SMTP commonly uses `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, and a dedicated service mailbox.
-- Microsoft 365 Calendar sync uses Microsoft Graph, not SMTP. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until the sync implementation stage is deployed.
+- Microsoft 365 Calendar sync uses Microsoft Graph, not SMTP. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra values are configured and the integration is ready to test.
 
 ### Database Setup
 
@@ -344,7 +345,7 @@ Add future custom-domain URLs when a domain is ready.
 
 See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environment variables, Supabase setup, first-admin promotion, storage checks, smoke tests, and rollback notes.
 
-App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and remains disabled until the implementation stage.
+App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and should remain disabled until Microsoft Entra app registration and the central calendar target are ready.
 
 ## Security Model
 
@@ -380,5 +381,6 @@ App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync a
 - Automatic email cron/background processing is deferred.
 - Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
 - Recurring bookings are deferred.
-- External guest invitations and live Microsoft 365 event sync are deferred.
+- External guest invitations are deferred.
+- Inbound, two-way, delegated OAuth, facility-calendar mapping, Teams meeting creation, and personal-calendar Microsoft 365 sync are deferred.
 - Network-layer internal access protection, such as Vercel protection or Cloudflare Access, is an optional deployment hardening step.

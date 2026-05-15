@@ -2,7 +2,7 @@
 
 This document defines the planned Microsoft 365 Calendar integration for the Booking System.
 
-Stage 1 is planning and configuration groundwork only. The app does not call Microsoft Graph, request tokens, run OAuth, create events, update events, or cancel events yet.
+Stage 2 implements outbound Microsoft Graph sync. The app does not import Microsoft 365 calendar events, run delegated user OAuth, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
 
 ## Overview
 
@@ -12,7 +12,7 @@ The intended sync direction is one-way:
 Booking System -> Microsoft 365 Calendar
 ```
 
-The first implementation should create or update a Microsoft 365 calendar event when a booking becomes confirmed, and cancel or delete that event when the booking is cancelled. Microsoft 365 events will not be imported back into the Booking System in v1.
+When sync is enabled and configured, the app creates or updates a Microsoft 365 calendar event when a booking becomes confirmed, and deletes the event when the synced booking is cancelled. Microsoft 365 events are not imported back into the Booking System in v1.
 
 ## Recommended V1 Architecture
 
@@ -84,7 +84,7 @@ This is not recommended for v1. It usually needs delegated permissions, OAuth, a
 | Completed | Keep event as historical record |
 | Expired | Keep event as historical record |
 
-Stage 2 should hook into booking status transitions without changing booking conflict prevention, approval logic, or cancellation rules.
+Sync is a side effect after booking state changes. Microsoft Graph failures do not roll back booking creation, approval, or cancellation. Failures are recorded in `booking_calendar_syncs` for Super Admin review and retry.
 
 ## Planned Event Content
 
@@ -162,7 +162,7 @@ This is not recommended for v1 because it requires OAuth, user consent, token re
 
 ## Environment Variables
 
-Add these values in `.env.local` for local testing and in Vercel Project Settings for production when Stage 2 is ready:
+Add these values in `.env.local` for local testing and in Vercel Project Settings for production:
 
 ```txt
 MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
@@ -182,6 +182,18 @@ Supported sync modes:
 
 Keep `MICROSOFT_CLIENT_SECRET` server-only. Never prefix Microsoft secrets with `NEXT_PUBLIC_`.
 
+`MICROSOFT_DEFAULT_CALENDAR_ID` is treated as the central booking calendar mailbox user ID or user principal name. The v1 Graph path is:
+
+```txt
+/users/{MICROSOFT_DEFAULT_CALENDAR_ID}/events
+```
+
+For example:
+
+```txt
+MICROSOFT_DEFAULT_CALENDAR_ID=booking-calendar@company.com
+```
+
 ## Database Sync Tracking
 
 Migration `0014_microsoft_calendar_sync_groundwork.sql` adds `public.booking_calendar_syncs`.
@@ -193,7 +205,11 @@ Purpose:
 - Store sanitized errors and retry attempts.
 - Support future Super Admin retry/status workflows.
 
-The table does not create Microsoft Graph events by itself.
+The table records Microsoft Graph sync state. Migration `0014` must be applied before enabled sync can record successful or failed attempts:
+
+```powershell
+npx.cmd supabase db push
+```
 
 Employees do not directly access sync records. Admins and Super Admins can view sync state. Super Admins can manage records for future retry/repair tooling.
 
@@ -204,9 +220,50 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 - Do not store access tokens in browser storage.
 - Store only sanitized sync errors.
 - Do not store raw stack traces, secrets, or bearer tokens in `last_error`.
-- Future integration settings UI should be Super Admin only.
+- Integration status and retry UI is Super Admin only at `/admin/integrations/microsoft-calendar`.
 - Employees should not see raw sync records or integration internals.
 - Event body content should avoid sensitive admin-only booking details.
+
+## Runtime Behavior
+
+Confirmed booking paths:
+
+- Booking created as confirmed automatically: create Microsoft 365 event.
+- Pending booking approved by Admin/Super Admin: create Microsoft 365 event.
+- Existing confirmed booking retried by Super Admin: create or update Microsoft 365 event.
+
+Cancelled booking paths:
+
+- Employee cancels their own confirmed booking: delete Microsoft 365 event if one exists.
+- Admin/Super Admin cancels a confirmed booking: delete Microsoft 365 event if one exists.
+- Super Admin retries a cancelled booking: delete Microsoft 365 event if one exists.
+
+Skipped paths:
+
+- Pending bookings are not synced.
+- Rejected bookings are not synced.
+- Completed/expired bookings keep historical Microsoft 365 events.
+- Sync disabled or `MICROSOFT_SYNC_MODE=disabled` performs no Graph calls.
+
+## Super Admin Status And Retry
+
+Route:
+
+```txt
+/admin/integrations/microsoft-calendar
+```
+
+The page shows:
+
+- Enabled/disabled state.
+- Sync mode.
+- Whether required env configuration is present.
+- Default calendar target.
+- Recent sync records.
+- Attempts and sanitized errors.
+- Retry action for records with a related booking.
+
+The page does not show client secrets, access tokens, or raw Microsoft responses.
 
 ## Manual IT Setup Checklist
 
@@ -219,24 +276,60 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 - [ ] Apply database migration `0014_microsoft_calendar_sync_groundwork.sql`.
 - [ ] Keep sync disabled until Stage 2 code is deployed and verified.
 
-## Future Stage 2 Implementation Plan
+## Implementation Notes
 
-Stage 2 should add:
+The implementation includes:
 
-- Microsoft Graph token client.
-- Calendar event mapper.
-- Confirmed-booking create/update behavior.
-- Cancelled-booking cancel/delete behavior.
-- Sanitized failure handling.
-- Retry strategy.
-- Admin or Super Admin sync-status visibility if needed.
-- Tests with mocked Microsoft Graph responses.
+- Microsoft identity client credentials token request.
+- Microsoft Graph fetch wrapper.
+- Confirmed-booking event create/update.
+- Cancelled-booking event delete.
+- Configured timezone event mapping.
+- Sanitized error storage.
+- Super Admin retry/status page.
+
+The token endpoint is:
+
+```txt
+https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+```
+
+The app uses scope:
+
+```txt
+https://graph.microsoft.com/.default
+```
+
+## Manual QA
+
+1. Disabled sync:
+   - Set `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false`.
+   - Create or approve a booking.
+   - Confirm booking succeeds and no Graph call is required.
+2. Missing config:
+   - Set `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` and `MICROSOFT_SYNC_MODE=central_calendar`.
+   - Leave one required Microsoft variable blank.
+   - Confirm booking succeeds and sync record shows a safe configuration error.
+3. Confirmed booking sync:
+   - Configure real Microsoft Entra values and a central booking calendar mailbox.
+   - Create a confirmed booking.
+   - Confirm Outlook event appears and sync record is `synced`.
+4. Approval sync:
+   - Create a pending booking.
+   - Approve it.
+   - Confirm Outlook event appears.
+5. Cancellation sync:
+   - Cancel a synced confirmed booking.
+   - Confirm Outlook event is removed and sync record is `cancelled`.
+6. Retry:
+   - Force a failed sync.
+   - Open `/admin/integrations/microsoft-calendar` as Super Admin.
+   - Retry and confirm status updates.
 
 ## Known Limitations
 
-- No Microsoft Graph calls are implemented in Stage 1.
 - No OAuth flow is implemented.
-- No real calendar event creation or cancellation exists yet.
 - Facility-to-calendar mapping is deferred.
 - Inbound Microsoft 365 availability import is out of scope.
 - Two-way sync is out of scope.
+- Microsoft Teams meeting creation is out of scope.

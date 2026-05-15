@@ -277,7 +277,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
 - [ ] Confirm `SMTP_PASSWORD` is not exposed to browser bundles.
 - [ ] Confirm `MICROSOFT_CLIENT_SECRET` is not exposed to browser bundles.
-- [ ] Confirm Microsoft 365 Calendar sync remains disabled unless Stage 2 implementation is intentionally being tested.
+- [ ] Confirm Microsoft 365 Calendar sync remains disabled unless Microsoft Entra setup and manual Graph sync QA are intentionally being tested.
 - [ ] Confirm employees cannot access Microsoft 365 sync tracking records.
 - [ ] Confirm only admins/super admins can view future sync status, and only super admins can manage future retry/repair records.
 - [ ] Confirm active employees can select their own bookings and safe invited booking details only.
@@ -317,8 +317,14 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm migration `0014_microsoft_calendar_sync_groundwork.sql` is applied before enabling future sync.
 - [ ] Confirm `booking_calendar_syncs` RLS denies employees direct access.
 - [ ] Confirm only sanitized sync errors are documented for `last_error`.
-- [ ] Confirm no real Microsoft Graph calls are made in Stage 1.
-- [ ] Confirm `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed before Stage 2 work begins.
+- [ ] Confirm disabled sync does not call Microsoft Graph and booking flows still succeed.
+- [ ] Enable sync with missing config and confirm booking flows still succeed while sync records show safe configuration errors.
+- [ ] Configure real Microsoft env vars and create a confirmed booking; confirm Outlook event appears in the central calendar and sync record is `synced`.
+- [ ] Approve a pending booking; confirm Outlook event appears in the central calendar.
+- [ ] Cancel a synced confirmed booking; confirm Outlook event is removed and sync record is `cancelled`.
+- [ ] Force a failed sync and retry from `/admin/integrations/microsoft-calendar` as Super Admin.
+- [ ] Confirm `/admin/integrations/microsoft-calendar` is hidden/denied for Admin and Employee roles.
+- [ ] Confirm `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed before production enablement.
 
 ## Basic Responsive UI
 

@@ -58,11 +58,11 @@ Server-side app defaults:
 - [ ] `SMTP_SECURE` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_REQUIRE_TLS` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_USER` is blank until SMTP is ready, or set to the SMTP mailbox username.
-- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Graph sync is implemented and verified.
+- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra setup and manual Graph sync QA are complete.
 - [ ] `MICROSOFT_TENANT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
 - [ ] `MICROSOFT_CLIENT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
 - [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID.
-- [ ] `MICROSOFT_SYNC_MODE=disabled` until Stage 2 sync is ready.
+- [ ] `MICROSOFT_SYNC_MODE=disabled` until Microsoft 365 Calendar sync is ready to test.
 - [ ] `MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0`, unless a different Microsoft Graph endpoint is intentionally required.
 - [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 
@@ -139,13 +139,15 @@ Email can stay disabled for MVP testing.
 
 ## Microsoft 365 Calendar Sync
 
-Microsoft 365 Calendar sync is separate from SMTP email delivery and remains disabled until Stage 2 implementation is ready.
+Microsoft 365 Calendar sync is separate from SMTP email delivery and should remain disabled until Microsoft Entra setup and manual Graph sync QA are ready.
 
 - [ ] Recommended v1 target is a central booking calendar mailbox.
 - [ ] Microsoft Graph calendar sync is not confused with Microsoft 365 SMTP email settings.
 - [ ] Microsoft Entra app registration and permissions are reviewed by IT before enabling sync.
 - [ ] `MICROSOFT_CLIENT_SECRET` is stored only in Vercel environment variables.
-- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Graph token fetching and event sync are deployed.
+- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is the central booking calendar mailbox user ID or user principal name.
+- [ ] `/admin/integrations/microsoft-calendar` is available to Super Admins only.
+- [ ] Disabled sync, missing-config sync, confirmed-booking sync, approval sync, cancellation sync, and retry have been manually tested before production enablement.
 - [ ] `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed by the deployment owner and IT.
 
 ## Domain And HTTPS

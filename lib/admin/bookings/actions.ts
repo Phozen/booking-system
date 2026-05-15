@@ -6,6 +6,10 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
+import {
+  cancelMicrosoftCalendarEventForBooking,
+  syncConfirmedBookingToMicrosoftCalendar,
+} from "@/lib/integrations/microsoft-365-calendar/sync";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   adminBookingActionSchema,
@@ -195,6 +199,40 @@ function revalidateAdminBookingPaths(bookingId: string) {
   revalidatePath("/dashboard");
 }
 
+async function runMicrosoftCalendarSyncSafely({
+  bookingId,
+  action,
+  actorUserId,
+  actorEmail,
+}: {
+  bookingId: string;
+  action: "confirm" | "cancel";
+  actorUserId: string;
+  actorEmail: string | undefined;
+}) {
+  try {
+    const actor = { userId: actorUserId, email: actorEmail };
+    const result =
+      action === "confirm"
+        ? await syncConfirmedBookingToMicrosoftCalendar(bookingId, actor)
+        : await cancelMicrosoftCalendarEventForBooking(bookingId, actor);
+
+    if (result.status === "failed") {
+      console.error("Microsoft calendar sync side effect failed", {
+        bookingId,
+        action,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error("Microsoft calendar sync side effect unavailable", {
+      bookingId,
+      action,
+      error,
+    });
+  }
+}
+
 export async function adminCancelBookingAction(
   bookingId: string,
   _previousState: AdminBookingActionResult,
@@ -307,6 +345,14 @@ export async function adminCancelBookingAction(
       status: updated.status,
     },
   });
+  if (existing.status === "confirmed") {
+    await runMicrosoftCalendarSyncSafely({
+      bookingId,
+      action: "cancel",
+      actorUserId: user.id,
+      actorEmail: user.email,
+    });
+  }
 
   revalidateAdminBookingPaths(bookingId);
 
@@ -472,6 +518,12 @@ export async function approveBookingAction(
       remarks: parsed.data.remarks || null,
       status: updated.status,
     },
+  });
+  await runMicrosoftCalendarSyncSafely({
+    bookingId,
+    action: "confirm",
+    actorUserId: user.id,
+    actorEmail: user.email,
   });
 
   revalidateAdminBookingPaths(bookingId);

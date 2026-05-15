@@ -5,6 +5,7 @@ export type StatusBadgeKind =
   | "facility"
   | "maintenance"
   | "email"
+  | "calendar-sync"
   | "blocked-period"
   | "user"
   | "user-role"
@@ -167,6 +168,38 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
       dotClassName: statusDots.slate,
     },
   },
+  "calendar-sync": {
+    pending: {
+      label: "Pending",
+      description: "Calendar sync is waiting to run.",
+      className: statusClasses.amber,
+      dotClassName: statusDots.amber,
+    },
+    synced: {
+      label: "Synced",
+      description: "Calendar event is synced.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+    failed: {
+      label: "Failed",
+      description: "Calendar sync failed.",
+      className: statusClasses.rose,
+      dotClassName: statusDots.rose,
+    },
+    skipped: {
+      label: "Skipped",
+      description: "Calendar sync was skipped.",
+      className: statusClasses.slate,
+      dotClassName: statusDots.slate,
+    },
+    cancelled: {
+      label: "Cancelled",
+      description: "Calendar event was cancelled or removed.",
+      className: statusClasses.zinc,
+      dotClassName: statusDots.zinc,
+    },
+  },
   "blocked-period": {
     active: {
       label: "Active",
@@ -254,6 +287,7 @@ const kindLabels: Record<StatusBadgeKind, string> = {
   facility: "Facility",
   maintenance: "Maintenance",
   email: "Email",
+  "calendar-sync": "Calendar sync",
   "blocked-period": "Blocked period",
   user: "User",
   "user-role": "User role",
