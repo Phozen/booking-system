@@ -23,8 +23,9 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Employee dashboard with quick actions and upcoming booking preview.
 - Facility browsing and facility detail pages with photos, equipment, capacity, approval requirements, and booking CTA.
 - Booking creation with timezone-aware date/time handling, conflict prevention, blocked-period checks, maintenance checks, and approval-aware status.
+- Food and drinks / catering request details during booking creation.
 - My Bookings grouped by pending, upcoming, history, and cancelled.
-- Booking detail with cancellation flow and attendee invitations.
+- Booking detail with cancellation flow, attendee invitations, catering edits, and printable approval form.
 - Invitations page for accepting or declining internal booking invitations.
 - Calendar page for owned and invited bookings, with optional all-company visibility controlled by admin settings.
 - Profile page for editing safe self-service fields: full name, department, and phone.
@@ -43,6 +44,8 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Filter by status/facility.
   - Approve, reject, or cancel bookings where allowed.
   - View attendee invitations.
+  - Review and update catering / food and drinks details.
+  - Print booking approval forms with signature sections.
 - Availability management:
   - Create, update, and deactivate blocked dates.
   - Create, update, complete, and cancel maintenance closures.
@@ -82,6 +85,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 | Facilities | Read active non-archived facilities | Create, read, update, archive, manage photos |
 | Facility photos | Read through facility pages | Upload, set primary, delete |
 | Bookings | Create own, read own/invited, cancel own eligible bookings | Read all, approve, reject, cancel |
+| Catering details | Add during booking creation; owner can update pending/confirmed bookings | View/update for operational purposes |
 | Invitations | Invite users to own bookings, accept/decline own invitations | View attendee status on booking detail |
 | Calendar | View own/invited bookings; optionally view limited all-company bookings | View all bookings or own bookings |
 | Users/profiles | Read/update own safe profile fields | Super Admin only: read/search/update users, roles, statuses, safe profile fields |
@@ -109,6 +113,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - `/facilities/[slug]`
 - `/bookings/new`
 - `/bookings/[id]`
+- `/bookings/[id]/print`
 - `/my-bookings`
 - `/calendar`
 - `/invitations`
@@ -120,6 +125,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - `/admin/users`
 - `/admin/facilities`
 - `/admin/bookings`
+- `/admin/bookings/[id]/print`
 - `/admin/approvals`
 - `/admin/calendar`
 - `/admin/blocked-dates`
@@ -234,6 +240,7 @@ Current migration set:
 0012_calendar_visibility_setting.sql
 0013_split_admin_roles.sql
 0014_microsoft_calendar_sync_groundwork.sql
+0015_booking_catering_details.sql
 ```
 
 Typical commands:

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getEmployeeFacilities } from "@/lib/facilities/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 export async function getBookableFacilities(supabase: SupabaseClient) {
@@ -24,6 +25,7 @@ type BookingFacilityRecord =
       slug: string;
       level: string;
       type: FacilityType;
+      capacity: number;
     }
   | {
       id: string;
@@ -31,6 +33,7 @@ type BookingFacilityRecord =
       slug: string;
       level: string;
       type: FacilityType;
+      capacity: number;
     }[]
   | null;
 
@@ -49,6 +52,12 @@ type BookingRecord = {
   title: string;
   description: string | null;
   attendee_count: number | null;
+  catering_required: boolean | null;
+  catering_type: BookingCateringDetails["type"] | null;
+  catering_pax: number | null;
+  catering_serving_time: BookingCateringDetails["servingTime"] | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
   status: BookingStatus;
   starts_at: string;
   ends_at: string;
@@ -67,6 +76,7 @@ export type BookingFacility = {
   slug: string;
   level: string;
   type: FacilityType;
+  capacity: number;
 };
 
 export type EmployeeBooking = {
@@ -76,6 +86,7 @@ export type EmployeeBooking = {
   title: string;
   description: string | null;
   attendeeCount: number | null;
+  catering: BookingCateringDetails;
   status: BookingStatus;
   startsAt: string;
   endsAt: string;
@@ -101,6 +112,12 @@ const employeeBookingBaseSelect = `
   title,
   description,
   attendee_count,
+  catering_required,
+  catering_type,
+  catering_pax,
+  catering_serving_time,
+  catering_dietary_notes,
+  catering_notes,
   status,
   starts_at,
   ends_at,
@@ -114,7 +131,8 @@ const employeeBookingBaseSelect = `
     name,
     slug,
     level,
-    type
+    type,
+    capacity
   )
 `;
 
@@ -157,6 +175,14 @@ function mapBooking(record: BookingRecord): EmployeeBooking {
     title: record.title,
     description: record.description,
     attendeeCount: record.attendee_count,
+    catering: {
+      required: Boolean(record.catering_required),
+      type: record.catering_type,
+      pax: record.catering_pax,
+      servingTime: record.catering_serving_time,
+      dietaryNotes: record.catering_dietary_notes,
+      notes: record.catering_notes,
+    },
     status: record.status,
     startsAt: record.starts_at,
     endsAt: record.ends_at,
@@ -172,6 +198,7 @@ function mapBooking(record: BookingRecord): EmployeeBooking {
           slug: facilityRecord.slug,
           level: facilityRecord.level,
           type: facilityRecord.type,
+          capacity: facilityRecord.capacity,
         }
       : null,
     approvals: (record.booking_approvals ?? []).map((approval) => ({

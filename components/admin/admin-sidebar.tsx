@@ -13,7 +13,7 @@ export function AdminSidebar({
   role?: string | null;
 }) {
   return (
-    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar/92 shadow-sm shadow-primary/5 lg:block">
+    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar/92 shadow-sm shadow-primary/5 print:hidden lg:block">
       <div className="sticky top-0 flex h-svh flex-col gap-6 p-4">
         <div className="border-b border-sidebar-border pb-4">
           <Link

@@ -1,27 +1,30 @@
 import { z } from "zod";
 
+import { cateringFormSchema } from "@/lib/bookings/catering/validation";
 import { zonedDateTimeToUtc } from "@/lib/calendar/date-range";
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-export const bookingFormSchema = z.object({
-  facilityId: z.string().uuid("Choose a facility."),
-  date: z.string().min(1, "Choose a date."),
-  startTime: z.string().regex(timePattern, "Choose a valid start time."),
-  endTime: z.string().regex(timePattern, "Choose a valid end time."),
-  title: z.string().trim().min(2, "Enter a booking purpose.").max(160),
-  description: z.string().trim().max(2000).optional(),
-  attendeeCount: z
-    .union([
-      z.literal(""),
-      z.coerce
-        .number()
-        .int("Attendee count must be a whole number.")
-        .min(0, "Attendee count cannot be negative.")
-        .max(100000, "Attendee count is too large."),
-    ])
-    .optional(),
-});
+export const bookingFormSchema = z
+  .object({
+    facilityId: z.string().uuid("Choose a facility."),
+    date: z.string().min(1, "Choose a date."),
+    startTime: z.string().regex(timePattern, "Choose a valid start time."),
+    endTime: z.string().regex(timePattern, "Choose a valid end time."),
+    title: z.string().trim().min(2, "Enter a booking purpose.").max(160),
+    description: z.string().trim().max(2000).optional(),
+    attendeeCount: z
+      .union([
+        z.literal(""),
+        z.coerce
+          .number()
+          .int("Attendee count must be a whole number.")
+          .min(0, "Attendee count cannot be negative.")
+          .max(100000, "Attendee count is too large."),
+      ])
+      .optional(),
+  })
+  .and(cateringFormSchema);
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
@@ -46,6 +49,17 @@ export function formDataToBookingValues(formData: FormData) {
     title: getOptionalFormValue(formData, "title"),
     description: getOptionalFormValue(formData, "description"),
     attendeeCount: getOptionalFormValue(formData, "attendeeCount"),
+    cateringRequired:
+      getOptionalFormValue(formData, "cateringRequired") === "yes"
+        ? "yes"
+        : "no",
+    cateringType: getOptionalFormValue(formData, "cateringType") ?? "",
+    cateringPax: getOptionalFormValue(formData, "cateringPax") ?? "",
+    cateringServingTime:
+      getOptionalFormValue(formData, "cateringServingTime") ?? "",
+    cateringDietaryNotes:
+      getOptionalFormValue(formData, "cateringDietaryNotes") ?? "",
+    cateringNotes: getOptionalFormValue(formData, "cateringNotes") ?? "",
   };
 }
 

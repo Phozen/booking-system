@@ -1,4 +1,5 @@
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 export type ReportFilters = {
@@ -59,6 +60,7 @@ export type BookingHistoryRow = {
   createdAt: string;
   approvalRequired: boolean;
   attendeeCount: number | null;
+  catering: BookingCateringDetails;
   cancellationReason: string | null;
   cancelledAt: string | null;
   facility: ReportBookingFacility | null;
@@ -121,4 +123,3 @@ export type ReportExportType =
   | "user-bookings"
   | "cancelled-bookings"
   | "audit-logs";
-

@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, CalendarClock, CheckCircle2, ShieldCheck, Users } from "lucide-react";
+import { AlertCircle, CalendarClock, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
 
 import {
   createBookingAction,
@@ -14,6 +14,12 @@ import {
   formDataToBookingValues,
   getBookingDateRange,
 } from "@/lib/bookings/validation";
+import {
+  cateringServingTimeOptions,
+  cateringTypeOptions,
+  formatCateringServingTime,
+  formatCateringType,
+} from "@/lib/bookings/catering/format";
 import type { Facility } from "@/lib/facilities/queries";
 import {
   formatFacilityType,
@@ -49,7 +55,12 @@ type BookingFieldId =
   | "endTime"
   | "title"
   | "description"
-  | "attendeeCount";
+  | "attendeeCount"
+  | "cateringType"
+  | "cateringPax"
+  | "cateringServingTime"
+  | "cateringDietaryNotes"
+  | "cateringNotes";
 
 type BookingFieldErrors = Partial<Record<BookingFieldId, string>>;
 
@@ -129,6 +140,7 @@ export function BookingForm({
   const hasFacilities = facilities.length > 0;
   const [selectedFacility, setSelectedFacility] = useState(initialFacilityId);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
+  const [cateringRequired, setCateringRequired] = useState(false);
   const [previewValues, setPreviewValues] = useState<BookingPreviewValues>({
     date: "",
     startTime: "",
@@ -181,6 +193,15 @@ export function BookingForm({
       nextErrors.title = getFirstError(errors.title);
       nextErrors.description = getFirstError(errors.description);
       nextErrors.attendeeCount = getFirstError(errors.attendeeCount);
+      nextErrors.cateringType = getFirstError(errors.cateringType);
+      nextErrors.cateringPax = getFirstError(errors.cateringPax);
+      nextErrors.cateringServingTime = getFirstError(
+        errors.cateringServingTime,
+      );
+      nextErrors.cateringDietaryNotes = getFirstError(
+        errors.cateringDietaryNotes,
+      );
+      nextErrors.cateringNotes = getFirstError(errors.cateringNotes);
     } else {
       const dateRange = getBookingDateRange(
         parsed.data,
@@ -451,6 +472,186 @@ export function BookingForm({
           {fieldErrors.description}
         </FormFieldError>
       </div>
+
+      <section className="grid gap-4 rounded-lg border border-amber-200 bg-amber-50/60 p-4 text-amber-950 shadow-sm shadow-amber-500/10 ring-1 ring-amber-200/60 dark:border-amber-900 dark:bg-amber-950/25 dark:text-amber-100">
+        <div className="flex items-start gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+            <Coffee className="size-4" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 className="font-semibold tracking-normal">
+              Food & drinks / catering
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add refreshment details if this meeting needs water, drinks,
+              meals, or VIP catering.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="cateringRequired">Food/drinks required?</Label>
+            <select
+              id="cateringRequired"
+              name="cateringRequired"
+              defaultValue="no"
+              onChange={(event) =>
+                setCateringRequired(event.target.value === "yes")
+              }
+              disabled={!hasFacilities || isPending}
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+            >
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+            <FormFieldHelper id="cateringRequired-helper">
+              Select Yes for any food, drinks, meals, or management meeting
+              catering support.
+            </FormFieldHelper>
+          </div>
+
+          {cateringRequired ? (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="cateringType">Request type</Label>
+                <select
+                  id="cateringType"
+                  name="cateringType"
+                  disabled={!hasFacilities || isPending}
+                  aria-describedby={getFieldDescribedBy(
+                    "cateringType-helper",
+                    fieldErrors.cateringType && "cateringType-error",
+                  )}
+                  aria-invalid={Boolean(fieldErrors.cateringType)}
+                  required
+                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                >
+                  <option value="">Choose request type</option>
+                  {cateringTypeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {formatCateringType(option)}
+                    </option>
+                  ))}
+                </select>
+                <FormFieldHelper id="cateringType-helper">
+                  Choose the closest request. Use Other for custom needs.
+                </FormFieldHelper>
+                <FormFieldError id="cateringType-error">
+                  {fieldErrors.cateringType}
+                </FormFieldError>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="cateringPax">Number of pax</Label>
+                <Input
+                  id="cateringPax"
+                  name="cateringPax"
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  defaultValue={previewValues.attendeeCount}
+                  disabled={!hasFacilities || isPending}
+                  aria-describedby={getFieldDescribedBy(
+                    "cateringPax-helper",
+                    fieldErrors.cateringPax && "cateringPax-error",
+                  )}
+                  aria-invalid={Boolean(fieldErrors.cateringPax)}
+                  required
+                />
+                <FormFieldHelper id="cateringPax-helper">
+                  Defaults can follow attendee count, but adjust if catering is
+                  needed for a different number.
+                </FormFieldHelper>
+                <FormFieldError id="cateringPax-error">
+                  {fieldErrors.cateringPax}
+                </FormFieldError>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="cateringServingTime">Serving time</Label>
+                <select
+                  id="cateringServingTime"
+                  name="cateringServingTime"
+                  disabled={!hasFacilities || isPending}
+                  aria-describedby={getFieldDescribedBy(
+                    "cateringServingTime-helper",
+                    fieldErrors.cateringServingTime &&
+                      "cateringServingTime-error",
+                  )}
+                  aria-invalid={Boolean(fieldErrors.cateringServingTime)}
+                  required
+                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                >
+                  <option value="">Choose serving time</option>
+                  {cateringServingTimeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {formatCateringServingTime(option)}
+                    </option>
+                  ))}
+                </select>
+                <FormFieldHelper id="cateringServingTime-helper">
+                  Tell Admin/Facilities when the request should be ready.
+                </FormFieldHelper>
+                <FormFieldError id="cateringServingTime-error">
+                  {fieldErrors.cateringServingTime}
+                </FormFieldError>
+              </div>
+
+              <div className="grid gap-2 sm:col-span-2">
+                <Label htmlFor="cateringDietaryNotes">
+                  Dietary / special notes
+                </Label>
+                <textarea
+                  id="cateringDietaryNotes"
+                  name="cateringDietaryNotes"
+                  rows={3}
+                  placeholder="Vegetarian, halal, allergies, VIP requirements"
+                  disabled={!hasFacilities || isPending}
+                  aria-describedby={getFieldDescribedBy(
+                    "cateringDietaryNotes-helper",
+                    fieldErrors.cateringDietaryNotes &&
+                      "cateringDietaryNotes-error",
+                  )}
+                  aria-invalid={Boolean(fieldErrors.cateringDietaryNotes)}
+                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                />
+                <FormFieldHelper id="cateringDietaryNotes-helper">
+                  Optional, but useful for dietary restrictions, allergies, or
+                  VIP setup details.
+                </FormFieldHelper>
+                <FormFieldError id="cateringDietaryNotes-error">
+                  {fieldErrors.cateringDietaryNotes}
+                </FormFieldError>
+              </div>
+
+              <div className="grid gap-2 sm:col-span-2">
+                <Label htmlFor="cateringNotes">
+                  Additional catering notes
+                </Label>
+                <textarea
+                  id="cateringNotes"
+                  name="cateringNotes"
+                  rows={3}
+                  disabled={!hasFacilities || isPending}
+                  aria-describedby={getFieldDescribedBy(
+                    "cateringNotes-helper",
+                    fieldErrors.cateringNotes && "cateringNotes-error",
+                  )}
+                  aria-invalid={Boolean(fieldErrors.cateringNotes)}
+                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                />
+                <FormFieldHelper id="cateringNotes-helper">
+                  Optional. Add setup, timing, or supplier instructions.
+                </FormFieldHelper>
+                <FormFieldError id="cateringNotes-error">
+                  {fieldErrors.cateringNotes}
+                </FormFieldError>
+              </div>
+            </>
+          ) : null}
+        </div>
+      </section>
 
       {hasPreviewDetails ? (
         <section className="grid gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">

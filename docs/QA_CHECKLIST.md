@@ -7,7 +7,7 @@ Use this checklist after migrations are applied and the app is running with real
 ## Preflight
 
 - [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.
-- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0013`.
+- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0015`.
 - [ ] Run `npm.cmd run lint`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
@@ -95,11 +95,17 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] As active employee, open `/facilities`, choose a facility, and click "Book this facility".
 - [ ] Create a valid booking with title, date, start time, end time, and attendee count.
+- [ ] Select no catering and confirm booking can be submitted.
+- [ ] Select catering required and try submitting without request type, pax, or serving time; expect field errors.
+- [ ] Fill request type, pax, serving time, dietary notes, and catering notes; confirm booking submits.
 - [ ] Confirm redirect to `/bookings/[id]?created=1&invite=1`.
 - [ ] Confirm booking detail shows the created/pending success alert and highlights the invitation form.
 - [ ] Confirm the post-booking prompt offers Invite users, Skip for now, Back to My Bookings, and View Calendar.
 - [ ] Confirm booking appears in `/my-bookings`.
 - [ ] Confirm booking detail page shows facility, date/time, status, title, description, attendee count, created date, and updated date.
+- [ ] Confirm booking detail shows the food & drinks / catering section.
+- [ ] As booking owner, edit catering details on a pending or confirmed booking and confirm an audit log is created.
+- [ ] Confirm owner cannot edit catering details after the booking is cancelled, rejected, completed, or expired.
 - [ ] Confirm attendee count above facility capacity is rejected.
 - [ ] Confirm start time equal to or after end time is rejected.
 - [ ] Confirm booking an inactive, archived, or under-maintenance facility is rejected.
@@ -139,10 +145,21 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Accept a pending invitation; confirm status changes to `Accepted` and an audit log is created.
 - [ ] Decline another pending invitation; confirm status changes to `Declined` and an audit log is created.
 - [ ] Open the invited booking detail; confirm the invitee sees safe details and cannot cancel or manage attendees.
+- [ ] Confirm invitees can view safe catering details but cannot edit catering details or print the approval form.
 - [ ] As owner, remove an invited attendee; confirm the attendee no longer appears on the booking detail.
 - [ ] Confirm invitation-created, accepted, declined, and removed actions create audit log records.
 - [ ] Confirm invitation email notification records are queued when the invitation email enum values are applied.
 - [ ] Check `/invitations` and invited booking detail on mobile and in dark mode.
+
+## Printable Booking Approval Forms
+
+- [ ] As owner, open `/bookings/[id]/print`; confirm requester, booking, facility, invited attendees, catering details, and signature sections render.
+- [ ] As Admin/Super Admin, open `/admin/bookings/[id]/print`; confirm the same operational details render.
+- [ ] Confirm the Print button opens the browser print dialog.
+- [ ] Confirm app navigation, admin sidebar, and interactive buttons are hidden in print output.
+- [ ] Confirm logged-out users cannot access print routes.
+- [ ] Confirm employees cannot print another user's booking approval form.
+- [ ] Confirm invited users cannot print the owner approval form in v1.
 
 ## Profile
 
@@ -174,12 +191,14 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm audit log and cancellation email queue records are created.
 - [ ] Confirm employee users cannot perform admin booking actions by POSTing or using hidden controls.
 - [ ] Open an admin booking detail page and confirm invited attendee names, emails, statuses, and response dates are visible.
+- [ ] Open an admin booking detail page and confirm catering details are visible and editable by Admin/Super Admin.
 
 ## Admin Approvals
 
 - [ ] Enable approval mode globally or for a facility.
 - [ ] As employee, create a booking; confirm status is `pending`.
 - [ ] Open `/admin/approvals`; confirm pending booking appears.
+- [ ] Confirm pending approval rows show whether catering was requested.
 - [ ] Approve the booking; confirm status becomes `confirmed`.
 - [ ] Confirm approval record has `approved`, `reviewed_by`, `reviewed_at`, and remarks if entered.
 - [ ] Confirm `booking_approval` notification and audit log records are created.
@@ -247,6 +266,7 @@ Use this checklist after migrations are applied and the app is running with real
 ## CSV Exports
 
 - [ ] Export booking history CSV; confirm download and readable headers.
+- [ ] Confirm booking history CSV includes catering required, type, pax, serving time, dietary notes, and catering notes.
 - [ ] Export facility utilization CSV; confirm room-level totals.
 - [ ] Export user booking summary CSV; confirm user-level totals.
 - [ ] Export cancelled bookings CSV; confirm cancellation reason column.

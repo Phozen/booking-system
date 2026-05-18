@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { BookingStatus } from "@/lib/bookings/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type {
   BookingInvitation,
   BookingInvitationStatus,
@@ -32,6 +33,7 @@ type FacilityRecord =
       slug?: string;
       level: string;
       type: FacilityType;
+      capacity?: number;
     }
   | {
       id: string;
@@ -39,6 +41,7 @@ type FacilityRecord =
       slug?: string;
       level: string;
       type: FacilityType;
+      capacity?: number;
     }[]
   | null;
 
@@ -65,6 +68,12 @@ type InvitedBookingRecord = InvitationRecord & {
         title: string;
         description: string | null;
         attendee_count: number | null;
+        catering_required: boolean | null;
+        catering_type: BookingCateringDetails["type"] | null;
+        catering_pax: number | null;
+        catering_serving_time: BookingCateringDetails["servingTime"] | null;
+        catering_dietary_notes: string | null;
+        catering_notes: string | null;
         status: BookingStatus;
         starts_at: string;
         ends_at: string;
@@ -81,6 +90,12 @@ type InvitedBookingRecord = InvitationRecord & {
         title: string;
         description: string | null;
         attendee_count: number | null;
+        catering_required: boolean | null;
+        catering_type: BookingCateringDetails["type"] | null;
+        catering_pax: number | null;
+        catering_serving_time: BookingCateringDetails["servingTime"] | null;
+        catering_dietary_notes: string | null;
+        catering_notes: string | null;
         status: BookingStatus;
         starts_at: string;
         ends_at: string;
@@ -124,6 +139,12 @@ const invitedBookingSelect = `
     title,
     description,
     attendee_count,
+    catering_required,
+    catering_type,
+    catering_pax,
+    catering_serving_time,
+    catering_dietary_notes,
+    catering_notes,
     status,
     starts_at,
     ends_at,
@@ -135,7 +156,8 @@ const invitedBookingSelect = `
       name,
       slug,
       level,
-      type
+      type,
+      capacity
     ),
     profiles!bookings_user_id_fkey (
       id,
@@ -256,6 +278,14 @@ function mapInvitedBooking(record: InvitedBookingRecord): InvitedBooking | null 
       title: bookingRecord.title,
       description: bookingRecord.description,
       attendeeCount: bookingRecord.attendee_count,
+      catering: {
+        required: Boolean(bookingRecord.catering_required),
+        type: bookingRecord.catering_type,
+        pax: bookingRecord.catering_pax,
+        servingTime: bookingRecord.catering_serving_time,
+        dietaryNotes: bookingRecord.catering_dietary_notes,
+        notes: bookingRecord.catering_notes,
+      },
       status: bookingRecord.status,
       startsAt: bookingRecord.starts_at,
       endsAt: bookingRecord.ends_at,
@@ -269,6 +299,7 @@ function mapInvitedBooking(record: InvitedBookingRecord): InvitedBooking | null 
             slug: facilityRecord.slug,
             level: facilityRecord.level,
             type: facilityRecord.type,
+            capacity: facilityRecord.capacity,
           }
         : null,
       organizer: mapProfile(bookingRecord.profiles ?? null),

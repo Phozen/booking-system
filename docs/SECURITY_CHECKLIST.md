@@ -25,6 +25,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 - [x] RLS is enabled on application tables.
 - [x] Employees can select their own bookings and safe invited booking details only.
+- [x] Catering fields are protected by booking access rules; owners/admins can edit, invited users can view only.
 - [x] Invited employees can view only safe details for bookings they were invited to.
 - [x] Employee all-company calendar visibility is settings-gated and shows limited details for unrelated bookings without management/detail links.
 - [x] Booking invitation RLS allows owners to invite/remove, invitees to respond, and admins to view/manage.
@@ -76,6 +77,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `public.is_super_admin()` requires active super admin profile status.
 - [x] `public.is_active_user()` requires active profile status.
 - [x] `public.create_booking()` checks active user, ownership, active facility, capacity, blocked periods, maintenance closures, and valid time range.
+- [x] `public.create_booking()` validates required catering type, pax, and serving time when catering is requested.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 - [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.
@@ -86,6 +88,8 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Visit `/dashboard`, `/my-bookings`, `/admin/dashboard`, and `/admin/reports` while logged out; expect `/login?auth=required`.
 - [ ] Log in as employee and visit `/admin/facilities`, `/admin/bookings`, `/admin/settings`, and `/admin/audit-logs`; expect redirect or access denied.
 - [ ] Log in as employee and open an owned booking; expect access.
+- [ ] As owner, update catering details for a pending or confirmed booking; expect success and audit logging.
+- [ ] As invited user, confirm catering details are visible but edit and print controls are unavailable.
 - [ ] Log in as booking invitee and open the invited booking; expect limited detail access with no cancel/manage controls.
 - [ ] Attempt to invite a disabled, pending, duplicate, or owner account; expect a friendly block.
 - [ ] Attempt to respond to another user's invitation; expect denial.

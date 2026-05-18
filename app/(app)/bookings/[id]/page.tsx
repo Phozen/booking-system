@@ -30,6 +30,7 @@ function invitedBookingToEmployeeBooking(
     title: booking.title,
     description: booking.description,
     attendeeCount: booking.attendeeCount,
+    catering: booking.catering,
     status: booking.status,
     startsAt: booking.startsAt,
     endsAt: booking.endsAt,
@@ -45,6 +46,7 @@ function invitedBookingToEmployeeBooking(
           slug: booking.facility.slug ?? "",
           level: booking.facility.level,
           type: booking.facility.type,
+          capacity: booking.facility.capacity ?? 0,
         }
       : null,
     approvals: [],

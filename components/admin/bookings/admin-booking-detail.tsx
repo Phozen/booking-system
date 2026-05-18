@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -17,6 +17,8 @@ import {
 } from "@/lib/bookings/format";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
+import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
+import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
 import { buttonVariants } from "@/components/ui/button";
@@ -69,6 +71,16 @@ export function AdminBookingDetail({
             <BookingStatusBadge status={booking.status} />
           </div>
         </div>
+        <Link
+          href={`/admin/bookings/${booking.id}/print`}
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
+        >
+          <Printer data-icon="inline-start" />
+          Print approval form
+        </Link>
       </header>
 
       <section className="rounded-lg border bg-card p-5">
@@ -137,6 +149,15 @@ export function AdminBookingDetail({
           {booking.description || "No description was provided."}
         </p>
       </section>
+
+      <CateringDetailsCard catering={booking.catering} />
+
+      <CateringEditForm
+        bookingId={booking.id}
+        catering={booking.catering}
+        canEdit
+        lockedMessage=""
+      />
 
       <InvitationList
         bookingId={booking.id}

@@ -426,6 +426,7 @@ Employee
    * Description
    * Attendee count
    * Remarks
+   * Food and drinks / catering details, if required
 8. System validates required fields.
 9. System checks selected time range.
 10. System checks facility status.
@@ -436,6 +437,34 @@ Employee
 15. System creates audit log entry.
 16. System creates or sends booking confirmation email.
 17. Employee sees booking success screen.
+
+### Catering Branch
+
+If the employee selects food/drinks required, the booking form requires:
+
+* Request type
+* Number of pax
+* Serving time
+
+Dietary/special notes and additional catering notes remain optional but should be prompted clearly for VIP, halal, vegetarian, allergy, or setup requirements.
+
+After booking creation, the owner can update catering details while the booking is `pending` or `confirmed`. Admins and Super Admins can update catering details for operational purposes. Invited users can view safe catering details but cannot edit them.
+
+### Printable Approval Form
+
+Booking owners can open:
+
+```txt
+/bookings/[id]/print
+```
+
+Admins and Super Admins can open:
+
+```txt
+/admin/bookings/[id]/print
+```
+
+The print form includes booking details, requester details, invited attendees, catering details, and physical signature sections for requested-by, superior/HOD/boss approval, and Admin/Facilities approval.
 
 ### Success Result
 

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 type AdminBookingFacilityRecord =
@@ -11,6 +12,7 @@ type AdminBookingFacilityRecord =
       slug: string;
       level: string;
       type: FacilityType;
+      capacity: number;
     }
   | {
       id: string;
@@ -19,6 +21,7 @@ type AdminBookingFacilityRecord =
       slug: string;
       level: string;
       type: FacilityType;
+      capacity: number;
     }[]
   | null;
 
@@ -27,11 +30,15 @@ type AdminBookingProfileRecord =
       id: string;
       email: string;
       full_name: string | null;
+      department: string | null;
+      phone: string | null;
     }
   | {
       id: string;
       email: string;
       full_name: string | null;
+      department: string | null;
+      phone: string | null;
     }[]
   | null;
 
@@ -53,6 +60,12 @@ type AdminBookingRecord = {
   title: string;
   description: string | null;
   attendee_count: number | null;
+  catering_required: boolean | null;
+  catering_type: BookingCateringDetails["type"] | null;
+  catering_pax: number | null;
+  catering_serving_time: BookingCateringDetails["servingTime"] | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
   status: BookingStatus;
   starts_at: string;
   ends_at: string;
@@ -80,6 +93,7 @@ export type AdminBooking = {
   title: string;
   description: string | null;
   attendeeCount: number | null;
+  catering: BookingCateringDetails;
   status: BookingStatus;
   startsAt: string;
   endsAt: string;
@@ -96,11 +110,14 @@ export type AdminBooking = {
     slug: string;
     level: string;
     type: FacilityType;
+    capacity: number;
   } | null;
   user: {
     id: string;
     email: string;
     fullName: string | null;
+    department: string | null;
+    phone: string | null;
   } | null;
   approvals: {
     id: string;
@@ -121,6 +138,12 @@ const adminBookingSelect = `
   title,
   description,
   attendee_count,
+  catering_required,
+  catering_type,
+  catering_pax,
+  catering_serving_time,
+  catering_dietary_notes,
+  catering_notes,
   status,
   starts_at,
   ends_at,
@@ -136,12 +159,15 @@ const adminBookingSelect = `
     name,
     slug,
     level,
-    type
+    type,
+    capacity
   ),
   profiles!bookings_user_id_fkey (
     id,
     email,
-    full_name
+    full_name,
+    department,
+    phone
   ),
   booking_approvals (
     id,
@@ -170,6 +196,14 @@ function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
     title: record.title,
     description: record.description,
     attendeeCount: record.attendee_count,
+    catering: {
+      required: Boolean(record.catering_required),
+      type: record.catering_type,
+      pax: record.catering_pax,
+      servingTime: record.catering_serving_time,
+      dietaryNotes: record.catering_dietary_notes,
+      notes: record.catering_notes,
+    },
     status: record.status,
     startsAt: record.starts_at,
     endsAt: record.ends_at,
@@ -187,6 +221,7 @@ function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
           slug: facilityRecord.slug,
           level: facilityRecord.level,
           type: facilityRecord.type,
+          capacity: facilityRecord.capacity,
         }
       : null,
     user: userRecord
@@ -194,6 +229,8 @@ function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
           id: userRecord.id,
           email: userRecord.email,
           fullName: userRecord.full_name,
+          department: userRecord.department,
+          phone: userRecord.phone,
         }
       : null,
     approvals: (record.booking_approvals ?? []).map((approval) => ({

@@ -397,6 +397,12 @@ create table public.bookings (
   title text not null,
   description text,
   attendee_count integer check (attendee_count is null or attendee_count >= 0),
+  catering_required boolean not null default false,
+  catering_type text,
+  catering_pax integer,
+  catering_serving_time text,
+  catering_dietary_notes text,
+  catering_notes text,
   status booking_status not null default 'confirmed',
   starts_at timestamptz not null,
   ends_at timestamptz not null,
@@ -411,9 +417,47 @@ create table public.bookings (
   updated_at timestamptz not null default now(),
 
   constraint bookings_valid_time_range check (starts_at < ends_at),
-  constraint bookings_attendee_capacity check (attendee_count is null or attendee_count >= 0)
+  constraint bookings_attendee_capacity check (attendee_count is null or attendee_count >= 0),
+  constraint bookings_catering_required_details_check check (
+    catering_required = false
+    or (
+      catering_type is not null
+      and catering_pax is not null
+      and catering_pax > 0
+      and catering_serving_time is not null
+    )
+  )
 );
 ```
+
+### Catering / Food And Drinks Fields
+
+Bookings can optionally include food and drinks details for operational review and printed approval forms.
+
+Allowed `catering_type` values:
+
+```txt
+water
+coffee_tea
+light_refreshments
+snacks
+packed_meals
+buffet_catering
+vip_catering
+other
+```
+
+Allowed `catering_serving_time` values:
+
+```txt
+before_meeting
+during_meeting
+lunch_break
+after_meeting
+custom
+```
+
+If `catering_required` is true, the type, pax, and serving time are required. Dietary notes and additional catering notes are optional.
 
 ### Important Time Range Convention
 
@@ -1113,7 +1157,13 @@ create or replace function public.create_booking(
   p_attendee_count integer,
   p_starts_at timestamptz,
   p_ends_at timestamptz,
-  p_approval_required boolean
+  p_approval_required boolean,
+  p_catering_required boolean default false,
+  p_catering_type text default null,
+  p_catering_pax integer default null,
+  p_catering_serving_time text default null,
+  p_catering_dietary_notes text default null,
+  p_catering_notes text default null
 )
 returns public.bookings
 language plpgsql
@@ -1127,6 +1177,15 @@ declare
 begin
   if p_starts_at >= p_ends_at then
     raise exception 'Booking start time must be before end time.';
+  end if;
+
+  if coalesce(p_catering_required, false) = true and (
+    p_catering_type is null
+    or p_catering_pax is null
+    or p_catering_pax <= 0
+    or p_catering_serving_time is null
+  ) then
+    raise exception 'Catering type, pax, and serving time are required.';
   end if;
 
   select *

@@ -1,4 +1,5 @@
 import type { BookingStatus } from "@/lib/bookings/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 export type BookingInvitationStatus =
@@ -38,6 +39,7 @@ export type InvitedBooking = {
     title: string;
     description: string | null;
     attendeeCount: number | null;
+    catering: BookingCateringDetails;
     status: BookingStatus;
     startsAt: string;
     endsAt: string;
@@ -50,6 +52,7 @@ export type InvitedBooking = {
       slug?: string;
       level: string;
       type: FacilityType;
+      capacity?: number;
     } | null;
     organizer: InvitationProfile | null;
   };

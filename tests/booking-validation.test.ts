@@ -16,6 +16,12 @@ describe("booking validation", () => {
       title: "Planning meeting",
       description: "",
       attendeeCount: "8",
+      cateringRequired: "no",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
+      cateringDietaryNotes: "",
+      cateringNotes: "",
     });
 
     expect(parsed.success).toBe(true);
@@ -32,9 +38,49 @@ describe("booking validation", () => {
       endTime: "11:00",
       title: "A",
       attendeeCount: "-1",
+      cateringRequired: "no",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
     });
 
     expect(parsed.success).toBe(false);
+  });
+
+  it("requires catering type, pax, and serving time when catering is requested", () => {
+    const missing = bookingFormSchema.safeParse({
+      facilityId: "11111111-1111-4111-8111-111111111111",
+      date: "2026-06-01",
+      startTime: "10:00",
+      endTime: "11:00",
+      title: "Management meeting",
+      attendeeCount: "8",
+      cateringRequired: "yes",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
+      cateringDietaryNotes: "",
+      cateringNotes: "",
+    });
+
+    expect(missing.success).toBe(false);
+
+    const valid = bookingFormSchema.safeParse({
+      facilityId: "11111111-1111-4111-8111-111111111111",
+      date: "2026-06-01",
+      startTime: "10:00",
+      endTime: "11:00",
+      title: "Management meeting",
+      attendeeCount: "8",
+      cateringRequired: "yes",
+      cateringType: "vip_catering",
+      cateringPax: "8",
+      cateringServingTime: "before_meeting",
+      cateringDietaryNotes: "Halal",
+      cateringNotes: "Serve before arrival",
+    });
+
+    expect(valid.success).toBe(true);
   });
 
   it("builds Malaysia-time UTC ranges and blocks reversed ranges", () => {

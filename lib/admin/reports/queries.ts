@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
+import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
 import type {
   AdminReportsData,
@@ -49,6 +50,12 @@ type ReportBookingRecord = {
   created_at: string;
   approval_required: boolean;
   attendee_count: number | null;
+  catering_required: boolean | null;
+  catering_type: BookingCateringDetails["type"] | null;
+  catering_pax: number | null;
+  catering_serving_time: BookingCateringDetails["servingTime"] | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
   cancellation_reason: string | null;
   cancelled_at: string | null;
   facilities?: ReportBookingFacilityRecord;
@@ -80,6 +87,12 @@ const reportBookingSelect = `
   created_at,
   approval_required,
   attendee_count,
+  catering_required,
+  catering_type,
+  catering_pax,
+  catering_serving_time,
+  catering_dietary_notes,
+  catering_notes,
   cancellation_reason,
   cancelled_at,
   facilities (
@@ -132,6 +145,14 @@ function mapBookingRecord(record: ReportBookingRecord): BookingHistoryRow {
     createdAt: record.created_at,
     approvalRequired: record.approval_required,
     attendeeCount: record.attendee_count,
+    catering: {
+      required: Boolean(record.catering_required),
+      type: record.catering_type,
+      pax: record.catering_pax,
+      servingTime: record.catering_serving_time,
+      dietaryNotes: record.catering_dietary_notes,
+      notes: record.catering_notes,
+    },
     cancellationReason: record.cancellation_reason,
     cancelledAt: record.cancelled_at,
     facility: facilityRecord

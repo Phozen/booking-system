@@ -20,6 +20,7 @@ import {
   getBookingDateRange,
   normalizeAttendeeCount,
 } from "@/lib/bookings/validation";
+import { cateringValuesToDetails } from "@/lib/bookings/catering/validation";
 import {
   getAppSettings,
   getEffectiveApprovalRequired,
@@ -41,6 +42,12 @@ type CreatedBookingRecord = {
   title: string;
   description: string | null;
   attendee_count: number | null;
+  catering_required: boolean;
+  catering_type: string | null;
+  catering_pax: number | null;
+  catering_serving_time: string | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
   status: "pending" | "confirmed";
   starts_at: string;
   ends_at: string;
@@ -311,6 +318,7 @@ export async function createBookingAction(
   }
 
   const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
+  const cateringDetails = cateringValuesToDetails(parsed.data);
   const settings = await getAppSettings();
   const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
 
@@ -361,6 +369,12 @@ export async function createBookingAction(
     p_starts_at: dateRange.startsAt.toISOString(),
     p_ends_at: dateRange.endsAt.toISOString(),
     p_approval_required: approvalRequired,
+    p_catering_required: cateringDetails.required,
+    p_catering_type: cateringDetails.type,
+    p_catering_pax: cateringDetails.pax,
+    p_catering_serving_time: cateringDetails.servingTime,
+    p_catering_dietary_notes: cateringDetails.dietaryNotes,
+    p_catering_notes: cateringDetails.notes,
   });
 
   if (error || !data) {

@@ -60,6 +60,7 @@ Design personality:
 | `/invitations` | Booking invitations | Exists | Shows meetings the employee was invited to, with accept/decline actions. |
 | `/bookings/new` | Create booking | Exists | Needs stronger availability feedback and form error UX. |
 | `/bookings/[id]` | Employee booking detail | Exists | Should keep privacy-safe not-found/access-denied behavior. |
+| `/bookings/[id]/print` | Printable owner approval form | Exists | Owner-only print route for physical signature workflows. |
 | `/my-bookings` | Current user's bookings | Exists | Good grouping foundation. |
 | `/profile` | User profile | Exists | Users can view account details and update safe contact fields only. |
 
@@ -74,6 +75,7 @@ Design personality:
 | `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details plus admin photo management. Equipment management remains data-backed rather than a dedicated UI. |
 | `/admin/bookings` | All bookings | Exists | Status/facility filters exist; needs broader filters and responsive pattern. |
 | `/admin/bookings/[id]` | Admin booking detail/actions | Exists | Needs consistent destructive confirmation UX. |
+| `/admin/bookings/[id]/print` | Printable admin approval form | Exists | Admin/Super Admin printable form with requester, attendees, catering, and signatures. |
 | `/admin/approvals` | Pending approvals | Exists | Should emphasize time-sensitive pending work. |
 | `/admin/blocked-dates` | Blocked period list | Exists | Needs consistent table/filter treatment. |
 | `/admin/blocked-dates/new` | Create blocked period | Exists | Form foundation exists. |
@@ -258,6 +260,16 @@ Examples:
 - Primary buttons should use solid brand color and clear verb labels.
 - Outline button: secondary navigation/actions, visually clear but quieter than primary.
 - Ghost button: back links, low emphasis reset/cancel actions.
+
+### Catering And Print Form UX
+
+- The booking form includes a dedicated "Food & drinks / catering" section.
+- Catering defaults to "No" to keep ordinary bookings fast.
+- When catering is required, request type, pax, and serving time must be visibly required and produce field-level errors.
+- Dietary/special notes should prompt for halal, vegetarian, allergies, VIP requirements, and setup needs without making those notes mandatory.
+- Booking detail pages show catering details even when no catering is requested, so Admin/Facilities can quickly scan the operational impact.
+- Owners can edit catering details while a booking is pending or confirmed; Admins and Super Admins can edit for operational purposes.
+- Printable approval forms use a white document-style layout, hide navigation and buttons when printing, and include physical signature blocks that do not split awkwardly across pages.
 - Destructive button: cancellation, rejection, deactivation, completing irreversible state transitions when appropriate. Use rose/destructive treatment and confirmation where needed.
 - Success buttons should be reserved for affirmative operational actions such as approve/reactivate when that styling improves clarity.
 - Warning buttons should be reserved for cautionary non-destructive state transitions; avoid using warning as a decorative alternative.

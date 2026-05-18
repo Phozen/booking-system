@@ -178,6 +178,17 @@ Employees must be able to create bookings by selecting:
 - Optional description
 - Optional attendees or expected participants
 - Optional remarks
+- Optional food and drinks / catering details when refreshments, meals, or VIP catering are required
+
+When catering is required, the system should capture:
+
+- Request type
+- Number of pax
+- Serving time
+- Dietary or special notes
+- Additional catering notes
+
+Booking owners may edit catering details while a booking is pending or confirmed. Admins and Super Admins may edit catering details for operational purposes. Changes should be audit logged.
 
 ### 6.2 Booking Statuses
 

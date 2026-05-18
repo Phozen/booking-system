@@ -76,6 +76,14 @@ describe("CSV exports", () => {
           createdAt: "2026-05-01T00:00:00.000Z",
           approvalRequired: false,
           attendeeCount: 8,
+          catering: {
+            required: true,
+            type: "coffee_tea",
+            pax: 8,
+            servingTime: "before_meeting",
+            dietaryNotes: "Halal",
+            notes: "Serve near the entrance",
+          },
           cancellationReason: null,
           cancelledAt: null,
           facility: {
@@ -100,6 +108,8 @@ describe("CSV exports", () => {
 
     expect(rowCount).toBe(1);
     expect(csv).toContain("Title,Facility,User,Date,Time,Status");
+    expect(csv).toContain("Catering required,Catering type,Catering pax");
+    expect(csv).toContain("Yes,Coffee / tea,8,Before meeting,Halal");
     expect(csv).toContain("\"Board \"\"planning\"\", Q1\nFollow-up\"");
   });
 });

@@ -4,6 +4,11 @@ import {
   formatBookingStatus,
   formatBookingWindow,
 } from "@/lib/bookings/format";
+import {
+  formatCateringRequired,
+  formatCateringServingTime,
+  formatCateringType,
+} from "@/lib/bookings/catering/format";
 import { formatFacilityType } from "@/lib/facilities/format";
 import type {
   AdminReportsData,
@@ -187,6 +192,12 @@ export function buildReportCsv(data: AdminReportsData, type: ReportExportType) {
         "Approval required",
         "Approval status",
         "Attendee count",
+        "Catering required",
+        "Catering type",
+        "Catering pax",
+        "Catering serving time",
+        "Catering dietary notes",
+        "Catering notes",
         "Created at",
       ],
       data.bookingHistory.map((row) => [
@@ -199,9 +210,16 @@ export function buildReportCsv(data: AdminReportsData, type: ReportExportType) {
         row.approvalRequired ? "Yes" : "No",
         row.approvalStatus,
         row.attendeeCount,
+        formatCateringRequired(row.catering.required),
+        row.catering.required ? formatCateringType(row.catering.type) : "",
+        row.catering.required ? row.catering.pax : "",
+        row.catering.required
+          ? formatCateringServingTime(row.catering.servingTime)
+          : "",
+        row.catering.dietaryNotes,
+        row.catering.notes,
         formatBookingDateTime(row.createdAt),
       ]),
     ),
   };
 }
-

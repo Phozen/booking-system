@@ -51,6 +51,12 @@ export function PendingApprovalsTable({
                   label: "Requested",
                   value: formatBookingDateTime(booking.createdAt),
                 },
+                {
+                  label: "Catering",
+                  value: booking.catering.required
+                    ? `${booking.catering.pax ?? "?"} pax`
+                    : "Not requested",
+                },
               ]}
               actions={
                 <Link
@@ -84,6 +90,7 @@ export function PendingApprovalsTable({
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Time</th>
               <th className="px-4 py-3 font-medium">Requested</th>
+              <th className="px-4 py-3 font-medium">Catering</th>
               <th className="px-4 py-3 text-right font-medium">Review</th>
             </tr>
           </thead>
@@ -109,6 +116,11 @@ export function PendingApprovalsTable({
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatBookingDateTime(booking.createdAt)}
                   </td>
+                  <td className="px-4 py-3">
+                    {booking.catering.required
+                      ? `${booking.catering.pax ?? "?"} pax`
+                      : "Not requested"}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/bookings/${booking.id}`}
@@ -127,7 +139,7 @@ export function PendingApprovalsTable({
               <tr>
                 <td
                   className="px-4 py-8"
-                  colSpan={7}
+                  colSpan={8}
                 >
                   <EmptyState
                     className="border-0 bg-transparent py-4"
