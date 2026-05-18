@@ -201,6 +201,18 @@ Security notes:
 - Microsoft 365 SMTP commonly uses `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, and a dedicated service mailbox.
 - Microsoft 365 Calendar sync uses Microsoft Graph, not SMTP. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra values are configured and the integration is ready to test.
 
+### Vercel Environment Template
+
+A safe Vercel import template is available at:
+
+```txt
+docs/vercel-env-templates/booking-system-vercel-env.example
+```
+
+The template contains placeholders only. Copy it locally to `.env.vercel.local`, replace placeholders with real values, then paste or import those values into Vercel Project Settings > Environment Variables.
+
+Do not commit `.env.local`, `.env.vercel.local`, Supabase service role keys, SMTP passwords, Microsoft client secrets, or access tokens.
+
 ### Database Setup
 
 Apply Supabase migrations through the latest migration in `supabase/migrations`.
@@ -347,6 +359,35 @@ See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environmen
 
 App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and should remain disabled until Microsoft Entra app registration and the central calendar target are ready.
 
+## Integration Readiness
+
+App-side support is complete for SMTP email and Microsoft 365 Calendar one-way sync. Both integrations can remain safely disabled while external credentials and IT setup are pending.
+
+Recommended safe values while waiting for credentials:
+
+```txt
+EMAIL_PROVIDER=none
+MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
+MICROSOFT_SYNC_MODE=disabled
+```
+
+SMTP email is ready for Microsoft 365 once a service mailbox, SMTP AUTH, sender identity, and mailbox credentials are available. The app reads:
+
+```txt
+EMAIL_PROVIDER
+EMAIL_FROM
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_REQUIRE_TLS
+SMTP_USER
+SMTP_PASSWORD
+```
+
+Microsoft 365 Calendar sync is ready for live testing once migration `0014` is applied, Microsoft Entra app registration is complete, Graph application permissions/admin consent are granted, and the central booking calendar mailbox is configured.
+
+See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and external IT checklist.
+
 ## Security Model
 
 - Supabase Auth handles identity.
@@ -374,6 +415,8 @@ App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync a
 - `docs/STORAGE_SETUP.md` - facility photo storage setup.
 - `docs/E2E_TESTING.md` - Playwright setup, credentials, and browser smoke-test strategy.
 - `docs/MICROSOFT_365_CALENDAR_SYNC.md` - Microsoft 365 Calendar sync architecture, setup, security, and Stage 2 plan.
+- `docs/INTEGRATION_READINESS_CHECKLIST.md` - SMTP and Microsoft 365 Calendar app-side readiness and remaining external setup.
+- `docs/vercel-env-templates/booking-system-vercel-env.example` - safe Vercel environment variable import template.
 
 ## Deferred Or Optional Items
 
