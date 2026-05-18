@@ -222,6 +222,20 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] If Microsoft 365 SMTP fails, confirm `last_error` is safe and mentions authentication, connection, or TLS without exposing the SMTP password.
 - [ ] Confirm Supabase Auth emails are understood as separate from the app email queue and are configured in Supabase Dashboard if needed.
 
+### SMTP Vercel Verification
+
+- [ ] Copy `docs/vercel-env-templates/booking-system-vercel-env.example` to `.env.vercel.local`.
+- [ ] Replace placeholder values locally and paste/import values into Vercel Project Settings > Environment Variables.
+- [ ] Apply values to Production, and Preview only if desired.
+- [ ] Redeploy after changing Vercel environment variables.
+- [ ] Create a queued booking or invitation notification.
+- [ ] Open `/admin/email-notifications` as Admin or Super Admin.
+- [ ] Click `Process queued emails`.
+- [ ] Confirm provider shows `SMTP`.
+- [ ] Confirm status changes to `sent`.
+- [ ] If failed, review `last_error`.
+- [ ] Confirm no secrets appear in UI or log output.
+
 ## Reports
 
 - [ ] Open `/admin/reports`; confirm summary metrics render.

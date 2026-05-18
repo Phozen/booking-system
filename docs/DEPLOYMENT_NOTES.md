@@ -46,6 +46,22 @@ See `docs/E2E_TESTING.md` for browser installation, required test users, and loc
 
 Set these in Vercel Project Settings > Environment Variables for Production. Add Preview values too if testing auth or emails from preview deployments.
 
+Safe import template:
+
+```txt
+docs/vercel-env-templates/booking-system-vercel-env.example
+```
+
+To prepare values for Vercel:
+
+1. Copy the template to `.env.vercel.local`.
+2. Replace placeholder values locally.
+3. Paste or import the final values into Vercel Project Settings > Environment Variables.
+4. Apply values to Production, and to Preview only if you intentionally test auth or email from preview deployments.
+5. Redeploy after changing Vercel environment variables.
+
+Do not commit `.env.vercel.local`. It is covered by the repository env-file ignore rules.
+
 Public browser-exposed values:
 
 ```txt
@@ -291,6 +307,19 @@ If email variables are missing, processing should fail safely and store a clear 
 
 SMTP is supported for Microsoft 365 and other SMTP providers.
 
+The SMTP provider implementation reads these exact environment names:
+
+```txt
+EMAIL_PROVIDER
+EMAIL_FROM
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_REQUIRE_TLS
+SMTP_USER
+SMTP_PASSWORD
+```
+
 Example Vercel environment values:
 
 ```txt
@@ -310,16 +339,20 @@ Microsoft 365 notes:
 - Prefer a dedicated service mailbox such as `noreply@company.com`.
 - Avoid using a personal user mailbox for app notifications.
 - Do not commit SMTP credentials.
+- If SMTP is not ready, use `EMAIL_PROVIDER=none` or leave `EMAIL_PROVIDER` blank so queued emails fail safely with a configuration message.
+- Use `docs/vercel-env-templates/booking-system-vercel-env.example` as the safe Vercel import template and copy it locally to `.env.vercel.local` before replacing placeholders.
 
 Manual SMTP smoke test:
 
-1. Configure the SMTP environment variables in Vercel or `.env.local`.
-2. Restart the app.
-3. Create or queue a booking notification.
-4. Open `/admin/email-notifications`.
+1. Configure the SMTP environment variables in Vercel.
+2. Redeploy the app.
+3. Create or queue a booking/invitation notification.
+4. Open `/admin/email-notifications` as Admin or Super Admin.
 5. Click `Process queued emails`.
-6. Confirm the notification becomes `sent`, or review the safe `last_error` message.
-7. Test invalid credentials only in a controlled environment and confirm secrets are not shown.
+6. Confirm the provider shows `SMTP`.
+7. Confirm the notification status changes to `sent`.
+8. If sending fails, review the safe `last_error` message.
+9. Confirm no secrets appear in the UI or log output.
 
 ### Supabase Auth Email Is Separate
 
