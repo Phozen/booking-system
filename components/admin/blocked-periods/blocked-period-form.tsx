@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 function toDateTimeInputs(value: string, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -304,11 +305,9 @@ export function BlockedPeriodForm({
           Cancel
         </Button>
         <Button type="submit" disabled={isBusy}>
-          {isPending || isStatusPending
-            ? "Saving..."
-            : blockedPeriod
-              ? "Save blocked period"
-              : "Create blocked period"}
+          <PendingButtonContent pending={isBusy} pendingLabel="Saving...">
+            {blockedPeriod ? "Save blocked period" : "Create blocked period"}
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -97,7 +98,9 @@ export function AdminBookingActionForm({
           />
         ) : (
           <Button type="submit" variant={variant} disabled={isPending}>
-            {isPending ? "Saving..." : submitLabel}
+            <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+              {submitLabel}
+            </PendingButtonContent>
           </Button>
         )}
       </div>

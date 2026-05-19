@@ -380,6 +380,17 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm calendar today marker, booking events, invited booking labels, and mobile agenda cards are easy to scan.
 - [ ] Confirm accent changes do not introduce horizontal overflow or cramped controls on mobile.
 
+## Loading, Pending, And Progress Feedback
+
+- [ ] Navigate between dashboard, facilities, calendar, profile, admin bookings, admin users, and admin settings; confirm route loading states or the top progress indicator appear where practical.
+- [ ] Confirm route loading states use readable text and do not create horizontal overflow on 320px, 360px, 390px, or 430px widths.
+- [ ] Submit booking, profile, catering, invitation, facility photo, facility archive, email processing, and Microsoft calendar retry actions; confirm buttons disable and show action-specific pending text.
+- [ ] Confirm confirmation dialogs show pending labels such as "Deleting...", "Archiving...", or "Saving..." after confirmation.
+- [ ] Confirm list/table skeletons look like loading placeholders and are not mistaken for real records.
+- [ ] Confirm loading indicators use readable text or accessible status labels; no critical workflow relies on a spinner alone.
+- [ ] Confirm loading indicators, skeletons, disabled buttons, and the top progress bar remain readable in dark mode.
+- [ ] Confirm print approval form actions show "Opening print dialog..." and interactive controls stay hidden in printed output.
+
 ## Dark Mode
 
 - [ ] Confirm the auth-page theme toggle sits in the top-right corner outside the form card.

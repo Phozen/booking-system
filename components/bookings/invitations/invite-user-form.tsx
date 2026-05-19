@@ -7,6 +7,7 @@ import { inviteUserToBookingAction } from "@/lib/bookings/invitations/actions";
 import { invitationActionInitialState } from "@/lib/bookings/invitations/action-state";
 import type { InviteCandidate } from "@/lib/bookings/invitations/types";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -60,8 +61,10 @@ export function InviteUserForm({
       ) : null}
 
       <Button type="submit" disabled={isPending || candidates.length === 0}>
-        <UserPlus data-icon="inline-start" />
-        {isPending ? "Inviting..." : "Invite user"}
+        <PendingButtonContent pending={isPending} pendingLabel="Sending invitation...">
+          <UserPlus data-icon="inline-start" />
+          Invite user
+        </PendingButtonContent>
       </Button>
     </form>
   );

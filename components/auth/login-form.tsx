@@ -9,6 +9,7 @@ import { loginAction, type AuthActionResult } from "@/lib/auth/actions";
 import { loginSchema, type LoginValues } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -87,7 +88,9 @@ export function LoginForm({ initialMessage }: LoginFormProps) {
       </div>
 
       <Button type="submit" size="lg" disabled={isPending}>
-        {isPending ? "Logging in..." : "Log in"}
+        <PendingButtonContent pending={isPending} pendingLabel="Logging in...">
+          Log in
+        </PendingButtonContent>
       </Button>
 
       <div className="flex flex-wrap justify-between gap-3 text-sm text-muted-foreground">

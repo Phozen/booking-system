@@ -1,6 +1,5 @@
-import { Loader2 } from "lucide-react";
-
 import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
 
 export function LoadingState({
   label = "Loading",
@@ -18,8 +17,7 @@ export function LoadingState({
       role="status"
       aria-live="polite"
     >
-      <Loader2 className="size-4 animate-spin text-primary" aria-hidden="true" />
-      <span>{label}</span>
+      <LoadingSpinner label={label} showLabel className="text-primary" />
     </div>
   );
 }

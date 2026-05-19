@@ -199,6 +199,17 @@ Every major page should define:
 - Loading state: short skeleton or "Loading..." with screen-reader text.
 - Error state: plain message and retry/back action where possible.
 
+Loading and pending feedback should be contextual rather than disruptive:
+
+- Route-level loading should use a calm spinner plus short page-specific text such as "Loading dashboard..." or "Loading admin area...".
+- List and table loading should prefer skeleton cards/rows that match the final layout without pretending to be real content.
+- Form submit buttons must disable while pending and replace their label with action-specific text such as "Creating booking...", "Saving...", "Uploading photo...", "Processing emails...", or "Archiving facility...".
+- Long-running admin actions should keep the user on the current screen and show progress on the action button or confirmation dialog.
+- Client navigation may show a thin top progress indicator; it must not block the page or cover mobile navigation.
+- Print approval forms should show preparation feedback for the print action and hide interactive controls in print output.
+- Spinners and progress indicators need accessible text using `role="status"` or polite live-region behavior where helpful.
+- Reduced-motion users should still receive text feedback when animation is minimized.
+
 Examples:
 
 - Facility empty: "No active facilities are available. Contact an admin if this looks wrong."
@@ -450,6 +461,9 @@ Requirements:
   - "Cancel booking", not "Cancel" when destructive.
   - "Approve booking", "Reject booking", "Deactivate blocked period".
 - Loading text should describe work: "Creating...", "Saving...", "Processing emails...".
+- Pending buttons should include both a spinner and readable text; icon-only spinner states are not enough for primary workflows.
+- Pending labels must stay short enough for mobile buttons and may wrap without clipping.
+- Pending buttons must be disabled to prevent duplicate submissions while preserving readable contrast.
 
 ### ARIA Usage
 

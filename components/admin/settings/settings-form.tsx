@@ -21,6 +21,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const initialState: SettingsActionResult = {
   status: "idle",
@@ -325,7 +326,9 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
       <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save settings"}
+          <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+            Save settings
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 export function CateringEditForm({
   bookingId,
@@ -180,7 +181,9 @@ export function CateringEditForm({
         {canEdit ? (
           <div className="flex justify-end">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save catering details"}
+              <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+                Save catering details
+              </PendingButtonContent>
             </Button>
           </div>
         ) : null}

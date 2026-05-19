@@ -5,6 +5,7 @@ import { useId, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 export function ConfirmDialog({
   triggerLabel,
@@ -118,7 +119,9 @@ export function ConfirmDialog({
               onClick={handleConfirm}
               disabled={disabled || isPending}
             >
-              {isPending ? pendingLabel : confirmLabel}
+              <PendingButtonContent pending={isPending} pendingLabel={pendingLabel}>
+                {confirmLabel}
+              </PendingButtonContent>
             </Button>
           </div>
         </div>

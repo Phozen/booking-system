@@ -20,6 +20,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 type ProfileFieldId = "fullName" | "department" | "phone";
 type ProfileFieldErrors = Partial<Record<ProfileFieldId, string>>;
@@ -141,8 +142,10 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
 
       <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button type="submit" disabled={isPending}>
-          <Save data-icon="inline-start" />
-          {isPending ? "Saving..." : "Save profile"}
+          <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+            <Save data-icon="inline-start" />
+            Save profile
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

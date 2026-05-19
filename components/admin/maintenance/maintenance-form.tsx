@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 function toDateTimeInputs(value: string, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -302,11 +303,9 @@ export function MaintenanceForm({
           Back
         </Button>
         <Button type="submit" disabled={isBusy}>
-          {isPending || isStatusPending
-            ? "Saving..."
-            : maintenanceClosure
-              ? "Save closure"
-              : "Create closure"}
+          <PendingButtonContent pending={isBusy} pendingLabel="Saving...">
+            {maintenanceClosure ? "Save closure" : "Create closure"}
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

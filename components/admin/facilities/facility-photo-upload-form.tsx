@@ -15,6 +15,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const maxSizeMb = Math.floor(facilityPhotoMaxBytes / 1024 / 1024);
 
@@ -79,8 +80,13 @@ export function FacilityPhotoUploadForm({
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-          <ImagePlus data-icon="inline-start" />
-          {isPending ? "Uploading..." : "Upload photo"}
+          <PendingButtonContent
+            pending={isPending}
+            pendingLabel="Uploading photo..."
+          >
+            <ImagePlus data-icon="inline-start" />
+            Upload photo
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

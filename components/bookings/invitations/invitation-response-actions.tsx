@@ -7,6 +7,7 @@ import { respondToInvitationAction } from "@/lib/bookings/invitations/actions";
 import { invitationActionInitialState } from "@/lib/bookings/invitations/action-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 export function InvitationResponseActions({
   invitationId,
@@ -46,8 +47,13 @@ export function InvitationResponseActions({
             className="w-full"
             disabled={disabled || isPending}
           >
-            <CheckCircle2 data-icon="inline-start" />
-            {acceptPending ? "Accepting..." : "Accept invitation"}
+            <PendingButtonContent
+              pending={acceptPending}
+              pendingLabel="Accepting..."
+            >
+              <CheckCircle2 data-icon="inline-start" />
+              Accept invitation
+            </PendingButtonContent>
           </Button>
         </form>
         <form action={declineAction} className="w-full sm:w-auto">
@@ -57,8 +63,13 @@ export function InvitationResponseActions({
             className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
             disabled={disabled || isPending}
           >
-            <XCircle data-icon="inline-start" />
-            {declinePending ? "Declining..." : "Decline invitation"}
+            <PendingButtonContent
+              pending={declinePending}
+              pendingLabel="Declining..."
+            >
+              <XCircle data-icon="inline-start" />
+              Decline invitation
+            </PendingButtonContent>
           </Button>
         </form>
       </div>

@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/integrations/microsoft-calendar/actions";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const initialState: MicrosoftCalendarRetryActionResult = {
   status: "idle",
@@ -29,8 +30,10 @@ export function RetryMicrosoftCalendarSyncForm({
     <form action={formAction} className="grid gap-2">
       <input type="hidden" name="bookingId" value={bookingId} />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
-        <RefreshCcw aria-hidden="true" />
-        {pending ? "Retrying..." : "Retry sync"}
+        <PendingButtonContent pending={pending} pendingLabel="Retrying...">
+          <RefreshCcw aria-hidden="true" />
+          Retry sync
+        </PendingButtonContent>
       </Button>
       {state.status !== "idle" ? (
         <Alert variant={state.status === "error" ? "destructive" : "success"}>

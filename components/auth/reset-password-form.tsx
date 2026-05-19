@@ -15,6 +15,7 @@ import {
 } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -67,7 +68,9 @@ export function ResetPasswordForm() {
       </div>
 
       <Button type="submit" size="lg" disabled={isPending}>
-        {isPending ? "Sending..." : "Send reset link"}
+        <PendingButtonContent pending={isPending} pendingLabel="Sending...">
+          Send reset link
+        </PendingButtonContent>
       </Button>
 
       <p className="text-sm text-muted-foreground">

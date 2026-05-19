@@ -42,6 +42,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -713,7 +714,12 @@ export function BookingForm({
           Cancel
         </Link>
         <Button type="submit" disabled={!hasFacilities || isPending}>
-          {isPending ? "Creating..." : "Create booking"}
+          <PendingButtonContent
+            pending={isPending}
+            pendingLabel="Creating booking..."
+          >
+            Create booking
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

@@ -30,6 +30,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 function requiresApprovalValue(value: boolean | null) {
   if (value === true) {
@@ -327,7 +328,9 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : facility ? "Save facility" : "Create facility"}
+          <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+            {facility ? "Save facility" : "Create facility"}
+          </PendingButtonContent>
         </Button>
       </div>
     </form>

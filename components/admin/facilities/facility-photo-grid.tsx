@@ -11,6 +11,7 @@ import { facilityPhotoActionInitialState } from "@/lib/admin/facilities/photo-ac
 import type { Facility, FacilityPhoto } from "@/lib/facilities/queries";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -111,12 +112,10 @@ function FacilityPhotoCard({
               disabled={photo.isPrimary || primaryPending || deletePending}
               className={cn("w-full", photo.isPrimary && "justify-center")}
             >
-              <Star data-icon="inline-start" />
-              {primaryPending
-                ? "Updating..."
-                : photo.isPrimary
-                  ? "Primary photo"
-                  : "Set primary"}
+              <PendingButtonContent pending={primaryPending} pendingLabel="Updating...">
+                <Star data-icon="inline-start" />
+                {photo.isPrimary ? "Primary photo" : "Set primary"}
+              </PendingButtonContent>
             </Button>
           </form>
 
