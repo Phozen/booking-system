@@ -12,6 +12,8 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Tailwind CSS and shadcn/ui-style components
 - Resend or SMTP-ready email notification queue
 - Microsoft 365 Calendar one-way outbound sync support
+- Facility availability timeline, waitlist/alternative requests, and finite recurring bookings
+- Reporting enhancements, audit diff review, and backup/restore handoff docs
 - Vitest for unit tests
 - Vercel for deployment
 
@@ -440,6 +442,7 @@ See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and 
 - `docs/E2E_TESTING.md` - Playwright setup, credentials, and browser smoke-test strategy.
 - `docs/MICROSOFT_365_CALENDAR_SYNC.md` - Microsoft 365 Calendar sync architecture, setup, security, and Stage 2 plan.
 - `docs/INTEGRATION_READINESS_CHECKLIST.md` - SMTP and Microsoft 365 Calendar app-side readiness and remaining external setup.
+- `docs/BACKUP_RESTORE.md` - Supabase, storage, Vercel env, secret rotation, and restore runbook.
 - `docs/vercel-env-templates/booking-system-vercel-env.example` - safe Vercel environment variable import template.
 
 ## Deferred Or Optional Items

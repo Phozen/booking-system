@@ -2028,3 +2028,15 @@ Before considering frontend polish complete:
 - [ ] No admin-only controls appear on employee pages.
 - [ ] Unimplemented routes are not shown as primary nav.
 - [ ] `npm.cmd run qa` passes after implementation.
+## Roadmap Feature UI Guidance
+
+- Facility availability timelines must include text labels for Available,
+  Booked, Pending, Blocked, and Maintenance states; color alone is not enough.
+- Waitlist and recurring booking flows must explain that conflict prevention
+  remains authoritative and that waitlist requests do not reserve rooms.
+- Recurring booking previews must show available and unavailable occurrences
+  before creation, with mobile-friendly stacked rows.
+- Report summary cards and simple bars should remain readable in light and dark
+  mode and avoid dense chart-only communication.
+- Audit diff fields should be grouped, readable, and masked for sensitive
+  values.

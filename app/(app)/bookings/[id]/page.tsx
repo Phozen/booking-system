@@ -37,6 +37,8 @@ function invitedBookingToEmployeeBooking(
     approvalRequired: booking.approvalRequired,
     cancellationReason: null,
     cancelledAt: null,
+    recurrenceSeriesId: null,
+    recurrenceSequence: null,
     createdAt: booking.createdAt,
     updatedAt: booking.updatedAt,
     facility: booking.facility

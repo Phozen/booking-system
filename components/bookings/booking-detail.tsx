@@ -20,6 +20,7 @@ import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
+import { RecurringCancelActions } from "@/components/bookings/recurring/recurring-cancel-actions";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
@@ -340,6 +341,12 @@ export function BookingDetail({
           </div>
           <CancelBookingForm bookingId={booking.id} />
         </section>
+      ) : null}
+
+      {isOwnerView &&
+      booking.recurrenceSeriesId &&
+      isCancellableBooking(booking.status) ? (
+        <RecurringCancelActions bookingId={booking.id} />
       ) : null}
     </main>
   );

@@ -155,6 +155,12 @@ export function BookingForm({
   );
   const alertCopy =
     state.status !== "idle" ? getBookingAlertCopy(state) : null;
+  const canRequestAlternative =
+    state.status === "error" &&
+    alertCopy &&
+    ["Booking conflict", "Facility unavailable", "Facility under maintenance"].includes(
+      alertCopy.title,
+    );
   const hasPreviewDetails = Boolean(
     selectedFacilityDetails ||
       previewValues.date ||
@@ -252,7 +258,19 @@ export function BookingForm({
             <CheckCircle2 aria-hidden="true" />
           )}
           <AlertTitle>{alertCopy?.title}</AlertTitle>
-          <AlertDescription>{alertCopy?.message}</AlertDescription>
+          <AlertDescription>
+            {alertCopy?.message}
+            {canRequestAlternative ? (
+              <span className="mt-2 block">
+                <Link
+                  href={`/waitlist${selectedFacility ? `?facilityId=${selectedFacility}` : ""}`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  Request waitlist / alternative
+                </Link>
+              </span>
+            ) : null}
+          </AlertDescription>
         </Alert>
       ) : null}
 

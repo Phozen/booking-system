@@ -177,6 +177,8 @@ function mapBookingRecord(record: ReportBookingRecord): BookingHistoryRow {
       : null,
     approvalStatus: approvalRecord?.status ?? null,
     approvalRemarks: approvalRecord?.remarks ?? null,
+    approvalRequestedAt: approvalRecord?.requested_at ?? null,
+    approvalReviewedAt: approvalRecord?.reviewed_at ?? null,
   };
 }
 
@@ -199,8 +201,21 @@ function buildSummary(bookings: BookingHistoryRow[]): ReportSummary {
     string,
     { userName: string; email: string; bookingCount: number }
   >();
+  const statusCounts = new Map<BookingStatus, number>();
+  const approvalDurations: number[] = [];
 
   for (const booking of bookings) {
+    statusCounts.set(booking.status, (statusCounts.get(booking.status) ?? 0) + 1);
+
+    if (booking.approvalRequestedAt && booking.approvalReviewedAt) {
+      const requestedAt = new Date(booking.approvalRequestedAt).getTime();
+      const reviewedAt = new Date(booking.approvalReviewedAt).getTime();
+
+      if (!Number.isNaN(requestedAt) && !Number.isNaN(reviewedAt) && reviewedAt >= requestedAt) {
+        approvalDurations.push((reviewedAt - requestedAt) / 3_600_000);
+      }
+    }
+
     if (booking.facility) {
       const key = booking.facility.id;
       const current = facilityCounts.get(key) ?? {
@@ -234,6 +249,22 @@ function buildSummary(bookings: BookingHistoryRow[]): ReportSummary {
       .length,
     pendingBookings: bookings.filter((item) => item.status === "pending").length,
     totalBookedHours: roundHours(totalBookedHours),
+    noShowBookings: bookings.filter((item) => item.usageStatus === "no_show").length,
+    cateringRequests: bookings.filter((item) => item.catering.required).length,
+    cateringPax: bookings.reduce(
+      (total, item) => total + (item.catering.required ? item.catering.pax ?? 0 : 0),
+      0,
+    ),
+    averageApprovalHours:
+      approvalDurations.length > 0
+        ? roundHours(
+            approvalDurations.reduce((total, value) => total + value, 0) /
+              approvalDurations.length,
+          )
+        : null,
+    statusBreakdown: [...statusCounts.entries()]
+      .map(([status, count]) => ({ status, count }))
+      .sort((a, b) => b.count - a.count),
     mostBookedFacilities: [...facilityCounts.values()]
       .sort((a, b) => b.bookingCount - a.bookingCount)
       .slice(0, 5),

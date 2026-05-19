@@ -131,3 +131,16 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Automated browser/security E2E tests are not implemented yet; continue using the manual QA checklist until those tests exist.
 - Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.
 - Microsoft 365 Calendar sync is outbound-only; inbound import, delegated OAuth, personal calendars, and two-way sync are not implemented.
+## Waitlist, Recurrence, and Audit Security
+
+- Waitlist requests are owner-visible to employees and globally manageable only
+  by Admin/Super Admin users.
+- Waitlist requests do not reserve slots and must not bypass booking conflict
+  checks.
+- Recurring booking creation must generate normal bookings and run existing
+  availability checks for every occurrence.
+- Employees must not manage another user's recurrence series or waitlist
+  request.
+- Audit diff views must mask secret-like fields including passwords, tokens,
+  API keys, service-role keys, SMTP passwords, Microsoft client secrets, and
+  authorization headers.

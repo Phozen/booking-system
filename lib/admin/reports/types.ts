@@ -26,6 +26,14 @@ export type ReportSummary = {
   rejectedBookings: number;
   pendingBookings: number;
   totalBookedHours: number;
+  noShowBookings: number;
+  cateringRequests: number;
+  cateringPax: number;
+  averageApprovalHours: number | null;
+  statusBreakdown: {
+    status: BookingStatus;
+    count: number;
+  }[];
   mostBookedFacilities: {
     facilityName: string;
     level: string;
@@ -69,6 +77,8 @@ export type BookingHistoryRow = {
   user: ReportBookingUser | null;
   approvalStatus: ApprovalStatus | null;
   approvalRemarks: string | null;
+  approvalRequestedAt: string | null;
+  approvalReviewedAt: string | null;
 };
 
 export type CancelledBookingRow = BookingHistoryRow & {

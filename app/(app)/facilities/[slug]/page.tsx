@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guards";
+import { getFacilityAvailabilityTimeline } from "@/lib/facilities/availability-timeline";
 import { getEmployeeFacilityBySlug } from "@/lib/facilities/queries";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -10,11 +11,14 @@ export const dynamic = "force-dynamic";
 
 export default async function FacilityDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ date?: string }>;
 }) {
   await requireUser();
   const { slug } = await params;
+  const query = await searchParams;
   const supabase = await createClient();
   const [facility, settings] = await Promise.all([
     getEmployeeFacilityBySlug(supabase, slug),
@@ -25,5 +29,27 @@ export default async function FacilityDetailPage({
     notFound();
   }
 
-  return <FacilityDetail facility={facility} settings={settings} />;
+  const selectedDate =
+    query.date && /^\d{4}-\d{2}-\d{2}$/.test(query.date)
+      ? query.date
+      : new Intl.DateTimeFormat("en-CA", {
+          timeZone: settings.defaultTimezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date());
+  const timeline = await getFacilityAvailabilityTimeline(supabase, {
+    facilityId: facility.id,
+    date: selectedDate,
+    timezone: settings.defaultTimezone,
+  });
+
+  return (
+    <FacilityDetail
+      facility={facility}
+      settings={settings}
+      availabilityDate={selectedDate}
+      availabilityTimeline={timeline}
+    />
+  );
 }

@@ -36,5 +36,8 @@ test.describe("admin smoke flows", () => {
 
     await page.goto("/admin/settings");
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
+
+    await page.goto("/admin/system-health");
+    await expect(page).toHaveURL(/\/admin\/dashboard$/);
   });
 });

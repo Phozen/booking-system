@@ -11,6 +11,7 @@ import {
   formatFacilityType,
 } from "@/lib/facilities/format";
 import type { Facility } from "@/lib/facilities/queries";
+import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
 import {
   formatEffectiveApprovalCopy,
   formatEffectiveApprovalLabel,
@@ -19,14 +20,19 @@ import {
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { FacilityAvailabilityTimeline } from "@/components/facilities/facility-availability-timeline";
 import { buttonVariants } from "@/components/ui/button";
 
 export function FacilityDetail({
   facility,
   settings,
+  availabilityDate,
+  availabilityTimeline,
 }: {
   facility: Facility;
   settings: AppSettings;
+  availabilityDate: string;
+  availabilityTimeline: AvailabilityTimelineItem[];
 }) {
   const canBook = facility.status === "active" && !facility.isArchived;
   const approvalLabel = formatEffectiveApprovalLabel(
@@ -154,6 +160,13 @@ export function FacilityDetail({
           )}
         </div>
       </section>
+
+      <FacilityAvailabilityTimeline
+        facilityId={facility.id}
+        date={availabilityDate}
+        items={availabilityTimeline}
+        basePath={`/facilities/${facility.slug}`}
+      />
 
       {facility.photos.length > 1 ? (
         <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">

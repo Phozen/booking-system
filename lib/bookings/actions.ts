@@ -722,3 +722,161 @@ export async function updateBookingAction(
     bookingStatus: updated.status === "pending" ? "pending" : "confirmed",
   };
 }
+
+export async function cancelRecurringFutureBookingsAction(
+  bookingId: string,
+  _previousState: CancellationActionResult,
+  _formData: FormData,
+): Promise<CancellationActionResult> {
+  void _previousState;
+  void _formData;
+  return cancelRecurringBookingsScope(bookingId, "future");
+}
+
+export async function cancelRecurringSeriesAction(
+  bookingId: string,
+  _previousState: CancellationActionResult,
+  _formData: FormData,
+): Promise<CancellationActionResult> {
+  void _previousState;
+  void _formData;
+  return cancelRecurringBookingsScope(bookingId, "series");
+}
+
+async function cancelRecurringBookingsScope(
+  bookingId: string,
+  scope: "future" | "series",
+): Promise<CancellationActionResult> {
+  const { user, profile } = await requireUser();
+
+  if (profile.status !== "active") {
+    return {
+      status: "error",
+      message: "Your account is not active for booking changes.",
+    };
+  }
+
+  const supabase = await createClient();
+  const existing = await getMyBookingById(supabase, user.id, bookingId);
+
+  if (!existing?.recurrenceSeriesId) {
+    return {
+      status: "error",
+      message: "This booking is not part of an active recurring series.",
+    };
+  }
+
+  let impactedQuery = supabase
+    .from("bookings")
+    .select("id,status")
+    .eq("user_id", user.id)
+    .eq("recurrence_series_id", existing.recurrenceSeriesId)
+    .in("status", ["pending", "confirmed"]);
+
+  if (scope === "future") {
+    impactedQuery = impactedQuery.gte("starts_at", existing.startsAt);
+  }
+
+  const { data: impactedRows, error: impactedError } = await impactedQuery;
+
+  if (impactedError) {
+    return {
+      status: "error",
+      message: "Recurring bookings could not be loaded.",
+    };
+  }
+
+  const impacted = (impactedRows as { id: string; status: BookingStatus }[] | null) ?? [];
+
+  if (impacted.length === 0) {
+    return {
+      status: "error",
+      message: "No cancellable recurring bookings were found.",
+    };
+  }
+
+  let updateQuery = supabase
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      cancelled_by: user.id,
+      cancelled_at: new Date().toISOString(),
+      cancellation_reason:
+        scope === "future"
+          ? "Recurring booking future occurrences cancelled by owner."
+          : "Recurring booking series cancelled by owner.",
+    })
+    .eq("user_id", user.id)
+    .eq("recurrence_series_id", existing.recurrenceSeriesId)
+    .in("status", ["pending", "confirmed"]);
+
+  if (scope === "future") {
+    updateQuery = updateQuery.gte("starts_at", existing.startsAt);
+  }
+
+  const { error } = await updateQuery;
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Recurring bookings could not be cancelled.",
+    };
+  }
+
+  if (scope === "series") {
+    await supabase
+      .from("booking_recurrence_series")
+      .update({
+        status: "cancelled",
+        cancelled_by: user.id,
+        cancelled_at: new Date().toISOString(),
+      })
+      .eq("id", existing.recurrenceSeriesId)
+      .eq("owner_user_id", user.id);
+  }
+
+  await createAuditLogSafely(
+    createAdminClient(),
+    {
+      action: "cancel",
+      entityType: "booking",
+      entityId: existing.recurrenceSeriesId,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary:
+        scope === "future"
+          ? "Cancelled future recurring booking occurrences."
+          : "Cancelled recurring booking series.",
+      oldValues: {
+        seriesId: existing.recurrenceSeriesId,
+        scope,
+      },
+      newValues: {
+        cancelledBookingIds: impacted.map((item) => item.id),
+      },
+    },
+    { bookingId },
+  );
+
+  for (const item of impacted) {
+    if (item.status === "confirmed") {
+      await runMicrosoftCalendarSyncSafely({
+        bookingId: item.id,
+        action: "cancel",
+      });
+    }
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/my-bookings");
+  revalidatePath("/calendar");
+  revalidatePath(`/bookings/${bookingId}`);
+
+  return {
+    status: "success",
+    message:
+      scope === "future"
+        ? `Cancelled ${impacted.length} future recurring occurrence${impacted.length === 1 ? "" : "s"}.`
+        : `Cancelled ${impacted.length} recurring occurrence${impacted.length === 1 ? "" : "s"}.`,
+  };
+}

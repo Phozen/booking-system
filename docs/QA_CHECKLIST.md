@@ -452,3 +452,18 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Recurring bookings are deferred.
 - [ ] Production deployment remains pending; keep deployment documentation aligned with the chosen host before launch.
 - [ ] Vercel protection, Cloudflare Access, or another network-layer internal restriction is a deployment hardening option.
+## Roadmap Feature QA
+
+- Facility timeline: verify employee and admin facility detail pages show
+  available, booked, pending, blocked, and maintenance periods for a selected
+  date without exposing employee-private details.
+- Waitlist: submit a request from `/waitlist`, cancel it as the owner, update it
+  from `/admin/waitlist`, and confirm unrelated employees cannot view it.
+- Recurring bookings: preview daily, weekly, and monthly recurrence rules;
+  confirm conflicts are displayed before creation; create available occurrences
+  and verify normal booking conflict rules remain enforced.
+- Reports: verify no-show, catering demand, approval turnaround, status volume,
+  top facility, and utilization summaries render in light/dark mode.
+- Audit logs: verify old/new values are readable and sensitive fields such as
+  tokens, secrets, passwords, API keys, and SMTP/Microsoft secrets are masked.
+- Backup/restore: review `docs/BACKUP_RESTORE.md` before launch handoff.

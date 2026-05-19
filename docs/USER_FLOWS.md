@@ -2217,3 +2217,33 @@ The user flows are implemented when:
 
 ```
 ```
+## Waitlist and Alternative Requests
+
+- Employees use `/waitlist` when a preferred slot is unavailable or when they
+  want Admin to suggest another room/time.
+- A waitlist request captures preferred facility, date/time, attendee count,
+  purpose, and flexibility notes. It does not reserve a room and does not bypass
+  booking conflict checks.
+- Employees can view and cancel their own open requests.
+- Admin and Super Admin users review requests at `/admin/waitlist`, add an
+  alternative/response, and close or cancel the request.
+
+## Recurring Bookings
+
+- Employees can create finite recurring bookings from
+  `/bookings/recurring/new`.
+- The user previews generated daily, weekly, or monthly occurrences before any
+  bookings are created.
+- Each occurrence is checked with the existing availability/conflict rules.
+- Only available occurrences are created as normal bookings linked to a
+  recurrence series; conflicting occurrences are skipped and shown in the
+  preview.
+- Recurring booking v1 is capped at 50 generated occurrences and does not
+  support infinite recurrence or external calendar import.
+
+## Facility Availability Timeline
+
+- Facility detail pages show a read-only daily timeline with available gaps,
+  bookings, pending requests, blocked periods, and maintenance windows.
+- Employee views use safe booking labels. Admin facility pages show operational
+  booking details where available.
