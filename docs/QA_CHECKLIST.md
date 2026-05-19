@@ -165,6 +165,12 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Open `/profile` as an employee; confirm full name, email, role, status, department, phone, last login, created date, and updated date display.
 - [ ] Update full name, department, and phone; confirm values persist after refresh.
+- [ ] Clear one or more of full name, department, or phone for a test active user; confirm a profile completion prompt appears after login on protected employee/admin pages.
+- [ ] Confirm the profile completion prompt lists the missing fields and the `Update profile` action opens `/profile`.
+- [ ] Confirm the profile completion prompt can be dismissed without blocking page usage.
+- [ ] Confirm the prompt returns in a future browser session if the required fields are still missing.
+- [ ] Complete full name, department, and phone; confirm the prompt no longer appears.
+- [ ] Confirm the prompt does not appear on `/login`, `/register`, `/reset-password`, logged-out pages, or on `/profile` itself.
 - [ ] Confirm email, role, status, user ID, created date, updated date, and auth provider fields are read-only.
 - [ ] Open `/profile` as an admin; confirm admin can update only their own safe profile fields.
 - [ ] Confirm profile update creates an audit log entry with action `update` and entity type `user`.

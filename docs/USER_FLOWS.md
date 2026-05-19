@@ -139,10 +139,13 @@ Employee or Admin
 8. If profile status is `active`, user is allowed in.
 9. System redirects user based on role.
 10. Audit log may record login event.
+11. If the active profile is missing full name, department, or phone, the protected app layout shows a dismissible profile completion reminder with a link to `/profile`.
 
 ### Success Result
 
 User is authenticated and redirected to the correct dashboard.
+
+If safe contact fields are incomplete, the profile reminder is shown as a non-blocking prompt until the user completes full name, department, and phone.
 
 ### Failure Cases
 

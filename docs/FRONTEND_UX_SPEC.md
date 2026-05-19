@@ -151,6 +151,13 @@ Required employee nav links:
 - My Bookings: `/my-bookings`
 - Profile: `/profile`.
 
+Profile completion reminder:
+
+- Active signed-in users with missing full name, department, or phone should see a non-blocking reminder in protected employee/admin layouts.
+- The reminder should include the missing field labels and a clear `Update profile` action that opens `/profile`.
+- The reminder can be dismissed for the current browser session/page flow, but it should return on a future session while the fields remain incomplete.
+- The reminder should not appear on public/auth pages, for logged-out users, or on the profile page itself.
+
 ### Admin Layout
 
 Purpose: support repeated operational work with stable navigation and dense content.

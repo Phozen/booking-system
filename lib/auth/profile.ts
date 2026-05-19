@@ -5,6 +5,9 @@ export type AppRole = "employee" | "admin" | "super_admin";
 export type ProfileSession = {
   role: AppRole;
   status: "active" | "disabled" | "pending";
+  full_name: string | null;
+  department: string | null;
+  phone: string | null;
 };
 
 export function getDashboardPathForRole(role: AppRole) {
@@ -35,7 +38,7 @@ export async function getProfileSession(
 ): Promise<ProfileSession | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("role,status")
+    .select("role,status,full_name,department,phone")
     .eq("id", userId)
     .maybeSingle();
 
@@ -51,5 +54,11 @@ export async function getProfileSession(
       ? data.status
       : "active";
 
-  return { role, status };
+  return {
+    role,
+    status,
+    full_name: data.full_name ?? null,
+    department: data.department ?? null,
+    phone: data.phone ?? null,
+  };
 }

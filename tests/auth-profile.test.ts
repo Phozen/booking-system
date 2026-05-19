@@ -6,6 +6,7 @@ import {
   isAdminRole,
   isSuperAdminRole,
 } from "@/lib/auth/profile";
+import { getMissingProfileFields } from "@/lib/profile/completion";
 
 describe("auth profile role helpers", () => {
   it("treats admin and super admin as admin-level roles", () => {
@@ -29,5 +30,29 @@ describe("auth profile role helpers", () => {
     expect(formatAppRole("employee")).toBe("Employee");
     expect(formatAppRole("admin")).toBe("Admin");
     expect(formatAppRole("super_admin")).toBe("Super Admin");
+  });
+
+  it("detects missing profile completion fields", () => {
+    expect(
+      getMissingProfileFields({
+        full_name: "Jane User",
+        department: "Operations",
+        phone: "+60123456789",
+      }),
+    ).toEqual({
+      isComplete: true,
+      missingFields: [],
+    });
+
+    expect(
+      getMissingProfileFields({
+        full_name: " ",
+        department: null,
+        phone: "",
+      }),
+    ).toEqual({
+      isComplete: false,
+      missingFields: ["Full name", "Department", "Phone"],
+    });
   });
 });
