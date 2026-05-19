@@ -23,6 +23,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <ProfileCompletionPrompt
           missingFields={profileCompletion.missingFields}
           storageKey={`profile-completion-prompt:${user.id}`}
+          profileHref="/admin/profile"
         />
       ) : null}
       {children}

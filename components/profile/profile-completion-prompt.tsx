@@ -12,10 +12,12 @@ import { cn } from "@/lib/utils";
 export function ProfileCompletionPrompt({
   missingFields,
   storageKey,
+  profileHref = "/profile",
   className,
 }: {
   missingFields: MissingProfileField[];
   storageKey: string;
+  profileHref?: "/profile" | "/admin/profile";
   className?: string;
 }) {
   const pathname = usePathname();
@@ -35,6 +37,8 @@ export function ProfileCompletionPrompt({
 
   if (
     pathname === "/profile" ||
+    pathname === "/admin/profile" ||
+    pathname.endsWith("/print") ||
     missingFields.length === 0 ||
     isDismissed
   ) {
@@ -92,10 +96,10 @@ export function ProfileCompletionPrompt({
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
           <Link
-            href="/profile"
+            href={profileHref}
             className={buttonVariants({ size: "sm", variant: "default" })}
           >
-            Update profile
+            Go to profile
           </Link>
           <Button
             type="button"

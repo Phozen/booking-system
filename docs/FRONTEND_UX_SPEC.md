@@ -69,6 +69,7 @@ Design personality:
 | Route | Purpose | Current status | Notes |
 | --- | --- | --- | --- |
 | `/admin/dashboard` | Admin overview | Exists | Currently foundational; needs metrics and recent activity polish. |
+| `/admin/profile` | Admin-side profile | Exists | Admin/Super Admin version of the self-service profile page inside the admin shell. |
 | `/admin/calendar` | All-bookings calendar | Exists | Admin-only calendar for reviewing bookings across facilities and users. |
 | `/admin/facilities` | Facility list and management | Exists | Needs shared admin shell and filters. |
 | `/admin/facilities/new` | Create facility | Exists | Form foundation exists. |
@@ -154,9 +155,11 @@ Required employee nav links:
 Profile completion reminder:
 
 - Active signed-in users with missing full name, department, or phone should see a non-blocking reminder in protected employee/admin layouts.
-- The reminder should include the missing field labels and a clear `Update profile` action that opens `/profile`.
+- The reminder should include the missing field labels and a clear profile action.
+- In the employee layout, the reminder opens `/profile`.
+- In the admin layout, the reminder opens `/admin/profile`.
 - The reminder can be dismissed for the current browser session/page flow, but it should return on a future session while the fields remain incomplete.
-- The reminder should not appear on public/auth pages, for logged-out users, or on the profile page itself.
+- The reminder should not appear on public/auth pages, for logged-out users, print routes, `/profile`, or `/admin/profile`.
 
 ### Admin Layout
 
@@ -190,6 +193,9 @@ Navigation visibility:
 - `admin` users see operational navigation only.
 - `super_admin` users see all admin navigation, including Users and Settings.
 - Hidden super-admin-only routes should be omitted from the nav rather than shown disabled.
+- Admin and Super Admin users should have a visible switch to the employee side from the admin sidebar or account menu.
+- Admin and Super Admin users should see an `Admin console` switch in the employee account menu.
+- Employees must not see admin-console switch controls.
 
 Admin page header:
 

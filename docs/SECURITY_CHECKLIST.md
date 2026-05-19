@@ -20,6 +20,8 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Employees are redirected away from `/admin/*` routes.
 - [x] Admin user-management actions keep role/status changes server-side and audit logged.
 - [x] Admin users cannot access `/admin/users` or `/admin/settings`; only super admins can.
+- [x] `/admin/profile` requires active admin or super admin access; employees continue to use `/profile` only.
+- [x] Admin/employee mode switch links are UI navigation only and do not bypass route guards.
 
 ## RLS Checklist
 
@@ -98,6 +100,8 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Enable all-company calendar visibility and confirm unrelated employee calendar items show limited details only and do not link to booking detail.
 - [ ] Set a profile status to `disabled`; confirm protected pages are blocked.
 - [ ] Log in as admin; confirm admin pages still work.
+- [ ] Log in as admin and open `/admin/profile`; confirm only own safe profile fields can be updated.
+- [ ] Log in as employee and visit `/admin/profile`; expect redirect or access denied.
 - [ ] Log in as admin; confirm `/admin/users` and `/admin/settings` are hidden and denied.
 - [ ] Log in as super admin; confirm `/admin/users` and `/admin/settings` are available.
 - [ ] Attempt to demote or disable the final active super admin; expect denial.

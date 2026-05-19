@@ -17,6 +17,8 @@ export function AppHeader({
     <UserMenu
       email={email}
       role={role}
+      currentArea="employee"
+      profileHref="/profile"
       className="grid gap-3"
     />
   );
@@ -40,6 +42,8 @@ export function AppHeader({
             email={email}
             role={role}
             showIdentity={false}
+            currentArea="employee"
+            profileHref="/profile"
             className="flex items-center gap-3"
           />
         </div>

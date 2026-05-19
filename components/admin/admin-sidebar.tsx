@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { ArrowLeftRight } from "lucide-react";
 
 import { AdminNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
+import { buttonVariants } from "@/components/ui/button";
 
 export function AdminSidebar({
   appName,
@@ -29,7 +31,23 @@ export function AdminSidebar({
         <div className="min-h-0 flex-1 overflow-y-auto">
           <AdminNavigation role={role} />
         </div>
-        <UserMenu email={email} role={role} className="grid gap-3 border-t border-sidebar-border pt-4" />
+        <div className="grid gap-3 border-t border-sidebar-border pt-4">
+          <Link
+            href="/dashboard"
+            className={buttonVariants({ variant: "secondary", size: "sm" })}
+          >
+            <ArrowLeftRight data-icon="inline-start" />
+            Employee side
+          </Link>
+          <UserMenu
+            email={email}
+            role={role}
+            currentArea="admin"
+            profileHref="/admin/profile"
+            showModeSwitch={false}
+            className="grid gap-3"
+          />
+        </div>
       </div>
     </aside>
   );

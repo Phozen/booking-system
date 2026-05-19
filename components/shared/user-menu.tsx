@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { LogOut, UserRound } from "lucide-react";
+import { ArrowLeftRight, LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
-import { formatAppRole } from "@/lib/auth/profile";
+import { formatAppRole, isAdminRole } from "@/lib/auth/profile";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -11,12 +11,25 @@ export function UserMenu({
   role,
   className,
   showIdentity = true,
+  currentArea = "employee",
+  profileHref,
+  showModeSwitch = true,
 }: {
   email?: string | null;
   role?: string | null;
   className?: string;
   showIdentity?: boolean;
+  currentArea?: "employee" | "admin";
+  profileHref?: "/profile" | "/admin/profile";
+  showModeSwitch?: boolean;
 }) {
+  const adminRole = isAdminRole(role);
+  const resolvedProfileHref =
+    profileHref ?? (currentArea === "admin" ? "/admin/profile" : "/profile");
+  const switchHref = currentArea === "admin" ? "/dashboard" : "/admin/dashboard";
+  const switchLabel =
+    currentArea === "admin" ? "Employee side" : "Admin console";
+
   return (
     <div className={className}>
       {showIdentity ? (
@@ -33,8 +46,17 @@ export function UserMenu({
         </div>
       ) : null}
       <div className="flex flex-col gap-2 sm:flex-row">
+        {adminRole && showModeSwitch ? (
+          <Link
+            href={switchHref}
+            className={buttonVariants({ variant: "secondary", size: "sm" })}
+          >
+            <ArrowLeftRight data-icon="inline-start" />
+            {switchLabel}
+          </Link>
+        ) : null}
         <Link
-          href="/profile"
+          href={resolvedProfileHref}
           className={buttonVariants({ variant: "outline", size: "sm" })}
         >
           <UserRound data-icon="inline-start" />

@@ -28,6 +28,7 @@ export default async function EmployeeLayout({
         <ProfileCompletionPrompt
           missingFields={profileCompletion.missingFields}
           storageKey={`profile-completion-prompt:${user.id}`}
+          profileHref="/profile"
         />
       ) : null}
       {children}

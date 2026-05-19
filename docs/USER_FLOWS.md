@@ -89,6 +89,7 @@ Unauthenticated users must not access:
 /bookings
 /my-bookings
 /profile
+/admin/profile
 /admin/*
 ```
 
@@ -110,6 +111,22 @@ Recommended behavior:
 
 * Admins should be taken to `/admin/dashboard`.
 * Employees should be taken to `/dashboard`.
+* Admins and Super Admins can switch from the admin console to the employee side for normal booking actions.
+* Admins and Super Admins can return from the employee side to the admin console.
+* Employees never see admin-console switch links.
+
+## 3.2 Admin / Employee Mode Switching
+
+Admins and Super Admins may need both operational admin tools and normal booking actions.
+
+Available switch targets:
+
+```txt
+Admin console -> Employee side: /dashboard
+Employee side -> Admin console: /admin/dashboard
+```
+
+The switch appears in the user/account menu and, on desktop admin screens, as a sidebar link. It is shown only to users with role `admin` or `super_admin`.
 
 ---
 
@@ -139,13 +156,15 @@ Employee or Admin
 8. If profile status is `active`, user is allowed in.
 9. System redirects user based on role.
 10. Audit log may record login event.
-11. If the active profile is missing full name, department, or phone, the protected app layout shows a dismissible profile completion reminder with a link to `/profile`.
+11. If the active profile is missing full name, department, or phone, the protected app layout shows a dismissible profile completion reminder with a layout-aware profile link.
 
 ### Success Result
 
 User is authenticated and redirected to the correct dashboard.
 
 If safe contact fields are incomplete, the profile reminder is shown as a non-blocking prompt until the user completes full name, department, and phone.
+
+The reminder links employees in the employee app to `/profile` and admins in the admin console to `/admin/profile`.
 
 ### Failure Cases
 
@@ -1946,6 +1965,7 @@ Existing booking history is preserved.
 
 ```txt
 /admin/dashboard
+/admin/profile
 /admin/users
 /admin/bookings
 /admin/bookings/[id]

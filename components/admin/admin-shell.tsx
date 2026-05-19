@@ -20,6 +20,8 @@ export function AdminShell({
     <UserMenu
       email={email}
       role={role}
+      currentArea="admin"
+      profileHref="/admin/profile"
       className="grid gap-3"
     />
   );
