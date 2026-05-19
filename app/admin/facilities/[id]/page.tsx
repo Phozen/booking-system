@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
+import { getEquipmentItems } from "@/lib/admin/equipment/queries";
 import { getAdminFacilityById } from "@/lib/facilities/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityForm } from "@/components/admin/facilities/facility-form";
+import { FacilityEquipmentManager } from "@/components/admin/facilities/facility-equipment-manager";
 import { FacilityArchiveAction } from "@/components/admin/facilities/facility-archive-action";
 import { FacilityPhotoManager } from "@/components/admin/facilities/facility-photo-manager";
 import { PageHeader } from "@/components/shared/page-header";
@@ -21,7 +24,10 @@ export default async function EditFacilityPage({
   await requireAdmin();
   const { id } = await params;
   const supabase = await createClient();
-  const facility = await getAdminFacilityById(supabase, id);
+  const [facility, equipment] = await Promise.all([
+    getAdminFacilityById(supabase, id),
+    getEquipmentItems(createAdminClient()),
+  ]);
 
   if (!facility) {
     notFound();
@@ -52,6 +58,8 @@ export default async function EditFacilityPage({
       <section className="rounded-lg border bg-card p-5">
         <FacilityForm facility={facility} />
       </section>
+
+      <FacilityEquipmentManager facility={facility} equipment={equipment} />
 
       <FacilityPhotoManager facility={facility} />
 

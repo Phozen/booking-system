@@ -4,6 +4,7 @@ import {
   formatBookingStatus,
   formatBookingWindow,
 } from "@/lib/bookings/format";
+import { formatBookingUsageStatus } from "@/lib/bookings/usage";
 import {
   formatCateringRequired,
   formatCateringServingTime,
@@ -189,6 +190,7 @@ export function buildReportCsv(data: AdminReportsData, type: ReportExportType) {
         "Date",
         "Time",
         "Status",
+        "Usage status",
         "Approval required",
         "Approval status",
         "Attendee count",
@@ -207,6 +209,7 @@ export function buildReportCsv(data: AdminReportsData, type: ReportExportType) {
         formatBookingDate(row.startsAt),
         formatBookingWindow(row.startsAt, row.endsAt),
         formatBookingStatus(row.status),
+        formatBookingUsageStatus(row.usageStatus),
         row.approvalRequired ? "Yes" : "No",
         row.approvalStatus,
         row.attendeeCount,

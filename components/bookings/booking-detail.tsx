@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarPlus, CheckCircle2, Printer, UserPlus } from "lucide-react";
+import { ArrowLeft, CalendarPlus, CheckCircle2, Edit3, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -120,16 +120,30 @@ export function BookingDetail({
 
         <div className="flex flex-col gap-2 sm:flex-row">
           {isOwnerView ? (
-            <Link
-              href={`/bookings/${booking.id}/print`}
-              className={buttonVariants({
-                variant: "outline",
-                className: "w-full sm:w-auto",
-              })}
-            >
-              <Printer data-icon="inline-start" />
-              Print approval form
-            </Link>
+            <>
+              {booking.status === "pending" || booking.status === "confirmed" ? (
+                <Link
+                  href={`/bookings/${booking.id}/edit`}
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "w-full sm:w-auto",
+                  })}
+                >
+                  <Edit3 data-icon="inline-start" />
+                  Edit / reschedule
+                </Link>
+              ) : null}
+              <Link
+                href={`/bookings/${booking.id}/print`}
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "w-full sm:w-auto",
+                })}
+              >
+                <Printer data-icon="inline-start" />
+                Print approval form
+              </Link>
+            </>
           ) : null}
           <Link
             href="/bookings/new"

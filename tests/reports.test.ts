@@ -75,6 +75,7 @@ describe("CSV exports", () => {
           endsAt: "2026-06-01T03:00:00.000Z",
           createdAt: "2026-05-01T00:00:00.000Z",
           approvalRequired: false,
+          usageStatus: "checked_in",
           attendeeCount: 8,
           catering: {
             required: true,
@@ -107,7 +108,7 @@ describe("CSV exports", () => {
     const { csv, rowCount } = buildReportCsv(data, "booking-history");
 
     expect(rowCount).toBe(1);
-    expect(csv).toContain("Title,Facility,User,Date,Time,Status");
+    expect(csv).toContain("Title,Facility,User,Date,Time,Status,Usage status");
     expect(csv).toContain("Catering required,Catering type,Catering pax");
     expect(csv).toContain("Yes,Coffee / tea,8,Before meeting,Halal");
     expect(csv).toContain("\"Board \"\"planning\"\", Q1\nFollow-up\"");

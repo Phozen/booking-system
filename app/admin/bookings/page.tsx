@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { CalendarPlus } from "lucide-react";
+
 import { requireAdmin } from "@/lib/auth/guards";
 import {
   getAdminBookings,
@@ -9,6 +12,7 @@ import { getAdminFacilities } from "@/lib/facilities/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AdminBookingsTable } from "@/components/admin/bookings/admin-bookings-table";
 import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +56,15 @@ export default async function AdminBookingsPage({
         eyebrow="Admin area"
         title="Booking management"
         description="Review bookings, filter by status or facility, and open booking details for cancellation or approval actions."
+        primaryAction={
+          <Link
+            href="/admin/bookings/new"
+            className={buttonVariants({ className: "w-full sm:w-auto" })}
+          >
+            <CalendarPlus data-icon="inline-start" />
+            Create for user
+          </Link>
+        }
       />
 
       <AdminBookingsTable

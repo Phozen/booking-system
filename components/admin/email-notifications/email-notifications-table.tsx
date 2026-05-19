@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import {
   processQueuedEmailNotificationsAction,
+  queueDueBookingRemindersAction,
   retryFailedEmailNotificationsAction,
   type EmailNotificationsActionResult,
 } from "@/lib/admin/email-notifications/actions";
@@ -66,14 +67,16 @@ export function EmailNotificationsTable({
   );
   const [isPending, setIsPending] = useState(false);
 
-  async function runAction(action: "process" | "retry") {
+  async function runAction(action: "process" | "retry" | "reminders") {
     setIsPending(true);
 
     try {
       const actionResult =
         action === "process"
           ? await processQueuedEmailNotificationsAction()
-          : await retryFailedEmailNotificationsAction();
+          : action === "retry"
+            ? await retryFailedEmailNotificationsAction()
+            : await queueDueBookingRemindersAction();
 
       setResult(actionResult);
     } finally {
@@ -91,6 +94,17 @@ export function EmailNotificationsTable({
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <ConfirmDialog
+            triggerLabel="Queue reminders"
+            title="Queue due booking reminders?"
+            description="Reminder records will be queued for confirmed bookings whose reminder time has arrived. This does not send emails until queued emails are processed."
+            confirmLabel="Queue reminders"
+            cancelLabel="Leave reminders"
+            pendingLabel="Queueing..."
+            pending={isPending}
+            triggerClassName="w-full sm:w-auto"
+            onConfirm={() => runAction("reminders")}
+          />
           <ConfirmDialog
             triggerLabel="Retry failed"
             title="Retry failed email notifications?"

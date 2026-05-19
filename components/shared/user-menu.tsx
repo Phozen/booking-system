@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftRight, LogOut, UserRound } from "lucide-react";
+import { ArrowLeftRight, Bell, LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
 import { formatAppRole, isAdminRole } from "@/lib/auth/profile";
@@ -62,6 +62,15 @@ export function UserMenu({
           <UserRound data-icon="inline-start" />
           Profile
         </Link>
+        {currentArea === "employee" ? (
+          <Link
+            href="/notification-preferences"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <Bell data-icon="inline-start" />
+            Notifications
+          </Link>
+        ) : null}
         <form action={logoutAction}>
           <Button type="submit" variant="outline" size="sm">
             <LogOut data-icon="inline-start" />

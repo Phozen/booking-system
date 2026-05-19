@@ -31,6 +31,7 @@ type AvailabilityInput = {
   startsAt: Date;
   endsAt: Date;
   attendeeCount: number | null;
+  excludeBookingId?: string;
 };
 
 export async function checkBookingAvailability(
@@ -78,6 +79,7 @@ export async function checkBookingAvailability(
     .select("id")
     .eq("facility_id", input.facilityId)
     .in("status", ["pending", "confirmed"])
+    .neq("id", input.excludeBookingId ?? "00000000-0000-0000-0000-000000000000")
     .lt("starts_at", endsAt)
     .gt("ends_at", startsAt)
     .limit(1);

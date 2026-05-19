@@ -5,6 +5,7 @@ import { getMissingProfileFields } from "@/lib/profile/completion";
 import { getAppSettings } from "@/lib/settings/queries";
 import { AppHeader } from "@/components/app/app-header";
 import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
+import { SkipLink } from "@/components/shared/skip-link";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function EmployeeLayout({
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
+      <SkipLink />
       <AppHeader
         appName={settings.appName}
         email={user.email}
@@ -31,7 +33,9 @@ export default async function EmployeeLayout({
           profileHref="/profile"
         />
       ) : null}
-      {children}
+      <div id="main-content" tabIndex={-1} className="contents">
+        {children}
+      </div>
     </div>
   );
 }

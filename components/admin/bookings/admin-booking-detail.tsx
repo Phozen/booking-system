@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/bookings/actions";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
+import { canTrackBookingUsage, formatBookingUsageStatus } from "@/lib/bookings/usage";
 import {
   formatBookingDate,
   formatBookingDateTime,
@@ -21,6 +22,7 @@ import { CateringDetailsCard } from "@/components/bookings/catering-details-card
 import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
+import { BookingUsageActions } from "@/components/admin/bookings/booking-usage-actions";
 import { buttonVariants } from "@/components/ui/button";
 
 function DetailItem({
@@ -106,6 +108,9 @@ export function AdminBookingDetail({
           <DetailItem label="Approval required">
             {booking.approvalRequired ? "Yes" : "No"}
           </DetailItem>
+          <DetailItem label="Usage status">
+            {formatBookingUsageStatus(booking.usageStatus)}
+          </DetailItem>
         </dl>
       </section>
 
@@ -163,6 +168,12 @@ export function AdminBookingDetail({
         bookingId={booking.id}
         invitations={invitations}
         canManage={false}
+      />
+
+      <BookingUsageActions
+        bookingId={booking.id}
+        usageStatus={booking.usageStatus}
+        canTrack={canTrackBookingUsage(booking.status)}
       />
 
       <section className="grid gap-5 lg:grid-cols-2">

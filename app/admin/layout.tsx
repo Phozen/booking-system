@@ -5,6 +5,7 @@ import { getMissingProfileFields } from "@/lib/profile/completion";
 import { getAppSettings } from "@/lib/settings/queries";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
+import { SkipLink } from "@/components/shared/skip-link";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       email={user.email}
       role={profile.role}
     >
+      <SkipLink />
       {!profileCompletion.isComplete ? (
         <ProfileCompletionPrompt
           missingFields={profileCompletion.missingFields}
@@ -26,7 +28,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           profileHref="/admin/profile"
         />
       ) : null}
-      {children}
+      <div id="main-content" tabIndex={-1} className="contents">
+        {children}
+      </div>
     </AdminShell>
   );
 }

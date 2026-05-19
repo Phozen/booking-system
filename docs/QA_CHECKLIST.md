@@ -4,6 +4,19 @@ Phase 15 manual and automated QA checklist for the internal Booking System.
 
 Use this checklist after migrations are applied and the app is running with real Supabase credentials. Mark each item with the tester name, date, environment, and evidence where practical.
 
+## Post-MVP Feature QA
+
+- [ ] Keyboard users can focus and activate the global “Skip to main content” link in employee and admin layouts.
+- [ ] Owner can edit/reschedule pending and confirmed bookings.
+- [ ] Owner cannot edit cancelled, rejected, completed, or expired bookings.
+- [ ] Rescheduling checks conflicts, blocked periods, maintenance closures, and capacity.
+- [ ] Admin can create a booking for an active user from `/admin/bookings/new`.
+- [ ] Admin can mark confirmed/historical bookings checked in, no-show, or reset usage tracking.
+- [ ] Admin can add, archive/reactivate, and assign equipment to facilities.
+- [ ] User can save non-critical notification preferences from `/notification-preferences`.
+- [ ] Admin can queue due booking reminders from `/admin/email-notifications`.
+- [ ] Super Admin can open `/admin/system-health`, and the page does not display secrets.
+
 ## Preflight
 
 - [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.

@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
+import type { BookingUsageStatus } from "@/lib/bookings/usage";
 import type { FacilityType } from "@/lib/facilities/validation";
 import type {
   AdminReportsData,
@@ -49,6 +50,7 @@ type ReportBookingRecord = {
   ends_at: string;
   created_at: string;
   approval_required: boolean;
+  usage_status: BookingUsageStatus | null;
   attendee_count: number | null;
   catering_required: boolean | null;
   catering_type: BookingCateringDetails["type"] | null;
@@ -86,6 +88,7 @@ const reportBookingSelect = `
   ends_at,
   created_at,
   approval_required,
+  usage_status,
   attendee_count,
   catering_required,
   catering_type,
@@ -144,6 +147,7 @@ function mapBookingRecord(record: ReportBookingRecord): BookingHistoryRow {
     endsAt: record.ends_at,
     createdAt: record.created_at,
     approvalRequired: record.approval_required,
+    usageStatus: record.usage_status ?? "not_tracked",
     attendeeCount: record.attendee_count,
     catering: {
       required: Boolean(record.catering_required),

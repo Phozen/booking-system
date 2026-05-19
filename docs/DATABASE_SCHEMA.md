@@ -29,6 +29,17 @@ The database must support:
 
 The database must enforce data integrity and should not rely only on frontend validation.
 
+### Post-MVP additive roadmap schema
+
+Migrations `0016` through `0019` add the next operational foundations:
+
+- `0016_booking_usage_tracking.sql` adds booking usage tracking columns to `public.bookings`: `usage_status`, `checked_in_at`, `checked_in_by`, `no_show_marked_at`, and `no_show_marked_by`.
+- `0017_booking_waitlist_requests.sql` adds `public.booking_waitlist_requests` for non-reserving waitlist and alternative-slot requests.
+- `0018_user_notification_preferences.sql` adds `public.user_notification_preferences` for non-critical reminder and invitation preferences.
+- `0019_booking_recurrence_series.sql` adds `public.booking_recurrence_series` and optional occurrence links on `public.bookings`.
+
+These changes are additive and do not change existing booking conflict prevention, approval behavior, cancellation behavior, or role semantics.
+
 ---
 
 ## 2. Database Principles

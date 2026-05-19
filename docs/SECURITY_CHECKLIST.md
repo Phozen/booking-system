@@ -2,6 +2,16 @@
 
 Phase 14 security and RLS hardening checklist for the internal Booking System.
 
+## Post-MVP Roadmap Checks
+
+- [ ] Apply migrations `0016` through `0019` before deploying code paths that read new tables or columns.
+- [ ] Confirm only Admin/Super Admin can create bookings on behalf of another user.
+- [ ] Confirm admin-created bookings can target active users only.
+- [ ] Confirm employees cannot update booking usage tracking fields.
+- [ ] Confirm users can manage only their own notification preferences.
+- [ ] Confirm notification preferences affect non-critical notifications only.
+- [ ] Confirm Super Admin health/status pages expose configuration presence only and never secrets.
+
 ## Auth Protection Checklist
 
 - [x] Unauthenticated users are redirected away from employee pages.

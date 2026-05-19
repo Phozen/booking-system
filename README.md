@@ -23,12 +23,14 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Employee dashboard with quick actions and upcoming booking preview.
 - Facility browsing and facility detail pages with photos, equipment, capacity, approval requirements, and booking CTA.
 - Booking creation with timezone-aware date/time handling, conflict prevention, blocked-period checks, maintenance checks, and approval-aware status.
+- Booking edit/reschedule for pending and confirmed bookings.
 - Food and drinks / catering request details during booking creation.
 - My Bookings grouped by pending, upcoming, history, and cancelled.
 - Booking detail with cancellation flow, attendee invitations, catering edits, and printable approval form.
 - Invitations page for accepting or declining internal booking invitations.
 - Calendar page for owned and invited bookings, with optional all-company visibility controlled by admin settings.
 - Profile page for editing safe self-service fields: full name, department, and phone.
+- Notification preferences for non-critical reminders and invitation updates.
 - Light/dark theme toggle.
 
 ### Admin Features
@@ -40,16 +42,23 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Archive facilities instead of hard-deleting them, preserving historical bookings and reports.
   - Upload, set primary, and delete facility photos through Supabase Storage.
 - Booking management:
+  - Create bookings on behalf of active internal users.
   - View all bookings.
   - Filter by status/facility.
   - Approve, reject, or cancel bookings where allowed.
+  - Mark confirmed/historical bookings as checked in or no-show.
   - View attendee invitations.
   - Review and update catering / food and drinks details.
   - Print booking approval forms with signature sections.
+- Equipment management:
+  - Add equipment to the shared equipment library.
+  - Archive/reactivate equipment.
+  - Assign active equipment and quantities to facilities.
 - Availability management:
   - Create, update, and deactivate blocked dates.
   - Create, update, complete, and cancel maintenance closures.
 - Email notification queue:
+  - Queue due booking reminders.
   - View queued/sent/failed notifications.
   - Process queued notifications.
   - Retry failed notifications.
@@ -77,6 +86,14 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Integration groundwork:
   - Microsoft 365 Calendar sync status and retry page.
   - Server-side Microsoft Graph configuration through environment variables.
+- System health:
+  - Sanitized readiness view for email, Microsoft Calendar, and operational queue follow-up.
+
+Post-MVP migrations through `0019` must be applied before deploying the latest operational features:
+
+```powershell
+npx.cmd supabase db push
+```
 
 ## CRUD And Operations Summary
 

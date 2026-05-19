@@ -10,6 +10,7 @@ import {
 import type { BookingStatus } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
+import { formatBookingUsageStatus } from "@/lib/bookings/usage";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
@@ -135,6 +136,10 @@ export function AdminBookingsTable({
                       : "Not required",
                   },
                   {
+                    label: "Usage",
+                    value: formatBookingUsageStatus(booking.usageStatus),
+                  },
+                  {
                     label: "Created",
                     value: formatBookingDateTime(booking.createdAt),
                   },
@@ -175,6 +180,7 @@ export function AdminBookingsTable({
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Time</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Usage</th>
                 <th className="px-4 py-3 font-medium">Approval</th>
                 <th className="px-4 py-3 font-medium">Created</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -203,6 +209,9 @@ export function AdminBookingsTable({
                       <BookingStatusBadge status={booking.status} />
                     </td>
                     <td className="px-4 py-3">
+                      {formatBookingUsageStatus(booking.usageStatus)}
+                    </td>
+                    <td className="px-4 py-3">
                       {booking.approvalRequired ? "Required" : "Not required"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
@@ -224,7 +233,7 @@ export function AdminBookingsTable({
                 ))
               ) : (
                 <tr>
-                    <td className="px-4 py-8" colSpan={9}>
+                    <td className="px-4 py-8" colSpan={10}>
                       <EmptyState
                         className="border-0 bg-transparent py-4"
                         title="No bookings found"

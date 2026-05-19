@@ -15,6 +15,16 @@ It is based on:
 
 This specification does not change product behavior, database schema, or implementation scope. It defines the desired frontend shape for future incremental work.
 
+## Post-MVP UX Additions
+
+- Protected employee and admin layouts include a keyboard-accessible “Skip to main content” link.
+- Booking owners see **Edit / reschedule** only for pending and confirmed bookings.
+- Admin booking detail pages include explicit checked-in/no-show/reset usage controls.
+- Admin booking tables and cards include usage status text, not only color.
+- Admin equipment management uses card-style controls and clear active/archived labels.
+- Notification preferences use plain checkbox cards and explain that critical messages remain system-controlled.
+- Super Admin system health uses sanitized status cards and never displays secrets, tokens, service role keys, SMTP passwords, or Microsoft client secrets.
+
 ## 1. Frontend Goals
 
 The Booking System should feel like a calm internal operations tool: quick to understand, predictable, and forgiving when users make mistakes.

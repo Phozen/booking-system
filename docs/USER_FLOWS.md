@@ -23,6 +23,24 @@ Admins manage operational booking workflows such as facilities, bookings, approv
 
 Super Admins have full system-owner access, including user/role management and system settings.
 
+## Post-MVP operational flows
+
+### Edit / reschedule own booking
+
+Owners can edit pending or confirmed bookings from the booking detail page. Facility, date/time, attendee count, purpose, and description changes re-run availability checks before saving. Catering remains edited from the catering section.
+
+### Admin creates booking for user
+
+Admins can create bookings on behalf of active internal users from `/admin/bookings/new`. The selected user owns the booking, the admin is recorded as creator, and normal availability/approval rules still apply.
+
+### Usage tracking
+
+Admins can mark confirmed or historical bookings as checked in or no-show, or reset usage tracking. These actions are audit logged.
+
+### Notification preferences
+
+Users can manage non-critical booking reminder and invitation update preferences at `/notification-preferences`. Critical approval, rejection, cancellation, and account messages remain system-controlled.
+
 ---
 
 ## 2. User Roles

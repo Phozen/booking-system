@@ -4,12 +4,25 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { checkBookingAvailability } from "@/lib/bookings/availability";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
+import type { BookingUsageStatus } from "@/lib/bookings/usage";
+import {
+  bookingFormSchema,
+  formDataToBookingValues,
+  getBookingDateRange,
+  getOptionalFormValue,
+  normalizeAttendeeCount,
+} from "@/lib/bookings/validation";
 import {
   cancelMicrosoftCalendarEventForBooking,
   syncConfirmedBookingToMicrosoftCalendar,
 } from "@/lib/integrations/microsoft-365-calendar/sync";
+import {
+  getAppSettings,
+  getEffectiveApprovalRequired,
+} from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   adminBookingActionSchema,
@@ -32,6 +45,11 @@ type AdminBookingActionRecord = {
   approval_required: boolean;
   cancellation_reason: string | null;
   cancelled_at: string | null;
+  usage_status?: BookingUsageStatus | null;
+  checked_in_at?: string | null;
+  checked_in_by?: string | null;
+  no_show_marked_at?: string | null;
+  no_show_marked_by?: string | null;
   facilities:
     | {
         name: string;
@@ -89,6 +107,11 @@ async function getAdminActionBooking(bookingId: string) {
       approval_required,
       cancellation_reason,
       cancelled_at,
+      usage_status,
+      checked_in_at,
+      checked_in_by,
+      no_show_marked_at,
+      no_show_marked_by,
       facilities (
         name,
         level
@@ -112,6 +135,119 @@ async function getAdminActionBooking(bookingId: string) {
   }
 
   return data as unknown as AdminBookingActionRecord;
+}
+
+async function updateBookingUsageStatus({
+  bookingId,
+  status,
+  actorUserId,
+  actorEmail,
+}: {
+  bookingId: string;
+  status: BookingUsageStatus;
+  actorUserId: string;
+  actorEmail: string | undefined;
+}): Promise<AdminBookingActionResult> {
+  const existing = await getAdminActionBooking(bookingId);
+
+  if (!existing) {
+    return {
+      status: "error",
+      message: "Booking could not be found.",
+    };
+  }
+
+  if (!["confirmed", "completed", "expired"].includes(existing.status)) {
+    return {
+      status: "error",
+      message: "Usage can only be tracked for confirmed or historical bookings.",
+    };
+  }
+
+  const now = new Date().toISOString();
+  const updateValues =
+    status === "checked_in"
+      ? {
+          usage_status: status,
+          checked_in_at: now,
+          checked_in_by: actorUserId,
+          no_show_marked_at: null,
+          no_show_marked_by: null,
+        }
+      : status === "no_show"
+        ? {
+            usage_status: status,
+            checked_in_at: null,
+            checked_in_by: null,
+            no_show_marked_at: now,
+            no_show_marked_by: actorUserId,
+          }
+        : {
+            usage_status: status,
+            checked_in_at: null,
+            checked_in_by: null,
+            no_show_marked_at: null,
+            no_show_marked_by: null,
+          };
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .update(updateValues)
+    .eq("id", bookingId)
+    .select(
+      "id,facility_id,user_id,title,status,starts_at,ends_at,approval_required,cancellation_reason,cancelled_at,usage_status,checked_in_at,checked_in_by,no_show_marked_at,no_show_marked_by,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
+    )
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Booking usage update failed", {
+      bookingId,
+      message: error?.message,
+    });
+
+    return {
+      status: "error",
+      message: "Usage status could not be updated. Please refresh and try again.",
+    };
+  }
+
+  const updated = data as unknown as AdminBookingActionRecord;
+
+  await createAuditLogSafely(
+    supabase,
+    {
+      action: "update",
+      entityType: "booking",
+      entityId: bookingId,
+      actorUserId,
+      actorEmail,
+      summary: `Updated usage tracking for booking ${updated.title}.`,
+      oldValues: {
+        usageStatus: existing.usage_status ?? "not_tracked",
+        checkedInAt: existing.checked_in_at ?? null,
+        noShowMarkedAt: existing.no_show_marked_at ?? null,
+      },
+      newValues: {
+        usageStatus: updated.usage_status ?? "not_tracked",
+        checkedInAt: updated.checked_in_at ?? null,
+        noShowMarkedAt: updated.no_show_marked_at ?? null,
+      },
+    },
+    { bookingId },
+  );
+
+  revalidateAdminBookingPaths(bookingId);
+
+  return {
+    status: "success",
+    message:
+      status === "checked_in"
+        ? "Booking marked as checked in."
+        : status === "no_show"
+          ? "Booking marked as no-show."
+          : "Booking usage tracking was reset.",
+  };
 }
 
 async function insertAuditLog({
@@ -156,7 +292,11 @@ async function insertBookingEmail({
   templateName,
   templateData,
 }: {
-  type: "booking_approval" | "booking_rejection" | "booking_cancellation";
+  type:
+    | "booking_confirmation"
+    | "booking_approval"
+    | "booking_rejection"
+    | "booking_cancellation";
   booking: AdminBookingActionRecord;
   subject: string;
   body: string;
@@ -189,6 +329,179 @@ async function insertBookingEmail({
       message: error.message,
     });
   }
+}
+
+export async function adminCreateBookingAction(
+  _previousState: AdminBookingActionResult,
+  formData: FormData,
+): Promise<AdminBookingActionResult> {
+  void _previousState;
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  const targetUserId = getOptionalFormValue(formData, "targetUserId");
+
+  if (!targetUserId) {
+    return {
+      status: "error",
+      message: "Choose an active booking owner.",
+    };
+  }
+
+  const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Check the booking details, then try again.",
+    };
+  }
+
+  const settings = await getAppSettings();
+  const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
+
+  if (!dateRange.startsAt || !dateRange.endsAt || dateRange.message) {
+    return {
+      status: "error",
+      message: dateRange.message ?? "Choose a valid booking date and time.",
+    };
+  }
+
+  const supabase = createAdminClient();
+  const { data: targetProfile, error: targetError } = await supabase
+    .from("profiles")
+    .select("id,email,full_name,status")
+    .eq("id", targetUserId)
+    .maybeSingle();
+
+  if (targetError || !targetProfile || targetProfile.status !== "active") {
+    return {
+      status: "error",
+      message: "Only active users can own admin-created bookings.",
+    };
+  }
+
+  const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
+  const availability = await checkBookingAvailability(supabase, {
+    facilityId: parsed.data.facilityId,
+    startsAt: dateRange.startsAt,
+    endsAt: dateRange.endsAt,
+    attendeeCount,
+  });
+
+  if (!availability.available) {
+    return {
+      status: "error",
+      message: availability.message,
+    };
+  }
+
+  const approvalRequired = getEffectiveApprovalRequired(
+    availability.facility.requiresApproval,
+    settings,
+  );
+
+  const { data, error } = await supabase.rpc("create_booking", {
+    p_facility_id: parsed.data.facilityId,
+    p_user_id: targetProfile.id,
+    p_created_by: user.id,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description || null,
+    p_attendee_count: attendeeCount,
+    p_starts_at: dateRange.startsAt.toISOString(),
+    p_ends_at: dateRange.endsAt.toISOString(),
+    p_approval_required: approvalRequired,
+    p_catering_required: false,
+    p_catering_type: null,
+    p_catering_pax: null,
+    p_catering_serving_time: null,
+    p_catering_dietary_notes: null,
+    p_catering_notes: null,
+  });
+
+  if (error || !data) {
+    console.error("Admin booking create failed", {
+      code: error?.code,
+      message: error?.message,
+    });
+
+    return {
+      status: "error",
+      message:
+        error?.code === "23P01"
+          ? "This time slot is no longer available. Please choose another time."
+          : "Booking could not be created. Please check the details and try again.",
+    };
+  }
+
+  const booking = data as AdminBookingActionRecord;
+
+  await createAuditLogSafely(
+    supabase,
+    {
+      action: "create",
+      entityType: "booking",
+      entityId: booking.id,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Admin created booking ${booking.title} for ${targetProfile.email}.`,
+      newValues: booking as unknown as Record<string, unknown>,
+    },
+    { bookingId: booking.id },
+  );
+
+  if (booking.status === "confirmed") {
+    const bookingForEmail: AdminBookingActionRecord = {
+      ...booking,
+      profiles: {
+        email: targetProfile.email,
+        full_name: targetProfile.full_name,
+      },
+    };
+
+    await insertBookingEmail({
+      type: "booking_confirmation",
+      booking: bookingForEmail,
+      subject: `Booking confirmed: ${booking.title}`,
+      body: `Your booking for ${availability.facility.name} has been created by an admin and confirmed.`,
+      templateName: "booking_confirmation",
+      templateData: {
+        bookingId: booking.id,
+        title: booking.title,
+        facilityName: availability.facility.name,
+        startsAt: booking.starts_at,
+        endsAt: booking.ends_at,
+        status: booking.status,
+      },
+    });
+
+    await runMicrosoftCalendarSyncSafely({
+      bookingId: booking.id,
+      action: "confirm",
+      actorUserId: user.id,
+      actorEmail: user.email,
+    });
+  }
+
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/approvals");
+  revalidatePath("/calendar");
+  revalidatePath("/admin/calendar");
+  revalidatePath("/my-bookings");
+
+  return {
+    status: "success",
+    message:
+      booking.status === "pending"
+        ? "Booking request created for the selected user and is pending approval."
+        : "Booking created for the selected user.",
+  };
 }
 
 function revalidateAdminBookingPaths(bookingId: string) {
@@ -665,4 +978,76 @@ export async function rejectBookingAction(
     message:
       "Booking rejected. The requester will see the updated status and a rejection email has been queued if possible.",
   };
+}
+
+export async function markBookingCheckedInAction(
+  bookingId: string,
+  _previousState: AdminBookingActionResult,
+  _formData: FormData,
+): Promise<AdminBookingActionResult> {
+  void _previousState;
+  void _formData;
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  return updateBookingUsageStatus({
+    bookingId,
+    status: "checked_in",
+    actorUserId: user.id,
+    actorEmail: user.email,
+  });
+}
+
+export async function markBookingNoShowAction(
+  bookingId: string,
+  _previousState: AdminBookingActionResult,
+  _formData: FormData,
+): Promise<AdminBookingActionResult> {
+  void _previousState;
+  void _formData;
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  return updateBookingUsageStatus({
+    bookingId,
+    status: "no_show",
+    actorUserId: user.id,
+    actorEmail: user.email,
+  });
+}
+
+export async function resetBookingUsageAction(
+  bookingId: string,
+  _previousState: AdminBookingActionResult,
+  _formData: FormData,
+): Promise<AdminBookingActionResult> {
+  void _previousState;
+  void _formData;
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  return updateBookingUsageStatus({
+    bookingId,
+    status: "not_tracked",
+    actorUserId: user.id,
+    actorEmail: user.email,
+  });
 }

@@ -554,3 +554,171 @@ export async function cancelBookingAction(
       "Booking cancelled. It will remain visible in your cancelled bookings for reference.",
   };
 }
+
+export async function updateBookingAction(
+  bookingId: string,
+  _previousState: BookingActionResult,
+  formData: FormData,
+): Promise<BookingActionResult> {
+  void _previousState;
+  const { user, profile } = await requireUser();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in to update a booking.",
+    };
+  }
+
+  if (profile?.status !== "active") {
+    return {
+      status: "error",
+      message: "Your account is not active for booking changes.",
+    };
+  }
+
+  const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Check the booking details, then try again.",
+    };
+  }
+
+  const supabase = await createClient();
+  const existing = await getMyBookingById(supabase, user.id, bookingId);
+
+  if (!existing) {
+    return {
+      status: "error",
+      message: "Booking could not be found.",
+    };
+  }
+
+  if (existing.status !== "pending" && existing.status !== "confirmed") {
+    return {
+      status: "error",
+      message: "This booking can no longer be edited.",
+    };
+  }
+
+  const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
+  const settings = await getAppSettings();
+  const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
+
+  if (!dateRange.startsAt || !dateRange.endsAt || dateRange.message) {
+    return {
+      status: "error",
+      message: dateRange.message ?? "Choose a valid booking date and time.",
+    };
+  }
+
+  let availability;
+
+  try {
+    availability = await checkBookingAvailability(supabase, {
+      facilityId: parsed.data.facilityId,
+      startsAt: dateRange.startsAt,
+      endsAt: dateRange.endsAt,
+      attendeeCount,
+      excludeBookingId: bookingId,
+    });
+  } catch (error) {
+    console.error("Booking update availability check failed", error);
+    return {
+      status: "error",
+      message: "Availability could not be checked. Please try again.",
+    };
+  }
+
+  if (!availability.available) {
+    return {
+      status: "error",
+      message: availability.message,
+    };
+  }
+
+  const updateValues = {
+    facility_id: parsed.data.facilityId,
+    title: parsed.data.title,
+    description: parsed.data.description || null,
+    attendee_count: attendeeCount,
+    starts_at: dateRange.startsAt.toISOString(),
+    ends_at: dateRange.endsAt.toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .update(updateValues)
+    .eq("id", bookingId)
+    .eq("user_id", user.id)
+    .in("status", ["pending", "confirmed"])
+    .select(
+      "id,facility_id,user_id,title,description,attendee_count,catering_required,catering_type,catering_pax,catering_serving_time,catering_dietary_notes,catering_notes,status,starts_at,ends_at,approval_required",
+    )
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Booking update failed", {
+      bookingId,
+      code: error?.code,
+      message: error?.message,
+    });
+
+    return {
+      status: "error",
+      message: getFriendlyBookingError({
+        code: error?.code,
+        message: error?.message,
+      }),
+    };
+  }
+
+  const updated = data as CreatedBookingRecord;
+  const adminSupabase = createAdminClient();
+  await createAuditLogSafely(
+    adminSupabase,
+    {
+      action: "update",
+      entityType: "booking",
+      entityId: bookingId,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Updated booking ${updated.title}.`,
+      oldValues: {
+        facilityId: existing.facilityId,
+        title: existing.title,
+        description: existing.description,
+        attendeeCount: existing.attendeeCount,
+        startsAt: existing.startsAt,
+        endsAt: existing.endsAt,
+      },
+      newValues: updateValues,
+    },
+    { bookingId },
+  );
+
+  if (updated.status === "confirmed") {
+    await runMicrosoftCalendarSyncSafely({
+      bookingId,
+      action: "confirm",
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/my-bookings");
+  revalidatePath(`/bookings/${bookingId}`);
+  revalidatePath(`/bookings/${bookingId}/edit`);
+  revalidatePath("/calendar");
+  revalidatePath("/admin/bookings");
+  revalidatePath(`/admin/bookings/${bookingId}`);
+
+  return {
+    status: "success",
+    message:
+      "Booking updated. Availability was checked again before saving your changes.",
+    bookingId,
+    bookingStatus: updated.status === "pending" ? "pending" : "confirmed",
+  };
+}
