@@ -245,7 +245,6 @@ export function BookingPrintForm({
           <SignatureBlock title="Requested by" />
           <SignatureBlock title="Superior / HOD / Boss approval" />
           <SignatureBlock title="Admin / Facilities approval" />
-          <SignatureBlock title="Final remarks / conditions" />
         </section>
       </article>
     </main>
