@@ -45,7 +45,7 @@ export function UserMenu({
           ) : null}
         </div>
       ) : null}
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
         {adminRole && showModeSwitch ? (
           <Link
             href={switchHref}

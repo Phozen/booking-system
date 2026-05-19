@@ -25,7 +25,7 @@ export function AppHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-card/92 shadow-sm shadow-primary/5 backdrop-blur print:hidden">
-      <div className="relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex min-h-16 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-6">
           <Link
             href="/dashboard"
@@ -33,7 +33,7 @@ export function AppHeader({
           >
             {appName}
           </Link>
-          <div className="hidden min-w-0 flex-1 overflow-hidden lg:flex">
+          <div className="hidden min-w-0 flex-1 overflow-hidden 2xl:flex">
             <EmployeeNavigation />
           </div>
         </div>
@@ -44,14 +44,14 @@ export function AppHeader({
             showIdentity={false}
             currentArea="employee"
             profileHref="/profile"
-            className="flex items-center gap-3"
+            className="flex items-center gap-2"
           />
         </div>
         <MobileNav
           variant="employee"
           label="Menu"
           footer={mobileFooter}
-          className="lg:hidden"
+          className="2xl:hidden"
         />
       </div>
     </header>

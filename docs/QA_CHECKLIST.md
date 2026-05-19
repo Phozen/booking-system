@@ -192,6 +192,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm employees do not see an `Admin console` switch.
 - [ ] Confirm mobile menus expose the switch controls for Admin/Super Admin without overflow.
 - [ ] Confirm switch controls are readable in dark mode and are real keyboard-focusable links.
+- [ ] Confirm the Admin/Super Admin employee-side header does not overlap normal navigation with the `Admin console` switch at 768px, 1024px, 1280px, and 1536px widths.
 
 ## Employee Cancellation
 
