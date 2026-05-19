@@ -33,7 +33,7 @@ export function AppHeader({
           >
             {appName}
           </Link>
-          <div className="hidden min-w-0 lg:block">
+          <div className="hidden min-w-0 flex-1 overflow-hidden lg:flex">
             <EmployeeNavigation />
           </div>
         </div>
