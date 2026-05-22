@@ -1570,9 +1570,10 @@ Responsive table standards:
 - Native date/time is acceptable.
 - Calendar pages are additive navigation surfaces; they do not replace My Bookings, booking detail pages, or admin booking management.
 - Employee calendar route: `/calendar`. It shows the signed-in employee's own bookings and may also include pending/accepted invited bookings with visible text such as "Pending invitation" or "Accepted invitation".
-- Employee calendar visibility is controlled by the admin setting `calendar_visibility_mode`.
+- Employee calendar visibility is controlled by the Super Admin setting `calendar_visibility_mode`.
 - When `calendar_visibility_mode` is `my_bookings_only`, employees see only owned and invited bookings.
-- When `calendar_visibility_mode` is `all_company_bookings`, employees can toggle between "My bookings" and "All bookings".
+- When `calendar_visibility_mode` is `admins_only`, Admin and Super Admin users can use all-bookings calendar visibility while employees still see only owned and invited bookings.
+- When `calendar_visibility_mode` is `all_users`, employees can toggle between "My bookings" and "All bookings".
 - Employee "All bookings" shows room usage across the company with limited details for unrelated bookings: facility, date/time, status, and booked-by label where available. Unrelated bookings must not link to employee booking detail or expose descriptions, cancellation reasons, approval internals, or invitation lists.
 - Employee invitations route: `/invitations`. It shows only invitations addressed to the signed-in employee and groups them by pending, accepted, and declined.
 - Admin calendar route: `/admin/calendar`. It shows all bookings and must remain admin-only. Admins can toggle between "My bookings" and "All bookings"; all admin-visible booking items can link to admin booking detail.

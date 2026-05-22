@@ -39,7 +39,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Employees can select their own bookings and safe invited booking details only.
 - [x] Catering fields are protected by booking access rules; owners/admins can edit, invited users can view only.
 - [x] Invited employees can view only safe details for bookings they were invited to.
-- [x] Employee all-company calendar visibility is settings-gated and shows limited details for unrelated bookings without management/detail links.
+- [x] Employee all-user calendar visibility is gated by the Super Admin `calendar_visibility_mode` setting and shows limited details for unrelated bookings without management/detail links.
 - [x] Booking invitation RLS allows owners to invite/remove, invitees to respond, and admins to view/manage.
 - [x] Active users can view and update only their own safe profile fields through the self-service profile page.
 - [x] Employees cannot directly insert bookings into `public.bookings`; booking creation must use `public.create_booking()`.
@@ -107,7 +107,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Attempt to respond to another user's invitation; expect denial.
 - [ ] Log in as employee and update `/profile`; confirm only full name, department, and phone can change.
 - [ ] Attempt another user's booking detail as employee; expect not found or access denied.
-- [ ] Enable all-company calendar visibility and confirm unrelated employee calendar items show limited details only and do not link to booking detail.
+- [ ] Set calendar visibility to `my_bookings_only`; confirm employees cannot use All bookings even with URL query tampering.
+- [ ] Set calendar visibility to `admins_only`; confirm employees remain limited to owned/invited bookings while Admin/Super Admin users can use all-bookings calendar visibility where intended.
+- [ ] Set calendar visibility to `all_users`; confirm unrelated employee calendar items show limited details only and do not link to booking detail.
 - [ ] Set a profile status to `disabled`; confirm protected pages are blocked.
 - [ ] Log in as admin; confirm admin pages still work.
 - [ ] Log in as admin and open `/admin/profile`; confirm only own safe profile fields can be updated.

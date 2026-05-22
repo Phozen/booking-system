@@ -12,8 +12,8 @@ import {
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
 import {
-  canUseAllCompanyCalendar,
   parseCalendarViewMode,
+  shouldShowAllBookingsToggle,
 } from "@/lib/calendar/visibility";
 import {
   groupCalendarBookingsByDay,
@@ -82,10 +82,11 @@ export default async function EmployeeCalendarPage({
     view?: string | string[];
   }>;
 }) {
-  const { user } = await requireUser();
+  const { user, profile } = await requireUser();
   const params = await searchParams;
   const settings = await getAppSettings();
-  const allowAllBookings = canUseAllCompanyCalendar(
+  const allowAllBookings = shouldShowAllBookingsToggle(
+    profile.role,
     settings.calendarVisibilityMode,
   );
   const selectedView = parseCalendarViewMode({

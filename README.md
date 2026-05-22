@@ -30,7 +30,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - My Bookings grouped by pending, upcoming, history, and cancelled.
 - Booking detail with cancellation flow, attendee invitations, catering edits, and printable approval form.
 - Invitations page for accepting or declining internal booking invitations.
-- Calendar page for owned and invited bookings, with optional all-company visibility controlled by admin settings.
+- Calendar page for owned and invited bookings, with optional all-user visibility controlled by Super Admin settings.
 - Profile page for editing safe self-service fields: full name, department, and phone.
 - Notification preferences for non-critical reminders and invitation updates.
 - Light/dark theme toggle.
@@ -84,7 +84,7 @@ The app lets employees browse facilities, create bookings, manage their own book
   - Registration and allowed email domains.
   - Approval defaults and facility override setting.
   - Timezone and reminder offsets.
-  - Employee calendar visibility mode.
+  - Calendar visibility scope: My bookings only, Admins only, or All users.
 - Integration groundwork:
   - Microsoft 365 Calendar sync status and retry page.
   - Server-side Microsoft Graph configuration through environment variables.
@@ -106,7 +106,7 @@ npx.cmd supabase db push
 | Bookings | Create own, read own/invited, cancel own eligible bookings | Read all, approve, reject, cancel |
 | Catering details | Add during booking creation; owner can update pending/confirmed bookings | View/update for operational purposes |
 | Invitations | Invite users to own bookings, accept/decline own invitations | View attendee status on booking detail |
-| Calendar | View own/invited bookings; optionally view limited all-company bookings | View all bookings or own bookings |
+| Calendar | View own/invited bookings; optionally view limited all-user bookings when enabled | View all bookings or own bookings |
 | Users/profiles | Read/update own safe profile fields | Super Admin only: read/search/update users, roles, statuses, safe profile fields |
 | Blocked dates | Read active availability impact indirectly through booking validation | Create, read, update, deactivate |
 | Maintenance closures | Read active availability impact indirectly through booking validation | Create, read, update, complete, cancel |
@@ -260,6 +260,11 @@ Current migration set:
 0013_split_admin_roles.sql
 0014_microsoft_calendar_sync_groundwork.sql
 0015_booking_catering_details.sql
+0016_booking_usage_tracking.sql
+0017_booking_waitlist_requests.sql
+0018_user_notification_preferences.sql
+0019_booking_recurrence_series.sql
+0020_calendar_visibility_scope.sql
 ```
 
 Typical commands:
@@ -421,7 +426,7 @@ See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and 
 - Active employee/admin/super-admin status is required for protected areas.
 - Employees cannot access `/admin/*`.
 - Employees can manage only their own bookings and invitations.
-- Employee all-company calendar visibility is settings-gated and shows limited details for unrelated bookings.
+- Employee all-user calendar visibility is settings-gated and shows limited details for unrelated bookings.
 - Operational admin pages require active `admin` or `super_admin` authorization.
 - `/admin/users` and `/admin/settings` require active `super_admin` authorization.
 - Supabase RLS remains enabled on application tables.

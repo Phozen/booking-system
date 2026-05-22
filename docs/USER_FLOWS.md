@@ -1773,6 +1773,10 @@ Super Admin
 * Facility approval override enabled
 * Reminder email timing
 * Default timezone
+* Calendar visibility scope:
+  * My bookings only
+  * Admins only
+  * All users
 
 ---
 
@@ -1790,6 +1794,12 @@ Super Admin
 4. System saves settings.
 5. System creates audit log.
 6. New settings affect future app behavior.
+
+Calendar visibility scope controls who can switch a calendar into all-bookings mode:
+
+* `my_bookings_only`: employees see owned/invited bookings only; Admin/Super Admin users keep operational all-bookings access through the admin calendar.
+* `admins_only`: Admin and Super Admin users can view all bookings on calendars; employees remain limited to owned/invited bookings.
+* `all_users`: all active users can view all bookings for scheduling awareness. Employee views of unrelated bookings stay limited and non-manageable.
 
 ### Success Result
 

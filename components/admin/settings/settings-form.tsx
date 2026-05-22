@@ -11,6 +11,7 @@ import {
   formDataToSettingsValues,
   settingsFormSchema,
 } from "@/lib/admin/settings/validation";
+import { getCalendarVisibilityLabel } from "@/lib/calendar/visibility";
 import type { AppSettings } from "@/lib/settings/queries";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ type SettingsFieldId =
   | "companyName"
   | "systemContactEmail"
   | "allowedEmailDomains"
+  | "calendarVisibilityMode"
   | "defaultTimezone"
   | "reminderOffsetsMinutes";
 
@@ -67,6 +69,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         reminderOffsetsMinutes: getFirstError(
           errors.reminderOffsetsMinutesText,
         ),
+        calendarVisibilityMode: getFirstError(errors.calendarVisibilityMode),
       });
       event.preventDefault();
       return;
@@ -258,19 +261,33 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             id="calendarVisibilityMode"
             name="calendarVisibilityMode"
             defaultValue={settings.calendarVisibilityMode}
+            aria-describedby={getFieldDescribedBy(
+              "calendarVisibilityMode-helper",
+              fieldErrors.calendarVisibilityMode &&
+                "calendarVisibilityMode-error",
+            )}
+            aria-invalid={Boolean(fieldErrors.calendarVisibilityMode)}
             className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="my_bookings_only">
-              Only show each user their own bookings
+              {getCalendarVisibilityLabel("my_bookings_only")}
             </option>
-            <option value="all_company_bookings">
-              Allow users to view all company bookings
+            <option value="admins_only">
+              {getCalendarVisibilityLabel("admins_only")}
+            </option>
+            <option value="all_users">
+              {getCalendarVisibilityLabel("all_users")}
             </option>
           </select>
           <FormFieldHelper id="calendarVisibilityMode-helper">
-            All company bookings helps employees see room usage and
-            availability. Other users&apos; booking details remain limited.
+            My bookings only limits employees to owned/invited bookings.
+            Admins only gives operational calendar visibility to Admin and
+            Super Admin users. All users lets active employees view limited
+            company-wide booking details for scheduling awareness.
           </FormFieldHelper>
+          <FormFieldError id="calendarVisibilityMode-error">
+            {fieldErrors.calendarVisibilityMode}
+          </FormFieldError>
         </div>
       </section>
 

@@ -31,16 +31,24 @@ describe("app settings helpers", () => {
       { key: "company_name", value: "  Example Co  " },
       { key: "system_contact_email", value: " facilities@example.com " },
       { key: "allowed_email_domains", value: ["@Example.com", "team.example.com"] },
-      { key: "calendar_visibility_mode", value: "all_company_bookings" },
+      { key: "calendar_visibility_mode", value: "admins_only" },
     ]);
 
     expect(settings.appName).toBe("Room Hub");
     expect(getCompanyDisplayName(settings)).toBe("Example Co");
     expect(settings.systemContactEmail).toBe("facilities@example.com");
-    expect(settings.calendarVisibilityMode).toBe("all_company_bookings");
+    expect(settings.calendarVisibilityMode).toBe("admins_only");
     expect(formatAllowedEmailDomains(settings.allowedEmailDomains)).toBe(
       "example.com, team.example.com",
     );
+  });
+
+  it("maps legacy all-company calendar visibility to all users", () => {
+    const settings = mapSettingsRowsToAppSettings([
+      { key: "calendar_visibility_mode", value: "all_company_bookings" },
+    ]);
+
+    expect(settings.calendarVisibilityMode).toBe("all_users");
   });
 
   it("formats contact-aware access and registration messages", () => {

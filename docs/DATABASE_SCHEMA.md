@@ -599,13 +599,14 @@ create index booking_invitations_created_at_idx on public.booking_invitations(cr
 
 ## 12B. Calendar Visibility Setting
 
-`system_settings` includes `calendar_visibility_mode` for employee calendar privacy.
+`system_settings` includes `calendar_visibility_mode` for calendar privacy and all-user visibility scope.
 
 Allowed values:
 
 ```txt
 my_bookings_only
-all_company_bookings
+admins_only
+all_users
 ```
 
 Default:
@@ -614,7 +615,13 @@ Default:
 my_bookings_only
 ```
 
-When enabled as `all_company_bookings`, employees can view company-wide room usage on `/calendar`, but unrelated bookings must expose limited details only and must not allow employee management actions.
+`my_bookings_only` keeps employee-side `/calendar` limited to bookings the user owns or is invited to. Admin/Super Admin users keep operational all-bookings access through `/admin/calendar`.
+
+`admins_only` allows Admin and Super Admin users to use all-bookings calendar visibility while employees remain limited to owned/invited bookings.
+
+`all_users` allows active employees to toggle `/calendar` between "My bookings" and "All bookings". Unrelated bookings must expose limited safe details only and must not link to employee booking detail or expose descriptions, catering, cancellation reasons, approval internals, or invitation lists.
+
+Legacy value `all_company_bookings` maps to `all_users`.
 
 ---
 

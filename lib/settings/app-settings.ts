@@ -166,7 +166,7 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.calendarVisibilityMode,
       value: settings.calendarVisibilityMode,
       description:
-        "Whether employees can view all company bookings on the employee calendar.",
+        "Controls who can view all-user bookings on calendar pages.",
       is_public: false,
     },
     {

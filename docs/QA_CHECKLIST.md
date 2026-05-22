@@ -334,7 +334,8 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Toggle `default_approval_required`; confirm future bookings follow it.
 - [ ] Toggle facility approval override; confirm global default controls when override is disabled.
 - [ ] Set calendar visibility to `my_bookings_only`; confirm employees cannot choose All bookings on `/calendar`.
-- [ ] Set calendar visibility to `all_company_bookings`; confirm employees can toggle My bookings / All bookings on `/calendar`.
+- [ ] Set calendar visibility to `admins_only`; confirm employees cannot choose All bookings, while Admin/Super Admin users can use all-bookings calendar visibility where intended.
+- [ ] Set calendar visibility to `all_users`; confirm employees can toggle My bookings / All bookings on `/calendar`.
 - [ ] In month view, confirm adjacent-month date numbers are not shown; for example, May should not display June 1.
 - [ ] Confirm facility detail and booking form approval copy matches the effective approval setting.
 - [ ] Update reminder offsets; confirm validation accepts positive integer list.
@@ -354,8 +355,8 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm employees cannot update other users' bookings.
 - [ ] Confirm employees cannot view or update invitations for unrelated bookings.
 - [ ] Confirm invited employees can view only their own invitations and safe booking details.
-- [ ] Confirm employee all-company calendar view shows limited unrelated booking details and does not link to `/bookings/[id]` for unrelated bookings.
-- [ ] Confirm employees cannot cancel, manage, or open detail pages for unrelated all-company calendar bookings.
+- [ ] Confirm employee all-user calendar view shows limited unrelated booking details and does not link to `/bookings/[id]` for unrelated bookings.
+- [ ] Confirm employees cannot cancel, manage, or open detail pages for unrelated all-user calendar bookings.
 - [ ] Confirm employees cannot view audit logs, export logs, email notifications, or private settings.
 - [ ] Confirm active admins can manage expected admin records.
 - [ ] Confirm only super admins can update profiles through user management.
