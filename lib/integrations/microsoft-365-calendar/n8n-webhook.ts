@@ -64,6 +64,7 @@ export type N8nCalendarWebhookResult =
     };
 
 type FetchLike = typeof fetch;
+const bodyPreviewLength = 280;
 
 function labelValue(value: string | null | undefined) {
   return value?.trim() || null;
@@ -96,6 +97,59 @@ export function buildN8nCateringSummary(
 function buildBookingUrl(bookingId: string, appUrl: string | undefined) {
   const baseUrl = appUrl?.trim().replace(/\/+$/, "");
   return baseUrl ? `${baseUrl}/admin/bookings/${bookingId}` : null;
+}
+
+function getSafeWebhookTarget(url: string) {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return "configured n8n webhook";
+  }
+}
+
+function getSafeBodyPreview(body: string) {
+  const compact = body.replace(/\s+/g, " ").trim();
+  return sanitizeMicrosoftCalendarError(compact).slice(0, bodyPreviewLength);
+}
+
+function isProbablyJson(contentType: string, body: string) {
+  const normalizedContentType = contentType.toLowerCase();
+  const trimmedBody = body.trim();
+
+  return (
+    normalizedContentType.includes("application/json") ||
+    normalizedContentType.includes("+json") ||
+    trimmedBody.startsWith("{") ||
+    trimmedBody.startsWith("[")
+  );
+}
+
+function buildN8nResponseError({
+  url,
+  status,
+  statusText,
+  contentType,
+  body,
+  reason,
+}: {
+  url: string;
+  status: number;
+  statusText: string;
+  contentType: string;
+  body: string;
+  reason: string;
+}) {
+  const target = getSafeWebhookTarget(url);
+  const preview = getSafeBodyPreview(body);
+  const parts = [
+    `${reason} from ${target}.`,
+    `Status: ${status}${statusText ? ` ${statusText}` : ""}.`,
+    `Content-Type: ${contentType || "unknown"}.`,
+    preview ? `Body preview: ${preview}` : null,
+  ].filter(Boolean);
+
+  return sanitizeMicrosoftCalendarError(parts.join(" "));
 }
 
 export function buildN8nCalendarCreatePayload({
@@ -191,15 +245,55 @@ export async function sendN8nCalendarCreateWebhook({
     });
 
     const text = await response.text();
-    const data = text ? JSON.parse(text) : null;
+    const contentType = response.headers.get("content-type") ?? "";
+    const looksLikeHtml = text.trimStart().startsWith("<");
+
+    if (!isProbablyJson(contentType, text) || looksLikeHtml) {
+      return {
+        ok: false,
+        status: response.status,
+        error: buildN8nResponseError({
+          url: config.createWebhookUrl,
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          body: text,
+          reason: "n8n webhook returned non-JSON response",
+        }),
+      };
+    }
+
+    let data: unknown;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      return {
+        ok: false,
+        status: response.status,
+        error: buildN8nResponseError({
+          url: config.createWebhookUrl,
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          body: text,
+          reason: "n8n webhook returned invalid JSON",
+        }),
+      };
+    }
 
     if (!response.ok) {
       return {
         ok: false,
         status: response.status,
-        error: sanitizeMicrosoftCalendarError(
-          `n8n calendar webhook failed with status ${response.status}: ${text}`,
-        ),
+        error: buildN8nResponseError({
+          url: config.createWebhookUrl,
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          body: text,
+          reason: "n8n calendar webhook failed",
+        }),
       };
     }
 

@@ -84,6 +84,40 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.n8nWebhook.validationError).toBeNull();
   });
 
+  it("allows blank n8n update and delete URLs for create-only testing", () => {
+    const config = getN8nCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "true",
+      N8N_CALENDAR_CREATE_WEBHOOK_URL:
+        "https://n.qsbportal.com.my/webhook/booking-calendar/create",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+      MICROSOFT_365_CALENDAR_SYNC_ENABLED: "false",
+      MICROSOFT_SYNC_MODE: "disabled",
+    });
+
+    expect(config.enabled).toBe(true);
+    expect(config.isConfigured).toBe(true);
+    expect(config.createWebhookConfigured).toBe(true);
+    expect(config.updateWebhookConfigured).toBe(false);
+    expect(config.deleteWebhookConfigured).toBe(false);
+  });
+
+  it("rejects n8n test webhook URLs in production", () => {
+    const config = getN8nCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "true",
+      N8N_CALENDAR_CREATE_WEBHOOK_URL:
+        "https://n.qsbportal.com.my/webhook-test/booking-calendar/create",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+      VERCEL_ENV: "production",
+    });
+
+    expect(config.createWebhookUsesTestUrl).toBe(true);
+    expect(config.isConfigured).toBe(false);
+    expect(config.validationError).toContain("production /webhook/ URL");
+    expect(config.validationError).not.toContain("super-secret-value");
+  });
+
   it("requires Microsoft credentials for enabled central-calendar sync", () => {
     const config = getMicrosoftCalendarSyncConfig({
       MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",

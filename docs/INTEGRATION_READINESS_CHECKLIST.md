@@ -88,6 +88,7 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 6. Confirm `/admin/integrations/microsoft-calendar` shows provider `n8n webhook` and the create/update/delete webhook configured yes/no state without displaying URLs or secrets.
 7. Confirm the sync record uses provider `n8n_webhook` and status `synced`.
 8. Confirm cancellation/reschedule does not call Microsoft Graph fallback in n8n mode; update/delete remain deferred until those workflows exist.
+9. If a sync record reports a non-JSON response, confirm Vercel uses the production `/webhook/` URL, the workflow is active, and the stored error includes status/content-type/safe body preview without exposing the webhook secret.
 
 ## What Remains Outside The Developer/User Account
 

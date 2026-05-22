@@ -272,6 +272,30 @@ Expected n8n success response:
 
 The app stores `externalEventId` in `booking_calendar_syncs` with provider `n8n_webhook` and status `synced`. Failed or invalid responses are sanitized and stored as `failed`. Cancellation/reschedule paths do not call Microsoft Graph fallback in n8n mode; delete/update are skipped safely in this create-only test stage.
 
+Troubleshooting HTML responses:
+
+If the integration page reports an error like `Unexpected token '<', "<!DOCTYPE "... is not valid JSON`, the webhook request reached something that returned HTML instead of compact JSON. Newer builds report the upstream status, content type, safe webhook host/path, and a short sanitized body preview instead of the raw parse error.
+
+Check:
+
+- Vercel `N8N_CALENDAR_CREATE_WEBHOOK_URL` uses the production `/webhook/` URL, not `/webhook-test/`.
+- The n8n workflow is active/published.
+- Vercel was redeployed after env var changes.
+- `N8N_CALENDAR_WEBHOOK_SECRET` matches the n8n header check.
+- The n8n workflow ends with a response body shaped like:
+
+```json
+{
+  "success": true,
+  "provider": "n8n_graph_delegated",
+  "externalEventId": "...",
+  "externalCalendarId": "me",
+  "webLink": "https://outlook.office365.com/..."
+}
+```
+
+- A manual PowerShell production webhook test returns JSON from the same URL configured in Vercel.
+
 ## Runtime Behavior
 
 Confirmed booking paths:

@@ -141,6 +141,7 @@ describe("Microsoft 365 calendar sync helpers", () => {
         createWebhookConfigured: true,
         updateWebhookConfigured: false,
         deleteWebhookConfigured: false,
+        createWebhookUsesTestUrl: false,
       },
       payload: {
         action: "create",
@@ -190,6 +191,7 @@ describe("Microsoft 365 calendar sync helpers", () => {
         createWebhookConfigured: true,
         updateWebhookConfigured: false,
         deleteWebhookConfigured: false,
+        createWebhookUsesTestUrl: false,
       },
       payload: {
         action: "create",
@@ -219,6 +221,117 @@ describe("Microsoft 365 calendar sync helpers", () => {
 
     expect(result.ok).toBe(false);
     expect(result.ok ? "" : result.error).not.toContain("super-secret-value");
-    expect(result.ok ? "" : result.error).not.toContain("n8n.example");
+    expect(result.ok ? "" : result.error).toContain("n8n.example/webhook/create");
+  });
+
+  it("reports HTML responses without throwing raw JSON parse errors", async () => {
+    const result = await sendN8nCalendarCreateWebhook({
+      config: {
+        provider: "n8n_webhook",
+        enabled: true,
+        createWebhookUrl:
+          "https://n.qsbportal.com.my/webhook/booking-calendar/create?token=secret",
+        updateWebhookUrl: "",
+        deleteWebhookUrl: "",
+        webhookSecret: "super-secret-value",
+        missingKeys: [],
+        isConfigured: true,
+        validationError: null,
+        createWebhookConfigured: true,
+        updateWebhookConfigured: false,
+        deleteWebhookConfigured: false,
+        createWebhookUsesTestUrl: false,
+      },
+      payload: {
+        action: "create",
+        bookingId: "booking-1",
+        bookingReference: "booking-1",
+        title: "Meeting",
+        description: null,
+        facilityName: "Room",
+        facilityLevel: "Level 1",
+        facilityType: null,
+        startTime: "2026-05-14T10:00:00",
+        endTime: "2026-05-14T11:00:00",
+        timezone: "Asia/Kuala_Lumpur",
+        organizerName: null,
+        organizerEmail: null,
+        attendeeCount: null,
+        cateringRequired: false,
+        cateringSummary: "Not requested",
+        bookingUrl: null,
+      },
+      fetchImpl: (async () =>
+        new Response("<!DOCTYPE html><html><body>Not found</body></html>", {
+          status: 404,
+          statusText: "Not Found",
+          headers: { "content-type": "text/html; charset=utf-8" },
+        })) as typeof fetch,
+    });
+
+    expect(result.ok).toBe(false);
+    const error = result.ok ? "" : result.error;
+    expect(error).toContain("n8n webhook returned non-JSON response");
+    expect(error).toContain(
+      "n.qsbportal.com.my/webhook/booking-calendar/create",
+    );
+    expect(error).toContain("Status: 404 Not Found");
+    expect(error).toContain("Content-Type: text/html");
+    expect(error).toContain("Body preview: <!DOCTYPE html>");
+    expect(error).not.toContain("Unexpected token");
+    expect(error).not.toContain("token=secret");
+    expect(error).not.toContain("super-secret-value");
+  });
+
+  it("reports invalid JSON responses with status and safe body preview", async () => {
+    const result = await sendN8nCalendarCreateWebhook({
+      config: {
+        provider: "n8n_webhook",
+        enabled: true,
+        createWebhookUrl: "https://n8n.example/webhook/create",
+        updateWebhookUrl: "",
+        deleteWebhookUrl: "",
+        webhookSecret: "super-secret-value",
+        missingKeys: [],
+        isConfigured: true,
+        validationError: null,
+        createWebhookConfigured: true,
+        updateWebhookConfigured: false,
+        deleteWebhookConfigured: false,
+        createWebhookUsesTestUrl: false,
+      },
+      payload: {
+        action: "create",
+        bookingId: "booking-1",
+        bookingReference: "booking-1",
+        title: "Meeting",
+        description: null,
+        facilityName: "Room",
+        facilityLevel: "Level 1",
+        facilityType: null,
+        startTime: "2026-05-14T10:00:00",
+        endTime: "2026-05-14T11:00:00",
+        timezone: "Asia/Kuala_Lumpur",
+        organizerName: null,
+        organizerEmail: null,
+        attendeeCount: null,
+        cateringRequired: false,
+        cateringSummary: "Not requested",
+        bookingUrl: null,
+      },
+      fetchImpl: (async () =>
+        new Response("{not-json", {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        })) as typeof fetch,
+    });
+
+    expect(result.ok).toBe(false);
+    const error = result.ok ? "" : result.error;
+    expect(error).toContain("n8n webhook returned invalid JSON");
+    expect(error).toContain("Status: 200");
+    expect(error).toContain("Content-Type: application/json");
+    expect(error).toContain("Body preview: {not-json");
+    expect(error).not.toContain("Unexpected token");
   });
 });

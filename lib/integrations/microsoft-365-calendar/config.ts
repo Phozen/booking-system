@@ -44,6 +44,7 @@ export type N8nCalendarSyncConfig = {
   createWebhookConfigured: boolean;
   updateWebhookConfigured: boolean;
   deleteWebhookConfigured: boolean;
+  createWebhookUsesTestUrl: boolean;
 };
 
 const defaultGraphBaseUrl = "https://graph.microsoft.com/v1.0";
@@ -169,6 +170,7 @@ export function getN8nCalendarSyncConfig(
   const updateWebhookUrl = trimValue(env.N8N_CALENDAR_UPDATE_WEBHOOK_URL);
   const deleteWebhookUrl = trimValue(env.N8N_CALENDAR_DELETE_WEBHOOK_URL);
   const webhookSecret = env.N8N_CALENDAR_WEBHOOK_SECRET ?? "";
+  const createWebhookUsesTestUrl = createWebhookUrl.includes("/webhook-test/");
   const baseConfig = {
     provider,
     enabled,
@@ -179,6 +181,7 @@ export function getN8nCalendarSyncConfig(
     createWebhookConfigured: Boolean(createWebhookUrl),
     updateWebhookConfigured: Boolean(updateWebhookUrl),
     deleteWebhookConfigured: Boolean(deleteWebhookUrl),
+    createWebhookUsesTestUrl,
   };
 
   if (!enabled) {
@@ -197,16 +200,23 @@ export function getN8nCalendarSyncConfig(
   const missingKeys = requiredValues
     .filter(([, value]) => !value)
     .map(([key]) => key);
+  const testUrlError =
+    createWebhookUsesTestUrl &&
+    (env.VERCEL_ENV === "production" || env.NODE_ENV === "production")
+      ? "n8n calendar create webhook uses a test URL. Use the production /webhook/ URL in production."
+      : null;
 
   return {
     ...baseConfig,
     missingKeys,
-    isConfigured: missingKeys.length === 0,
+    isConfigured: missingKeys.length === 0 && !testUrlError,
     validationError:
       missingKeys.length > 0
         ? `n8n calendar webhook sync is not configured. Set ${missingKeys.join(
             ", ",
           )}.`
+        : testUrlError
+          ? testUrlError
         : null,
   };
 }

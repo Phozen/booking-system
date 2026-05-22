@@ -401,6 +401,8 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm the n8n payload contains safe booking fields and local `YYYY-MM-DDTHH:mm:ss` start/end values.
 - [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not visible in UI, sync errors, or client bundles.
 - [ ] Confirm cancellation/reschedule in n8n mode skips update/delete safely until those workflows are configured.
+- [ ] If n8n returns HTML, confirm the sync error reports status, content type, safe webhook host/path, and a short sanitized body preview instead of a raw `Unexpected token '<'` parse error.
+- [ ] Confirm production n8n configuration rejects `/webhook-test/` URLs and requires the active `/webhook/` URL.
 
 ## Basic Responsive UI
 

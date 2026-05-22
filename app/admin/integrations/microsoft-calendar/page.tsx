@@ -21,6 +21,10 @@ function formatMode(mode: string) {
   return mode.replaceAll("_", " ");
 }
 
+function getDisplayMode(provider: string, mode: string) {
+  return provider === "n8n_webhook" ? "create webhook only" : formatMode(mode);
+}
+
 function formatProvider(provider: string) {
   if (provider === "microsoft_graph") {
     return "Microsoft Graph";
@@ -77,7 +81,9 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
           <p className="text-xs font-medium uppercase text-muted-foreground">
             Mode
           </p>
-          <p className="mt-1 capitalize">{formatMode(status.mode)}</p>
+          <p className="mt-1 capitalize">
+            {getDisplayMode(status.provider, status.mode)}
+          </p>
         </div>
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">
