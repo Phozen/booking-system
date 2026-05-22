@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: MicrosoftCalendarRetryActionResult = {
   status: "idle",
@@ -28,6 +29,11 @@ export function RetryMicrosoftCalendarSyncForm({
 
   return (
     <form action={formAction} className="grid gap-2">
+      <ActionToastEffect
+        state={state}
+        successTitle="Microsoft Calendar sync retried"
+        errorTitle="Microsoft Calendar retry failed"
+      />
       <input type="hidden" name="bookingId" value={bookingId} />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         <PendingButtonContent pending={pending} pendingLabel="Retrying...">

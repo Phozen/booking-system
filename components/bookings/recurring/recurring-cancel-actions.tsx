@@ -8,6 +8,7 @@ import {
   type CancellationActionResult,
 } from "@/lib/bookings/actions";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Button } from "@/components/ui/button";
 
 const initialState: CancellationActionResult = {
@@ -28,6 +29,11 @@ export function RecurringCancelActions({ bookingId }: { bookingId: string }) {
 
   return (
     <section className="grid gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-5 text-amber-950 shadow-sm shadow-amber-500/10 ring-1 ring-amber-200/60 dark:border-amber-900 dark:bg-amber-950/25 dark:text-amber-100">
+      <ActionToastEffect
+        state={latestState}
+        successTitle="Recurring booking cancelled"
+        errorTitle="Recurring cancellation failed"
+      />
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
           Recurring booking controls

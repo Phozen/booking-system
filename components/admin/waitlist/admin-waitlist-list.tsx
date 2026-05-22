@@ -11,6 +11,7 @@ import type { WaitlistRequest } from "@/lib/waitlist/queries";
 import { formatBookingWindow } from "@/lib/bookings/format";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
@@ -27,6 +28,11 @@ function AdminWaitlistUpdateForm({ request }: { request: WaitlistRequest }) {
 
   return (
     <form action={action} className="grid gap-3 rounded-lg border border-border/70 bg-muted/35 p-3">
+      <ActionToastEffect
+        state={state}
+        successTitle="Waitlist request updated"
+        errorTitle="Waitlist update failed"
+      />
       <div className="grid gap-2 sm:grid-cols-[14rem_1fr_auto] sm:items-end">
         <div className="grid gap-1.5">
           <Label htmlFor={`status-${request.id}`}>Status</Label>

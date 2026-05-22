@@ -21,6 +21,7 @@ import {
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 type ProfileFieldId = "fullName" | "department" | "phone";
 type ProfileFieldErrors = Partial<Record<ProfileFieldId, string>>;
@@ -63,6 +64,11 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       noValidate
       onSubmit={validateBeforeSubmit}
     >
+      <ActionToastEffect
+        state={state}
+        successTitle="Profile saved"
+        errorTitle="Profile not saved"
+      />
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
           Edit profile

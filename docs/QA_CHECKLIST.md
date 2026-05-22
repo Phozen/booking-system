@@ -454,6 +454,14 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Vercel protection, Cloudflare Access, or another network-layer internal restriction is a deployment hardening option.
 ## Roadmap Feature QA
 
+- Booking form availability timeline: open `/bookings/new`, confirm the empty
+  state appears before date selection, select a facility/date, confirm available
+  and unavailable periods load, and verify conflicting submissions are still
+  blocked by server-side validation.
+- Toast notifications: confirm short success/error toasts appear for profile
+  save, catering update, booking cancellation, invitation response, photo
+  upload, waitlist updates, recurring booking actions, and email queue actions
+  while inline validation errors remain visible.
 - Facility timeline: verify employee and admin facility detail pages show
   available, booked, pending, blocked, and maintenance periods for a selected
   date without exposing employee-private details.

@@ -43,6 +43,8 @@ import {
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -250,6 +252,12 @@ export function BookingForm({
       onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={validateBeforeSubmit}
     >
+      <ActionToastEffect
+        state={state}
+        successTitle="Booking created"
+        errorTitle="Booking unavailable"
+      />
+
       {state.status !== "idle" ? (
         <Alert variant={state.status === "error" ? "destructive" : "success"}>
           {state.status === "error" ? (
@@ -426,6 +434,12 @@ export function BookingForm({
             {fieldErrors.startTime}
           </FormFieldError>
         </div>
+
+        <BookingAvailabilityTimeline
+          facilityId={selectedFacility}
+          facilityName={selectedFacilityDetails?.name}
+          date={previewValues.date}
+        />
 
         <div className="grid gap-2">
           <Label htmlFor="endTime">End time</Label>

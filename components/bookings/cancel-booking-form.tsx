@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: CancellationActionResult = {
   status: "idle",
@@ -52,6 +53,11 @@ export function CancelBookingForm({ bookingId }: { bookingId: string }) {
       action={formAction}
       className="grid gap-4 rounded-lg border p-4"
     >
+      <ActionToastEffect
+        state={state}
+        successTitle="Booking cancelled"
+        errorTitle="Cancellation failed"
+      />
       <div className="flex items-start gap-3">
         <AlertTriangle className="mt-0.5 size-4 text-destructive" aria-hidden="true" />
         <div>

@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 export function CateringEditForm({
   bookingId,
@@ -38,6 +39,11 @@ export function CateringEditForm({
 
   return (
     <section className="grid gap-4 rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+      <ActionToastEffect
+        state={state}
+        successTitle="Catering details updated"
+        errorTitle="Catering not saved"
+      />
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
           Edit food & drinks / catering

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { appConfig } from "@/config/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
+import { ToastProvider } from "@/components/shared/toast-provider";
 
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
             <NavigationProgress />
           </Suspense>
           {children}
+          <ToastProvider />
         </ThemeProvider>
       </body>
     </html>

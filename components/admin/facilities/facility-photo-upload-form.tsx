@@ -16,6 +16,7 @@ import {
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const maxSizeMb = Math.floor(facilityPhotoMaxBytes / 1024 / 1024);
 
@@ -32,6 +33,11 @@ export function FacilityPhotoUploadForm({
 
   return (
     <form action={formAction} className="grid gap-4">
+      <ActionToastEffect
+        state={state}
+        successTitle="Photo uploaded"
+        errorTitle="Photo upload failed"
+      />
       <input type="hidden" name="facilityId" value={facilityId} />
 
       {state.status !== "idle" ? (

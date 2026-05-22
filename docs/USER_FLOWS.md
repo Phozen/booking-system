@@ -29,6 +29,19 @@ Super Admins have full system-owner access, including user/role management and s
 
 Owners can edit pending or confirmed bookings from the booking detail page. Facility, date/time, attendee count, purpose, and description changes re-run availability checks before saving. Catering remains edited from the catering section.
 
+### Booking form availability feedback
+
+When an employee selects a facility and date on `/bookings/new`, the form loads
+a read-only daily availability timeline. The timeline helps the user choose a
+non-overlapping time but does not replace server-side conflict prevention.
+
+### Toast feedback
+
+Short non-critical results such as profile saved, catering updated, invitation
+sent/responded, photo uploaded, waitlist updated, recurring booking action, and
+email queue processing may also appear as toast notifications. Inline alerts
+and field-level validation remain the persistent source for important errors.
+
 ### Admin creates booking for user
 
 Admins can create bookings on behalf of active internal users from `/admin/bookings/new`. The selected user owns the booking, the admin is recorded as creator, and normal availability/approval rules still apply.

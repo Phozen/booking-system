@@ -21,6 +21,7 @@ import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { RecurringCancelActions } from "@/components/bookings/recurring/recurring-cancel-actions";
+import { StaticToastEffect } from "@/components/shared/static-toast-effect";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
@@ -161,6 +162,18 @@ export function BookingDetail({
 
       {isOwnerView && justCreated ? (
         <Alert variant="success">
+          <StaticToastEffect
+            title={
+              booking.status === "pending"
+                ? "Booking request submitted"
+                : "Booking created"
+            }
+            description={
+              booking.status === "pending"
+                ? "Booking request submitted and pending approval."
+                : "Booking created."
+            }
+          />
           <CheckCircle2 aria-hidden="true" />
           <AlertTitle>
             {booking.status === "pending"

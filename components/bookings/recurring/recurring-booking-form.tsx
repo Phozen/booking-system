@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: RecurringBookingActionResult = {
   status: "idle",
@@ -41,6 +42,15 @@ export function RecurringBookingForm({
 
   return (
     <form action={previewAction} className="grid gap-6 rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/10">
+      <ActionToastEffect
+        state={latestState}
+        successTitle={
+          createState.status === "success"
+            ? "Recurring booking created"
+            : "Recurring preview ready"
+        }
+        errorTitle="Recurring booking failed"
+      />
       {latestState.status !== "idle" ? (
         <Alert variant={latestState.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{latestState.message}</AlertDescription>

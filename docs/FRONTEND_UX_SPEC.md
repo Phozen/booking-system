@@ -2032,6 +2032,14 @@ Before considering frontend polish complete:
 
 - Facility availability timelines must include text labels for Available,
   Booked, Pending, Blocked, and Maintenance states; color alone is not enough.
+- The booking creation form should show a read-only availability timeline after
+  a facility and date are selected. Empty, loading, and error states must remain
+  helpful and must explain that server-side conflict checks still decide whether
+  a booking can be created.
+- Toast notifications are appropriate for short non-critical action feedback
+  such as saved profile, updated catering, sent invitation, uploaded photo,
+  waitlist updates, and recurring booking actions. Validation errors and
+  critical failures must keep inline alerts or field-level errors.
 - Waitlist and recurring booking flows must explain that conflict prevention
   remains authoritative and that waitlist requests do not reserve rooms.
 - Recurring booking previews must show available and unavailable occurrences

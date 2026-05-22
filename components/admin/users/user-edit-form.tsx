@@ -27,6 +27,7 @@ import {
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: UserActionResult = {
   status: "idle",
@@ -185,6 +186,11 @@ export function UserEditForm({
       noValidate
       onSubmit={validateBeforeSubmit}
     >
+      <ActionToastEffect
+        state={state}
+        successTitle="User updated"
+        errorTitle="User update failed"
+      />
       <input type="hidden" name="userId" value={user.id} />
       {isSelf ? (
         <>

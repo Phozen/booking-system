@@ -12,6 +12,7 @@ import type { Facility, FacilityPhoto } from "@/lib/facilities/queries";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -74,6 +75,15 @@ function FacilityPhotoCard({
 
   return (
     <article className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm ring-1 ring-primary/5">
+      {result ? (
+        <ActionToastEffect
+          state={result}
+          successTitle={
+            deleteState.status !== "idle" ? "Photo deleted" : "Primary photo updated"
+          }
+          errorTitle="Photo action failed"
+        />
+      ) : null}
       <div className="relative aspect-[4/3] bg-muted">
         <FacilityPhotoPreview facility={facility} photo={photo} />
         {photo.isPrimary ? (

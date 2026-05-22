@@ -144,3 +144,6 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Audit diff views must mask secret-like fields including passwords, tokens,
   API keys, service-role keys, SMTP passwords, Microsoft client secrets, and
   authorization headers.
+- Toast notifications must use sanitized action messages only; they must not
+  expose raw provider errors, secrets, tokens, service-role keys, SMTP
+  passwords, or Microsoft Graph credentials.

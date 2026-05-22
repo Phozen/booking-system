@@ -8,6 +8,7 @@ import { archiveFacilityFormAction } from "@/lib/facilities/actions";
 import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: FacilityActionResult = {
   status: "idle",
@@ -38,6 +39,11 @@ export function FacilityArchiveAction({
 
   return (
     <section className="grid gap-4 rounded-lg border border-destructive/35 bg-rose-50/60 p-5 text-rose-950 shadow-sm shadow-rose-500/10 ring-1 ring-rose-200/60 dark:border-rose-900 dark:bg-rose-950/25 dark:text-rose-100">
+      <ActionToastEffect
+        state={state}
+        successTitle="Facility archived"
+        errorTitle="Facility archive failed"
+      />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="inline-flex items-center gap-2 text-lg font-semibold tracking-normal">

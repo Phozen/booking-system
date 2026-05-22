@@ -8,6 +8,7 @@ import { invitationActionInitialState } from "@/lib/bookings/invitations/action-
 import type { InviteCandidate } from "@/lib/bookings/invitations/types";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,11 @@ export function InviteUserForm({
 
   return (
     <form action={formAction} className="grid gap-3 rounded-lg border bg-card p-4">
+      <ActionToastEffect
+        state={state}
+        successTitle="Invitation sent"
+        errorTitle="Invitation not sent"
+      />
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="grid gap-2">
         <Label htmlFor={fieldId}>Invite an active internal user</Label>

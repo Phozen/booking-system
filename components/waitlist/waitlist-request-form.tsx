@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: WaitlistActionResult = {
   status: "idle",
@@ -34,6 +35,11 @@ export function WaitlistRequestForm({
 
   return (
     <form action={action} className="grid gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/10">
+      <ActionToastEffect
+        state={state}
+        successTitle="Waitlist request submitted"
+        errorTitle="Waitlist request failed"
+      />
       {state.status !== "idle" ? (
         <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>

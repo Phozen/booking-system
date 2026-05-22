@@ -8,6 +8,7 @@ import { invitationActionInitialState } from "@/lib/bookings/invitations/action-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 export function InvitationResponseActions({
   invitationId,
@@ -34,6 +35,13 @@ export function InvitationResponseActions({
 
   return (
     <div className="grid gap-3">
+      {result ? (
+        <ActionToastEffect
+          state={result}
+          successTitle="Invitation response saved"
+          errorTitle="Invitation response failed"
+        />
+      ) : null}
       {result ? (
         <Alert variant={result.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{result.message}</AlertDescription>

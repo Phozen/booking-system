@@ -22,6 +22,7 @@ import {
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: SettingsActionResult = {
   status: "idle",
@@ -81,6 +82,11 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
       noValidate
       onSubmit={validateBeforeSubmit}
     >
+      <ActionToastEffect
+        state={state}
+        successTitle="Settings saved"
+        errorTitle="Settings not saved"
+      />
       {state.status !== "idle" ? (
         <Alert variant={state.status === "error" ? "destructive" : "success"}>
           <AlertDescription>{state.message}</AlertDescription>

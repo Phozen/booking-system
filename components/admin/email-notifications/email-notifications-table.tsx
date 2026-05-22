@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 function formatNotificationType(type: EmailNotificationType) {
   const labels: Record<EmailNotificationType, string> = {
@@ -86,6 +87,11 @@ export function EmailNotificationsTable({
 
   return (
     <div className="grid gap-5">
+      <ActionToastEffect
+        state={result ?? {}}
+        successTitle="Email action completed"
+        errorTitle="Email action failed"
+      />
       <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold tracking-normal">Email queue</h2>
