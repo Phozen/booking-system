@@ -26,7 +26,7 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-function toGraphDateTime(value: string, timezone: string) {
+export function toCalendarLocalDateTime(value: string, timezone: string) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
@@ -83,11 +83,11 @@ export function buildMicrosoftCalendarEventPayload({
       content: bodyLines.join("\n"),
     },
     start: {
-      dateTime: toGraphDateTime(booking.startsAt, timezone),
+      dateTime: toCalendarLocalDateTime(booking.startsAt, timezone),
       timeZone: timezone,
     },
     end: {
-      dateTime: toGraphDateTime(booking.endsAt, timezone),
+      dateTime: toCalendarLocalDateTime(booking.endsAt, timezone),
       timeZone: timezone,
     },
     location: {
