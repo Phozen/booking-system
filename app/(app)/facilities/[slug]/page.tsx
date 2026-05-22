@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { getFacilityAvailabilityTimeline } from "@/lib/facilities/availability-timeline";
 import { getEmployeeFacilityBySlug } from "@/lib/facilities/queries";
 import { getAppSettings } from "@/lib/settings/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityDetail } from "@/components/facilities/facility-detail";
 
@@ -38,7 +39,7 @@ export default async function FacilityDetailPage({
           month: "2-digit",
           day: "2-digit",
         }).format(new Date());
-  const timeline = await getFacilityAvailabilityTimeline(supabase, {
+  const timeline = await getFacilityAvailabilityTimeline(createAdminClient(), {
     facilityId: facility.id,
     date: selectedDate,
     timezone: settings.defaultTimezone,

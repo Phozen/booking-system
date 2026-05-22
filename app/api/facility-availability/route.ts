@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/guards";
 import { getFacilityAvailabilityTimeline } from "@/lib/facilities/availability-timeline";
 import { getAppSettings } from "@/lib/settings/queries";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -22,7 +22,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const [settings, supabase] = await Promise.all([getAppSettings(), createClient()]);
+  const settings = await getAppSettings();
+  const supabase = createAdminClient();
   const items = await getFacilityAvailabilityTimeline(supabase, {
     facilityId,
     date,
