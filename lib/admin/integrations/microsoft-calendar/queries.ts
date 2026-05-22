@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
+import { getCalendarSyncProviderSummary } from "@/lib/integrations/microsoft-365-calendar/config";
 import type { MicrosoftCalendarSyncStatus } from "@/lib/integrations/microsoft-365-calendar/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -114,15 +114,23 @@ function mapRecord(record: SyncRecord): AdminMicrosoftCalendarSyncRecord {
 }
 
 export async function getMicrosoftCalendarIntegrationStatus() {
-  const config = getMicrosoftCalendarSyncConfig();
+  const config = getCalendarSyncProviderSummary();
+  const activeConfig =
+    config.provider === "n8n_webhook"
+      ? config.n8nWebhook
+      : config.microsoftGraph;
 
   return {
-    enabled: config.enabled,
-    mode: config.mode,
-    isConfigured: config.isConfigured,
-    validationError: config.validationError,
-    defaultCalendarId: config.defaultCalendarId,
-    graphBaseUrl: config.graphBaseUrl,
+    provider: config.provider,
+    enabled: activeConfig.enabled,
+    mode: config.microsoftGraph.mode,
+    isConfigured: activeConfig.isConfigured,
+    validationError: activeConfig.validationError,
+    defaultCalendarId: config.microsoftGraph.defaultCalendarId,
+    graphBaseUrl: config.microsoftGraph.graphBaseUrl,
+    n8nCreateWebhookConfigured: config.n8nWebhook.createWebhookConfigured,
+    n8nUpdateWebhookConfigured: config.n8nWebhook.updateWebhookConfigured,
+    n8nDeleteWebhookConfigured: config.n8nWebhook.deleteWebhookConfigured,
   };
 }
 
@@ -156,7 +164,6 @@ export async function getMicrosoftCalendarSyncRecords(limit = 50) {
       )
     `,
     )
-    .eq("provider", "microsoft_365")
     .order("updated_at", { ascending: false })
     .limit(limit);
 

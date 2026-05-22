@@ -67,9 +67,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `EMAIL_API_KEY` is server-only.
 - [x] `SMTP_PASSWORD` is server-only.
 - [x] `MICROSOFT_CLIENT_SECRET` is server-only.
+- [x] `N8N_CALENDAR_WEBHOOK_SECRET` is server-only and sent only as a webhook header.
 - [x] Microsoft Graph tokens must never be exposed to client components or browser storage when sync is implemented.
 - [x] SMTP provider errors are sanitized before being stored in email notification records.
-- [x] Future Microsoft 365 calendar sync errors must be sanitized before being stored in sync tracking records.
+- [x] Microsoft 365 calendar sync and n8n webhook errors must be sanitized before being stored in sync tracking records.
 - [x] `.env.local` and `.env*` files are ignored by Git.
 - [x] Secrets are not displayed in UI.
 
@@ -94,6 +95,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 - [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.
 - [x] Microsoft Graph writes are performed server-side only after successful booking state changes or Super Admin retry.
+- [x] Temporary n8n webhook sync performs server-side create calls only when `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`.
 
 ## Manual Test Checklist
 
@@ -123,8 +125,10 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Confirm admins can view future sync records only through approved admin tooling.
 - [ ] Confirm Microsoft 365 Calendar sync remains disabled until Microsoft Entra setup and manual Graph sync QA are ready.
 - [ ] Confirm Microsoft client secrets and future Graph tokens are not exposed in browser bundles or UI.
+- [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not exposed in browser bundles, UI, or raw sync errors.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is Super Admin only.
 - [ ] Confirm booking creation/approval/cancellation still succeeds if Microsoft Graph sync fails.
+- [ ] Confirm booking creation/approval/cancellation still succeeds if n8n webhook sync fails or update/delete webhook support is deferred.
 
 ## Remaining Risks
 

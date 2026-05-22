@@ -1,7 +1,10 @@
 import "server-only";
 
 import { createAuditLogSafely } from "@/lib/audit/log";
-import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
+import {
+  getMicrosoftCalendarSyncConfig,
+  getN8nCalendarSyncConfig,
+} from "@/lib/integrations/microsoft-365-calendar/config";
 import {
   buildMicrosoftGraphPath,
   microsoftGraphFetch,
@@ -11,6 +14,11 @@ import {
   buildMicrosoftCalendarEventPayload,
   type MicrosoftCalendarBookingForEvent,
 } from "@/lib/integrations/microsoft-365-calendar/event-mapper";
+import {
+  buildN8nCalendarCreatePayload,
+  sendN8nCalendarCreateWebhook,
+  type N8nCalendarBookingForEvent,
+} from "@/lib/integrations/microsoft-365-calendar/n8n-webhook";
 import type {
   MicrosoftCalendarSyncResult,
   MicrosoftCalendarSyncStatus,
@@ -43,14 +51,23 @@ type BookingRecord = {
   status: string;
   starts_at: string;
   ends_at: string;
+  attendee_count: number | null;
+  catering_required: boolean | null;
+  catering_type: string | null;
+  catering_pax: number | null;
+  catering_serving_time: string | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
   facilities:
     | {
         name: string;
         level: string;
+        type: string | null;
       }
     | {
         name: string;
         level: string;
+        type: string | null;
       }[]
     | null;
   profiles:
@@ -95,6 +112,42 @@ function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForE
   };
 }
 
+function mapBookingForN8nEvent(record: BookingRecord): N8nCalendarBookingForEvent {
+  const facility = getRecord(record.facilities);
+  const owner = getRecord(record.profiles);
+
+  return {
+    id: record.id,
+    title: record.title,
+    description: record.description,
+    status: record.status,
+    startsAt: record.starts_at,
+    endsAt: record.ends_at,
+    attendeeCount: record.attendee_count,
+    catering: {
+      required: Boolean(record.catering_required),
+      type: record.catering_type,
+      pax: record.catering_pax,
+      servingTime: record.catering_serving_time,
+      dietaryNotes: record.catering_dietary_notes,
+      notes: record.catering_notes,
+    },
+    facility: facility
+      ? {
+          name: facility.name,
+          level: facility.level,
+          type: facility.type,
+        }
+      : null,
+    owner: owner
+      ? {
+          email: owner.email,
+          fullName: owner.full_name,
+        }
+      : null,
+  };
+}
+
 async function getBookingForSync(bookingId: string) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -107,9 +160,17 @@ async function getBookingForSync(bookingId: string) {
       status,
       starts_at,
       ends_at,
+      attendee_count,
+      catering_required,
+      catering_type,
+      catering_pax,
+      catering_serving_time,
+      catering_dietary_notes,
+      catering_notes,
       facilities (
         name,
-        level
+        level,
+        type
       ),
       profiles!bookings_user_id_fkey (
         email,
@@ -127,7 +188,12 @@ async function getBookingForSync(bookingId: string) {
   return data ? (data as unknown as BookingRecord) : null;
 }
 
-async function getSyncRecord(bookingId: string) {
+type CalendarSyncProviderRecord = "microsoft_365" | "n8n_webhook";
+
+async function getSyncRecord(
+  bookingId: string,
+  provider: CalendarSyncProviderRecord = "microsoft_365",
+) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("booking_calendar_syncs")
@@ -135,7 +201,7 @@ async function getSyncRecord(bookingId: string) {
       "id,booking_id,provider,external_calendar_id,external_event_id,sync_status,attempts,last_error",
     )
     .eq("booking_id", bookingId)
-    .eq("provider", "microsoft_365")
+    .eq("provider", provider)
     .maybeSingle();
 
   if (error) {
@@ -147,6 +213,7 @@ async function getSyncRecord(bookingId: string) {
 
 async function upsertSyncRecord({
   bookingId,
+  provider = "microsoft_365",
   calendarId,
   eventId,
   status,
@@ -154,6 +221,7 @@ async function upsertSyncRecord({
   attempts,
 }: {
   bookingId: string;
+  provider?: CalendarSyncProviderRecord;
   calendarId: string | null;
   eventId: string | null;
   status: MicrosoftCalendarSyncStatus;
@@ -163,7 +231,7 @@ async function upsertSyncRecord({
   const supabase = createAdminClient();
   const payload = {
     booking_id: bookingId,
-    provider: "microsoft_365",
+    provider,
     external_calendar_id: calendarId,
     external_event_id: eventId,
     sync_status: status,
@@ -191,19 +259,22 @@ async function upsertSyncRecord({
 
 async function markFailed({
   bookingId,
+  provider = "microsoft_365",
   calendarId,
   eventId,
   error,
 }: {
   bookingId: string;
+  provider?: CalendarSyncProviderRecord;
   calendarId: string | null;
   eventId: string | null;
   error: unknown;
 }) {
-  const existing = await getSyncRecord(bookingId).catch(() => null);
+  const existing = await getSyncRecord(bookingId, provider).catch(() => null);
   const sanitizedError = sanitizeMicrosoftCalendarError(error);
   return upsertSyncRecord({
     bookingId,
+    provider,
     calendarId,
     eventId,
     status: "failed",
@@ -214,6 +285,7 @@ async function markFailed({
 
 async function tryMarkFailed(input: {
   bookingId: string;
+  provider?: CalendarSyncProviderRecord;
   calendarId: string | null;
   eventId: string | null;
   error: unknown;
@@ -234,12 +306,14 @@ async function auditCalendarSync({
   status,
   summary,
   actor,
+  integration = "microsoft_365_calendar",
   metadata = {},
 }: {
   bookingId: string;
   status: MicrosoftCalendarSyncStatus;
   summary: string;
   actor?: SyncActor;
+  integration?: string;
   metadata?: Record<string, unknown>;
 }) {
   const supabase = createAdminClient();
@@ -256,22 +330,227 @@ async function auditCalendarSync({
         microsoftCalendarSyncStatus: status,
       },
       metadata: {
-        integration: "microsoft_365_calendar",
+        integration,
         ...(actor?.reason ? { reason: actor.reason } : {}),
         ...metadata,
       },
     },
-    { bookingId, integration: "microsoft_365_calendar" },
+    { bookingId, integration },
   );
+}
+
+async function syncConfirmedBookingToN8nCalendar(
+  bookingId: string,
+  actor?: SyncActor,
+): Promise<MicrosoftCalendarSyncResult> {
+  const config = getN8nCalendarSyncConfig();
+  const provider: CalendarSyncProviderRecord = "n8n_webhook";
+
+  if (!config.enabled) {
+    return {
+      status: "skipped",
+      message: "n8n calendar webhook sync is disabled.",
+      bookingId,
+    };
+  }
+
+  if (!config.isConfigured) {
+    const record = await tryMarkFailed({
+      bookingId,
+      provider,
+      calendarId: null,
+      eventId: null,
+      error: config.validationError ?? "n8n calendar webhook sync is not configured.",
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "failed",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "n8n calendar webhook sync failed because configuration is incomplete.",
+      metadata: { syncId: record?.id ?? null },
+    });
+
+    return {
+      status: "failed",
+      message: record?.last_error ?? "n8n calendar webhook sync is not configured.",
+      bookingId,
+      syncId: record?.id,
+    };
+  }
+
+  try {
+    const booking = await getBookingForSync(bookingId);
+
+    if (!booking) {
+      throw new Error("Booking could not be found for n8n calendar webhook sync.");
+    }
+
+    if (booking.status !== "confirmed") {
+      const record = await upsertSyncRecord({
+        bookingId,
+        provider,
+        calendarId: null,
+        eventId: null,
+        status: "skipped",
+        lastError: null,
+      });
+
+      return {
+        status: "skipped",
+        message: "Only confirmed bookings are sent to the n8n calendar webhook.",
+        bookingId,
+        syncId: record.id,
+      };
+    }
+
+    const existing = await getSyncRecord(bookingId, provider);
+
+    if (existing?.external_event_id) {
+      const record = await upsertSyncRecord({
+        bookingId,
+        provider,
+        calendarId: existing.external_calendar_id,
+        eventId: existing.external_event_id,
+        status: "skipped",
+        lastError: "n8n update webhook is not enabled for this create-only test mode.",
+        attempts: existing.attempts,
+      });
+
+      return {
+        status: "skipped",
+        message: record.last_error ?? "n8n update webhook is not enabled.",
+        bookingId,
+        syncId: record.id,
+        externalEventId: existing.external_event_id,
+      };
+    }
+
+    const settings = await getAppSettings();
+    const payload = buildN8nCalendarCreatePayload({
+      booking: mapBookingForN8nEvent(booking),
+      timezone: settings.defaultTimezone,
+    });
+    const response = await sendN8nCalendarCreateWebhook({
+      config,
+      payload,
+    });
+
+    if (!response.ok) {
+      throw new Error(response.error);
+    }
+
+    const record = await upsertSyncRecord({
+      bookingId,
+      provider,
+      calendarId: response.externalCalendarId,
+      eventId: response.externalEventId,
+      status: "synced",
+      lastError: null,
+      attempts: existing?.attempts ?? 0,
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "synced",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "Created n8n calendar webhook event for booking.",
+      metadata: {
+        syncId: record.id,
+        externalCalendarId: response.externalCalendarId,
+        n8nProvider: response.provider,
+      },
+    });
+
+    return {
+      status: "synced",
+      message: "n8n calendar webhook event created.",
+      bookingId,
+      syncId: record.id,
+      externalEventId: response.externalEventId,
+    };
+  } catch (error) {
+    const existing = await getSyncRecord(bookingId, provider).catch(() => null);
+    const record = await tryMarkFailed({
+      bookingId,
+      provider,
+      calendarId: existing?.external_calendar_id ?? null,
+      eventId: existing?.external_event_id ?? null,
+      error,
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "failed",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "n8n calendar webhook sync failed for booking.",
+      metadata: { syncId: record?.id ?? null },
+    });
+
+    return {
+      status: "failed",
+      message: record?.last_error ?? "n8n calendar webhook sync failed.",
+      bookingId,
+      syncId: record?.id,
+      externalEventId: record?.external_event_id,
+    };
+  }
+}
+
+async function skipN8nCalendarCancellation(
+  bookingId: string,
+  actor?: SyncActor,
+): Promise<MicrosoftCalendarSyncResult> {
+  const provider: CalendarSyncProviderRecord = "n8n_webhook";
+  const existing = await getSyncRecord(bookingId, provider).catch(() => null);
+  const record = await upsertSyncRecord({
+    bookingId,
+    provider,
+    calendarId: existing?.external_calendar_id ?? null,
+    eventId: existing?.external_event_id ?? null,
+    status: "skipped",
+    lastError: "n8n delete webhook is not enabled for this create-only test mode.",
+    attempts: existing?.attempts ?? 0,
+  });
+
+  await auditCalendarSync({
+    bookingId,
+    status: "skipped",
+    actor,
+    integration: "n8n_calendar_webhook",
+    summary: "Skipped n8n calendar delete because only create webhook testing is enabled.",
+    metadata: { syncId: record.id },
+  });
+
+  return {
+    status: "skipped",
+    message: record.last_error ?? "n8n delete webhook is not enabled.",
+    bookingId,
+    syncId: record.id,
+    externalEventId: record.external_event_id,
+  };
 }
 
 export async function syncConfirmedBookingToMicrosoftCalendar(
   bookingId: string,
   actor?: SyncActor,
 ): Promise<MicrosoftCalendarSyncResult> {
+  const n8nConfig = getN8nCalendarSyncConfig();
+
+  if (n8nConfig.provider === "n8n_webhook") {
+    return syncConfirmedBookingToN8nCalendar(bookingId, actor);
+  }
+
   const config = getMicrosoftCalendarSyncConfig();
 
-  if (!config.enabled || config.mode === "disabled") {
+  if (
+    config.provider !== "microsoft_graph" ||
+    !config.enabled ||
+    config.mode === "disabled"
+  ) {
     return {
       status: "skipped",
       message: "Microsoft 365 Calendar sync is disabled.",
@@ -418,9 +697,27 @@ export async function cancelMicrosoftCalendarEventForBooking(
   bookingId: string,
   actor?: SyncActor,
 ): Promise<MicrosoftCalendarSyncResult> {
+  const n8nConfig = getN8nCalendarSyncConfig();
+
+  if (n8nConfig.provider === "n8n_webhook") {
+    if (!n8nConfig.enabled) {
+      return {
+        status: "skipped",
+        message: "n8n calendar webhook sync is disabled.",
+        bookingId,
+      };
+    }
+
+    return skipN8nCalendarCancellation(bookingId, actor);
+  }
+
   const config = getMicrosoftCalendarSyncConfig();
 
-  if (!config.enabled || config.mode === "disabled") {
+  if (
+    config.provider !== "microsoft_graph" ||
+    !config.enabled ||
+    config.mode === "disabled"
+  ) {
     return {
       status: "skipped",
       message: "Microsoft 365 Calendar sync is disabled.",
@@ -553,6 +850,10 @@ export async function retryMicrosoftCalendarSync(
   const config = getMicrosoftCalendarSyncConfig();
   const record = await upsertSyncRecord({
     bookingId,
+    provider:
+      getN8nCalendarSyncConfig().provider === "n8n_webhook"
+        ? "n8n_webhook"
+        : "microsoft_365",
     calendarId: config.defaultCalendarId || null,
     eventId: null,
     status: "skipped",

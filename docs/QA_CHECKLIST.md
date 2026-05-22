@@ -381,10 +381,12 @@ Use this checklist after migrations are applied and the app is running with real
 ## Microsoft 365 Calendar Sync Groundwork
 
 - [ ] Confirm `.env.example` includes Microsoft 365 calendar sync variables.
+- [ ] Confirm `.env.example` includes `CALENDAR_SYNC_PROVIDER` and n8n calendar webhook variables.
 - [ ] Confirm `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` by default.
 - [ ] Confirm `MICROSOFT_SYNC_MODE=disabled` by default.
+- [ ] Confirm `CALENDAR_SYNC_PROVIDER=disabled` and `N8N_CALENDAR_SYNC_ENABLED=false` by default.
 - [ ] Confirm Microsoft Graph sync is documented separately from Microsoft 365 SMTP email.
-- [ ] Confirm migration `0014_microsoft_calendar_sync_groundwork.sql` is applied before enabling future sync.
+- [ ] Confirm migrations `0014_microsoft_calendar_sync_groundwork.sql` and `0021_n8n_calendar_webhook_provider.sql` are applied before enabling future calendar sync.
 - [ ] Confirm `booking_calendar_syncs` RLS denies employees direct access.
 - [ ] Confirm only sanitized sync errors are documented for `last_error`.
 - [ ] Confirm disabled sync does not call Microsoft Graph and booking flows still succeed.
@@ -395,6 +397,10 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Force a failed sync and retry from `/admin/integrations/microsoft-calendar` as Super Admin.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is hidden/denied for Admin and Employee roles.
 - [ ] Confirm `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed before production enablement.
+- [ ] For temporary n8n testing, set `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`; confirm a confirmed booking calls only the create webhook.
+- [ ] Confirm the n8n payload contains safe booking fields and local `YYYY-MM-DDTHH:mm:ss` start/end values.
+- [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not visible in UI, sync errors, or client bundles.
+- [ ] Confirm cancellation/reschedule in n8n mode skips update/delete safely until those workflows are configured.
 
 ## Basic Responsive UI
 

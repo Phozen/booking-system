@@ -21,6 +21,18 @@ function formatMode(mode: string) {
   return mode.replaceAll("_", " ");
 }
 
+function formatProvider(provider: string) {
+  if (provider === "microsoft_graph") {
+    return "Microsoft Graph";
+  }
+
+  if (provider === "n8n_webhook") {
+    return "n8n webhook";
+  }
+
+  return "Disabled";
+}
+
 export default async function AdminMicrosoftCalendarIntegrationPage() {
   await requireSuperAdmin();
   const status = await getMicrosoftCalendarIntegrationStatus();
@@ -41,10 +53,18 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
       <PageHeader
         eyebrow="Super admin area"
         title="Microsoft 365 Calendar"
-        description="Monitor one-way Booking System to Microsoft 365 Calendar sync. Secrets stay in environment variables and are never shown here."
+        description="Monitor one-way Booking System calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
       />
 
-      <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-4">
+      <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-5">
+        <div>
+          <p className="text-xs font-medium uppercase text-muted-foreground">
+            Provider
+          </p>
+          <p className="mt-1 font-semibold tracking-normal">
+            {formatProvider(status.provider)}
+          </p>
+        </div>
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">
             Status
@@ -75,6 +95,35 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
         </div>
       </section>
 
+      {status.provider === "n8n_webhook" ? (
+        <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              n8n create webhook
+            </p>
+            <p className="mt-1 font-medium">
+              {status.n8nCreateWebhookConfigured ? "Configured" : "Not set"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              n8n update webhook
+            </p>
+            <p className="mt-1 font-medium">
+              {status.n8nUpdateWebhookConfigured ? "Configured" : "Not set"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              n8n delete webhook
+            </p>
+            <p className="mt-1 font-medium">
+              {status.n8nDeleteWebhookConfigured ? "Configured" : "Not set"}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       {status.validationError ? (
         <Alert variant="warning">
           <AlertDescription>{status.validationError}</AlertDescription>
@@ -92,13 +141,17 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
 
       <AdminTableShell
         title="Sync records"
-        description="Latest Microsoft 365 Calendar sync attempts and outcomes"
+        description="Latest calendar sync attempts and outcomes"
         mobileCards={
           records.length > 0 ? (
             records.map((record) => (
               <MobileRecordCard
                 key={record.id}
-                eyebrow="Microsoft 365"
+                eyebrow={
+                  record.provider === "n8n_webhook"
+                    ? "n8n webhook"
+                    : "Microsoft 365"
+                }
                 title={
                   record.booking ? (
                     <Link
@@ -119,6 +172,13 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
                   <StatusBadge kind="calendar-sync" status={record.status} />
                 }
                 rows={[
+                  {
+                    label: "Provider",
+                    value:
+                      record.provider === "n8n_webhook"
+                        ? "n8n webhook"
+                        : "Microsoft 365",
+                  },
                   {
                     label: "Facility",
                     value: record.booking?.facilityName ?? "Unknown",
@@ -155,7 +215,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
             <EmptyState
               className="bg-transparent"
               title="No calendar sync records yet"
-              description="Confirmed and cancelled bookings will create sync records when Microsoft 365 Calendar sync is enabled or attempted."
+              description="Confirmed and cancelled bookings will create sync records when calendar sync is enabled or attempted."
             />
           )
         }
@@ -164,6 +224,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Booking</th>
+              <th className="px-4 py-3 font-medium">Provider</th>
               <th className="px-4 py-3 font-medium">Booking status</th>
               <th className="px-4 py-3 font-medium">Sync status</th>
               <th className="px-4 py-3 font-medium">Facility</th>
@@ -194,6 +255,11 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
+                    {record.provider === "n8n_webhook"
+                      ? "n8n webhook"
+                      : "Microsoft 365"}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
                     {record.booking?.status ?? "Unknown"}
                   </td>
                   <td className="px-4 py-3">
@@ -222,11 +288,11 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
               ))
             ) : (
               <tr>
-                <td className="px-4 py-8" colSpan={8}>
+                <td className="px-4 py-8" colSpan={9}>
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No calendar sync records yet"
-                    description="Confirmed and cancelled bookings will create sync records when Microsoft 365 Calendar sync is enabled or attempted."
+                    description="Confirmed and cancelled bookings will create sync records when calendar sync is enabled or attempted."
                   />
                 </td>
               </tr>

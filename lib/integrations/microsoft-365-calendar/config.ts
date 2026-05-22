@@ -4,12 +4,21 @@ export const microsoftCalendarSyncModes = [
   "facility_calendars",
 ] as const;
 
+export const calendarSyncProviders = [
+  "disabled",
+  "microsoft_graph",
+  "n8n_webhook",
+] as const;
+
 export type MicrosoftCalendarSyncMode =
   (typeof microsoftCalendarSyncModes)[number];
+
+export type CalendarSyncProvider = (typeof calendarSyncProviders)[number];
 
 export type MicrosoftCalendarSyncEnv = Record<string, string | undefined>;
 
 export type MicrosoftCalendarSyncConfig = {
+  provider: CalendarSyncProvider;
   enabled: boolean;
   mode: MicrosoftCalendarSyncMode;
   tenantId: string;
@@ -22,13 +31,28 @@ export type MicrosoftCalendarSyncConfig = {
   validationError: string | null;
 };
 
+export type N8nCalendarSyncConfig = {
+  provider: CalendarSyncProvider;
+  enabled: boolean;
+  createWebhookUrl: string;
+  updateWebhookUrl: string;
+  deleteWebhookUrl: string;
+  webhookSecret: string;
+  missingKeys: string[];
+  isConfigured: boolean;
+  validationError: string | null;
+  createWebhookConfigured: boolean;
+  updateWebhookConfigured: boolean;
+  deleteWebhookConfigured: boolean;
+};
+
 const defaultGraphBaseUrl = "https://graph.microsoft.com/v1.0";
 
-function trimValue(value: string | undefined) {
+export function trimValue(value: string | undefined) {
   return value?.trim() ?? "";
 }
 
-function parseBoolean(value: string | undefined, fallback = false) {
+export function parseBoolean(value: string | undefined, fallback = false) {
   const normalized = trimValue(value).toLowerCase();
 
   if (["1", "true", "yes", "on"].includes(normalized)) {
@@ -40,6 +64,30 @@ function parseBoolean(value: string | undefined, fallback = false) {
   }
 
   return fallback;
+}
+
+export function parseCalendarSyncProvider(
+  value: string | undefined,
+): CalendarSyncProvider {
+  const normalized = trimValue(value).toLowerCase();
+
+  return calendarSyncProviders.includes(normalized as CalendarSyncProvider)
+    ? (normalized as CalendarSyncProvider)
+    : "disabled";
+}
+
+function getCalendarSyncProvider(
+  env: MicrosoftCalendarSyncEnv,
+): CalendarSyncProvider {
+  const configuredProvider = trimValue(env.CALENDAR_SYNC_PROVIDER);
+
+  if (configuredProvider) {
+    return parseCalendarSyncProvider(configuredProvider);
+  }
+
+  return parseBoolean(env.MICROSOFT_365_CALENDAR_SYNC_ENABLED, false)
+    ? "microsoft_graph"
+    : "disabled";
 }
 
 export function parseMicrosoftCalendarSyncMode(
@@ -57,10 +105,10 @@ export function parseMicrosoftCalendarSyncMode(
 export function getMicrosoftCalendarSyncConfig(
   env: MicrosoftCalendarSyncEnv = process.env,
 ): MicrosoftCalendarSyncConfig {
-  const enabled = parseBoolean(
-    env.MICROSOFT_365_CALENDAR_SYNC_ENABLED,
-    false,
-  );
+  const provider = getCalendarSyncProvider(env);
+  const enabled =
+    provider === "microsoft_graph" &&
+    parseBoolean(env.MICROSOFT_365_CALENDAR_SYNC_ENABLED, false);
   const mode = enabled
     ? parseMicrosoftCalendarSyncMode(env.MICROSOFT_SYNC_MODE)
     : "disabled";
@@ -79,6 +127,7 @@ export function getMicrosoftCalendarSyncConfig(
   if (!config.enabled || config.mode === "disabled") {
     return {
       ...config,
+      provider,
       missingKeys: [],
       isConfigured: false,
       validationError: null,
@@ -97,6 +146,7 @@ export function getMicrosoftCalendarSyncConfig(
 
   return {
     ...config,
+    provider,
     missingKeys,
     isConfigured: missingKeys.length === 0,
     validationError:
@@ -105,5 +155,72 @@ export function getMicrosoftCalendarSyncConfig(
             ", ",
           )}.`
         : null,
+  };
+}
+
+export function getN8nCalendarSyncConfig(
+  env: MicrosoftCalendarSyncEnv = process.env,
+): N8nCalendarSyncConfig {
+  const provider = getCalendarSyncProvider(env);
+  const enabled =
+    provider === "n8n_webhook" &&
+    parseBoolean(env.N8N_CALENDAR_SYNC_ENABLED, false);
+  const createWebhookUrl = trimValue(env.N8N_CALENDAR_CREATE_WEBHOOK_URL);
+  const updateWebhookUrl = trimValue(env.N8N_CALENDAR_UPDATE_WEBHOOK_URL);
+  const deleteWebhookUrl = trimValue(env.N8N_CALENDAR_DELETE_WEBHOOK_URL);
+  const webhookSecret = env.N8N_CALENDAR_WEBHOOK_SECRET ?? "";
+  const baseConfig = {
+    provider,
+    enabled,
+    createWebhookUrl,
+    updateWebhookUrl,
+    deleteWebhookUrl,
+    webhookSecret,
+    createWebhookConfigured: Boolean(createWebhookUrl),
+    updateWebhookConfigured: Boolean(updateWebhookUrl),
+    deleteWebhookConfigured: Boolean(deleteWebhookUrl),
+  };
+
+  if (!enabled) {
+    return {
+      ...baseConfig,
+      missingKeys: [],
+      isConfigured: false,
+      validationError: null,
+    };
+  }
+
+  const requiredValues = [
+    ["N8N_CALENDAR_CREATE_WEBHOOK_URL", createWebhookUrl],
+    ["N8N_CALENDAR_WEBHOOK_SECRET", webhookSecret],
+  ] as const;
+  const missingKeys = requiredValues
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  return {
+    ...baseConfig,
+    missingKeys,
+    isConfigured: missingKeys.length === 0,
+    validationError:
+      missingKeys.length > 0
+        ? `n8n calendar webhook sync is not configured. Set ${missingKeys.join(
+            ", ",
+          )}.`
+        : null,
+  };
+}
+
+export function getCalendarSyncProviderSummary(
+  env: MicrosoftCalendarSyncEnv = process.env,
+) {
+  const provider = getCalendarSyncProvider(env);
+  const microsoftGraph = getMicrosoftCalendarSyncConfig(env);
+  const n8nWebhook = getN8nCalendarSyncConfig(env);
+
+  return {
+    provider,
+    microsoftGraph,
+    n8nWebhook,
   };
 }

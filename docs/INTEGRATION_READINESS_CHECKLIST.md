@@ -10,6 +10,8 @@ Use these values while Microsoft 365 mailbox and Microsoft Entra setup are not r
 EMAIL_PROVIDER=none
 MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
 MICROSOFT_SYNC_MODE=disabled
+CALENDAR_SYNC_PROVIDER=disabled
+N8N_CALENDAR_SYNC_ENABLED=false
 ```
 
 Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
@@ -61,10 +63,12 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | Manual test: confirmed booking creates event | Pending credentials | Enable sync and create/approve a confirmed booking. |
 | Manual test: cancelled booking removes event | Pending credentials | Cancel a synced confirmed booking. |
 | Manual test: retry failed sync | Pending credentials | Retry from the Super Admin integration page. |
+| Temporary n8n create provider | Ready for webhook values | `CALENDAR_SYNC_PROVIDER=n8n_webhook` calls only the n8n create webhook for confirmed bookings. |
+| n8n update/delete | Deferred | Update/delete webhook env placeholders exist, but update/delete sync is skipped safely in create-only test mode. |
 
 ### Microsoft 365 Calendar Verification Steps
 
-1. Apply migration `0014` before enabling real sync.
+1. Apply migrations `0014` and `0021` before enabling real sync.
 2. Set Microsoft Entra and central calendar env vars in Vercel.
 3. Redeploy the app.
 4. Enable sync with `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` and `MICROSOFT_SYNC_MODE=central_calendar`.
@@ -73,6 +77,17 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 7. Cancel the synced booking.
 8. Confirm the Outlook event is removed and the sync record is `cancelled`.
 9. Force a failed sync in a controlled test and retry from `/admin/integrations/microsoft-calendar`.
+
+### Temporary n8n Create Webhook Verification Steps
+
+1. Set `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`.
+2. Set `N8N_CALENDAR_CREATE_WEBHOOK_URL` and `N8N_CALENDAR_WEBHOOK_SECRET` in Vercel or a private local env file.
+3. Redeploy or restart the app.
+4. Create or approve a confirmed booking.
+5. Confirm n8n receives the create payload and creates the Outlook event.
+6. Confirm `/admin/integrations/microsoft-calendar` shows provider `n8n webhook` and the create/update/delete webhook configured yes/no state without displaying URLs or secrets.
+7. Confirm the sync record uses provider `n8n_webhook` and status `synced`.
+8. Confirm cancellation/reschedule does not call Microsoft Graph fallback in n8n mode; update/delete remain deferred until those workflows exist.
 
 ## What Remains Outside The Developer/User Account
 
@@ -94,9 +109,17 @@ Microsoft 365 Calendar:
 - Migration `0014` applied to the target Supabase project.
 - Manual Graph sync QA before production enablement.
 
+n8n calendar test mode:
+
+- n8n create workflow URL.
+- Shared webhook secret.
+- Migration `0021` applied to allow provider `n8n_webhook` in sync records.
+- Update/delete n8n workflows before full cancellation/reschedule sync is enabled.
+
 ## Safety Notes
 
 - Do not commit `.env.local` or `.env.vercel.local`.
 - Do not commit SMTP passwords, Supabase service role keys, Microsoft client secrets, or access tokens.
-- Microsoft 365 SMTP and Microsoft Graph Calendar sync are separate integrations.
+- Microsoft 365 SMTP, Microsoft Graph Calendar sync, and temporary n8n calendar webhook sync are separate integrations.
+- Do not commit n8n webhook URLs or `N8N_CALENDAR_WEBHOOK_SECRET`.
 - Supabase Auth emails are separate from the app email notification queue.

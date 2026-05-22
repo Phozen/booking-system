@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getCalendarSyncProviderSummary,
   getMicrosoftCalendarSyncConfig,
+  getN8nCalendarSyncConfig,
+  parseCalendarSyncProvider,
   parseMicrosoftCalendarSyncMode,
 } from "@/lib/integrations/microsoft-365-calendar/config";
 
@@ -28,6 +31,57 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.enabled).toBe(false);
     expect(config.mode).toBe("disabled");
     expect(config.missingKeys).toEqual([]);
+  });
+
+  it("supports explicit calendar sync providers", () => {
+    expect(parseCalendarSyncProvider("microsoft_graph")).toBe(
+      "microsoft_graph",
+    );
+    expect(parseCalendarSyncProvider("n8n_webhook")).toBe("n8n_webhook");
+    expect(parseCalendarSyncProvider("unknown")).toBe("disabled");
+  });
+
+  it("keeps n8n disabled until the n8n enabled flag is true", () => {
+    const config = getN8nCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "false",
+      N8N_CALENDAR_CREATE_WEBHOOK_URL: "https://n8n.example/webhook/create",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+    });
+
+    expect(config.enabled).toBe(false);
+    expect(config.isConfigured).toBe(false);
+    expect(config.missingKeys).toEqual([]);
+  });
+
+  it("requires n8n create webhook config only when n8n sync is enabled", () => {
+    const config = getN8nCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "true",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+    });
+
+    expect(config.enabled).toBe(true);
+    expect(config.isConfigured).toBe(false);
+    expect(config.missingKeys).toEqual(["N8N_CALENDAR_CREATE_WEBHOOK_URL"]);
+    expect(config.validationError).not.toContain("super-secret-value");
+  });
+
+  it("reports n8n webhook URL presence without exposing values", () => {
+    const config = getCalendarSyncProviderSummary({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "true",
+      N8N_CALENDAR_CREATE_WEBHOOK_URL: "https://n8n.example/webhook/create",
+      N8N_CALENDAR_UPDATE_WEBHOOK_URL: "https://n8n.example/webhook/update",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+    });
+
+    expect(config.provider).toBe("n8n_webhook");
+    expect(config.n8nWebhook.isConfigured).toBe(true);
+    expect(config.n8nWebhook.createWebhookConfigured).toBe(true);
+    expect(config.n8nWebhook.updateWebhookConfigured).toBe(true);
+    expect(config.n8nWebhook.deleteWebhookConfigured).toBe(false);
+    expect(config.n8nWebhook.validationError).toBeNull();
   });
 
   it("requires Microsoft credentials for enabled central-calendar sync", () => {

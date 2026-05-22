@@ -211,7 +211,7 @@ Core tables:
 | `blocked_period_facilities` | Facilities affected by blocked periods                     |
 | `maintenance_closures`      | Facility maintenance closures                              |
 | `email_notifications`       | Email queue/history                                        |
-| `booking_calendar_syncs`    | Future outbound Microsoft 365 Calendar sync tracking       |
+| `booking_calendar_syncs`    | Outbound Microsoft Graph / n8n calendar sync tracking      |
 | `audit_logs`                | System action logs                                         |
 | `system_settings`           | Admin-configurable system behavior                         |
 | `export_logs`               | Optional export tracking                                   |
@@ -782,7 +782,7 @@ create table public.booking_calendar_syncs (
   updated_at timestamptz not null default now(),
 
   constraint booking_calendar_syncs_booking_provider_unique unique (booking_id, provider),
-  constraint booking_calendar_syncs_provider_check check (provider = 'microsoft_365'),
+  constraint booking_calendar_syncs_provider_check check (provider in ('microsoft_365', 'n8n_webhook')),
   constraint booking_calendar_syncs_status_check
     check (sync_status in ('pending', 'synced', 'failed', 'skipped', 'cancelled')),
   constraint booking_calendar_syncs_direction_check check (sync_direction = 'outbound'),

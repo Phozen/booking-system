@@ -2,7 +2,7 @@
 
 This document defines the planned Microsoft 365 Calendar integration for the Booking System.
 
-Stage 2 implements outbound Microsoft Graph sync. The app does not import Microsoft 365 calendar events, run delegated user OAuth, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
+Stage 2 implements outbound Microsoft Graph sync. A temporary `n8n_webhook` provider is also available for create-only testing through an n8n workflow that creates Outlook events. The app does not import Microsoft 365 calendar events, run delegated user OAuth from the app, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
 
 ## Overview
 
@@ -13,6 +13,8 @@ Booking System -> Microsoft 365 Calendar
 ```
 
 When sync is enabled and configured, the app creates or updates a Microsoft 365 calendar event when a booking becomes confirmed, and deletes the event when the synced booking is cancelled. Microsoft 365 events are not imported back into the Booking System in v1.
+
+Temporary n8n test mode is narrower: when `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`, confirmed bookings call the configured n8n create webhook. Update/delete workflows are intentionally skipped until those n8n workflows are ready.
 
 ## Recommended V1 Architecture
 
@@ -165,6 +167,7 @@ This is not recommended for v1 because it requires OAuth, user consent, token re
 Add these values in `.env.local` for local testing and in Vercel Project Settings for production:
 
 ```txt
+CALENDAR_SYNC_PROVIDER=disabled
 MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
 MICROSOFT_TENANT_ID=
 MICROSOFT_CLIENT_ID=
@@ -172,7 +175,19 @@ MICROSOFT_CLIENT_SECRET=
 MICROSOFT_DEFAULT_CALENDAR_ID=
 MICROSOFT_SYNC_MODE=disabled
 MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
+
+N8N_CALENDAR_SYNC_ENABLED=false
+N8N_CALENDAR_CREATE_WEBHOOK_URL=
+N8N_CALENDAR_UPDATE_WEBHOOK_URL=
+N8N_CALENDAR_DELETE_WEBHOOK_URL=
+N8N_CALENDAR_WEBHOOK_SECRET=
 ```
+
+Supported provider values:
+
+- `disabled`
+- `microsoft_graph`
+- `n8n_webhook`
 
 Supported sync modes:
 
@@ -181,6 +196,8 @@ Supported sync modes:
 - `facility_calendars`
 
 Keep `MICROSOFT_CLIENT_SECRET` server-only. Never prefix Microsoft secrets with `NEXT_PUBLIC_`.
+
+Keep `N8N_CALENDAR_WEBHOOK_SECRET` server-only. The Booking System sends it only in the `x-booking-system-secret` request header and never in the JSON payload. Do not show webhook URLs or secrets in the UI.
 
 `MICROSOFT_DEFAULT_CALENDAR_ID` is treated as the central booking calendar mailbox user ID or user principal name. The v1 Graph path is:
 
@@ -205,7 +222,7 @@ Purpose:
 - Store sanitized errors and retry attempts.
 - Support future Super Admin retry/status workflows.
 
-The table records Microsoft Graph sync state. Migration `0014` must be applied before enabled sync can record successful or failed attempts:
+The table records Microsoft Graph and n8n webhook sync state. Migration `0014` must be applied before enabled sync can record successful or failed attempts. Migration `0021_n8n_calendar_webhook_provider.sql` must also be applied before n8n records can be stored because it expands the provider constraint.
 
 ```powershell
 npx.cmd supabase db push
@@ -217,12 +234,43 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 
 - Microsoft client secret must stay server-only.
 - Microsoft Graph tokens must never be exposed to client components.
+- n8n webhook URLs and webhook secret must stay server-only.
+- n8n webhook secret is sent as `x-booking-system-secret`, not in the JSON body.
 - Do not store access tokens in browser storage.
 - Store only sanitized sync errors.
 - Do not store raw stack traces, secrets, or bearer tokens in `last_error`.
 - Integration status and retry UI is Super Admin only at `/admin/integrations/microsoft-calendar`.
 - Employees should not see raw sync records or integration internals.
 - Event body content should avoid sensitive admin-only booking details.
+
+## Temporary n8n Create Webhook Provider
+
+Use this mode only for confirmed booking -> n8n -> Outlook create-event testing while update and delete workflows are still being prepared.
+
+Required env:
+
+```txt
+CALENDAR_SYNC_PROVIDER=n8n_webhook
+N8N_CALENDAR_SYNC_ENABLED=true
+N8N_CALENDAR_CREATE_WEBHOOK_URL=https://your-n8n-host/webhook/...
+N8N_CALENDAR_WEBHOOK_SECRET=...
+```
+
+The app posts JSON with safe booking fields: booking ID/reference, title, description, facility name/level/type, local start/end date-times, timezone, organizer name/email, attendee count, catering summary, and a Booking System admin link. Local date-times are formatted as `YYYY-MM-DDTHH:mm:ss` using the app timezone, commonly `Asia/Kuala_Lumpur`.
+
+Expected n8n success response:
+
+```json
+{
+  "success": true,
+  "provider": "n8n_graph_delegated",
+  "externalEventId": "event-id",
+  "externalCalendarId": "me",
+  "webLink": "https://..."
+}
+```
+
+The app stores `externalEventId` in `booking_calendar_syncs` with provider `n8n_webhook` and status `synced`. Failed or invalid responses are sanitized and stored as `failed`. Cancellation/reschedule paths do not call Microsoft Graph fallback in n8n mode; delete/update are skipped safely in this create-only test stage.
 
 ## Runtime Behavior
 
