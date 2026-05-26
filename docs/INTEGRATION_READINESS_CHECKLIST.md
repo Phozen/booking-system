@@ -89,6 +89,7 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 7. Confirm the sync record uses provider `n8n_webhook` and status `synced`.
 8. Confirm cancellation/reschedule does not call Microsoft Graph fallback in n8n mode; update/delete remain deferred until those workflows exist.
 9. If a sync record reports a non-JSON response, confirm Vercel uses the production `/webhook/` URL, the workflow is active, and the stored error includes status/content-type/safe body preview without exposing the webhook secret.
+10. If the error says `Status: 403 Forbidden` with `<title>Just a moment...</title>`, ask IT to bypass Cloudflare challenge/security only for `n.qsbportal.com.my/webhook/booking-calendar/*`; the webhook remains protected by `x-booking-system-secret`.
 
 ## What Remains Outside The Developer/User Account
 
@@ -114,6 +115,7 @@ n8n calendar test mode:
 
 - n8n create workflow URL.
 - Shared webhook secret.
+- Cloudflare path bypass or webhook-only subdomain if Vercel receives a Cloudflare challenge page.
 - Migration `0021` applied to allow provider `n8n_webhook` in sync records.
 - Update/delete n8n workflows before full cancellation/reschedule sync is enabled.
 

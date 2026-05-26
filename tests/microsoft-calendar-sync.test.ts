@@ -171,6 +171,10 @@ describe("Microsoft 365 calendar sync helpers", () => {
       externalCalendarId: "me",
     });
     expect(calls[0]?.init.headers as Record<string, string>).toMatchObject({
+      Accept: "application/json",
+      "Cache-Control": "no-store",
+      "Content-Type": "application/json",
+      "User-Agent": "BookingSystem/1.0",
       "x-booking-system-secret": "super-secret-value",
     });
     expect(String(calls[0]?.init.body)).not.toContain("super-secret-value");
@@ -272,6 +276,8 @@ describe("Microsoft 365 calendar sync helpers", () => {
     expect(result.ok).toBe(false);
     const error = result.ok ? "" : result.error;
     expect(error).toContain("n8n webhook returned non-JSON response");
+    expect(error).toContain("Provider: n8n_webhook");
+    expect(error).toContain("Method: POST");
     expect(error).toContain(
       "n.qsbportal.com.my/webhook/booking-calendar/create",
     );
@@ -280,6 +286,62 @@ describe("Microsoft 365 calendar sync helpers", () => {
     expect(error).toContain("Body preview: <!DOCTYPE html>");
     expect(error).not.toContain("Unexpected token");
     expect(error).not.toContain("token=secret");
+    expect(error).not.toContain("super-secret-value");
+  });
+
+  it("adds a Cloudflare-specific hint for challenge pages", async () => {
+    const result = await sendN8nCalendarCreateWebhook({
+      config: {
+        provider: "n8n_webhook",
+        enabled: true,
+        createWebhookUrl:
+          "https://n.qsbportal.com.my/webhook/booking-calendar/create",
+        updateWebhookUrl: "",
+        deleteWebhookUrl: "",
+        webhookSecret: "super-secret-value",
+        missingKeys: [],
+        isConfigured: true,
+        validationError: null,
+        createWebhookConfigured: true,
+        updateWebhookConfigured: false,
+        deleteWebhookConfigured: false,
+        createWebhookUsesTestUrl: false,
+      },
+      payload: {
+        action: "create",
+        bookingId: "booking-1",
+        bookingReference: "booking-1",
+        title: "Meeting",
+        description: null,
+        facilityName: "Room",
+        facilityLevel: "Level 1",
+        facilityType: null,
+        startTime: "2026-05-14T10:00:00",
+        endTime: "2026-05-14T11:00:00",
+        timezone: "Asia/Kuala_Lumpur",
+        organizerName: null,
+        organizerEmail: null,
+        attendeeCount: null,
+        cateringRequired: false,
+        cateringSummary: "Not requested",
+        bookingUrl: null,
+      },
+      fetchImpl: (async () =>
+        new Response(
+          '<!DOCTYPE html><html><head><title>Just a moment...</title></head><body>cf-ray cloudflare</body></html>',
+          {
+            status: 403,
+            statusText: "Forbidden",
+            headers: { "content-type": "text/html; charset=UTF-8" },
+          },
+        )) as typeof fetch,
+    });
+
+    expect(result.ok).toBe(false);
+    const error = result.ok ? "" : result.error;
+    expect(error).toContain("Status: 403 Forbidden");
+    expect(error).toContain("Cloudflare appears to be challenging");
+    expect(error).toContain("webhook-only subdomain");
     expect(error).not.toContain("super-secret-value");
   });
 

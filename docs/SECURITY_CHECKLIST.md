@@ -129,6 +129,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is Super Admin only.
 - [ ] Confirm booking creation/approval/cancellation still succeeds if Microsoft Graph sync fails.
 - [ ] Confirm booking creation/approval/cancellation still succeeds if n8n webhook sync fails or update/delete webhook support is deferred.
+- [ ] If Cloudflare bypass is used for n8n webhooks, confirm it is scoped only to `/webhook/booking-calendar/*` and the n8n `x-booking-system-secret` check remains enabled.
 
 ## Remaining Risks
 

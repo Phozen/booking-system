@@ -65,6 +65,7 @@ export type N8nCalendarWebhookResult =
 
 type FetchLike = typeof fetch;
 const bodyPreviewLength = 280;
+const bookingSystemUserAgent = "BookingSystem/1.0";
 
 function labelValue(value: string | null | undefined) {
   return value?.trim() || null;
@@ -125,6 +126,18 @@ function isProbablyJson(contentType: string, body: string) {
   );
 }
 
+function detectCloudflareChallenge(body: string, contentType: string) {
+  const normalizedBody = body.toLowerCase();
+  const normalizedContentType = contentType.toLowerCase();
+
+  return (
+    normalizedContentType.includes("text/html") &&
+    (normalizedBody.includes("<title>just a moment") ||
+      normalizedBody.includes("cf-ray") ||
+      normalizedBody.includes("cloudflare"))
+  );
+}
+
 function buildN8nResponseError({
   url,
   status,
@@ -142,11 +155,15 @@ function buildN8nResponseError({
 }) {
   const target = getSafeWebhookTarget(url);
   const preview = getSafeBodyPreview(body);
+  const cloudflareHint = detectCloudflareChallenge(body, contentType)
+    ? " Cloudflare appears to be challenging the Vercel server request before n8n receives it. Add a Cloudflare skip/bypass rule for this webhook path or use a webhook-only subdomain."
+    : "";
   const parts = [
-    `${reason} from ${target}.`,
+    `${reason} from ${target}. Provider: n8n_webhook. Method: POST.`,
     `Status: ${status}${statusText ? ` ${statusText}` : ""}.`,
     `Content-Type: ${contentType || "unknown"}.`,
     preview ? `Body preview: ${preview}` : null,
+    cloudflareHint || null,
   ].filter(Boolean);
 
   return sanitizeMicrosoftCalendarError(parts.join(" "));
@@ -237,7 +254,9 @@ export async function sendN8nCalendarCreateWebhook({
       method: "POST",
       headers: {
         Accept: "application/json",
+        "Cache-Control": "no-store",
         "Content-Type": "application/json",
+        "User-Agent": bookingSystemUserAgent,
         "x-booking-system-secret": config.webhookSecret,
       },
       body: JSON.stringify(payload),

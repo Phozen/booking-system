@@ -296,6 +296,22 @@ Check:
 
 - A manual PowerShell production webhook test returns JSON from the same URL configured in Vercel.
 
+If the sanitized error includes `Status: 403 Forbidden`, `Content-Type: text/html`, and a body preview with `<title>Just a moment...</title>`, Cloudflare is challenging the Vercel server request before n8n receives it. This is an infrastructure rule issue, not a Booking System JSON or Microsoft Graph issue.
+
+Practical fixes:
+
+1. Add a Cloudflare skip/bypass rule for `Host = n.qsbportal.com.my` and URI path `/webhook/booking-calendar/*`. Skip managed challenge, WAF managed rules, bot challenge, and browser integrity checks only for that path. Keep the n8n `x-booking-system-secret` header check.
+2. Use a dedicated webhook-only subdomain such as `hooks.qsbportal.com.my`, point it to n8n, and apply less aggressive Cloudflare security. Then update `N8N_CALENDAR_CREATE_WEBHOOK_URL`.
+3. Set the webhook-only subdomain to DNS-only in Cloudflare if acceptable for the deployment.
+4. Use n8n Cloud or another automation host that is not behind the blocking Cloudflare rule.
+5. Consider a reverse polling design only if Cloudflare cannot be changed: n8n periodically asks the Booking System for pending sync jobs, creates the Outlook event, then calls back to mark the sync complete. This requires new secure API endpoints and is not the preferred quick fix.
+
+Message to IT:
+
+```txt
+Please bypass Cloudflare challenge/security only for Host n.qsbportal.com.my and URI path /webhook/booking-calendar/*. The webhook remains protected by x-booking-system-secret header auth.
+```
+
 ## Runtime Behavior
 
 Confirmed booking paths:
