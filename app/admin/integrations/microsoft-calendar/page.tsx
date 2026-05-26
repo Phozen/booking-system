@@ -22,7 +22,7 @@ function formatMode(mode: string) {
 }
 
 function getDisplayMode(provider: string, mode: string) {
-  return provider === "n8n_webhook" ? "create webhook only" : formatMode(mode);
+  return provider === "n8n_webhook" ? "n8n lifecycle" : formatMode(mode);
 }
 
 function formatProvider(provider: string) {
@@ -102,7 +102,17 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
       </section>
 
       {status.provider === "n8n_webhook" ? (
-        <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-3">
+        <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-4">
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Lifecycle mode
+            </p>
+            <p className="mt-1 font-medium">
+              {status.n8nLifecycleMode === "full_lifecycle"
+                ? "Full lifecycle"
+                : "Create-only"}
+            </p>
+          </div>
           <div>
             <p className="text-xs font-medium uppercase text-muted-foreground">
               n8n create webhook

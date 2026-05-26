@@ -81,6 +81,7 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.n8nWebhook.createWebhookConfigured).toBe(true);
     expect(config.n8nWebhook.updateWebhookConfigured).toBe(true);
     expect(config.n8nWebhook.deleteWebhookConfigured).toBe(false);
+    expect(config.n8nWebhook.lifecycleMode).toBe("create_only");
     expect(config.n8nWebhook.validationError).toBeNull();
   });
 
@@ -100,6 +101,27 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.createWebhookConfigured).toBe(true);
     expect(config.updateWebhookConfigured).toBe(false);
     expect(config.deleteWebhookConfigured).toBe(false);
+    expect(config.lifecycleMode).toBe("create_only");
+  });
+
+  it("enables n8n full lifecycle mode when update and delete URLs are configured", () => {
+    const config = getN8nCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "n8n_webhook",
+      N8N_CALENDAR_SYNC_ENABLED: "true",
+      N8N_CALENDAR_CREATE_WEBHOOK_URL:
+        "https://n.qsbportal.com.my/webhook/booking-calendar/create",
+      N8N_CALENDAR_UPDATE_WEBHOOK_URL:
+        "https://n.qsbportal.com.my/webhook/booking-calendar/update",
+      N8N_CALENDAR_DELETE_WEBHOOK_URL:
+        "https://n.qsbportal.com.my/webhook/booking-calendar/delete",
+      N8N_CALENDAR_WEBHOOK_SECRET: "super-secret-value",
+    });
+
+    expect(config.isConfigured).toBe(true);
+    expect(config.createWebhookConfigured).toBe(true);
+    expect(config.updateWebhookConfigured).toBe(true);
+    expect(config.deleteWebhookConfigured).toBe(true);
+    expect(config.lifecycleMode).toBe("full_lifecycle");
   });
 
   it("rejects n8n test webhook URLs in production", () => {

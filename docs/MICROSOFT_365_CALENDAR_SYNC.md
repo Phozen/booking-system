@@ -2,7 +2,7 @@
 
 This document defines the planned Microsoft 365 Calendar integration for the Booking System.
 
-Stage 2 implements outbound Microsoft Graph sync. A temporary `n8n_webhook` provider is also available for create-only testing through an n8n workflow that creates Outlook events. The app does not import Microsoft 365 calendar events, run delegated user OAuth from the app, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
+Stage 2 implements outbound Microsoft Graph sync. The `n8n_webhook` provider is also available for Outlook event lifecycle sync through n8n create, update, and delete workflows. The app does not import Microsoft 365 calendar events, run delegated user OAuth from the app, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
 
 ## Overview
 
@@ -14,7 +14,7 @@ Booking System -> Microsoft 365 Calendar
 
 When sync is enabled and configured, the app creates or updates a Microsoft 365 calendar event when a booking becomes confirmed, and deletes the event when the synced booking is cancelled. Microsoft 365 events are not imported back into the Booking System in v1.
 
-Temporary n8n test mode is narrower: when `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`, confirmed bookings call the configured n8n create webhook. Update/delete workflows are intentionally skipped until those n8n workflows are ready.
+When `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`, confirmed bookings call the configured n8n create webhook. If update/delete webhook URLs are configured, reschedules/updates and cancellations call the matching n8n workflows. If update/delete URLs are blank, the provider remains in create-only mode for safe testing.
 
 ## Recommended V1 Architecture
 
@@ -243,9 +243,9 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 - Employees should not see raw sync records or integration internals.
 - Event body content should avoid sensitive admin-only booking details.
 
-## Temporary n8n Create Webhook Provider
+## n8n Webhook Provider
 
-Use this mode only for confirmed booking -> n8n -> Outlook create-event testing while update and delete workflows are still being prepared.
+Use this mode for Booking System -> n8n -> Outlook event sync. Create-only mode is supported when only the create webhook is configured. Full lifecycle mode is active when create, update, and delete webhook URLs are configured.
 
 Required env:
 
@@ -253,10 +253,22 @@ Required env:
 CALENDAR_SYNC_PROVIDER=n8n_webhook
 N8N_CALENDAR_SYNC_ENABLED=true
 N8N_CALENDAR_CREATE_WEBHOOK_URL=https://your-n8n-host/webhook/...
+N8N_CALENDAR_UPDATE_WEBHOOK_URL=https://your-n8n-host/webhook/...
+N8N_CALENDAR_DELETE_WEBHOOK_URL=https://your-n8n-host/webhook/...
 N8N_CALENDAR_WEBHOOK_SECRET=...
 ```
 
-The app posts JSON with safe booking fields: booking ID/reference, title, description, facility name/level/type, local start/end date-times, timezone, organizer name/email, attendee count, catering summary, and a Booking System admin link. Local date-times are formatted as `YYYY-MM-DDTHH:mm:ss` using the app timezone, commonly `Asia/Kuala_Lumpur`.
+The create and update webhooks post JSON with safe booking fields: booking ID/reference, title, description, facility name/level/type, local start/end date-times, timezone, organizer name/email, attendee count, catering summary, and a Booking System admin link. Local date-times are formatted as `YYYY-MM-DDTHH:mm:ss` using the app timezone, commonly `Asia/Kuala_Lumpur`. Update payloads also include `externalEventId`.
+
+Delete webhook payload:
+
+```json
+{
+  "action": "delete",
+  "bookingId": "...",
+  "externalEventId": "..."
+}
+```
 
 Expected n8n success response:
 
@@ -270,7 +282,7 @@ Expected n8n success response:
 }
 ```
 
-The app stores `externalEventId` in `booking_calendar_syncs` with provider `n8n_webhook` and status `synced`. Failed or invalid responses are sanitized and stored as `failed`. Cancellation/reschedule paths do not call Microsoft Graph fallback in n8n mode; delete/update are skipped safely in this create-only test stage.
+The app stores `externalEventId` in `booking_calendar_syncs` with provider `n8n_webhook` and status `synced`. Reschedule/update and cancellation paths do not call Microsoft Graph fallback in n8n mode. For update success, the app keeps or updates `externalEventId`, marks the sync record `synced`, clears `last_error`, and updates `last_synced_at`. For delete success, the app marks the sync record `cancelled`, clears `last_error`, and updates `last_synced_at`. Failures are sanitized and stored as `failed`; booking changes are not rolled back.
 
 Troubleshooting HTML responses:
 

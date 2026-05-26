@@ -95,7 +95,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 - [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.
 - [x] Microsoft Graph writes are performed server-side only after successful booking state changes or Super Admin retry.
-- [x] Temporary n8n webhook sync performs server-side create calls only when `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`.
+- [x] n8n webhook sync performs server-side create/update/delete calls only when `CALENDAR_SYNC_PROVIDER=n8n_webhook`, `N8N_CALENDAR_SYNC_ENABLED=true`, and the matching webhook URL is configured.
 
 ## Manual Test Checklist
 
@@ -128,7 +128,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not exposed in browser bundles, UI, or raw sync errors.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is Super Admin only.
 - [ ] Confirm booking creation/approval/cancellation still succeeds if Microsoft Graph sync fails.
-- [ ] Confirm booking creation/approval/cancellation still succeeds if n8n webhook sync fails or update/delete webhook support is deferred.
+- [ ] Confirm booking creation/approval/update/cancellation still succeeds if n8n webhook sync fails or a matching lifecycle webhook URL is not configured.
 - [ ] If Cloudflare bypass is used for n8n webhooks, confirm it is scoped only to `/webhook/booking-calendar/*` and the n8n `x-booking-system-secret` check remains enabled.
 
 ## Remaining Risks

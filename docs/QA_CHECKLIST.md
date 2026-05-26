@@ -397,10 +397,12 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Force a failed sync and retry from `/admin/integrations/microsoft-calendar` as Super Admin.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is hidden/denied for Admin and Employee roles.
 - [ ] Confirm `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed before production enablement.
-- [ ] For temporary n8n testing, set `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`; confirm a confirmed booking calls only the create webhook.
+- [ ] For n8n testing, set `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`; confirm a confirmed booking calls the create webhook.
+- [ ] Configure `N8N_CALENDAR_UPDATE_WEBHOOK_URL`; reschedule/update a synced confirmed booking and confirm the update webhook receives `externalEventId` and safe booking fields.
+- [ ] Configure `N8N_CALENDAR_DELETE_WEBHOOK_URL`; cancel a synced booking and confirm the delete webhook receives `bookingId` and `externalEventId`.
 - [ ] Confirm the n8n payload contains safe booking fields and local `YYYY-MM-DDTHH:mm:ss` start/end values.
 - [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not visible in UI, sync errors, or client bundles.
-- [ ] Confirm cancellation/reschedule in n8n mode skips update/delete safely until those workflows are configured.
+- [ ] Confirm blank update/delete URLs keep n8n in create-only mode and do not roll back booking changes.
 - [ ] If n8n returns HTML, confirm the sync error reports status, content type, safe webhook host/path, and a short sanitized body preview instead of a raw `Unexpected token '<'` parse error.
 - [ ] Confirm production n8n configuration rejects `/webhook-test/` URLs and requires the active `/webhook/` URL.
 - [ ] If n8n sync reports Cloudflare `403` with `Just a moment`, confirm IT has added a Cloudflare skip/bypass rule for `/webhook/booking-calendar/*` or moved the webhook to a webhook-only subdomain.

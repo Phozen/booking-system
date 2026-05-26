@@ -49,6 +49,25 @@ export type N8nCalendarCreatePayload = {
   bookingUrl: string | null;
 };
 
+export type N8nCalendarUpdatePayload = Omit<
+  N8nCalendarCreatePayload,
+  "action"
+> & {
+  action: "update";
+  externalEventId: string;
+};
+
+export type N8nCalendarDeletePayload = {
+  action: "delete";
+  bookingId: string;
+  externalEventId: string;
+};
+
+type N8nCalendarWebhookPayload =
+  | N8nCalendarCreatePayload
+  | N8nCalendarUpdatePayload
+  | N8nCalendarDeletePayload;
+
 export type N8nCalendarWebhookResult =
   | {
       ok: true;
@@ -199,7 +218,42 @@ export function buildN8nCalendarCreatePayload({
   };
 }
 
-function parseN8nCreateResponse(data: unknown): N8nCalendarWebhookResult {
+export function buildN8nCalendarUpdatePayload({
+  booking,
+  externalEventId,
+  timezone,
+  appUrl = process.env.NEXT_PUBLIC_APP_URL,
+}: {
+  booking: N8nCalendarBookingForEvent;
+  externalEventId: string;
+  timezone: string;
+  appUrl?: string;
+}): N8nCalendarUpdatePayload {
+  return {
+    ...buildN8nCalendarCreatePayload({ booking, timezone, appUrl }),
+    action: "update",
+    externalEventId,
+  };
+}
+
+export function buildN8nCalendarDeletePayload({
+  bookingId,
+  externalEventId,
+}: {
+  bookingId: string;
+  externalEventId: string;
+}): N8nCalendarDeletePayload {
+  return {
+    action: "delete",
+    bookingId,
+    externalEventId,
+  };
+}
+
+function parseN8nWebhookResponse(
+  data: unknown,
+  fallbackExternalEventId?: string,
+): N8nCalendarWebhookResult {
   if (!data || typeof data !== "object") {
     return {
       ok: false,
@@ -211,12 +265,12 @@ function parseN8nCreateResponse(data: unknown): N8nCalendarWebhookResult {
   const externalEventId =
     typeof response.externalEventId === "string"
       ? response.externalEventId.trim()
-      : "";
+      : fallbackExternalEventId?.trim() ?? "";
 
   if (response.success !== true || !externalEventId) {
     return {
       ok: false,
-      error: "n8n calendar webhook did not confirm event creation.",
+      error: "n8n calendar webhook did not confirm event sync.",
     };
   }
 
@@ -241,6 +295,79 @@ export async function sendN8nCalendarCreateWebhook({
   payload: N8nCalendarCreatePayload;
   fetchImpl?: FetchLike;
 }): Promise<N8nCalendarWebhookResult> {
+  return sendN8nCalendarWebhook({
+    config,
+    url: config.createWebhookUrl,
+    payload,
+    fetchImpl,
+  });
+}
+
+export async function sendN8nCalendarUpdateWebhook({
+  config,
+  payload,
+  fetchImpl = fetch,
+}: {
+  config: N8nCalendarSyncConfig;
+  payload: N8nCalendarUpdatePayload;
+  fetchImpl?: FetchLike;
+}): Promise<N8nCalendarWebhookResult> {
+  if (!config.updateWebhookConfigured) {
+    return {
+      ok: false,
+      error:
+        "n8n update webhook is not configured. Set N8N_CALENDAR_UPDATE_WEBHOOK_URL or keep create-only mode.",
+    };
+  }
+
+  return sendN8nCalendarWebhook({
+    config,
+    url: config.updateWebhookUrl,
+    payload,
+    fallbackExternalEventId: payload.externalEventId,
+    fetchImpl,
+  });
+}
+
+export async function sendN8nCalendarDeleteWebhook({
+  config,
+  payload,
+  fetchImpl = fetch,
+}: {
+  config: N8nCalendarSyncConfig;
+  payload: N8nCalendarDeletePayload;
+  fetchImpl?: FetchLike;
+}): Promise<N8nCalendarWebhookResult> {
+  if (!config.deleteWebhookConfigured) {
+    return {
+      ok: false,
+      error:
+        "n8n delete webhook is not configured. Set N8N_CALENDAR_DELETE_WEBHOOK_URL or keep create-only mode.",
+    };
+  }
+
+  return sendN8nCalendarWebhook({
+    config,
+    url: config.deleteWebhookUrl,
+    payload,
+    fallbackExternalEventId: payload.externalEventId,
+    fetchImpl,
+  });
+}
+
+async function sendN8nCalendarWebhook({
+  config,
+  url,
+  payload,
+  fallbackExternalEventId,
+  fetchImpl = fetch,
+}: {
+  config: N8nCalendarSyncConfig;
+  url: string;
+  payload: N8nCalendarWebhookPayload;
+  fallbackExternalEventId?: string;
+  fetchImpl?: FetchLike;
+}): Promise<N8nCalendarWebhookResult> {
   if (!config.isConfigured) {
     return {
       ok: false,
@@ -250,7 +377,7 @@ export async function sendN8nCalendarCreateWebhook({
   }
 
   try {
-    const response = await fetchImpl(config.createWebhookUrl, {
+    const response = await fetchImpl(url, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -272,7 +399,7 @@ export async function sendN8nCalendarCreateWebhook({
         ok: false,
         status: response.status,
         error: buildN8nResponseError({
-          url: config.createWebhookUrl,
+          url,
           status: response.status,
           statusText: response.statusText,
           contentType,
@@ -291,7 +418,7 @@ export async function sendN8nCalendarCreateWebhook({
         ok: false,
         status: response.status,
         error: buildN8nResponseError({
-          url: config.createWebhookUrl,
+          url,
           status: response.status,
           statusText: response.statusText,
           contentType,
@@ -306,7 +433,7 @@ export async function sendN8nCalendarCreateWebhook({
         ok: false,
         status: response.status,
         error: buildN8nResponseError({
-          url: config.createWebhookUrl,
+          url,
           status: response.status,
           statusText: response.statusText,
           contentType,
@@ -316,7 +443,7 @@ export async function sendN8nCalendarCreateWebhook({
       };
     }
 
-    const parsed = parseN8nCreateResponse(data);
+    const parsed = parseN8nWebhookResponse(data, fallbackExternalEventId);
     return parsed.ok
       ? parsed
       : {

@@ -45,6 +45,7 @@ export type N8nCalendarSyncConfig = {
   updateWebhookConfigured: boolean;
   deleteWebhookConfigured: boolean;
   createWebhookUsesTestUrl: boolean;
+  lifecycleMode: "create_only" | "full_lifecycle";
 };
 
 const defaultGraphBaseUrl = "https://graph.microsoft.com/v1.0";
@@ -171,6 +172,8 @@ export function getN8nCalendarSyncConfig(
   const deleteWebhookUrl = trimValue(env.N8N_CALENDAR_DELETE_WEBHOOK_URL);
   const webhookSecret = env.N8N_CALENDAR_WEBHOOK_SECRET ?? "";
   const createWebhookUsesTestUrl = createWebhookUrl.includes("/webhook-test/");
+  const lifecycleMode: N8nCalendarSyncConfig["lifecycleMode"] =
+    updateWebhookUrl && deleteWebhookUrl ? "full_lifecycle" : "create_only";
   const baseConfig = {
     provider,
     enabled,
@@ -182,6 +185,7 @@ export function getN8nCalendarSyncConfig(
     updateWebhookConfigured: Boolean(updateWebhookUrl),
     deleteWebhookConfigured: Boolean(deleteWebhookUrl),
     createWebhookUsesTestUrl,
+    lifecycleMode,
   };
 
   if (!enabled) {

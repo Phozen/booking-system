@@ -35,7 +35,8 @@ MICROSOFT_CLIENT_SECRET=
 MICROSOFT_DEFAULT_CALENDAR_ID=
 MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 
-# Temporary n8n create-webhook calendar sync testing
+# n8n webhook calendar sync. Configure create only for testing, or all three
+# webhook URLs for full lifecycle create/update/delete sync.
 N8N_CALENDAR_SYNC_ENABLED=false
 N8N_CALENDAR_CREATE_WEBHOOK_URL=
 N8N_CALENDAR_UPDATE_WEBHOOK_URL=

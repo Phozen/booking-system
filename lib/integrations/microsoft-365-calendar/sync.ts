@@ -16,7 +16,11 @@ import {
 } from "@/lib/integrations/microsoft-365-calendar/event-mapper";
 import {
   buildN8nCalendarCreatePayload,
+  buildN8nCalendarDeletePayload,
+  buildN8nCalendarUpdatePayload,
   sendN8nCalendarCreateWebhook,
+  sendN8nCalendarDeleteWebhook,
+  sendN8nCalendarUpdateWebhook,
   type N8nCalendarBookingForEvent,
 } from "@/lib/integrations/microsoft-365-calendar/n8n-webhook";
 import type {
@@ -407,20 +411,21 @@ async function syncConfirmedBookingToN8nCalendar(
 
     const existing = await getSyncRecord(bookingId, provider);
 
-    if (existing?.external_event_id) {
+    if (existing?.external_event_id && !config.updateWebhookConfigured) {
       const record = await upsertSyncRecord({
         bookingId,
         provider,
         calendarId: existing.external_calendar_id,
         eventId: existing.external_event_id,
         status: "skipped",
-        lastError: "n8n update webhook is not enabled for this create-only test mode.",
+        lastError:
+          "n8n update webhook is not configured. Existing event was left unchanged.",
         attempts: existing.attempts,
       });
 
       return {
         status: "skipped",
-        message: record.last_error ?? "n8n update webhook is not enabled.",
+        message: record.last_error ?? "n8n update webhook is not configured.",
         bookingId,
         syncId: record.id,
         externalEventId: existing.external_event_id,
@@ -428,14 +433,23 @@ async function syncConfirmedBookingToN8nCalendar(
     }
 
     const settings = await getAppSettings();
-    const payload = buildN8nCalendarCreatePayload({
-      booking: mapBookingForN8nEvent(booking),
-      timezone: settings.defaultTimezone,
-    });
-    const response = await sendN8nCalendarCreateWebhook({
-      config,
-      payload,
-    });
+    const bookingForN8n = mapBookingForN8nEvent(booking);
+    const response = existing?.external_event_id
+      ? await sendN8nCalendarUpdateWebhook({
+          config,
+          payload: buildN8nCalendarUpdatePayload({
+            booking: bookingForN8n,
+            externalEventId: existing.external_event_id,
+            timezone: settings.defaultTimezone,
+          }),
+        })
+      : await sendN8nCalendarCreateWebhook({
+          config,
+          payload: buildN8nCalendarCreatePayload({
+            booking: bookingForN8n,
+            timezone: settings.defaultTimezone,
+          }),
+        });
 
     if (!response.ok) {
       throw new Error(response.error);
@@ -456,7 +470,9 @@ async function syncConfirmedBookingToN8nCalendar(
       status: "synced",
       actor,
       integration: "n8n_calendar_webhook",
-      summary: "Created n8n calendar webhook event for booking.",
+      summary: existing?.external_event_id
+        ? "Updated n8n calendar webhook event for booking."
+        : "Created n8n calendar webhook event for booking.",
       metadata: {
         syncId: record.id,
         externalCalendarId: response.externalCalendarId,
@@ -466,7 +482,9 @@ async function syncConfirmedBookingToN8nCalendar(
 
     return {
       status: "synced",
-      message: "n8n calendar webhook event created.",
+      message: existing?.external_event_id
+        ? "n8n calendar webhook event updated."
+        : "n8n calendar webhook event created.",
       bookingId,
       syncId: record.id,
       externalEventId: response.externalEventId,
@@ -500,38 +518,131 @@ async function syncConfirmedBookingToN8nCalendar(
   }
 }
 
-async function skipN8nCalendarCancellation(
+async function deleteN8nCalendarEventForBooking(
   bookingId: string,
   actor?: SyncActor,
 ): Promise<MicrosoftCalendarSyncResult> {
+  const config = getN8nCalendarSyncConfig();
   const provider: CalendarSyncProviderRecord = "n8n_webhook";
   const existing = await getSyncRecord(bookingId, provider).catch(() => null);
-  const record = await upsertSyncRecord({
-    bookingId,
-    provider,
-    calendarId: existing?.external_calendar_id ?? null,
-    eventId: existing?.external_event_id ?? null,
-    status: "skipped",
-    lastError: "n8n delete webhook is not enabled for this create-only test mode.",
-    attempts: existing?.attempts ?? 0,
-  });
 
-  await auditCalendarSync({
-    bookingId,
-    status: "skipped",
-    actor,
-    integration: "n8n_calendar_webhook",
-    summary: "Skipped n8n calendar delete because only create webhook testing is enabled.",
-    metadata: { syncId: record.id },
-  });
+  if (!existing?.external_event_id) {
+    const record = await upsertSyncRecord({
+      bookingId,
+      provider,
+      calendarId: existing?.external_calendar_id ?? null,
+      eventId: null,
+      status: "skipped",
+      lastError: "No n8n calendar event exists for this booking.",
+      attempts: existing?.attempts ?? 0,
+    });
 
-  return {
-    status: "skipped",
-    message: record.last_error ?? "n8n delete webhook is not enabled.",
-    bookingId,
-    syncId: record.id,
-    externalEventId: record.external_event_id,
-  };
+    return {
+      status: "skipped",
+      message: record.last_error ?? "No n8n calendar event exists.",
+      bookingId,
+      syncId: record.id,
+    };
+  }
+
+  if (!config.deleteWebhookConfigured) {
+    const record = await upsertSyncRecord({
+      bookingId,
+      provider,
+      calendarId: existing.external_calendar_id,
+      eventId: existing.external_event_id,
+      status: "skipped",
+      lastError:
+        "n8n delete webhook is not configured. Existing event was left unchanged.",
+      attempts: existing.attempts,
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "skipped",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "Skipped n8n calendar delete because delete webhook is not configured.",
+      metadata: { syncId: record.id },
+    });
+
+    return {
+      status: "skipped",
+      message: record.last_error ?? "n8n delete webhook is not configured.",
+      bookingId,
+      syncId: record.id,
+      externalEventId: record.external_event_id,
+    };
+  }
+
+  try {
+    const response = await sendN8nCalendarDeleteWebhook({
+      config,
+      payload: buildN8nCalendarDeletePayload({
+        bookingId,
+        externalEventId: existing.external_event_id,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(response.error);
+    }
+
+    const record = await upsertSyncRecord({
+      bookingId,
+      provider,
+      calendarId: response.externalCalendarId ?? existing.external_calendar_id,
+      eventId: response.externalEventId,
+      status: "cancelled",
+      lastError: null,
+      attempts: existing.attempts,
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "cancelled",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "Deleted n8n calendar webhook event for booking.",
+      metadata: {
+        syncId: record.id,
+        n8nProvider: response.provider,
+      },
+    });
+
+    return {
+      status: "cancelled",
+      message: "n8n calendar webhook event deleted.",
+      bookingId,
+      syncId: record.id,
+      externalEventId: response.externalEventId,
+    };
+  } catch (error) {
+    const record = await tryMarkFailed({
+      bookingId,
+      provider,
+      calendarId: existing.external_calendar_id,
+      eventId: existing.external_event_id,
+      error,
+    });
+
+    await auditCalendarSync({
+      bookingId,
+      status: "failed",
+      actor,
+      integration: "n8n_calendar_webhook",
+      summary: "n8n calendar webhook delete failed for booking.",
+      metadata: { syncId: record?.id ?? null },
+    });
+
+    return {
+      status: "failed",
+      message: record?.last_error ?? "n8n calendar webhook delete failed.",
+      bookingId,
+      syncId: record?.id,
+      externalEventId: record?.external_event_id,
+    };
+  }
 }
 
 export async function syncConfirmedBookingToMicrosoftCalendar(
@@ -708,7 +819,7 @@ export async function cancelMicrosoftCalendarEventForBooking(
       };
     }
 
-    return skipN8nCalendarCancellation(bookingId, actor);
+    return deleteN8nCalendarEventForBooking(bookingId, actor);
   }
 
   const config = getMicrosoftCalendarSyncConfig();

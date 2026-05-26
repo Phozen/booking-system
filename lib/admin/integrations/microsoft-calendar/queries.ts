@@ -131,6 +131,7 @@ export async function getMicrosoftCalendarIntegrationStatus() {
     n8nCreateWebhookConfigured: config.n8nWebhook.createWebhookConfigured,
     n8nUpdateWebhookConfigured: config.n8nWebhook.updateWebhookConfigured,
     n8nDeleteWebhookConfigured: config.n8nWebhook.deleteWebhookConfigured,
+    n8nLifecycleMode: config.n8nWebhook.lifecycleMode,
   };
 }
 

@@ -63,8 +63,8 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | Manual test: confirmed booking creates event | Pending credentials | Enable sync and create/approve a confirmed booking. |
 | Manual test: cancelled booking removes event | Pending credentials | Cancel a synced confirmed booking. |
 | Manual test: retry failed sync | Pending credentials | Retry from the Super Admin integration page. |
-| Temporary n8n create provider | Ready for webhook values | `CALENDAR_SYNC_PROVIDER=n8n_webhook` calls only the n8n create webhook for confirmed bookings. |
-| n8n update/delete | Deferred | Update/delete webhook env placeholders exist, but update/delete sync is skipped safely in create-only test mode. |
+| n8n lifecycle provider | Ready for webhook values | `CALENDAR_SYNC_PROVIDER=n8n_webhook` calls create, update, and delete webhooks when the matching URLs are configured. |
+| n8n create-only mode | Supported | Blank update/delete webhook URLs keep the provider in create-only mode for safe testing. |
 
 ### Microsoft 365 Calendar Verification Steps
 
@@ -78,18 +78,19 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 8. Confirm the Outlook event is removed and the sync record is `cancelled`.
 9. Force a failed sync in a controlled test and retry from `/admin/integrations/microsoft-calendar`.
 
-### Temporary n8n Create Webhook Verification Steps
+### n8n Webhook Verification Steps
 
 1. Set `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`.
-2. Set `N8N_CALENDAR_CREATE_WEBHOOK_URL` and `N8N_CALENDAR_WEBHOOK_SECRET` in Vercel or a private local env file.
+2. Set `N8N_CALENDAR_CREATE_WEBHOOK_URL`, `N8N_CALENDAR_UPDATE_WEBHOOK_URL`, `N8N_CALENDAR_DELETE_WEBHOOK_URL`, and `N8N_CALENDAR_WEBHOOK_SECRET` in Vercel or a private local env file.
 3. Redeploy or restart the app.
 4. Create or approve a confirmed booking.
 5. Confirm n8n receives the create payload and creates the Outlook event.
-6. Confirm `/admin/integrations/microsoft-calendar` shows provider `n8n webhook` and the create/update/delete webhook configured yes/no state without displaying URLs or secrets.
-7. Confirm the sync record uses provider `n8n_webhook` and status `synced`.
-8. Confirm cancellation/reschedule does not call Microsoft Graph fallback in n8n mode; update/delete remain deferred until those workflows exist.
-9. If a sync record reports a non-JSON response, confirm Vercel uses the production `/webhook/` URL, the workflow is active, and the stored error includes status/content-type/safe body preview without exposing the webhook secret.
-10. If the error says `Status: 403 Forbidden` with `<title>Just a moment...</title>`, ask IT to bypass Cloudflare challenge/security only for `n.qsbportal.com.my/webhook/booking-calendar/*`; the webhook remains protected by `x-booking-system-secret`.
+6. Reschedule/update the confirmed booking and confirm n8n receives the update payload.
+7. Cancel the synced booking and confirm n8n receives the delete payload.
+8. Confirm `/admin/integrations/microsoft-calendar` shows provider `n8n webhook`, lifecycle mode, and the create/update/delete webhook configured yes/no state without displaying URLs or secrets.
+9. Confirm the sync record uses provider `n8n_webhook` and status `synced` after create/update, then `cancelled` after delete.
+10. If a sync record reports a non-JSON response, confirm Vercel uses the production `/webhook/` URL, the workflow is active, and the stored error includes status/content-type/safe body preview without exposing the webhook secret.
+11. If the error says `Status: 403 Forbidden` with `<title>Just a moment...</title>`, ask IT to bypass Cloudflare challenge/security only for `n.qsbportal.com.my/webhook/booking-calendar/*`; the webhook remains protected by `x-booking-system-secret`.
 
 ## What Remains Outside The Developer/User Account
 
@@ -111,13 +112,14 @@ Microsoft 365 Calendar:
 - Migration `0014` applied to the target Supabase project.
 - Manual Graph sync QA before production enablement.
 
-n8n calendar test mode:
+n8n calendar mode:
 
 - n8n create workflow URL.
+- n8n update workflow URL for full lifecycle mode.
+- n8n delete workflow URL for full lifecycle mode.
 - Shared webhook secret.
 - Cloudflare path bypass or webhook-only subdomain if Vercel receives a Cloudflare challenge page.
 - Migration `0021` applied to allow provider `n8n_webhook` in sync records.
-- Update/delete n8n workflows before full cancellation/reschedule sync is enabled.
 
 ## Safety Notes
 
