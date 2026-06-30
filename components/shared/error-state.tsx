@@ -17,13 +17,13 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        "rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 shadow-sm ring-1 ring-rose-100 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100 dark:ring-rose-900/40",
+        "rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100",
         className,
       )}
       role="alert"
     >
       <div className="flex gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:ring-rose-900">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200">
           <AlertTriangle className="size-4" aria-hidden="true" />
         </div>
         <div>

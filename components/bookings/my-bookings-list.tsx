@@ -26,7 +26,7 @@ function BookingSection({
   return (
     <section className="grid gap-3">
       <div className="flex items-center justify-between border-b border-border/70 pb-2">
-        <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
+        <h2 className="text-base font-semibold tracking-normal">{title}</h2>
         <span className="rounded-full border border-border/70 bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground">
           {bookings.length}
         </span>
@@ -67,7 +67,7 @@ export function MyBookingsList({
       {created ? (
         <Alert variant="success">
           <CheckCircle2 aria-hidden="true" />
-          <AlertTitle>Booking saved</AlertTitle>
+          <AlertTitle>Room booking saved</AlertTitle>
           <AlertDescription>
             Your booking is now in My Bookings. Confirmed bookings are ready to
             use; pending requests are waiting for admin approval.
@@ -81,7 +81,7 @@ export function MyBookingsList({
             <div className="min-w-0">
               <h2 className="inline-flex items-center gap-2 font-semibold tracking-normal">
                 <UserPlus className="size-4" aria-hidden="true" />
-                Invited meetings
+                Room invitations
               </h2>
               <p className="mt-1 text-sm text-sky-800 dark:text-sky-200">
                 You have {invitationSummary.pending} pending and{" "}
@@ -97,7 +97,7 @@ export function MyBookingsList({
                   "w-full border-sky-300 bg-card text-foreground hover:bg-sky-100 sm:w-auto dark:border-sky-800 dark:hover:bg-sky-950/60",
               })}
             >
-              View invitations
+              Review invitations
             </Link>
           </div>
         </section>
@@ -105,19 +105,19 @@ export function MyBookingsList({
 
       {!hasAnyBookings ? (
         <EmptyState
-          title="No bookings yet"
-          description="Create your first booking from the facilities list or start directly from the booking form."
+          title="No room bookings yet"
+          description="Start from the room list if you need to compare capacity or equipment. Use the booking form if you already know the time slot."
           action={
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link href="/facilities" className={buttonVariants()}>
-                Browse facilities
+                Find a room
               </Link>
               <Link
                 href="/bookings/new"
                 className={buttonVariants({ variant: "outline" })}
               >
                 <CalendarPlus data-icon="inline-start" />
-                Create your first booking
+                Book a room
               </Link>
             </div>
           }
@@ -127,26 +127,26 @@ export function MyBookingsList({
       <BookingSection
         title="Pending approval"
         bookings={groupedBookings.pending}
-        emptyMessage="No pending bookings."
-        emptyDescription="Requests that need admin approval will appear here."
+        emptyMessage="No requests waiting for approval."
+        emptyDescription="Approval-required room bookings will appear here until an admin confirms or rejects them."
       />
       <BookingSection
         title="Upcoming confirmed"
         bookings={groupedBookings.upcoming}
-        emptyMessage="No upcoming confirmed bookings."
-        emptyDescription="Confirmed future bookings will appear here."
+        emptyMessage="No confirmed room bookings coming up."
+        emptyDescription="Once a booking is confirmed, its room and time slot will appear here."
       />
       <BookingSection
         title="History"
         bookings={groupedBookings.history}
-        emptyMessage="No booking history yet."
-        emptyDescription="Completed, expired, or rejected bookings will appear here."
+        emptyMessage="No previous bookings yet."
+        emptyDescription="Completed, expired, and rejected room requests will appear here for reference."
       />
       <BookingSection
         title="Cancelled"
         bookings={groupedBookings.cancelled}
-        emptyMessage="No cancelled bookings."
-        emptyDescription="Bookings you cancel will remain visible here for reference."
+        emptyMessage="No cancelled room bookings."
+        emptyDescription="Cancelled bookings stay here so you can verify what was released."
       />
     </div>
   );

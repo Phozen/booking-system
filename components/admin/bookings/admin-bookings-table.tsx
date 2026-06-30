@@ -34,10 +34,10 @@ export function AdminBookingsTable({
   return (
     <div className="grid gap-5">
       <AdminFilterBar>
-      <form className="grid gap-3 md:grid-cols-[minmax(0,220px)_minmax(0,280px)_auto_auto] md:items-end [&>*]:min-w-0">
+      <form className="grid gap-3 md:grid-cols-[minmax(0,220px)_minmax(0,300px)_auto_auto] md:items-end [&>*]:min-w-0">
         <div className="grid gap-2">
           <label htmlFor="status" className="text-sm font-medium">
-            Status
+            Booking status
           </label>
           <select
             id="status"
@@ -55,7 +55,7 @@ export function AdminBookingsTable({
 
         <div className="grid gap-2">
           <label htmlFor="facilityId" className="text-sm font-medium">
-            Facility
+            Room
           </label>
           <select
             id="facilityId"
@@ -63,7 +63,7 @@ export function AdminBookingsTable({
             defaultValue={selectedFacilityId ?? "all"}
             className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <option value="all">All facilities</option>
+            <option value="all">All rooms</option>
             {facilities.map((facility) => (
               <option key={facility.id} value={facility.id}>
                 {facility.name} - {facility.level}
@@ -99,7 +99,7 @@ export function AdminBookingsTable({
 
       <AdminTableShell
         title="Bookings"
-        description={`${bookings.length} booking records`}
+        description={`${bookings.length} room booking records`}
         mobileCards={
           bookings.length > 0 ? (
             bookings.map((booking) => (
@@ -110,13 +110,13 @@ export function AdminBookingsTable({
                 badges={<BookingStatusBadge status={booking.status} />}
                 rows={[
                   {
-                    label: "Facility",
+                    label: "Room",
                     value: booking.facility
                       ? `${booking.facility.name}, ${booking.facility.level}`
-                      : "Unavailable",
+                      : "Room unavailable",
                   },
                   {
-                    label: "User",
+                    label: "Requester",
                     value:
                       booking.user?.fullName ||
                       booking.user?.email ||
@@ -175,8 +175,8 @@ export function AdminBookingsTable({
             <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Title</th>
-                <th className="px-4 py-3 font-medium">Facility</th>
-                <th className="px-4 py-3 font-medium">User</th>
+                <th className="px-4 py-3 font-medium">Room</th>
+                <th className="px-4 py-3 font-medium">Requester</th>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Time</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -194,7 +194,7 @@ export function AdminBookingsTable({
                     <td className="px-4 py-3">
                       {booking.facility
                         ? `${booking.facility.name}, ${booking.facility.level}`
-                        : "Unavailable"}
+                        : "Room unavailable"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {booking.user?.fullName || booking.user?.email || "Unknown"}

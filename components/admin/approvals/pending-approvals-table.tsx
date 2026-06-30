@@ -19,24 +19,24 @@ export function PendingApprovalsTable({
 }) {
   return (
     <AdminTableShell
-      title="Pending approvals"
+      title="Approval queue"
       description={`${bookings.length} requests waiting for review`}
       mobileCards={
         bookings.length > 0 ? (
           bookings.map((booking) => (
             <MobileRecordCard
               key={booking.id}
-              eyebrow="Pending request"
+              eyebrow="Pending room request"
               title={booking.title}
               rows={[
                 {
-                  label: "Facility",
+                  label: "Room",
                   value: booking.facility
                     ? `${booking.facility.name}, ${booking.facility.level}`
-                    : "Unavailable",
+                    : "Room unavailable",
                 },
                 {
-                  label: "User",
+                  label: "Requester",
                   value:
                     booking.user?.fullName || booking.user?.email || "Unknown",
                 },
@@ -76,7 +76,7 @@ export function PendingApprovalsTable({
           <EmptyState
             className="bg-transparent"
             title="No pending approvals"
-            description="There are no booking requests waiting for admin review."
+              description="New room requests that need approval will appear here."
           />
         )
       }
@@ -85,8 +85,8 @@ export function PendingApprovalsTable({
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
-              <th className="px-4 py-3 font-medium">Facility</th>
-              <th className="px-4 py-3 font-medium">User</th>
+              <th className="px-4 py-3 font-medium">Room</th>
+              <th className="px-4 py-3 font-medium">Requester</th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Time</th>
               <th className="px-4 py-3 font-medium">Requested</th>
@@ -102,7 +102,7 @@ export function PendingApprovalsTable({
                   <td className="px-4 py-3">
                     {booking.facility
                       ? `${booking.facility.name}, ${booking.facility.level}`
-                      : "Unavailable"}
+                      : "Room unavailable"}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {booking.user?.fullName || booking.user?.email || "Unknown"}
@@ -144,7 +144,7 @@ export function PendingApprovalsTable({
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No pending approvals"
-                    description="There are no booking requests waiting for admin review."
+                    description="New room requests that need approval will appear here."
                   />
                 </td>
               </tr>

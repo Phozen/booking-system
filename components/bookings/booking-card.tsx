@@ -11,11 +11,11 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function BookingCard({ booking }: { booking: EmployeeBooking }) {
   return (
-    <article className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-sm shadow-primary/5 ring-1 ring-primary/10 sm:grid-cols-[1fr_auto] sm:items-center">
+    <article className="grid gap-3 rounded-lg border border-border/70 bg-card p-4 text-card-foreground sm:grid-cols-[1fr_auto] sm:items-center">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           <BookingStatusBadge status={booking.status} />
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground">
             {formatBookingDate(booking.startsAt)}
           </span>
         </div>
@@ -29,7 +29,7 @@ export function BookingCard({ booking }: { booking: EmployeeBooking }) {
             <MapPin className="size-4" aria-hidden="true" />
             {booking.facility
               ? `${booking.facility.name}, ${booking.facility.level}`
-              : "Facility unavailable"}
+              : "Room unavailable"}
           </span>
           <span className="inline-flex items-center gap-2">
             <CalendarClock className="size-4" aria-hidden="true" />
@@ -45,7 +45,7 @@ export function BookingCard({ booking }: { booking: EmployeeBooking }) {
           className: "w-full sm:w-fit",
         })}
       >
-        View details
+        Open booking
         <ArrowRight data-icon="inline-end" />
       </Link>
     </article>

@@ -23,44 +23,44 @@ function EquipmentSummary({ facility }: { facility: Facility }) {
 
 export function FacilityCard({ facility }: { facility: Facility }) {
   return (
-    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all hover:border-primary/35 hover:shadow-md hover:shadow-primary/10 sm:grid-cols-[220px_1fr]">
-      <div className="aspect-[4/3] bg-muted sm:aspect-auto">
+    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground transition-colors hover:border-primary/35 sm:grid-cols-[180px_1fr]">
+      <div className="aspect-[16/10] bg-muted sm:aspect-auto">
         <FacilityPhoto facility={facility} />
       </div>
 
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 border-l-4 border-sky-500 pl-3">
-            <p className="text-sm font-medium text-muted-foreground">
+      <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
               {facility.code} - {facility.level}
             </p>
-            <h2 className="mt-1 text-xl font-semibold tracking-normal">
+            <h2 className="mt-1 text-lg font-semibold tracking-normal">
               {facility.name}
             </h2>
           </div>
           <StatusBadge kind="facility" status={facility.status} />
         </div>
 
-        <dl className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <dt className="font-medium text-foreground">Type</dt>
+            <dt className="text-xs font-medium uppercase text-muted-foreground">Room type</dt>
             <dd>{formatFacilityType(facility.type)}</dd>
           </div>
           <div>
-            <dt className="font-medium text-foreground">Capacity</dt>
+            <dt className="text-xs font-medium uppercase text-muted-foreground">Capacity</dt>
             <dd className="inline-flex items-center gap-1">
               <Users className="size-3.5" aria-hidden="true" />
               {facility.capacity}
             </dd>
           </div>
           <div>
-            <dt className="font-medium text-foreground">Equipment</dt>
+            <dt className="text-xs font-medium uppercase text-muted-foreground">Equipment</dt>
             <dd className="break-words">
               <EquipmentSummary facility={facility} />
             </dd>
           </div>
           <div>
-            <dt className="font-medium text-foreground">Approval</dt>
+            <dt className="text-xs font-medium uppercase text-muted-foreground">Booking rule</dt>
             <dd className="inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5" aria-hidden="true" />
               {formatRequiresApproval(facility.requiresApproval)}
@@ -76,7 +76,7 @@ export function FacilityCard({ facility }: { facility: Facility }) {
               className: "w-full sm:w-fit",
             })}
           >
-            View details
+            Check availability
             <ArrowRight data-icon="inline-end" />
           </Link>
         </div>
