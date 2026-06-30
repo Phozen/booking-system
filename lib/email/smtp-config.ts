@@ -79,6 +79,14 @@ export function sanitizeSmtpError(error: unknown) {
     return "SMTP authentication failed. Check the mailbox credentials and confirm SMTP AUTH is enabled for the mailbox.";
   }
 
+  if (/invalid from|MAIL FROM|sender|envelope/i.test(message)) {
+    return "SMTP sender address was rejected. Check that EMAIL_FROM is a plain sender email verified by the SMTP provider.";
+  }
+
+  if (/recipient|RCPT TO|invalid to/i.test(message)) {
+    return "SMTP recipient address was rejected. Check the recipient email address and provider sending rules.";
+  }
+
   if (
     /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNECTION|timeout|connection/i.test(
       message,

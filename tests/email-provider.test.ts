@@ -73,4 +73,12 @@ describe("email provider configuration", () => {
     );
     expect(sanitizeSmtpError(error)).not.toContain("super-secret");
   });
+
+  it("maps SMTP sender rejection errors to a clear safe message", () => {
+    const error = new Error("Mail command failed: 451 4.0.0 Invalid from");
+
+    expect(sanitizeSmtpError(error)).toBe(
+      "SMTP sender address was rejected. Check that EMAIL_FROM is a plain sender email verified by the SMTP provider.",
+    );
+  });
 });

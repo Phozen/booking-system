@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -143,18 +140,13 @@ describe("email processing cron route", () => {
     consoleError.mockRestore();
   });
 
-  it("configures the Vercel cron entry", () => {
+  it("does not configure a Vercel cron schedule", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
     const vercelConfig = JSON.parse(
       readFileSync(join(process.cwd(), "vercel.json"), "utf8"),
     );
 
-    expect(vercelConfig.crons).toEqual(
-      expect.arrayContaining([
-        {
-          path: "/api/cron/email/process",
-          schedule: "*/5 * * * *",
-        },
-      ]),
-    );
+    expect(vercelConfig.crons).toBeUndefined();
   });
 });

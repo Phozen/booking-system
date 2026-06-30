@@ -57,18 +57,20 @@ export function UserMenu({
         ) : null}
         <Link
           href={resolvedProfileHref}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
+          className={buttonVariants({ variant: "outline", size: "icon" })}
+          aria-label="Profile"
+          title="Profile"
         >
-          <UserRound data-icon="inline-start" />
-          Profile
+          <UserRound aria-hidden="true" />
         </Link>
         {currentArea === "employee" ? (
           <Link
             href="/notification-preferences"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "outline", size: "icon" })}
+            aria-label="Notification preferences"
+            title="Notification preferences"
           >
-            <Bell data-icon="inline-start" />
-            Notifications
+            <Bell aria-hidden="true" />
           </Link>
         ) : null}
         <form action={logoutAction}>
