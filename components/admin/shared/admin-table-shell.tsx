@@ -20,11 +20,11 @@ export function AdminTableShell({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm shadow-primary/5 ring-1 ring-primary/10",
+        "overflow-hidden rounded-lg border border-border/75 bg-card",
         className,
       )}
     >
-      <div className="flex flex-col gap-3 border-b border-border/70 bg-gradient-to-r from-muted/65 via-card to-card p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-border/75 bg-muted/45 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold tracking-normal">{title}</h2>
           {description ? (

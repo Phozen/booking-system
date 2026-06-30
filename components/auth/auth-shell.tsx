@@ -18,16 +18,16 @@ export function AuthShell({
       <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
         <ThemeToggle compact className="size-11 bg-card/95 shadow-sm" />
       </div>
-      <div className="grid w-full max-w-md gap-6">
-        <div className="text-center">
+      <div className="grid w-full max-w-md gap-5">
+        <div>
           <Link
             href="/"
-            className="inline-flex rounded-sm text-2xl font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex rounded-sm text-xl font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {appName}
           </Link>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Internal facilities for {getCompanyDisplayName({ companyName })}
+          <p className="mt-1 text-sm text-muted-foreground">
+            Room booking for {getCompanyDisplayName({ companyName })}
           </p>
         </div>
         {children}

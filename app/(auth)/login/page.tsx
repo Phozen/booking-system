@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <CardHeader>
         <CardTitle>Log in</CardTitle>
         <CardDescription>
-          Use your company email and password to access bookings.
+          Access room bookings, approvals, and your upcoming schedule.
         </CardDescription>
       </CardHeader>
       <CardContent>

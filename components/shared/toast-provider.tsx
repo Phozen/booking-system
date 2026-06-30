@@ -17,7 +17,7 @@ export function ToastProvider() {
         duration: 5000,
         classNames: {
           toast:
-            "border border-border/80 bg-popover text-popover-foreground shadow-lg shadow-primary/10 dark:border-border dark:bg-popover dark:text-popover-foreground",
+            "border border-border/80 bg-popover text-popover-foreground shadow-md dark:border-border dark:bg-popover dark:text-popover-foreground",
           title: "font-semibold tracking-normal",
           description: "text-muted-foreground dark:text-muted-foreground",
           actionButton: "bg-primary text-primary-foreground",

@@ -15,8 +15,8 @@ export function AdminSidebar({
   role?: string | null;
 }) {
   return (
-    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar/92 shadow-sm shadow-primary/5 print:hidden lg:block">
-      <div className="sticky top-0 flex h-svh flex-col gap-6 p-4">
+    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar print:hidden lg:block">
+      <div className="sticky top-0 flex h-svh flex-col gap-5 p-4">
         <div className="border-b border-sidebar-border pb-4">
           <Link
             href="/admin/dashboard"
@@ -24,7 +24,7 @@ export function AdminSidebar({
           >
             {appName}
           </Link>
-          <p className="mt-2 inline-flex rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-violet-900 dark:border-violet-800 dark:bg-violet-950/45 dark:text-violet-100">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Admin console
           </p>
         </div>

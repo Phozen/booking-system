@@ -22,8 +22,8 @@ export default async function RegisterPage() {
       <CardHeader>
         <CardTitle>Create account</CardTitle>
         <CardDescription>
-          Register with your company email. Access is controlled by system
-          settings.
+          Request access with your company email. Admins can review accounts
+          before booking access is active.
         </CardDescription>
       </CardHeader>
       <CardContent>

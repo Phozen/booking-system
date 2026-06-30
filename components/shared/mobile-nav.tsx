@@ -43,7 +43,7 @@ export function MobileNav({
       {open ? (
         <div
           id={menuId}
-          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border/70 bg-card/98 p-3 shadow-xl shadow-primary/10 ring-1 ring-primary/10"
+          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border bg-popover p-3 shadow-lg"
         >
           {variant === "admin" ? (
             <AdminNavigation compact onNavigate={() => setOpen(false)} role={role} />

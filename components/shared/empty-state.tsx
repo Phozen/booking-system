@@ -19,11 +19,11 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border border-dashed border-primary/25 bg-card/95 p-6 text-center text-card-foreground shadow-sm ring-1 ring-primary/10",
+        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-card-foreground",
         className,
       )}
     >
-      <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/25">
+      <div className="mb-3 flex size-10 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
         {icon ?? <Inbox className="size-5" aria-hidden="true" />}
       </div>
       <h2 className="text-base font-semibold tracking-normal text-foreground">

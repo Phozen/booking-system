@@ -16,7 +16,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "grid gap-4 rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/10",
+        "grid gap-4 rounded-lg border border-border/75 bg-card p-5",
         className,
       )}
       aria-hidden="true"
@@ -40,7 +40,7 @@ export function SkeletonTable({
 }) {
   return (
     <div
-      className="rounded-lg border border-border/70 bg-card p-4 shadow-sm ring-1 ring-primary/10"
+      className="rounded-lg border border-border/75 bg-card p-4"
       aria-hidden="true"
     >
       <div

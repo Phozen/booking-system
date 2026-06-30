@@ -41,11 +41,11 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-medium shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         compact ? "w-full" : "h-9",
         active
-          ? "border-primary/20 bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-          : "border-border/80 bg-card/95 text-muted-foreground hover:border-primary/30 hover:bg-accent/80 hover:text-accent-foreground",
+          ? "border-primary/30 bg-primary text-primary-foreground"
+          : "border-transparent bg-transparent text-muted-foreground hover:border-border hover:bg-accent/70 hover:text-accent-foreground",
       )}
     >
       <Icon className="size-4" aria-hidden="true" />
@@ -87,10 +87,10 @@ export function AdminNavigation({
   const navigationGroups = getAdminNavigationGroups(role);
 
   return (
-    <nav aria-label="Admin navigation" className="grid gap-5">
+    <nav aria-label="Admin navigation" className="grid gap-4">
       {navigationGroups.map((group) => (
         <div key={group.title} className="grid gap-1">
-          <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="px-3 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
             {group.title}
           </p>
           <div className={cn(compact ? "grid gap-1" : "flex flex-wrap gap-1")}>

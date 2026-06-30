@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "relative grid gap-4 overflow-hidden rounded-lg border border-border/70 bg-card/95 p-5 shadow-sm ring-1 ring-primary/10 before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-gradient-to-r before:from-primary before:via-sky-500 before:to-violet-500",
+        "grid gap-4 border-b border-border/75 bg-background pb-5",
         className,
       )}
     >
@@ -35,7 +35,7 @@ export function PageHeader({
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-foreground sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-foreground sm:text-[1.7rem]">
             {title}
           </h1>
           {description ? (
