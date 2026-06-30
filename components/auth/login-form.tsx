@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { loginAction, type AuthActionResult } from "@/lib/auth/actions";
 import { loginSchema, type LoginValues } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,11 +93,17 @@ export function LoginForm({ initialMessage }: LoginFormProps) {
         </PendingButtonContent>
       </Button>
 
-      <div className="flex flex-wrap justify-between gap-3 text-sm text-muted-foreground">
-        <Link href="/reset-password" className="hover:text-foreground">
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Link
+          href="/reset-password"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Reset password
         </Link>
-        <Link href="/register" className="hover:text-foreground">
+        <Link
+          href="/register"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Create account
         </Link>
       </div>

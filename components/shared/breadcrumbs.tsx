@@ -34,7 +34,7 @@ export function Breadcrumbs({
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="rounded-md px-1.5 py-0.5 underline-offset-4 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="rounded-md border border-border/70 bg-card px-2 py-0.5 shadow-xs shadow-foreground/5 underline-offset-4 hover:border-primary/35 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/20"
                 >
                   {item.label}
                 </Link>

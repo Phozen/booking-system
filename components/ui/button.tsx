@@ -4,25 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/35 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap shadow-xs shadow-foreground/10 transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:shadow-black/25 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/35 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90",
+          "border-primary/80 bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90",
         outline:
-          "border-input bg-card text-foreground hover:border-primary/35 hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-card dark:hover:bg-input/55",
+          "border-input bg-card text-foreground shadow-foreground/10 hover:border-primary/45 hover:bg-accent hover:text-accent-foreground aria-expanded:border-primary/45 aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-card dark:hover:bg-input/55",
         secondary:
-          "border-border bg-secondary text-secondary-foreground hover:border-primary/25 hover:bg-secondary/85 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "border-border bg-secondary text-secondary-foreground hover:border-primary/35 hover:bg-secondary/85 aria-expanded:border-primary/35 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
-          "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:hover:bg-muted/55",
+          "border-border/70 bg-background/70 text-foreground shadow-none hover:border-primary/35 hover:bg-accent/80 hover:text-accent-foreground aria-expanded:border-primary/35 aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:bg-muted/20 dark:hover:bg-muted/55",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
+          "border-destructive/80 bg-destructive text-destructive-foreground shadow-destructive/20 hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/40",
         success:
-          "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400",
+          "border-emerald-700/70 bg-emerald-600 text-white shadow-emerald-700/20 hover:bg-emerald-700 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/25 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400",
         warning:
-          "bg-amber-500 text-amber-950 hover:bg-amber-400 focus-visible:border-amber-500 focus-visible:ring-amber-500/25 dark:bg-amber-400 dark:text-amber-950 dark:hover:bg-amber-300",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-amber-600/70 bg-amber-500 text-amber-950 shadow-amber-700/20 hover:bg-amber-400 focus-visible:border-amber-500 focus-visible:ring-amber-500/25 dark:bg-amber-400 dark:text-amber-950 dark:hover:bg-amber-300",
+        link:
+          "border-transparent bg-transparent text-primary underline underline-offset-4 shadow-none hover:bg-transparent hover:text-primary/85",
       },
       size: {
         default:

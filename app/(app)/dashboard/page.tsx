@@ -75,7 +75,7 @@ export default async function DashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-card-foreground transition-colors hover:border-primary/35 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+              className="grid gap-2 rounded-lg border border-border/80 bg-card p-3 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
             >
               <div className="flex size-8 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground">
                 <Icon className="size-5" aria-hidden="true" />
@@ -98,12 +98,12 @@ export default async function DashboardPage() {
         </div>
 
         {upcomingBookings.length > 0 ? (
-          <div className="mt-4 divide-y divide-border/70">
+          <div className="mt-4 grid gap-2">
             {upcomingBookings.map((booking) => (
               <Link
                 key={booking.id}
                 href={`/bookings/${booking.id}`}
-                className="grid gap-2 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 sm:grid-cols-[1fr_auto] sm:items-center"
+                className="grid gap-2 rounded-md border border-border/75 bg-background px-3 py-3 shadow-xs shadow-foreground/5 transition-colors first:mt-0 hover:border-primary/35 hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/20 sm:grid-cols-[1fr_auto] sm:items-center"
               >
                 <div className="min-w-0">
                   <span className="block truncate font-medium">{booking.title}</span>

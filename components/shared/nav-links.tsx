@@ -41,11 +41,11 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
         compact ? "w-full" : "h-9",
         active
-          ? "border-primary/30 bg-primary text-primary-foreground"
-          : "border-transparent bg-transparent text-muted-foreground hover:border-border hover:bg-accent/70 hover:text-accent-foreground",
+          ? "border-primary/80 bg-primary text-primary-foreground shadow-primary/20"
+          : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
       )}
     >
       <Icon className="size-4" aria-hidden="true" />

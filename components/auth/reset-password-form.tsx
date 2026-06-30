@@ -14,7 +14,7 @@ import {
   type ResetPasswordValues,
 } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,12 +73,15 @@ export function ResetPasswordForm() {
         </PendingButtonContent>
       </Button>
 
-      <p className="text-sm text-muted-foreground">
-        Remember your password?{" "}
-        <Link href="/login" className="font-medium text-foreground">
+      <div className="grid gap-2 text-sm text-muted-foreground">
+        <span>Remember your password?</span>
+        <Link
+          href="/login"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Log in
         </Link>
-      </p>
+      </div>
     </form>
   );
 }

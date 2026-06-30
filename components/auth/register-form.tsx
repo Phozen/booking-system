@@ -9,7 +9,7 @@ import { registerAction, type AuthActionResult } from "@/lib/auth/actions";
 import { formatAllowedEmailDomains } from "@/lib/settings/app-settings";
 import { registerSchema, type RegisterValues } from "@/lib/auth/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -158,12 +158,15 @@ export function RegisterForm({
         </PendingButtonContent>
       </Button>
 
-      <p className="text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground">
+      <div className="grid gap-2 text-sm text-muted-foreground">
+        <span>Already have an account?</span>
+        <Link
+          href="/login"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Log in
         </Link>
-      </p>
+      </div>
     </form>
   );
 }

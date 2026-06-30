@@ -75,7 +75,7 @@ export default async function AdminDashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="grid gap-2 rounded-lg border border-border/70 bg-card p-4 text-card-foreground transition-colors hover:border-primary/35 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+              className="grid gap-2 rounded-lg border border-border/80 bg-card p-4 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
             >
               <div className="flex size-8 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground">
                 <Icon className="size-5" aria-hidden="true" />

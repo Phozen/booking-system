@@ -23,7 +23,7 @@ function EquipmentSummary({ facility }: { facility: Facility }) {
 
 export function FacilityCard({ facility }: { facility: Facility }) {
   return (
-    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground transition-colors hover:border-primary/35 sm:grid-cols-[180px_1fr]">
+    <article className="grid overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground sm:grid-cols-[180px_1fr]">
       <div className="aspect-[16/10] bg-muted sm:aspect-auto">
         <FacilityPhoto facility={facility} />
       </div>
