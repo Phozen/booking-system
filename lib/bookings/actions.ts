@@ -26,6 +26,7 @@ import {
   getAppSettings,
   getEffectiveApprovalRequired,
 } from "@/lib/settings/queries";
+import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -123,32 +124,48 @@ async function insertBookingConfirmationNotification({
       booking.starts_at,
       booking.ends_at,
     );
-    const { error } = await supabase.from("email_notifications").insert({
-      type: "booking_confirmation",
-      status: "queued",
-      recipient_email: recipientEmail,
-      recipient_user_id: booking.user_id,
-      subject: `Booking confirmed: ${booking.title}`,
-      body: `Your booking for ${facilityName} is confirmed for ${bookingWindow}.`,
-      template_name: "booking_confirmation",
-      template_data: {
-        bookingId: booking.id,
-        title: booking.title,
-        facilityName,
-        attendeeCount: booking.attendee_count,
-        startsAt: booking.starts_at,
-        endsAt: booking.ends_at,
-        status: booking.status,
-      },
-      related_booking_id: booking.id,
-      idempotency_key: `booking-confirmation:${booking.id}:${recipientEmail}`,
-    });
+    const { data, error } = await supabase
+      .from("email_notifications")
+      .insert({
+        type: "booking_confirmation",
+        status: "queued",
+        recipient_email: recipientEmail,
+        recipient_user_id: booking.user_id,
+        subject: `Booking confirmed: ${booking.title}`,
+        body: `Your booking for ${facilityName} is confirmed for ${bookingWindow}.`,
+        template_name: "booking_confirmation",
+        template_data: {
+          bookingId: booking.id,
+          title: booking.title,
+          facilityName,
+          attendeeCount: booking.attendee_count,
+          startsAt: booking.starts_at,
+          endsAt: booking.ends_at,
+          status: booking.status,
+        },
+        related_booking_id: booking.id,
+        idempotency_key: `booking-confirmation:${booking.id}:${recipientEmail}`,
+      })
+      .select("id")
+      .maybeSingle();
 
     if (error && error.code !== "23505") {
       console.error("Booking confirmation notification insert failed", {
         bookingId: booking.id,
         message: error.message,
       });
+    }
+
+    if (data?.id) {
+      const result = await processEmailNotificationNow(data.id, supabase);
+
+      if (result.sent === 0) {
+        console.error("Booking confirmation immediate send did not complete", {
+          bookingId: booking.id,
+          notificationId: data.id,
+          result,
+        });
+      }
     }
   } catch (error) {
     console.error("Booking confirmation notification unavailable", error);

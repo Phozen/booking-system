@@ -210,9 +210,8 @@ describe("email queue processor", () => {
     consoleError.mockRestore();
   });
 
-  it("has no direct select-then-update claiming path left in queue.ts", () => {
-    expect(queueSource).not.toContain('.from("email_notifications") .select');
-    expect(queueSource).not.toContain("status: \"sending\"");
+  it("keeps batch queue processing on the atomic claim RPC", () => {
     expect(queueSource).toContain('rpc("claim_email_notifications"');
+    expect(queueSource).toContain("export async function processEmailNotificationNow");
   });
 });

@@ -16,7 +16,7 @@ export function AuthShell({
   return (
     <main className="relative flex min-h-svh items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-10">
       <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
-        <ThemeToggle compact />
+        <ThemeToggle compact className="size-11 bg-card/95 shadow-sm" />
       </div>
       <div className="grid w-full max-w-md gap-6">
         <div className="text-center">

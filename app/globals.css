@@ -131,14 +131,35 @@
       linear-gradient(180deg, color-mix(in oklch, var(--background) 94%, white) 0%, var(--background) 36rem);
     overflow-x: clip;
   }
+  .dark body {
+    background-image:
+      radial-gradient(circle at top left, color-mix(in oklch, var(--primary) 12%, transparent) 0, transparent 28rem),
+      linear-gradient(180deg, color-mix(in oklch, var(--background) 88%, black) 0%, var(--background) 36rem);
+  }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
   }
   input,
   select,
   textarea,
   button {
     max-width: 100%;
+  }
+  select {
+    @apply bg-background text-foreground;
+  }
+  option,
+  optgroup {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
+  option:checked {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
   }
   button,
   a,

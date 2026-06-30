@@ -24,6 +24,7 @@ import {
   getAppSettings,
   getEffectiveApprovalRequired,
 } from "@/lib/settings/queries";
+import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   adminBookingActionSchema,
@@ -316,18 +317,22 @@ async function insertBookingEmail({
       ? `booking-confirmation:${booking.id}:${owner.email}`
       : null;
   const supabase = createAdminClient();
-  const { error } = await supabase.from("email_notifications").insert({
-    type,
-    status: "queued",
-    recipient_email: owner.email,
-    recipient_user_id: booking.user_id,
-    subject,
-    body,
-    template_name: templateName,
-    template_data: templateData,
-    related_booking_id: booking.id,
-    ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
-  });
+  const { data, error } = await supabase
+    .from("email_notifications")
+    .insert({
+      type,
+      status: "queued",
+      recipient_email: owner.email,
+      recipient_user_id: booking.user_id,
+      subject,
+      body,
+      template_name: templateName,
+      template_data: templateData,
+      related_booking_id: booking.id,
+      ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
+    })
+    .select("id")
+    .maybeSingle();
 
   if (error && error.code !== "23505") {
     console.error("Admin booking notification insert failed", {
@@ -335,6 +340,18 @@ async function insertBookingEmail({
       type,
       message: error.message,
     });
+  }
+
+  if (type === "booking_confirmation" && data?.id) {
+    const result = await processEmailNotificationNow(data.id, supabase);
+
+    if (result.sent === 0) {
+      console.error("Admin booking confirmation immediate send did not complete", {
+        bookingId: booking.id,
+        notificationId: data.id,
+        result,
+      });
+    }
   }
 }
 

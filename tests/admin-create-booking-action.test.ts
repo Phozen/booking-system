@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getEffectiveApprovalRequired: vi.fn(),
   createAuditLogSafely: vi.fn(),
   revalidatePath: vi.fn(),
+  processEmailNotificationNow: vi.fn(),
   syncConfirmedBookingToMicrosoftCalendar: vi.fn(),
 }));
 
@@ -34,6 +35,10 @@ vi.mock("@/lib/settings/queries", () => ({
 
 vi.mock("@/lib/audit/log", () => ({
   createAuditLogSafely: mocks.createAuditLogSafely,
+}));
+
+vi.mock("@/lib/email/queue", () => ({
+  processEmailNotificationNow: mocks.processEmailNotificationNow,
 }));
 
 vi.mock("@/lib/integrations/microsoft-365-calendar/sync", () => ({
@@ -119,8 +124,15 @@ function createSupabaseMock({
   };
 
   const emailQuery = {
-    insert: vi.fn().mockResolvedValue({ error: null }),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: { id: "66666666-6666-4666-8666-666666666666" },
+      error: null,
+    }),
+    select: vi.fn(),
+    insert: vi.fn(),
   };
+  emailQuery.insert.mockReturnValue(emailQuery);
+  emailQuery.select.mockReturnValue(emailQuery);
 
   const fallbackQuery = {
     select: vi.fn().mockReturnThis(),
@@ -162,6 +174,14 @@ function setupAction({
   mocks.getAppSettings.mockResolvedValue({ defaultTimezone: "UTC" });
   mocks.syncConfirmedBookingToMicrosoftCalendar.mockResolvedValue({
     status: "skipped",
+  });
+  mocks.processEmailNotificationNow.mockResolvedValue({
+    processed: 1,
+    sent: 1,
+    failed: 0,
+    retried: 0,
+    skipped: 0,
+    message: "Processed booking confirmation email notification.",
   });
   mocks.checkBookingAvailability.mockResolvedValue({
     available: true,
@@ -360,6 +380,10 @@ describe("adminCreateBookingAction", () => {
       related_booking_id: createdBooking.id,
       idempotency_key: `booking-confirmation:${createdBooking.id}:${targetProfile.email}`,
     });
+    expect(mocks.processEmailNotificationNow).toHaveBeenCalledWith(
+      "66666666-6666-4666-8666-666666666666",
+      expect.any(Object),
+    );
     expect(mocks.syncConfirmedBookingToMicrosoftCalendar).toHaveBeenCalledWith(
       createdBooking.id,
       {

@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`NEXT_REDIRECT:${url}`);
   }),
+  processEmailNotificationNow: vi.fn(),
   syncConfirmedBookingToMicrosoftCalendar: vi.fn(),
 }));
 
@@ -46,6 +47,10 @@ vi.mock("@/lib/settings/queries", () => ({
 
 vi.mock("@/lib/audit/log", () => ({
   createAuditLogSafely: mocks.createAuditLogSafely,
+}));
+
+vi.mock("@/lib/email/queue", () => ({
+  processEmailNotificationNow: mocks.processEmailNotificationNow,
 }));
 
 vi.mock("@/lib/integrations/microsoft-365-calendar/sync", () => ({
@@ -122,8 +127,15 @@ function createActionMocks({
   const rpc = vi.fn().mockResolvedValue({ data: booking, error: null });
   const userSupabase = { rpc };
   const emailQuery = {
-    insert: vi.fn().mockResolvedValue({ error: null }),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: { id: "44444444-4444-4444-8444-444444444444" },
+      error: null,
+    }),
+    select: vi.fn(),
+    insert: vi.fn(),
   };
+  emailQuery.insert.mockReturnValue(emailQuery);
+  emailQuery.select.mockReturnValue(emailQuery);
   const adminSupabase = {
     from: vi.fn((table: string) => {
       if (table === "email_notifications") {
@@ -148,6 +160,14 @@ function createActionMocks({
   });
   mocks.syncConfirmedBookingToMicrosoftCalendar.mockResolvedValue({
     status: "skipped",
+  });
+  mocks.processEmailNotificationNow.mockResolvedValue({
+    processed: 1,
+    sent: 1,
+    failed: 0,
+    retried: 0,
+    skipped: 0,
+    message: "Processed booking confirmation email notification.",
   });
 
   return { rpc, emailQuery };
@@ -185,6 +205,10 @@ describe("booking confirmation email queueing", () => {
       related_booking_id: confirmedBooking.id,
       idempotency_key: `booking-confirmation:${confirmedBooking.id}:${user.email}`,
     });
+    expect(mocks.processEmailNotificationNow).toHaveBeenCalledWith(
+      "44444444-4444-4444-8444-444444444444",
+      expect.any(Object),
+    );
   });
 
   it("does not queue booking_confirmation for pending approval-required bookings", async () => {
@@ -203,6 +227,7 @@ describe("booking confirmation email queueing", () => {
     ).rejects.toThrow("NEXT_REDIRECT");
 
     expect(emailQuery.insert).not.toHaveBeenCalled();
+    expect(mocks.processEmailNotificationNow).not.toHaveBeenCalled();
   });
 
   it("does not introduce TEST_EMAIL_TO or a hardcoded recipient path", async () => {

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Suspense } from "react";
 
 import { appConfig } from "@/config/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { ToastProvider } from "@/components/shared/toast-provider";
 
 import "./globals.css";
@@ -37,9 +35,6 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          <Suspense fallback={null}>
-            <NavigationProgress />
-          </Suspense>
           {children}
           <ToastProvider />
         </ThemeProvider>
