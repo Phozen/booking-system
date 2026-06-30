@@ -5,11 +5,13 @@ import { logoutAction } from "@/lib/auth/actions";
 import { formatAppRole, isAdminRole } from "@/lib/auth/profile";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { cn } from "@/lib/utils";
 
 export function UserMenu({
   email,
   role,
   className,
+  controlsClassName,
   showIdentity = true,
   currentArea = "employee",
   profileHref,
@@ -18,6 +20,7 @@ export function UserMenu({
   email?: string | null;
   role?: string | null;
   className?: string;
+  controlsClassName?: string;
   showIdentity?: boolean;
   currentArea?: "employee" | "admin";
   profileHref?: "/profile" | "/admin/profile";
@@ -45,7 +48,12 @@ export function UserMenu({
           ) : null}
         </div>
       ) : null}
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+      <div
+        className={cn(
+          "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end",
+          controlsClassName,
+        )}
+      >
         {adminRole && showModeSwitch ? (
           <Link
             href={switchHref}
@@ -79,8 +87,8 @@ export function UserMenu({
             Log out
           </Button>
         </form>
+        <ThemeToggle compact />
       </div>
-      <ThemeToggle compact />
     </div>
   );
 }
