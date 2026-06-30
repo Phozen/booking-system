@@ -21,28 +21,31 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | Item | Status | Notes |
 | --- | --- | --- |
 | App code support complete | Ready | `EMAIL_PROVIDER=smtp` routes through the SMTP provider. |
-| Env template complete | Ready | `docs/vercel-env-templates/booking-system-vercel-env.example` includes SMTP placeholders only. |
-| Vercel env imported | Ready for manual values | Import/paste values in Vercel, then redeploy. |
+| Env template complete | Ready | `docs/vercel-env-templates/booking-system-vercel-env.example` includes SMTP placeholders and server-only `CRON_SECRET`. |
+| Vercel env imported | Ready for manual values | Import/paste values in Vercel, including `CRON_SECRET`, then redeploy. |
 | Disabled mode verified | Ready | Blank/`none` provider fails safely with a clear configuration message. |
 | Provider options | Ready | Blank/`none`, `resend`, and `smtp` are supported. |
 | SMTP env names | Ready | `EMAIL_PROVIDER`, `EMAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_REQUIRE_TLS`, `SMTP_USER`, `SMTP_PASSWORD`. |
+| Queue processing automation | Ready | `/api/cron/email/process` processes queued rows every 5 minutes when called with `Authorization: Bearer ${CRON_SECRET}`. |
+| Reminder queueing automation | Ready | `/api/cron/email/reminders` queues due reminders every 15 minutes and does not send directly. |
 | Microsoft 365 SMTP defaults | Ready | Host `smtp.office365.com`, port `587`, secure `false`, require TLS `true`. |
 | External requirement: Microsoft 365 mailbox | Pending IT | Prefer a dedicated service mailbox such as `noreply@yourcompany.com`. |
 | External requirement: SMTP AUTH | Pending IT | SMTP AUTH may need to be enabled for the mailbox. |
 | External requirement: SMTP credentials | Pending IT | Add mailbox password or app password only in Vercel/local private env files. |
-| Manual test: process queued email | Pending credentials | Queue a booking/invitation email and process from `/admin/email-notifications`. |
+| Manual fallback test: process queued email | Pending credentials | Queue a booking/invitation email and process from `/admin/email-notifications`. |
 
 ### SMTP Verification Steps
 
-1. Set Vercel SMTP env vars.
+1. Set Vercel SMTP env vars and server-only `CRON_SECRET`.
 2. Redeploy the app.
 3. Create a queued booking or invitation notification.
-4. Open `/admin/email-notifications` as Admin or Super Admin.
-5. Click `Process queued emails`.
-6. Confirm provider shows `SMTP`.
-7. Confirm status changes to `sent`.
-8. If failed, review `last_error`.
-9. Confirm no secrets appear in the UI or log output.
+4. Confirm `/api/cron/email/process` rejects missing or invalid authorization.
+5. Confirm `/api/cron/email/process` with `Authorization: Bearer ${CRON_SECRET}` processes queued rows.
+6. Optionally open `/admin/email-notifications` as Admin or Super Admin and click `Process queued emails` to verify the manual fallback.
+7. Confirm provider shows `SMTP`.
+8. Confirm status changes to `sent`.
+9. If failed, review `last_error`.
+10. Confirm no secrets appear in the UI, cron response, or log output.
 
 ## Microsoft 365 Calendar Readiness
 

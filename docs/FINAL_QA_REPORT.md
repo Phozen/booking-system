@@ -131,9 +131,10 @@ No access-control bug requiring code changes was found in this pass.
 
 - `createAdminClient()` remains isolated in the server-only Supabase admin helper.
 - `SUPABASE_SERVICE_ROLE_KEY` was only found in server-side code and documentation.
+- `CRON_SECRET` is documented as a server-only secret for protected cron routes and must not use a `NEXT_PUBLIC_` prefix.
 - `EMAIL_API_KEY` was only found in server-side email provider code and documentation.
 - No client component imports of `createAdminClient()` were found.
-- `.env.example` documents server-only handling for service role and email keys.
+- `.env.example` documents server-only handling for service role, cron, and email keys.
 
 ## Storage Review
 

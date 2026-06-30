@@ -10,6 +10,16 @@ function getStringValue(data: Record<string, unknown>, key: string) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function getDisplayValue(data: Record<string, unknown>, key: string) {
+  const value = data[key];
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return getStringValue(data, key);
+}
+
 function getBookingLink(appUrl: string, bookingId: string | null) {
   const baseUrl = appUrl.replace(/\/$/, "");
   return bookingId ? `${baseUrl}/bookings/${bookingId}` : baseUrl;
@@ -90,6 +100,7 @@ export function renderEmailTemplate(
   const facilityLevel = getStringValue(input.templateData, "facilityLevel");
   const startsAt = getStringValue(input.templateData, "startsAt");
   const endsAt = getStringValue(input.templateData, "endsAt");
+  const attendeeCount = getDisplayValue(input.templateData, "attendeeCount");
   const status = getStringValue(input.templateData, "status");
   const rejectionReason =
     getStringValue(input.templateData, "rejectionReason") ??
@@ -113,6 +124,7 @@ export function renderEmailTemplate(
     { label: "Date", value: bookingDate },
     { label: "Start time", value: startTime },
     { label: "End time", value: endTime },
+    { label: "Attendee count", value: attendeeCount },
     { label: "Status", value: status },
     { label: "Invitation status", value: invitationStatus },
     { label: "Responded by", value: actorName ?? actorEmail },

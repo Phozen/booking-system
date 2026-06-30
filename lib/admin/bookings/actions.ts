@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { checkBookingAvailability } from "@/lib/bookings/availability";
+import { getFriendlyBookingError } from "@/lib/bookings/errors";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
 import type { BookingUsageStatus } from "@/lib/bookings/usage";
@@ -40,6 +41,7 @@ type AdminBookingActionRecord = {
   user_id: string;
   title: string;
   status: BookingStatus;
+  attendee_count?: number | null;
   starts_at: string;
   ends_at: string;
   approval_required: boolean;
@@ -309,6 +311,10 @@ async function insertBookingEmail({
     return;
   }
 
+  const idempotencyKey =
+    type === "booking_confirmation"
+      ? `booking-confirmation:${booking.id}:${owner.email}`
+      : null;
   const supabase = createAdminClient();
   const { error } = await supabase.from("email_notifications").insert({
     type,
@@ -320,9 +326,10 @@ async function insertBookingEmail({
     template_name: templateName,
     template_data: templateData,
     related_booking_id: booking.id,
+    ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
   });
 
-  if (error) {
+  if (error && error.code !== "23505") {
     console.error("Admin booking notification insert failed", {
       bookingId: booking.id,
       type,
@@ -407,10 +414,10 @@ export async function adminCreateBookingAction(
     settings,
   );
 
-  const { data, error } = await supabase.rpc("create_booking", {
+  const { data, error } = await supabase.rpc("admin_create_booking", {
+    p_actor_user_id: user.id,
+    p_target_user_id: targetProfile.id,
     p_facility_id: parsed.data.facilityId,
-    p_user_id: targetProfile.id,
-    p_created_by: user.id,
     p_title: parsed.data.title,
     p_description: parsed.data.description || null,
     p_attendee_count: attendeeCount,
@@ -427,16 +434,18 @@ export async function adminCreateBookingAction(
 
   if (error || !data) {
     console.error("Admin booking create failed", {
+      actorUserId: user.id,
+      targetUserId: targetProfile.id,
+      facilityId: parsed.data.facilityId,
       code: error?.code,
       message: error?.message,
     });
 
     return {
       status: "error",
-      message:
-        error?.code === "23P01"
-          ? "This time slot is no longer available. Please choose another time."
-          : "Booking could not be created. Please check the details and try again.",
+      message: error
+        ? getFriendlyBookingError(error, "admin-create")
+        : "Booking could not be created. Please check the details and try again.",
     };
   }
 
@@ -475,6 +484,7 @@ export async function adminCreateBookingAction(
         bookingId: booking.id,
         title: booking.title,
         facilityName: availability.facility.name,
+        attendeeCount: booking.attendee_count,
         startsAt: booking.starts_at,
         endsAt: booking.ends_at,
         status: booking.status,

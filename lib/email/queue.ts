@@ -3,8 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { sendNotificationEmail } from "@/lib/email/send";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
-  EmailNotificationStatus,
   EmailNotificationType,
   EmailTemplateData,
 } from "@/lib/email/types";
@@ -46,25 +46,20 @@ type RelatedBookingRecord =
     }[]
   | null;
 
+type SingleRelatedBooking = Exclude<RelatedBookingRecord, null | unknown[]>;
+
 type QueueNotificationRecord = {
   id: string;
   type: EmailNotificationType;
-  status: EmailNotificationStatus;
   recipient_email: string;
-  recipient_user_id: string | null;
+  recipient_name: string | null;
   subject: string;
   body: string | null;
-  template_name: string | null;
   template_data: EmailTemplateData | null;
   related_booking_id: string | null;
   provider: string | null;
-  provider_message_id: string | null;
   attempts: number;
   max_attempts: number;
-  last_error: string | null;
-  scheduled_for: string;
-  sent_at: string | null;
-  created_at: string;
   bookings?: RelatedBookingRecord;
 };
 
@@ -77,37 +72,80 @@ export type EmailQueueProcessResult = {
   message: string;
 };
 
-const queueNotificationSelect = `
+const relatedBookingSelect = `
   id,
-  type,
+  title,
   status,
-  recipient_email,
-  recipient_user_id,
-  subject,
-  body,
-  template_name,
-  template_data,
-  related_booking_id,
-  provider,
-  provider_message_id,
-  attempts,
-  max_attempts,
-  last_error,
-  scheduled_for,
-  sent_at,
-  created_at,
-  bookings:related_booking_id (
-    id,
-    title,
-    status,
-    starts_at,
-    ends_at,
-    facilities (
-      name,
-      level
-    )
+  starts_at,
+  ends_at,
+  facilities (
+    name,
+    level
   )
 `;
+
+const defaultStaleAfter = "15 minutes";
+
+function getRetryAt(attempts: number, maxAttempts: number) {
+  if (attempts >= maxAttempts) {
+    return null;
+  }
+
+  const retryDelaysMinutes: Record<number, number> = {
+    1: 5,
+    2: 30,
+    3: 120,
+  };
+  const minutes = retryDelaysMinutes[attempts] ?? 120;
+
+  return new Date(Date.now() + minutes * 60_000).toISOString();
+}
+
+function sanitizeQueueError(error: string) {
+  return error.replace(/[\u0000-\u001F\u007F]+/g, " ").slice(0, 2000).trim();
+}
+
+async function attachRelatedBookings(
+  supabase: SupabaseClient,
+  records: QueueNotificationRecord[],
+) {
+  const bookingIds = [
+    ...new Set(
+      records
+        .map((record) => record.related_booking_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+
+  if (bookingIds.length === 0) {
+    return records;
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(relatedBookingSelect)
+    .in("id", bookingIds);
+
+  if (error) {
+    console.error("Email queue related booking lookup failed", {
+      message: error.message,
+    });
+    return records;
+  }
+
+  const bookingRows = ((data as RelatedBookingRecord[] | null) ?? []).filter(
+    (booking): booking is SingleRelatedBooking =>
+      Boolean(booking && !Array.isArray(booking)),
+  );
+  const bookingsById = new Map(bookingRows.map((booking) => [booking.id, booking]));
+
+  return records.map((record) => ({
+    ...record,
+    bookings: record.related_booking_id
+      ? bookingsById.get(record.related_booking_id) ?? null
+      : null,
+  }));
+}
 
 function getRelatedBooking(record: QueueNotificationRecord) {
   return Array.isArray(record.bookings) ? record.bookings[0] : record.bookings;
@@ -137,79 +175,49 @@ function enrichTemplateData(record: QueueNotificationRecord): EmailTemplateData 
   };
 }
 
-async function claimNotification(
-  supabase: SupabaseClient,
-  record: QueueNotificationRecord,
-) {
-  const { data, error } = await supabase
-    .from("email_notifications")
-    .update({
-      status: "sending",
-      attempts: record.attempts + 1,
-      last_error: null,
-    })
-    .eq("id", record.id)
-    .eq("status", "queued")
-    .select(queueNotificationSelect)
-    .maybeSingle();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as unknown as QueueNotificationRecord;
-}
-
 async function markNotificationSent(
   supabase: SupabaseClient,
   notificationId: string,
   provider: string,
   messageId: string | null,
 ) {
-  await supabase
-    .from("email_notifications")
-    .update({
-      status: "sent",
-      provider,
-      provider_message_id: messageId,
-      last_error: null,
-      sent_at: new Date().toISOString(),
-    })
-    .eq("id", notificationId);
+  return supabase.rpc("mark_email_notification_sent", {
+    p_email_id: notificationId,
+    p_provider: provider,
+    p_provider_message_id: messageId,
+  });
 }
 
 async function markNotificationFailed(
   supabase: SupabaseClient,
   record: QueueNotificationRecord,
-  provider: string,
   error: string,
 ) {
-  const shouldFailPermanently = record.attempts >= record.max_attempts;
-
-  await supabase
-    .from("email_notifications")
-    .update({
-      status: shouldFailPermanently ? "failed" : "queued",
-      provider,
-      last_error: error,
-      scheduled_for: new Date().toISOString(),
-    })
-    .eq("id", record.id);
+  return supabase.rpc("mark_email_notification_failed", {
+    p_email_id: record.id,
+    p_error: sanitizeQueueError(error) || "Email delivery failed.",
+    p_retry_at: getRetryAt(record.attempts, record.max_attempts),
+  });
 }
 
 export async function processQueuedEmailNotifications(
-  supabase: SupabaseClient,
+  supabaseOrLimit?: SupabaseClient | number,
   limit = 20,
 ): Promise<EmailQueueProcessResult> {
-  const { data, error } = await supabase
-    .from("email_notifications")
-    .select(queueNotificationSelect)
-    .eq("status", "queued")
-    .lte("scheduled_for", new Date().toISOString())
-    .order("scheduled_for", { ascending: true })
-    .limit(limit);
+  const supabase =
+    typeof supabaseOrLimit === "number" || supabaseOrLimit == null
+      ? createAdminClient()
+      : supabaseOrLimit;
+  const claimLimit =
+    typeof supabaseOrLimit === "number" ? supabaseOrLimit : limit;
+  const { data, error } = await supabase.rpc("claim_email_notifications", {
+    p_limit: claimLimit,
+    p_stale_after: defaultStaleAfter,
+  });
 
   if (error) {
+    console.error("Email queue claim failed", { message: error.message });
+
     return {
       processed: 0,
       sent: 0,
@@ -220,33 +228,17 @@ export async function processQueuedEmailNotifications(
     };
   }
 
-  const notifications =
-    (data as unknown as QueueNotificationRecord[] | null) ?? [];
+  const notifications = await attachRelatedBookings(
+    supabase,
+    (data as unknown as QueueNotificationRecord[] | null) ?? [],
+  );
   let processed = 0;
   let sent = 0;
   let failed = 0;
+  let retried = 0;
   let skipped = 0;
 
-  for (const notification of notifications) {
-    if (notification.attempts >= notification.max_attempts) {
-      await supabase
-        .from("email_notifications")
-        .update({
-          status: "failed",
-          last_error: "Maximum email send attempts reached.",
-        })
-        .eq("id", notification.id);
-      failed += 1;
-      continue;
-    }
-
-    const claimed = await claimNotification(supabase, notification);
-
-    if (!claimed) {
-      skipped += 1;
-      continue;
-    }
-
+  for (const claimed of notifications) {
     processed += 1;
     const result = await sendNotificationEmail({
       type: claimed.type,
@@ -257,21 +249,43 @@ export async function processQueuedEmailNotifications(
     });
 
     if (result.ok) {
-      await markNotificationSent(
+      const { error: markSentError } = await markNotificationSent(
         supabase,
         claimed.id,
         result.provider,
         result.messageId,
       );
-      sent += 1;
+
+      if (markSentError) {
+        console.error("Email queue sent marker failed", {
+          notificationId: claimed.id,
+          provider: result.provider,
+          message: markSentError.message,
+        });
+        skipped += 1;
+      } else {
+        sent += 1;
+      }
     } else {
-      await markNotificationFailed(
+      const retryAt = getRetryAt(claimed.attempts, claimed.max_attempts);
+      const { error: markFailedError } = await markNotificationFailed(
         supabase,
         claimed,
-        result.provider,
         result.error,
       );
-      failed += claimed.attempts >= claimed.max_attempts ? 1 : 0;
+
+      if (markFailedError) {
+        console.error("Email queue failed marker failed", {
+          notificationId: claimed.id,
+          provider: result.provider,
+          message: markFailedError.message,
+        });
+        skipped += 1;
+      } else if (retryAt) {
+        retried += 1;
+      } else {
+        failed += 1;
+      }
     }
   }
 
@@ -279,7 +293,7 @@ export async function processQueuedEmailNotifications(
     processed,
     sent,
     failed,
-    retried: 0,
+    retried,
     skipped,
     message:
       notifications.length === 0
@@ -299,6 +313,8 @@ export async function retryFailedEmailNotifications(
       last_error: null,
       provider_message_id: null,
       sent_at: null,
+      failed_at: null,
+      sending_started_at: null,
       scheduled_for: new Date().toISOString(),
     })
     .eq("status", "failed")

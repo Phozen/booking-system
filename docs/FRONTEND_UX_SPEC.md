@@ -83,7 +83,7 @@ Design personality:
 | `/admin/calendar` | All-bookings calendar | Exists | Admin-only calendar for reviewing bookings across facilities and users. |
 | `/admin/facilities` | Facility list and management | Exists | Needs shared admin shell and filters. |
 | `/admin/facilities/new` | Create facility | Exists | Form foundation exists. |
-| `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details plus admin photo management. Equipment management remains data-backed rather than a dedicated UI. |
+| `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details, admin photo management, and facility equipment assignment backed by the dedicated `/admin/equipment` admin UI. |
 | `/admin/bookings` | All bookings | Exists | Status/facility filters exist; needs broader filters and responsive pattern. |
 | `/admin/bookings/[id]` | Admin booking detail/actions | Exists | Needs consistent destructive confirmation UX. |
 | `/admin/bookings/[id]/print` | Printable admin approval form | Exists | Admin/Super Admin printable form with requester, attendees, catering, and signatures. |
@@ -1137,12 +1137,12 @@ Mobile behavior:
 
 Purpose:
 
-- Monitor and manually process queued/failed email notifications.
+- Monitor queued/failed email notifications, retry failures, and manually process queued rows as an operational fallback to cron processing.
 - Provider configuration is environment-based. The UI may show provider/status outcomes such as Resend, SMTP, or configuration missing, but must never expose provider secrets.
 
 Primary actions:
 
-- Process queued emails.
+- Process queued emails manually.
 - Retry failed notifications.
 
 Table columns:

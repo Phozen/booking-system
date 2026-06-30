@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { checkBookingAvailability } from "@/lib/bookings/availability";
+import { getFriendlyBookingError } from "@/lib/bookings/errors";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import { getMyBookingById, type BookingStatus } from "@/lib/bookings/queries";
 import {
@@ -72,44 +73,6 @@ export type CancellationActionResult = {
   message: string;
 };
 
-function getFriendlyBookingError(error: { code?: string; message?: string }) {
-  const message = error.message?.toLowerCase() ?? "";
-
-  if (
-    error.code === "23P01" ||
-    message.includes("bookings_no_overlapping_active") ||
-    message.includes("exclusion constraint")
-  ) {
-    return "This time slot is no longer available. Please choose another time.";
-  }
-
-  if (message.includes("blocked")) {
-    return "This facility is unavailable during the selected time due to a blocked period.";
-  }
-
-  if (message.includes("maintenance")) {
-    return "This facility is under maintenance during the selected time.";
-  }
-
-  if (message.includes("not available") || message.includes("not found")) {
-    return "This facility is not available for booking.";
-  }
-
-  if (message.includes("attendee")) {
-    return "Attendee count exceeds the facility capacity.";
-  }
-
-  if (message.includes("active")) {
-    return "Your account is not active for booking.";
-  }
-
-  if (message.includes("start time")) {
-    return "Start time must be before end time.";
-  }
-
-  return "Booking could not be created. Please check the details and try again.";
-}
-
 function formatEmailBookingWindow(startsAt: string, endsAt: string) {
   return `${formatBookingDateTime(startsAt)} to ${formatBookingDateTime(endsAt)}`;
 }
@@ -172,14 +135,16 @@ async function insertBookingConfirmationNotification({
         bookingId: booking.id,
         title: booking.title,
         facilityName,
+        attendeeCount: booking.attendee_count,
         startsAt: booking.starts_at,
         endsAt: booking.ends_at,
         status: booking.status,
       },
       related_booking_id: booking.id,
+      idempotency_key: `booking-confirmation:${booking.id}:${recipientEmail}`,
     });
 
-    if (error) {
+    if (error && error.code !== "23505") {
       console.error("Booking confirmation notification insert failed", {
         bookingId: booking.id,
         message: error.message,
@@ -640,28 +605,28 @@ export async function updateBookingAction(
   }
 
   const updateValues = {
-    facility_id: parsed.data.facilityId,
+    facilityId: parsed.data.facilityId,
     title: parsed.data.title,
     description: parsed.data.description || null,
-    attendee_count: attendeeCount,
-    starts_at: dateRange.startsAt.toISOString(),
-    ends_at: dateRange.endsAt.toISOString(),
+    attendeeCount,
+    startsAt: dateRange.startsAt.toISOString(),
+    endsAt: dateRange.endsAt.toISOString(),
   };
 
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(updateValues)
-    .eq("id", bookingId)
-    .eq("user_id", user.id)
-    .in("status", ["pending", "confirmed"])
-    .select(
-      "id,facility_id,user_id,title,description,attendee_count,catering_required,catering_type,catering_pax,catering_serving_time,catering_dietary_notes,catering_notes,status,starts_at,ends_at,approval_required",
-    )
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("update_own_booking", {
+    p_booking_id: bookingId,
+    p_facility_id: updateValues.facilityId,
+    p_title: updateValues.title,
+    p_description: updateValues.description,
+    p_attendee_count: updateValues.attendeeCount,
+    p_starts_at: updateValues.startsAt,
+    p_ends_at: updateValues.endsAt,
+  });
 
   if (error || !data) {
-    console.error("Booking update failed", {
+    console.error("Booking update RPC failed", {
       bookingId,
+      facilityId: parsed.data.facilityId,
       code: error?.code,
       message: error?.message,
     });
@@ -694,7 +659,14 @@ export async function updateBookingAction(
         startsAt: existing.startsAt,
         endsAt: existing.endsAt,
       },
-      newValues: updateValues,
+      newValues: {
+        facilityId: updated.facility_id,
+        title: updated.title,
+        description: updated.description,
+        attendeeCount: updated.attendee_count,
+        startsAt: updated.starts_at,
+        endsAt: updated.ends_at,
+      },
     },
     { bookingId },
   );

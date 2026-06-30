@@ -14,13 +14,13 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Admin can mark confirmed/historical bookings checked in, no-show, or reset usage tracking.
 - [ ] Admin can add, archive/reactivate, and assign equipment to facilities.
 - [ ] User can save non-critical notification preferences from `/notification-preferences`.
-- [ ] Admin can queue due booking reminders from `/admin/email-notifications`.
+- [ ] Admin can queue due booking reminders from `/admin/email-notifications`; production cron queueing is verified separately.
 - [ ] Super Admin can open `/admin/system-health`, and the page does not display secrets.
 
 ## Preflight
 
 - [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.
-- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations `0001` through `0015`.
+- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations through `0024`.
 - [ ] Run `npm.cmd run lint`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
@@ -270,6 +270,11 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Open `/admin/email-notifications`; confirm notification records display type, status, recipient, subject, attempts, scheduled time, sent time, and errors.
 - [ ] Process queued emails with missing provider config; confirm app does not crash and records show clear failure.
 - [ ] Retry failed notifications after fixing config.
+- [ ] Call `GET /api/cron/email/process` without `CRON_SECRET`; expect a safe `500` if the secret is missing in the server environment or `401` if authorization is missing/invalid.
+- [ ] Call `GET /api/cron/email/process` with `Authorization: Bearer ${CRON_SECRET}`; confirm it returns counts only and does not expose body, template data, recipients, provider secrets, service role keys, or `CRON_SECRET`.
+- [ ] Call `GET /api/cron/email/reminders` without valid authorization; expect `401`.
+- [ ] Call `GET /api/cron/email/reminders` with valid authorization; confirm it queues eligible reminders only and returns safe counts.
+- [ ] Confirm the reminder cron route does not send email directly; queued rows are sent by `/api/cron/email/process`.
 - [ ] Optional: configure Resend and confirm a real email sends and `sent_at` is populated.
 - [ ] Optional: configure SMTP locally or in Vercel and confirm a real email sends and `sent_at` is populated.
 - [ ] Optional Microsoft 365 SMTP values: `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, `SMTP_USER=<service-mailbox>`, `SMTP_PASSWORD=<secret>`.
@@ -458,10 +463,8 @@ Use this checklist after migrations are applied and the app is running with real
 
 - [ ] Admin user management UI is implemented; complete the admin users manual tests before production launch.
 - [ ] Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop is deferred.
-- [ ] Automatic email cron/background processing is deferred.
-- [ ] Reminder scheduling automation is deferred.
 - [ ] PDF and Excel exports are deferred.
-- [ ] Recurring bookings are deferred.
+- [ ] Advanced recurring features such as infinite recurrence and external calendar import are deferred.
 - [ ] Production deployment remains pending; keep deployment documentation aligned with the chosen host before launch.
 - [ ] Vercel protection, Cloudflare Access, or another network-layer internal restriction is a deployment hardening option.
 ## Roadmap Feature QA

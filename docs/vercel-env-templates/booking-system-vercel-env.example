@@ -6,6 +6,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=PASTE_SUPABASE_ANON_KEY_HERE
 # Server-only Supabase
 SUPABASE_SERVICE_ROLE_KEY=PASTE_SUPABASE_SERVICE_ROLE_KEY_HERE
 
+# Server-only cron route secret. Do not prefix with NEXT_PUBLIC_.
+CRON_SECRET=PASTE_LONG_RANDOM_CRON_SECRET_HERE
+
 # App identity
 APP_TIMEZONE=Asia/Kuala_Lumpur
 APP_NAME=Booking System
@@ -17,7 +20,9 @@ EMAIL_PROVIDER=smtp
 EMAIL_FROM=Booking System <noreply@yourcompany.com>
 EMAIL_API_KEY=
 
-# Microsoft 365 SMTP
+# Microsoft 365 SMTP. For Brevo, use smtp-relay.brevo.com on port 587 with
+# SMTP_SECURE=false and SMTP_REQUIRE_TLS=true; SMTP_PASSWORD must be a Brevo
+# SMTP key, not a Brevo API key or account password.
 SMTP_HOST=smtp.office365.com
 SMTP_PORT=587
 SMTP_SECURE=false

@@ -91,7 +91,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - System health:
   - Sanitized readiness view for email, Microsoft Calendar, and operational queue follow-up.
 
-Post-MVP migrations through `0019` must be applied before deploying the latest operational features:
+Migrations through `0024` must be applied before deploying the latest operational features:
 
 ```powershell
 npx.cmd supabase db push
@@ -191,6 +191,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+CRON_SECRET=
 APP_TIMEZONE=Asia/Kuala_Lumpur
 APP_NAME=Booking System
 COMPANY_NAME=
@@ -217,6 +218,7 @@ Security notes:
 
 - `NEXT_PUBLIC_*` values are browser-exposed.
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be used in client components.
+- `CRON_SECRET` is server-only and protects the email cron routes. Do not prefix it with `NEXT_PUBLIC_`.
 - `EMAIL_API_KEY` is server-only and used by Resend.
 - `SMTP_PASSWORD` is server-only and used by the SMTP provider.
 - `MICROSOFT_CLIENT_SECRET` is server-only and will be used by the future Microsoft Graph Calendar sync.
@@ -265,6 +267,10 @@ Current migration set:
 0018_user_notification_preferences.sql
 0019_booking_recurrence_series.sql
 0020_calendar_visibility_scope.sql
+0021_n8n_calendar_webhook_provider.sql
+0022_booking_mutation_rpcs.sql
+0023_harden_employee_cancellation_updates.sql
+0024_email_queue_claiming.sql
 ```
 
 Typical commands:
@@ -275,6 +281,10 @@ npx.cmd supabase db push
 ```
 
 See `docs/DATABASE_SCHEMA.md` for the full schema and RLS model.
+
+Booking edits, admin-created bookings, and recurring booking creation use dedicated database RPCs for authorization and validation. Finite recurring booking creation is transactional: the user previews candidate occurrences, then final creation succeeds for the full series or fails without creating orphaned occurrences if one slot becomes unavailable.
+
+Queued app notification emails are processed by `GET /api/cron/email/process` every 5 minutes, and booking reminders are queued by `GET /api/cron/email/reminders` every 15 minutes. Both routes require `Authorization: Bearer ${CRON_SECRET}` and run server-side only.
 
 ### Storage Setup
 
@@ -453,9 +463,8 @@ See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and 
 ## Deferred Or Optional Items
 
 - Real email sending requires Resend or SMTP configuration and a verified sender/mailbox.
-- Automatic email cron/background processing is deferred.
 - Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
-- Recurring bookings are deferred.
+- Advanced recurring features such as infinite recurrence and external calendar import are deferred.
 - External guest invitations are deferred.
 - Inbound, two-way, delegated OAuth, facility-calendar mapping, Teams meeting creation, and personal-calendar Microsoft 365 sync are deferred.
 - Network-layer internal access protection, such as Vercel protection or Cloudflare Access, is an optional deployment hardening step.

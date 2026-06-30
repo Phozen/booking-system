@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
 import { checkBookingAvailability } from "@/lib/bookings/availability";
+import { getFriendlyBookingError } from "@/lib/bookings/errors";
 import { normalizeAttendeeCount } from "@/lib/bookings/validation";
 import { getEffectiveApprovalRequired, getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -169,6 +170,15 @@ export async function createRecurringBookingsAction(
     return { status: "error", message: "No generated occurrences are available." };
   }
 
+  if (available.length !== preview.occurrences.length) {
+    return {
+      status: "error",
+      message:
+        "Some generated occurrences are unavailable. Preview again and adjust the recurrence before creating it.",
+      occurrences: preview.occurrences,
+    };
+  }
+
   const parsed = preview.parsed.data;
   const supabase = await createClient();
   const adminSupabase = createAdminClient();
@@ -189,68 +199,61 @@ export async function createRecurringBookingsAction(
     firstAvailability.facility.requiresApproval,
     settings,
   );
-  const { data: series, error: seriesError } = await supabase
-    .from("booking_recurrence_series")
-    .insert({
-      owner_user_id: user.id,
-      facility_id: parsed.facilityId,
-      title: parsed.title,
-      description: parsed.description || null,
-      frequency: parsed.frequency,
-      interval_count: parsed.intervalCount,
-      starts_on: parsed.date,
-      ends_on: parsed.endsOn || null,
-      occurrence_count:
-        parsed.occurrenceCount === "" || parsed.occurrenceCount == null
-          ? available.length
-          : parsed.occurrenceCount,
-      created_by: user.id,
-      status: "active",
-    })
-    .select("id")
-    .maybeSingle();
 
-  if (seriesError || !series) {
-    return { status: "error", message: "Recurring series could not be created." };
-  }
+  const rpcOccurrences = available.map((occurrence) => ({
+    sequence: occurrence.sequence,
+    startsAt: occurrence.startsAt,
+    endsAt: occurrence.endsAt,
+  }));
 
-  const createdBookingIds: string[] = [];
+  const { data, error } = await supabase.rpc("create_recurring_booking_series", {
+    p_owner_user_id: user.id,
+    p_facility_id: parsed.facilityId,
+    p_title: parsed.title,
+    p_description: parsed.description || null,
+    p_attendee_count: attendeeCount,
+    p_approval_required: approvalRequired,
+    p_frequency: parsed.frequency,
+    p_interval_count: parsed.intervalCount,
+    p_starts_on: parsed.date,
+    p_ends_on: parsed.endsOn || null,
+    p_occurrence_count:
+      parsed.occurrenceCount === "" || parsed.occurrenceCount == null
+        ? available.length
+        : parsed.occurrenceCount,
+    p_occurrences: rpcOccurrences,
+  });
 
-  for (const occurrence of available) {
-    const { data, error } = await supabase.rpc("create_booking", {
-      p_facility_id: parsed.facilityId,
-      p_user_id: user.id,
-      p_created_by: user.id,
-      p_title: parsed.title,
-      p_description: parsed.description || null,
-      p_attendee_count: attendeeCount,
-      p_starts_at: occurrence.startsAt,
-      p_ends_at: occurrence.endsAt,
-      p_approval_required: approvalRequired,
-      p_catering_required: false,
-      p_catering_type: null,
-      p_catering_pax: null,
-      p_catering_serving_time: null,
-      p_catering_dietary_notes: null,
-      p_catering_notes: null,
+  if (error || !data || data.length === 0) {
+    console.error("Recurring booking series create failed", {
+      userId: user.id,
+      facilityId: parsed.facilityId,
+      occurrenceCount: rpcOccurrences.length,
+      code: error?.code,
+      message: error?.message,
     });
 
-    if (error || !data) {
-      continue;
-    }
+    return {
+      status: "error",
+      message: error
+        ? `${getFriendlyBookingError(error)} Preview again before creating the recurring booking.`
+        : "Recurring series could not be created. Preview again before trying to create it.",
+      occurrences: preview.occurrences,
+    };
+  }
 
-    const booking = data as { id: string; status: "pending" | "confirmed" };
-    await supabase
-      .from("bookings")
-      .update({
-        recurrence_series_id: series.id,
-        recurrence_sequence: occurrence.sequence,
-      })
-      .eq("id", booking.id);
-    createdBookingIds.push(booking.id);
+  const createdBookings = data as {
+    series_id: string;
+    booking_id: string;
+    recurrence_sequence: number;
+    status: "pending" | "confirmed";
+  }[];
+  const createdBookingIds = createdBookings.map((booking) => booking.booking_id);
+  const seriesId = createdBookings[0].series_id;
 
+  for (const booking of createdBookings) {
     if (booking.status === "confirmed") {
-      await syncConfirmedBookingSafely(booking.id);
+      await syncConfirmedBookingSafely(booking.booking_id);
     }
   }
 
@@ -259,14 +262,14 @@ export async function createRecurringBookingsAction(
     {
       action: "create",
       entityType: "booking",
-      entityId: series.id,
+      entityId: seriesId,
       actorUserId: user.id,
       actorEmail: user.email,
       summary: `Created recurring booking series ${parsed.title}.`,
       newValues: {
-        seriesId: series.id,
+        seriesId,
         createdBookingIds,
-        skippedConflicts: preview.occurrences.length - available.length,
+        occurrenceCount: createdBookingIds.length,
       },
     },
     { bookingId: createdBookingIds[0] },
@@ -279,7 +282,7 @@ export async function createRecurringBookingsAction(
 
   return {
     status: "success",
-    message: `Created ${createdBookingIds.length} recurring booking occurrence${createdBookingIds.length === 1 ? "" : "s"}. Conflicting occurrences were skipped.`,
+    message: `Created ${createdBookingIds.length} recurring booking occurrence${createdBookingIds.length === 1 ? "" : "s"}.`,
     occurrences: preview.occurrences,
     createdCount: createdBookingIds.length,
   };

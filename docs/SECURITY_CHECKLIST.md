@@ -4,12 +4,15 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 ## Post-MVP Roadmap Checks
 
-- [ ] Apply migrations `0016` through `0019` before deploying code paths that read new tables or columns.
+- [ ] Apply migrations through `0024` before deploying code paths that read current tables, columns, or RPCs.
 - [ ] Confirm only Admin/Super Admin can create bookings on behalf of another user.
 - [ ] Confirm admin-created bookings can target active users only.
 - [ ] Confirm employees cannot update booking usage tracking fields.
 - [ ] Confirm users can manage only their own notification preferences.
 - [ ] Confirm notification preferences affect non-critical notifications only.
+- [ ] Confirm booking mutation RPC grants match intent: `update_own_booking` and `create_recurring_booking_series` for authenticated users, `admin_create_booking` for service role only.
+- [ ] Confirm email queue RPCs are service-role-only.
+- [ ] Confirm email cron routes require `Authorization: Bearer ${CRON_SECRET}` and `CRON_SECRET` is server-only.
 - [ ] Confirm Super Admin health/status pages expose configuration presence only and never secrets.
 
 ## Auth Protection Checklist
@@ -42,9 +45,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Employee all-user calendar visibility is gated by the Super Admin `calendar_visibility_mode` setting and shows limited details for unrelated bookings without management/detail links.
 - [x] Booking invitation RLS allows owners to invite/remove, invitees to respond, and admins to view/manage.
 - [x] Active users can view and update only their own safe profile fields through the self-service profile page.
-- [x] Employees cannot directly insert bookings into `public.bookings`; booking creation must use `public.create_booking()`.
+- [x] Employees cannot directly insert bookings into `public.bookings`; booking mutations must use approved RPCs and server actions.
 - [x] Employee booking cancellation policy only permits transition to `cancelled` for the owner.
-- [x] Booking immutability during employee cancellation is backed by a database trigger.
+- [x] Booking immutability during employee cancellation is backed by a database trigger that only permits cancellation fields to change.
 - [x] Employees cannot view audit logs, email notifications, system settings, or export logs except public settings where intended.
 - [x] Employees cannot directly access Microsoft 365 calendar sync tracking records.
 - [x] Admins can manage required operational data through admin-only policies and server-side actions.
@@ -64,6 +67,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 - [x] Browser code uses only `NEXT_PUBLIC_*` variables.
 - [x] `SUPABASE_SERVICE_ROLE_KEY` is server-only.
+- [x] `CRON_SECRET` is server-only and is never prefixed with `NEXT_PUBLIC_`.
 - [x] `EMAIL_API_KEY` is server-only.
 - [x] `SMTP_PASSWORD` is server-only.
 - [x] `MICROSOFT_CLIENT_SECRET` is server-only.
@@ -91,6 +95,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] `public.is_active_user()` requires active profile status.
 - [x] `public.create_booking()` checks active user, ownership, active facility, capacity, blocked periods, maintenance closures, and valid time range.
 - [x] `public.create_booking()` validates required catering type, pax, and serving time when catering is requested.
+- [x] `public.update_own_booking()` validates active owner, ownership, eligible status, facility availability, capacity, blocked periods, maintenance closures, and valid time range.
+- [x] `public.admin_create_booking()` validates active Admin/Super Admin actor and active target user before creating a booking.
+- [x] `public.create_recurring_booking_series()` validates owner identity and creates the series transactionally.
 - [x] `bookings_no_overlapping_active` remains the final database conflict guard for pending and confirmed bookings.
 - [x] Facility delete is implemented as admin-only archive so historical bookings, reports, photos, and audit logs remain preserved.
 - [x] `booking_calendar_syncs` is a tracking table only; it does not perform Microsoft Graph writes by itself.

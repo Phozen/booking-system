@@ -147,7 +147,7 @@ npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-3. Confirm remote migrations `0001` through `0014` are applied.
+3. Confirm remote migrations are applied through the latest migration, currently `0024_email_queue_claiming.sql`.
 4. Confirm RLS is enabled on application tables.
 5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
 6. Confirm default facilities, equipment, and seeded system settings exist.
@@ -162,6 +162,9 @@ npx.cmd supabase db push
    - `default_timezone`
    - `reminder_offsets_minutes`
 8. Confirm `booking_calendar_syncs` exists if Microsoft 365 Calendar sync groundwork has been applied.
+9. Confirm the booking mutation RPCs from `0022_booking_mutation_rpcs.sql` exist.
+10. Confirm `0023_harden_employee_cancellation_updates.sql` is applied so direct employee cancellation cannot mutate unrelated booking fields.
+11. Confirm the email queue claiming RPCs and indexes from `0024_email_queue_claiming.sql` exist.
 
 ## Microsoft 365 Calendar Sync Groundwork
 
@@ -303,6 +306,26 @@ EMAIL_FROM=Booking System <bookings@your-domain.com>
 
 If email variables are missing, processing should fail safely and store a clear error on notification records.
 
+### Automated Queue Processing
+
+Queued app notification emails are processed by a protected Vercel Cron route:
+
+```txt
+GET /api/cron/email/process
+Authorization: Bearer ${CRON_SECRET}
+```
+
+Booking reminder emails are queued by a separate protected Vercel Cron route:
+
+```txt
+GET /api/cron/email/reminders
+Authorization: Bearer ${CRON_SECRET}
+```
+
+`vercel.json` schedules queued email processing every 5 minutes and reminder queueing every 15 minutes. Set `CRON_SECRET` in Vercel to a long random server-only value. Do not prefix it with `NEXT_PUBLIC_`, do not commit the real value, and do not expose it in client components.
+
+The reminder route only inserts queued reminder notification records. `/api/cron/email/process` remains responsible for sending emails.
+
 ### SMTP Setup For Microsoft 365
 
 SMTP is supported for Microsoft 365 and other SMTP providers.
@@ -341,6 +364,13 @@ Microsoft 365 notes:
 - Do not commit SMTP credentials.
 - If SMTP is not ready, use `EMAIL_PROVIDER=none` or leave `EMAIL_PROVIDER` blank so queued emails fail safely with a configuration message.
 - Use `docs/vercel-env-templates/booking-system-vercel-env.example` as the safe Vercel import template and copy it locally to `.env.vercel.local` before replacing placeholders.
+
+Brevo SMTP notes:
+
+- Use `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and `SMTP_REQUIRE_TLS=true`.
+- `SMTP_USER` is the Brevo SMTP login.
+- `SMTP_PASSWORD` must be a Brevo SMTP key, not a Brevo API key or account password.
+- `EMAIL_FROM` must be a sender address verified in Brevo. A personal verified sender is acceptable before a custom domain is ready.
 
 Manual SMTP smoke test:
 
@@ -424,10 +454,8 @@ When an Exabytes domain is purchased or ready:
 
 - Authenticated mobile QA still needs manual execution with real employee/admin accounts.
 - Facility photo storage needs real Supabase upload/delete verification before launch.
-- Automatic email cron/background processing is deferred.
-- Reminder scheduling automation is deferred.
 - PDF and Excel exports are deferred.
-- Recurring bookings are deferred.
+- Advanced recurring features such as infinite recurrence and external calendar import are deferred.
 - Dark mode is deferred.
 - Collaboration/invitations are deferred.
 - Vercel protection, Cloudflare Access, or another network-layer internal access gate is a future hardening option.

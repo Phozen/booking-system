@@ -31,12 +31,17 @@ The database must enforce data integrity and should not rely only on frontend va
 
 ### Post-MVP additive roadmap schema
 
-Migrations `0016` through `0019` add the next operational foundations:
+Migrations `0016` through `0024` add the next operational foundations:
 
 - `0016_booking_usage_tracking.sql` adds booking usage tracking columns to `public.bookings`: `usage_status`, `checked_in_at`, `checked_in_by`, `no_show_marked_at`, and `no_show_marked_by`.
 - `0017_booking_waitlist_requests.sql` adds `public.booking_waitlist_requests` for non-reserving waitlist and alternative-slot requests.
 - `0018_user_notification_preferences.sql` adds `public.user_notification_preferences` for non-critical reminder and invitation preferences.
 - `0019_booking_recurrence_series.sql` adds `public.booking_recurrence_series` and optional occurrence links on `public.bookings`.
+- `0020_calendar_visibility_scope.sql` adds the calendar visibility setting used by the employee calendar.
+- `0021_n8n_calendar_webhook_provider.sql` expands calendar sync provider support for n8n webhooks.
+- `0022_booking_mutation_rpcs.sql` adds trusted booking mutation RPCs for employee edits, admin-created bookings, and transactional recurring series creation.
+- `0023_harden_employee_cancellation_updates.sql` hardens direct employee cancellation updates so only cancellation fields can change.
+- `0024_email_queue_claiming.sql` adds atomic email queue claim/mark RPCs, retry metadata, stale sending recovery, and idempotency support.
 
 Waitlist and recurrence implementation notes:
 
@@ -743,10 +748,15 @@ create table public.email_notifications (
   last_error text,
   scheduled_for timestamptz not null default now(),
   sent_at timestamptz,
+  sending_started_at timestamptz,
+  failed_at timestamptz,
+  idempotency_key text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 ```
+
+`scheduled_for` is also used as the next-attempt timestamp for retry backoff. `sending_started_at` marks rows claimed by a worker, `failed_at` records terminal failure time, and `idempotency_key` prevents duplicate queue records such as repeated reminder enqueue attempts.
 
 ### Indexes
 
@@ -756,6 +766,15 @@ create index email_notifications_type_idx on public.email_notifications(type);
 create index email_notifications_scheduled_for_idx on public.email_notifications(scheduled_for);
 create index email_notifications_related_booking_id_idx on public.email_notifications(related_booking_id);
 create index email_notifications_recipient_user_id_idx on public.email_notifications(recipient_user_id);
+create index email_notifications_due_claim_idx
+  on public.email_notifications(scheduled_for, attempts)
+  where status = 'queued';
+create index email_notifications_stale_sending_idx
+  on public.email_notifications(sending_started_at)
+  where status = 'sending';
+create unique index email_notifications_idempotency_key_idx
+  on public.email_notifications(idempotency_key)
+  where idempotency_key is not null;
 ```
 
 ---
@@ -1314,6 +1333,107 @@ The function checks availability and provides cleaner error messages.
 The exclusion constraint protects against race conditions and simultaneous booking attempts.
 
 ---
+
+## 24A. Booking Mutation RPCs
+
+Booking mutations that need trusted trigger bypass or cross-user authority use dedicated security-definer RPCs instead of loosening direct table RLS policies.
+
+```sql
+public.update_own_booking(
+  p_booking_id uuid,
+  p_facility_id uuid,
+  p_title text,
+  p_description text,
+  p_attendee_count integer,
+  p_starts_at timestamptz,
+  p_ends_at timestamptz
+) returns public.bookings
+```
+
+`update_own_booking` is granted to `authenticated`. It uses `auth.uid()`, requires the caller to own the booking, allows only pending/confirmed bookings, validates active user and active facility state, checks capacity, blocked periods, maintenance closures, and relies on `bookings_no_overlapping_active` as the final conflict guard. The trusted trigger bypass is transaction-local.
+
+```sql
+public.admin_create_booking(
+  p_actor_user_id uuid,
+  p_target_user_id uuid,
+  p_facility_id uuid,
+  p_title text,
+  p_description text,
+  p_attendee_count integer,
+  p_starts_at timestamptz,
+  p_ends_at timestamptz,
+  p_approval_required boolean,
+  p_catering_required boolean default false,
+  p_catering_type text default null,
+  p_catering_pax integer default null,
+  p_catering_serving_time text default null,
+  p_catering_dietary_notes text default null,
+  p_catering_notes text default null
+) returns public.bookings
+```
+
+`admin_create_booking` is granted to `service_role` only. It validates `p_actor_user_id` as an active Admin or Super Admin in the database before creating a booking for an active target user. Server actions must source `p_actor_user_id` from the authenticated admin session, not from form input.
+
+```sql
+public.create_recurring_booking_series(
+  p_owner_user_id uuid,
+  p_facility_id uuid,
+  p_title text,
+  p_description text,
+  p_attendee_count integer,
+  p_approval_required boolean,
+  p_frequency text,
+  p_interval_count integer,
+  p_starts_on date,
+  p_ends_on date,
+  p_occurrence_count integer,
+  p_occurrences jsonb
+) returns table (
+  series_id uuid,
+  booking_id uuid,
+  recurrence_sequence integer,
+  status public.booking_status,
+  starts_at timestamptz,
+  ends_at timestamptz
+)
+```
+
+`create_recurring_booking_series` is granted to `authenticated`. It requires `auth.uid()` to match `p_owner_user_id`, validates each occurrence, inserts the series and occurrences in one transaction, and rolls back the whole series if any occurrence fails validation or conflicts.
+
+`0022_booking_mutation_rpcs.sql` also adds a unique partial index on `(recurrence_series_id, recurrence_sequence)` where `recurrence_series_id is not null`.
+
+## 24B. Email Queue RPCs
+
+Production email processing uses service-role-only queue RPCs so workers claim rows atomically and never send rows they did not claim.
+
+```sql
+public.claim_email_notifications(
+  p_limit integer default 25,
+  p_stale_after interval default interval '15 minutes'
+) returns table (...)
+```
+
+`claim_email_notifications` recovers stale `sending` rows, skips exhausted rows, claims due `queued` rows with `FOR UPDATE SKIP LOCKED`, increments `attempts`, sets `status = 'sending'`, clears `last_error`, and returns only the fields needed by the server-side processor.
+
+```sql
+public.mark_email_notification_sent(
+  p_email_id uuid,
+  p_provider text,
+  p_provider_message_id text default null
+) returns public.email_notifications
+```
+
+`mark_email_notification_sent` only updates rows currently in `sending`, sets `status = 'sent'`, records `sent_at`, provider details, and clears transient failure/claim fields.
+
+```sql
+public.mark_email_notification_failed(
+  p_email_id uuid,
+  p_error text,
+  p_retry_at timestamptz default null
+) returns public.email_notifications
+```
+
+`mark_email_notification_failed` only updates rows currently in `sending`. It either returns the row to `queued` with `scheduled_for = p_retry_at` for another attempt, or marks it `failed` with `failed_at` for permanent failure or exhausted attempts. These RPCs are granted to `service_role` only.
 
 ## 25. Row Level Security Overview
 

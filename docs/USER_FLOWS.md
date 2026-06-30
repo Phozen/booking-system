@@ -2257,10 +2257,12 @@ The user flows are implemented when:
   `/bookings/recurring/new`.
 - The user previews generated daily, weekly, or monthly occurrences before any
   bookings are created.
-- Each occurrence is checked with the existing availability/conflict rules.
-- Only available occurrences are created as normal bookings linked to a
-  recurrence series; conflicting occurrences are skipped and shown in the
-  preview.
+- The preview checks each occurrence with the existing availability/conflict
+  rules and may show unavailable occurrences before final submission.
+- Final creation is all-or-nothing through the database recurring-series RPC.
+  If any selected occurrence becomes unavailable after preview, the whole
+  series creation fails and the user should preview again.
+- Successful occurrences are normal bookings linked to a recurrence series.
 - Recurring booking v1 is capped at 50 generated occurrences and does not
   support infinite recurrence or external calendar import.
 

@@ -41,6 +41,7 @@ Public browser-exposed variables:
 Server-only variables:
 
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is set as a server-only secret.
+- [ ] `CRON_SECRET` is set as a long random server-only secret for protected cron routes.
 - [ ] `EMAIL_API_KEY` is blank until Resend is ready, or set as a server-only secret after Resend setup.
 - [ ] `SMTP_PASSWORD` is blank until SMTP is ready, or set as a server-only secret after SMTP setup.
 - [ ] `MICROSOFT_CLIENT_SECRET` is blank until Microsoft 365 Calendar sync is ready, or set as a server-only secret after Microsoft Entra setup.
@@ -70,6 +71,7 @@ Security reminders:
 
 - [ ] `NEXT_PUBLIC_*` values are safe for browser exposure.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is never exposed to client code.
+- [ ] `CRON_SECRET` is never exposed to client code and is never prefixed with `NEXT_PUBLIC_`.
 - [ ] `EMAIL_API_KEY` is never exposed to client code.
 - [ ] `SMTP_PASSWORD` is never exposed to client code.
 - [ ] `MICROSOFT_CLIENT_SECRET` is never exposed to client code.
@@ -78,10 +80,13 @@ Security reminders:
 ## Supabase
 
 - [ ] Production Supabase project is selected.
-- [ ] `npx.cmd supabase migration list` shows migrations `0001` through `0014`.
+- [ ] `npx.cmd supabase migration list` shows migrations through `0024`.
 - [ ] `npx.cmd supabase db push` has been run successfully.
 - [ ] RLS is enabled on application tables.
 - [ ] `booking_calendar_syncs` exists after migration `0014`.
+- [ ] Booking mutation RPCs from `0022_booking_mutation_rpcs.sql` exist and have expected grants.
+- [ ] Direct employee cancellation hardening from `0023_harden_employee_cancellation_updates.sql` is applied.
+- [ ] Email queue claiming RPCs and indexes from `0024_email_queue_claiming.sql` exist and have expected grants.
 - [ ] `bookings_no_overlapping_active` exclusion constraint exists.
 - [ ] `facility-photos` storage bucket exists and is private.
 - [ ] Storage policies allow active-user reads and admin writes for facility photos.
@@ -134,6 +139,10 @@ Email can stay disabled for MVP testing.
 - [ ] If using Microsoft 365 SMTP, recommended values are `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and `SMTP_REQUIRE_TLS=true`.
 - [ ] `EMAIL_FROM` matches a verified sender before real sending.
 - [ ] Queued email processing works from `/admin/email-notifications` after Resend or SMTP is configured.
+- [ ] `vercel.json` schedules `/api/cron/email/process` every 5 minutes.
+- [ ] `vercel.json` schedules `/api/cron/email/reminders` every 15 minutes.
+- [ ] Both cron routes reject missing or invalid `Authorization: Bearer ${CRON_SECRET}`.
+- [ ] The reminder cron only queues reminders; the process cron sends already-queued rows.
 - [ ] Sent notifications populate provider name, provider message ID when available, and `sent_at`.
 - [ ] Supabase Auth emails are reviewed separately in Supabase Dashboard > Authentication > SMTP settings if branded signup/password-reset emails are required.
 
@@ -218,10 +227,8 @@ When the Exabytes/custom domain is ready:
 
 ## Deferred Production Enhancements
 
-- [ ] Automatic email queue cron.
-- [ ] Reminder scheduling automation.
 - [ ] PDF and Excel exports.
-- [ ] Recurring bookings.
+- [ ] Advanced recurring features such as infinite recurrence and external calendar import.
 - [ ] Dark mode.
 - [ ] Collaboration/invitations.
 - [ ] Internal-only network access gate.
