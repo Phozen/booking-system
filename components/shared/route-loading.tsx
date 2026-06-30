@@ -14,12 +14,19 @@ export function RouteLoading({
   return (
     <main
       className={cn(
-        "mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:px-6 sm:py-10",
+        "mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-6xl content-center gap-8 px-4 py-10 sm:px-6",
         className,
       )}
     >
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <LoadingSpinner label={label} showLabel />
+      <div className="mx-auto flex min-h-56 w-full max-w-sm flex-col items-center justify-center gap-4 text-center text-sm text-muted-foreground">
+        <div className="rounded-full border border-primary/15 bg-card/90 p-6 shadow-lg shadow-primary/10 ring-1 ring-primary/10">
+          <LoadingSpinner
+            size="xl"
+            label={label}
+            className="text-primary"
+          />
+        </div>
+        <p className="font-medium text-foreground">{label}</p>
       </div>
       {variant === "table" ? (
         <SkeletonTable rows={6} columns={5} />

@@ -5,11 +5,20 @@ export default function AuthLoading() {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-4 py-10">
       <section
-        className="grid w-full max-w-md gap-5 rounded-lg border border-border/70 bg-card p-6 shadow-sm ring-1 ring-primary/10"
+        className="grid w-full max-w-md gap-6 rounded-lg border border-border/70 bg-card p-6 shadow-sm ring-1 ring-primary/10"
         role="status"
         aria-live="polite"
       >
-        <LoadingSpinner label="Loading secure form..." showLabel />
+        <div className="flex flex-col items-center justify-center gap-4 py-4 text-center">
+          <div className="rounded-full border border-primary/15 bg-background/80 p-6 shadow-lg shadow-primary/10 ring-1 ring-primary/10">
+            <LoadingSpinner
+              size="xl"
+              label="Loading secure form..."
+              className="text-primary"
+            />
+          </div>
+          <p className="text-sm font-medium">Loading secure form...</p>
+        </div>
         <div className="grid gap-3" aria-hidden="true">
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-full" />

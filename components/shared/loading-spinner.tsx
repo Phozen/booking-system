@@ -6,6 +6,7 @@ const spinnerSizes = {
   sm: "size-3.5",
   md: "size-4",
   lg: "size-5",
+  xl: "size-16 stroke-[1.8]",
 } as const;
 
 export function LoadingSpinner({
