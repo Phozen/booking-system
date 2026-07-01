@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { appConfig } from "@/config/app";
@@ -103,6 +104,42 @@ export async function loginAction(
   }
 
   redirect(redirectTo);
+}
+
+export async function loginWithMicrosoftAction(): Promise<void> {
+  let microsoftLoginUrl = "";
+  let errorRedirect = "";
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin") ?? appConfig.appUrl;
+
+  try {
+    const supabase = await createClient();
+    const redirectTo = `${origin}/auth/callback`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "azure",
+      options: {
+        redirectTo,
+        scopes: "openid email profile offline_access User.Read Calendars.ReadWrite",
+        queryParams: {
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error || !data.url) {
+      errorRedirect = `${origin}/login?error=microsoft`;
+    } else {
+      microsoftLoginUrl = data.url;
+    }
+  } catch {
+    errorRedirect = `${origin}/login?error=callback`;
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+
+  redirect(microsoftLoginUrl);
 }
 
 export async function registerAction(

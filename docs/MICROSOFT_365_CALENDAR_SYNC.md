@@ -32,6 +32,8 @@ Facility or room resource calendars are the best long-term model if the company 
 
 Delegated personal-calendar OAuth is not implemented. Booking-owner mode uses app-only Microsoft Graph permissions and should be constrained by IT with an Exchange Application Access Policy or mail-enabled security group.
 
+The login page also supports Microsoft sign-in through Supabase Azure OAuth for tenant testing. This proves delegated Microsoft login and consent can work, but direct Booking System calendar sync still uses the app-only Graph integration unless a separate delegated token storage/refresh flow is added later.
+
 ## Sync Target Options
 
 ### Option 1: Central Booking Calendar Mailbox
@@ -244,6 +246,7 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 - Microsoft client secret must stay server-only.
 - Microsoft Graph tokens must never be exposed to client components.
 - For booking-owner mode, Microsoft Graph application permissions should be limited by Exchange Application Access Policy or a mail-enabled security group covering only company staff mailboxes.
+- Microsoft login through Supabase requests delegated calendar scopes for testing, but delegated provider tokens must not be stored for sync until secure server-side storage and refresh handling are implemented.
 - n8n webhook URLs and webhook secret must stay server-only.
 - n8n webhook secret is sent as `x-booking-system-secret`, not in the JSON body.
 - Do not store access tokens in browser storage.
@@ -386,6 +389,7 @@ The page does not show client secrets, access tokens, or raw Microsoft responses
 - [ ] Add Microsoft env vars in Vercel as server-side variables.
 - [ ] Apply database migration `0014_microsoft_calendar_sync_groundwork.sql`.
 - [ ] Keep sync disabled until Stage 2 code is deployed and verified.
+- [ ] To test Microsoft login, enable the Azure provider in Supabase Auth, add `{NEXT_PUBLIC_APP_URL}/auth/callback` as an allowed Supabase redirect URL, and add the Supabase provider callback URL shown by Supabase as the Microsoft Entra redirect URI.
 
 ## Implementation Notes
 
