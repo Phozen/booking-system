@@ -46,6 +46,42 @@ export async function microsoftGraphFetch<T>(
 
   try {
     const token = await getMicrosoftGraphAccessToken();
+    return microsoftGraphFetchWithAccessToken<T>(path, token, init);
+  } catch (error) {
+    return {
+      ok: false,
+      status: 0,
+      error: sanitizeMicrosoftCalendarError(error),
+    };
+  }
+}
+
+export async function microsoftGraphFetchWithAccessToken<T>(
+  path: string,
+  accessToken: string,
+  init: RequestInit = {},
+): Promise<MicrosoftGraphFetchResult<T>> {
+  const config = getMicrosoftCalendarSyncConfig();
+
+  if (!config.enabled || config.mode === "disabled") {
+    return {
+      ok: false,
+      status: 0,
+      error: "Microsoft 365 Calendar sync is disabled.",
+    };
+  }
+
+  if (!config.isConfigured) {
+    return {
+      ok: false,
+      status: 0,
+      error:
+        config.validationError ??
+        "Microsoft 365 Calendar sync is not configured.",
+    };
+  }
+
+  try {
     const url = `${trimSlashes(config.graphBaseUrl)}/${trimSlashes(path)}`;
     const response = await fetch(url, {
       ...init,
@@ -53,7 +89,7 @@ export async function microsoftGraphFetch<T>(
         Accept: "application/json",
         ...(init.body ? { "Content-Type": "application/json" } : {}),
         ...init.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       cache: "no-store",
     });

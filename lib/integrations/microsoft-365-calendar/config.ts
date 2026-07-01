@@ -11,10 +11,14 @@ export const calendarSyncProviders = [
   "n8n_webhook",
 ] as const;
 
+export const microsoftGraphAuthModes = ["app_only", "delegated"] as const;
+
 export type MicrosoftCalendarSyncMode =
   (typeof microsoftCalendarSyncModes)[number];
 
 export type CalendarSyncProvider = (typeof calendarSyncProviders)[number];
+
+export type MicrosoftGraphAuthMode = (typeof microsoftGraphAuthModes)[number];
 
 export type MicrosoftCalendarSyncEnv = Record<string, string | undefined>;
 
@@ -22,9 +26,11 @@ export type MicrosoftCalendarSyncConfig = {
   provider: CalendarSyncProvider;
   enabled: boolean;
   mode: MicrosoftCalendarSyncMode;
+  graphAuthMode: MicrosoftGraphAuthMode;
   tenantId: string;
   clientId: string;
   clientSecret: string;
+  delegatedTokenEncryptionKey: string;
   defaultCalendarId: string;
   graphBaseUrl: string;
   missingKeys: string[];
@@ -105,6 +111,16 @@ export function parseMicrosoftCalendarSyncMode(
     : "disabled";
 }
 
+export function parseMicrosoftGraphAuthMode(
+  value: string | undefined,
+): MicrosoftGraphAuthMode {
+  const normalized = trimValue(value).toLowerCase();
+
+  return microsoftGraphAuthModes.includes(normalized as MicrosoftGraphAuthMode)
+    ? (normalized as MicrosoftGraphAuthMode)
+    : "app_only";
+}
+
 export function getMicrosoftCalendarSyncConfig(
   env: MicrosoftCalendarSyncEnv = process.env,
 ): MicrosoftCalendarSyncConfig {
@@ -119,9 +135,12 @@ export function getMicrosoftCalendarSyncConfig(
   const config = {
     enabled,
     mode,
+    graphAuthMode: parseMicrosoftGraphAuthMode(env.MICROSOFT_GRAPH_AUTH_MODE),
     tenantId: trimValue(env.MICROSOFT_TENANT_ID),
     clientId: trimValue(env.MICROSOFT_CLIENT_ID),
     clientSecret: env.MICROSOFT_CLIENT_SECRET ?? "",
+    delegatedTokenEncryptionKey:
+      env.MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY ?? "",
     defaultCalendarId: trimValue(env.MICROSOFT_DEFAULT_CALENDAR_ID),
     graphBaseUrl:
       trimValue(env.MICROSOFT_GRAPH_BASE_URL) || defaultGraphBaseUrl,
@@ -141,6 +160,14 @@ export function getMicrosoftCalendarSyncConfig(
     ["MICROSOFT_TENANT_ID", config.tenantId],
     ["MICROSOFT_CLIENT_ID", config.clientId],
     ["MICROSOFT_CLIENT_SECRET", config.clientSecret],
+    ...(config.graphAuthMode === "delegated"
+      ? ([
+          [
+            "MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY",
+            config.delegatedTokenEncryptionKey,
+          ],
+        ] as const)
+      : []),
     ...(config.mode === "central_calendar"
       ? ([["MICROSOFT_DEFAULT_CALENDAR_ID", config.defaultCalendarId]] as const)
       : []),
@@ -148,17 +175,23 @@ export function getMicrosoftCalendarSyncConfig(
   const missingKeys = requiredValues
     .filter(([, value]) => !value)
     .map(([key]) => key);
+  const authModeError =
+    config.graphAuthMode === "delegated" && config.mode !== "booking_owner_calendar"
+      ? "Delegated Microsoft Graph auth is only supported for booking-owner calendar sync."
+      : null;
 
   return {
     ...config,
     provider,
     missingKeys,
-    isConfigured: missingKeys.length === 0,
+    isConfigured: missingKeys.length === 0 && !authModeError,
     validationError:
       missingKeys.length > 0
         ? `Microsoft 365 Calendar sync is not configured. Set ${missingKeys.join(
             ", ",
           )}.`
+        : authModeError
+          ? authModeError
         : null,
   };
 }

@@ -831,6 +831,43 @@ create index booking_calendar_syncs_last_synced_at_idx on public.booking_calenda
 
 ---
 
+## 16B. Microsoft Calendar Connections Table
+
+Stores server-only encrypted delegated Microsoft Graph calendar tokens for booking-owner Outlook sync.
+
+```sql
+create table public.microsoft_calendar_connections (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  microsoft_email text not null,
+  microsoft_tenant_id text,
+  microsoft_account_id text,
+  scopes text[] not null default '{}',
+  encrypted_access_token text,
+  encrypted_refresh_token text,
+  access_token_expires_at timestamptz,
+  status text not null default 'connected',
+  last_connected_at timestamptz,
+  last_refreshed_at timestamptz,
+  last_error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint microsoft_calendar_connections_status_check
+    check (status in ('connected', 'reconnect_required')),
+  constraint microsoft_calendar_connections_last_error_length
+    check (last_error is null or char_length(last_error) <= 2000)
+);
+```
+
+### Notes
+
+* Tokens are encrypted in application code with AES-256-GCM before storage.
+* The encryption key is `MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY` and must stay server-only.
+* Authenticated users have no direct table grants; app code reads/writes through service-role server helpers only.
+* `last_error` must contain sanitized reconnect/refresh errors only.
+
+---
+
 ## 17. Audit Logs Table
 
 Stores read-only records of important system actions.

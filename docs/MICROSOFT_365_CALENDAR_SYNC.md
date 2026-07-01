@@ -2,7 +2,7 @@
 
 This document defines the planned Microsoft 365 Calendar integration for the Booking System.
 
-Stage 2 implements outbound Microsoft Graph sync. The `n8n_webhook` provider is also available for Outlook event lifecycle sync through n8n create, update, and delete workflows. The app does not import Microsoft 365 calendar events, run delegated user OAuth from the app, sync personal organizer calendars, create Teams meetings, or perform two-way sync.
+Stage 2 implements outbound Microsoft Graph sync. The `n8n_webhook` provider is also available for Outlook event lifecycle sync through n8n create, update, and delete workflows. The app does not import Microsoft 365 calendar events, create Teams meetings, or perform two-way sync.
 
 ## Overview
 
@@ -30,9 +30,10 @@ The central calendar keeps operations simple because the app writes confirmed bo
 
 Facility or room resource calendars are the best long-term model if the company already maintains Microsoft 365 room calendars. That model can be added later by mapping facilities to external calendar IDs.
 
-Delegated personal-calendar OAuth is not implemented. Booking-owner mode uses app-only Microsoft Graph permissions and should be constrained by IT with an Exchange Application Access Policy or mail-enabled security group.
+Booking-owner mode supports two Microsoft Graph auth models:
 
-The login page also supports Microsoft sign-in through Supabase Azure OAuth for tenant testing. This proves delegated Microsoft login and consent can work, but direct Booking System calendar sync still uses the app-only Graph integration unless a separate delegated token storage/refresh flow is added later.
+- `MICROSOFT_GRAPH_AUTH_MODE=app_only` writes to `/users/{ownerEmail}/events` with application permissions and should be constrained by IT with an Exchange Application Access Policy or mail-enabled security group.
+- `MICROSOFT_GRAPH_AUTH_MODE=delegated` writes to `/me/events` with the booking owner's connected Microsoft OAuth token. Each user must connect Microsoft Calendar from their profile.
 
 ## Sync Target Options
 
@@ -75,7 +76,7 @@ Tradeoff:
 
 Events sync to the booking owner's company mailbox calendar.
 
-This is supported for company-only Microsoft 365 tenants through `MICROSOFT_SYNC_MODE=booking_owner_calendar`. It does not use delegated permissions, OAuth, or user-level token management.
+This is supported for company-only Microsoft 365 tenants through `MICROSOFT_SYNC_MODE=booking_owner_calendar`. Use `MICROSOFT_GRAPH_AUTH_MODE=app_only` for application permissions or `MICROSOFT_GRAPH_AUTH_MODE=delegated` for per-user delegated tokens.
 
 ## Sync Behavior By Booking Status
 
@@ -153,7 +154,7 @@ The app acts as itself rather than as an individual user.
 Recommended for v1 because:
 
 - It works well for server-side automation.
-- No per-user OAuth flow is required.
+- No per-user OAuth flow is required in app-only mode.
 - It can target a central booking mailbox or room calendars.
 
 This requires tenant admin consent and should be scoped as narrowly as IT policy allows.
@@ -162,7 +163,7 @@ This requires tenant admin consent and should be scoped as narrowly as IT policy
 
 The app acts on behalf of a signed-in Microsoft user.
 
-This is not recommended for v1 because it requires OAuth, user consent, token refresh handling, and more complex failure modes.
+Delegated booking-owner sync is available for company deployments that prefer user-consented calendar writes over application permissions. It requires OAuth consent, encrypted token storage, refresh handling, and a reconnect path when Microsoft revokes or expires refresh tokens.
 
 ## Environment Variables
 
@@ -176,6 +177,8 @@ MICROSOFT_CLIENT_ID=
 MICROSOFT_CLIENT_SECRET=
 MICROSOFT_DEFAULT_CALENDAR_ID=
 MICROSOFT_SYNC_MODE=disabled
+MICROSOFT_GRAPH_AUTH_MODE=app_only
+MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY=
 MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 
 N8N_CALENDAR_SYNC_ENABLED=false
@@ -224,7 +227,7 @@ The booking owner email must be valid and match `system_settings.allowed_email_d
 
 ## Database Sync Tracking
 
-Migration `0014_microsoft_calendar_sync_groundwork.sql` adds `public.booking_calendar_syncs`.
+Migration `0014_microsoft_calendar_sync_groundwork.sql` adds `public.booking_calendar_syncs`. Migration `0025_microsoft_delegated_calendar_connections.sql` adds encrypted delegated Microsoft calendar connection storage.
 
 Purpose:
 
@@ -233,7 +236,7 @@ Purpose:
 - Store sanitized errors and retry attempts.
 - Support future Super Admin retry/status workflows.
 
-The table records Microsoft Graph and n8n webhook sync state. Migration `0014` must be applied before enabled sync can record successful or failed attempts. Migration `0021_n8n_calendar_webhook_provider.sql` must also be applied before n8n records can be stored because it expands the provider constraint.
+The sync table records Microsoft Graph and n8n webhook sync state. Migration `0014` must be applied before enabled sync can record successful or failed attempts. Migration `0021_n8n_calendar_webhook_provider.sql` must also be applied before n8n records can be stored because it expands the provider constraint. Migration `0025` must be applied before delegated Microsoft Calendar connections can be saved.
 
 ```powershell
 npx.cmd supabase db push
@@ -246,7 +249,7 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 - Microsoft client secret must stay server-only.
 - Microsoft Graph tokens must never be exposed to client components.
 - For booking-owner mode, Microsoft Graph application permissions should be limited by Exchange Application Access Policy or a mail-enabled security group covering only company staff mailboxes.
-- Microsoft login through Supabase requests delegated calendar scopes for testing, but delegated provider tokens must not be stored for sync until secure server-side storage and refresh handling are implemented.
+- Delegated provider tokens are stored only in `microsoft_calendar_connections` after server-side AES-256-GCM encryption with `MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY`.
 - n8n webhook URLs and webhook secret must stay server-only.
 - n8n webhook secret is sent as `x-booking-system-secret`, not in the JSON body.
 - Do not store access tokens in browser storage.
@@ -387,7 +390,7 @@ The page does not show client secrets, access tokens, or raw Microsoft responses
 - [ ] For booking-owner mode, constrain application access to company staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
 - [ ] Provide tenant ID, client ID, client secret, and central calendar ID if using central mode to the deployment owner.
 - [ ] Add Microsoft env vars in Vercel as server-side variables.
-- [ ] Apply database migration `0014_microsoft_calendar_sync_groundwork.sql`.
+- [ ] Apply database migrations through `0025_microsoft_delegated_calendar_connections.sql`.
 - [ ] Keep sync disabled until Stage 2 code is deployed and verified.
 - [ ] To test Microsoft login, enable the Azure provider in Supabase Auth, add `{NEXT_PUBLIC_APP_URL}/auth/callback` as an allowed Supabase redirect URL, and add the Supabase provider callback URL shown by Supabase as the Microsoft Entra redirect URI.
 
@@ -443,7 +446,7 @@ https://graph.microsoft.com/.default
 
 ## Known Limitations
 
-- No OAuth flow is implemented.
+- Delegated OAuth is implemented only for booking-owner Outlook calendar sync; inbound availability and two-way sync remain out of scope.
 - Facility-to-calendar mapping is deferred.
 - Inbound Microsoft 365 availability import is out of scope.
 - Two-way sync is out of scope.

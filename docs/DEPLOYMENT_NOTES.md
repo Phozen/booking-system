@@ -198,7 +198,7 @@ The app uses Microsoft Graph client credentials when sync is enabled. In `centra
 
 Keep sync disabled until:
 
-- migration `0014` has been applied,
+- migrations through `0025` have been applied,
 - Microsoft Entra app registration is complete,
 - the app has the required Microsoft Graph calendar permissions and admin consent,
 - the central booking calendar mailbox is ready, or booking-owner mode has allowed company domains configured,

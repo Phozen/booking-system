@@ -139,6 +139,42 @@ export async function loginWithMicrosoftAction(): Promise<void> {
   redirect(microsoftLoginUrl);
 }
 
+export async function connectMicrosoftCalendarAction(): Promise<void> {
+  let microsoftLoginUrl = "";
+  let errorRedirect = "";
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin") ?? appConfig.appUrl;
+
+  try {
+    const supabase = await createClient();
+    const redirectTo = `${origin}/auth/callback?next=/profile&calendar=connected`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "azure",
+      options: {
+        redirectTo,
+        scopes: "openid email profile offline_access User.Read Calendars.ReadWrite",
+        queryParams: {
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error || !data.url) {
+      errorRedirect = `${origin}/profile?calendar=error`;
+    } else {
+      microsoftLoginUrl = data.url;
+    }
+  } catch {
+    errorRedirect = `${origin}/profile?calendar=error`;
+  }
+
+  if (errorRedirect) {
+    redirect(errorRedirect);
+  }
+
+  redirect(microsoftLoginUrl);
+}
+
 export async function registerAction(
   formData: FormData,
 ): Promise<AuthActionResult> {

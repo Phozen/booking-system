@@ -211,6 +211,8 @@ MICROSOFT_CLIENT_ID=
 MICROSOFT_CLIENT_SECRET=
 MICROSOFT_DEFAULT_CALENDAR_ID=
 MICROSOFT_SYNC_MODE=disabled
+MICROSOFT_GRAPH_AUTH_MODE=app_only
+MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY=
 MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 ```
 
@@ -221,7 +223,8 @@ Security notes:
 - `CRON_SECRET` is server-only and protects the email cron routes. Do not prefix it with `NEXT_PUBLIC_`.
 - `EMAIL_API_KEY` is server-only and used by Resend.
 - `SMTP_PASSWORD` is server-only and used by the SMTP provider.
-- `MICROSOFT_CLIENT_SECRET` is server-only and will be used by the future Microsoft Graph Calendar sync.
+- `MICROSOFT_CLIENT_SECRET` is server-only and used by Microsoft Graph Calendar sync.
+- `MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY` is server-only and required only when delegated booking-owner sync is enabled.
 - Real secrets belong in `.env.local` locally and the Vercel dashboard in production. Do not commit them.
 - `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`.
 - Email variables can stay blank until a provider is configured. Email processing will fail safely with a configuration message.
@@ -271,6 +274,7 @@ Current migration set:
 0022_booking_mutation_rpcs.sql
 0023_harden_employee_cancellation_updates.sql
 0024_email_queue_claiming.sql
+0025_microsoft_delegated_calendar_connections.sql
 ```
 
 Typical commands:
@@ -425,7 +429,7 @@ SMTP_USER
 SMTP_PASSWORD
 ```
 
-Microsoft 365 Calendar sync is ready for live testing once migration `0014` is applied, Microsoft Entra app registration is complete, Graph application permissions/admin consent are granted, and either the central booking calendar mailbox or booking-owner mailbox mode is configured. For `MICROSOFT_SYNC_MODE=booking_owner_calendar`, configure allowed company email domains and ask IT to constrain app-only Graph access to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
+Microsoft 365 Calendar sync is ready for live testing once migrations through `0025` are applied, Microsoft Entra app registration is complete, and either the central booking calendar mailbox or booking-owner mailbox mode is configured. For app-only `MICROSOFT_SYNC_MODE=booking_owner_calendar`, grant Graph application permissions and ask IT to constrain access to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group. For delegated booking-owner sync, set `MICROSOFT_GRAPH_AUTH_MODE=delegated`, grant delegated `Calendars.ReadWrite` consent, configure the delegated token encryption key, and have each user connect Microsoft Calendar from their profile.
 
 See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and external IT checklist.
 
@@ -466,5 +470,5 @@ See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and 
 - Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
 - Advanced recurring features such as infinite recurrence and external calendar import are deferred.
 - External guest invitations are deferred.
-- Inbound, two-way, delegated OAuth, facility-calendar mapping, Teams meeting creation, and personal-calendar Microsoft 365 sync are deferred.
+- Inbound, two-way, facility-calendar mapping, Teams meeting creation, and arbitrary personal-calendar Microsoft 365 sync are deferred.
 - Network-layer internal access protection, such as Vercel protection or Cloudflare Access, is an optional deployment hardening step.

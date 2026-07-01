@@ -5,6 +5,7 @@ import {
   getMicrosoftCalendarSyncConfig,
   getN8nCalendarSyncConfig,
   parseCalendarSyncProvider,
+  parseMicrosoftGraphAuthMode,
   parseMicrosoftCalendarSyncMode,
 } from "@/lib/integrations/microsoft-365-calendar/config";
 
@@ -39,6 +40,12 @@ describe("Microsoft 365 calendar sync config", () => {
     );
     expect(parseCalendarSyncProvider("n8n_webhook")).toBe("n8n_webhook");
     expect(parseCalendarSyncProvider("unknown")).toBe("disabled");
+  });
+
+  it("supports Microsoft Graph auth modes", () => {
+    expect(parseMicrosoftGraphAuthMode("delegated")).toBe("delegated");
+    expect(parseMicrosoftGraphAuthMode("app_only")).toBe("app_only");
+    expect(parseMicrosoftGraphAuthMode("unknown")).toBe("app_only");
   });
 
   it("keeps n8n disabled until the n8n enabled flag is true", () => {
@@ -172,6 +179,44 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.mode).toBe("booking_owner_calendar");
     expect(config.isConfigured).toBe(true);
     expect(config.missingKeys).toEqual([]);
+  });
+
+  it("requires delegated token encryption config for delegated owner sync", () => {
+    const config = getMicrosoftCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "microsoft_graph",
+      MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",
+      MICROSOFT_SYNC_MODE: "booking_owner_calendar",
+      MICROSOFT_GRAPH_AUTH_MODE: "delegated",
+      MICROSOFT_TENANT_ID: "tenant",
+      MICROSOFT_CLIENT_ID: "client",
+      MICROSOFT_CLIENT_SECRET: "secret",
+    });
+
+    expect(config.graphAuthMode).toBe("delegated");
+    expect(config.isConfigured).toBe(false);
+    expect(config.missingKeys).toEqual([
+      "MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY",
+    ]);
+  });
+
+  it("rejects delegated auth for central calendar mode", () => {
+    const config = getMicrosoftCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "microsoft_graph",
+      MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",
+      MICROSOFT_SYNC_MODE: "central_calendar",
+      MICROSOFT_GRAPH_AUTH_MODE: "delegated",
+      MICROSOFT_TENANT_ID: "tenant",
+      MICROSOFT_CLIENT_ID: "client",
+      MICROSOFT_CLIENT_SECRET: "secret",
+      MICROSOFT_DEFAULT_CALENDAR_ID: "calendar@example.com",
+      MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY:
+        "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
+    });
+
+    expect(config.isConfigured).toBe(false);
+    expect(config.validationError).toContain(
+      "only supported for booking-owner calendar sync",
+    );
   });
 
   it("uses the Microsoft Graph base URL fallback", () => {

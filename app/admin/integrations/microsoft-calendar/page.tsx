@@ -60,7 +60,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
         description="Monitor one-way Booking System calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
       />
 
-      <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-5">
+      <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-6">
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">
             Provider
@@ -90,6 +90,16 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
             Configured
           </p>
           <p className="mt-1">{status.isConfigured ? "Yes" : "No"}</p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase text-muted-foreground">
+            Graph auth
+          </p>
+          <p className="mt-1 capitalize">
+            {status.provider === "microsoft_graph"
+              ? status.graphAuthMode.replaceAll("_", " ")
+              : "N/A"}
+          </p>
         </div>
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">

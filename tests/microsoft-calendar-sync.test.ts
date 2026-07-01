@@ -11,9 +11,32 @@ import {
   sendN8nCalendarDeleteWebhook,
   sendN8nCalendarUpdateWebhook,
 } from "@/lib/integrations/microsoft-365-calendar/n8n-webhook";
-import { resolveMicrosoftCalendarTarget } from "@/lib/integrations/microsoft-365-calendar/sync";
+import {
+  resolveMicrosoftCalendarTarget,
+  resolveMicrosoftDelegatedCalendarTarget,
+} from "@/lib/integrations/microsoft-365-calendar/sync";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/integrations/microsoft-365-calendar/delegated", () => ({
+  getMicrosoftDelegatedAccessToken: vi.fn(async () => ({
+    ok: true,
+    accessToken: "delegated-access-token",
+    connection: {
+      user_id: "user-1",
+      microsoft_email: "owner@example.com",
+      microsoft_tenant_id: "tenant-id",
+      microsoft_account_id: "account-id",
+      scopes: ["Calendars.ReadWrite"],
+      encrypted_access_token: "encrypted",
+      encrypted_refresh_token: "encrypted",
+      access_token_expires_at: "2026-07-01T00:00:00.000Z",
+      status: "connected",
+      last_connected_at: "2026-07-01T00:00:00.000Z",
+      last_refreshed_at: null,
+      last_error: null,
+    },
+  })),
+}));
 
 function getConfiguredN8nConfig() {
   return {
@@ -38,6 +61,7 @@ describe("Microsoft 365 calendar sync helpers", () => {
   function getTargetBooking(ownerEmail: string | null) {
     return {
       id: "booking-1",
+      user_id: "user-1",
       title: "Planning",
       description: null,
       status: "confirmed",
@@ -116,6 +140,22 @@ describe("Microsoft 365 calendar sync helpers", () => {
       ok: true,
       calendarId: "old-owner@example.com",
     });
+  });
+
+  it("resolves delegated booking-owner sync to the owner mailbox and /me path", async () => {
+    const target = await resolveMicrosoftDelegatedCalendarTarget({
+      booking: getTargetBooking("owner@example.com"),
+      settings: { allowedEmailDomains: ["example.com"] },
+    });
+
+    expect(target).toEqual({
+      ok: true,
+      calendarId: "owner@example.com",
+      accessToken: "delegated-access-token",
+    });
+    expect(target.ok ? buildMicrosoftGraphPath("me", "events") : "").toBe(
+      "me/events",
+    );
   });
 
   it.each([

@@ -128,6 +128,7 @@ export async function getMicrosoftCalendarIntegrationStatus() {
     provider: config.provider,
     enabled: activeConfig.enabled,
     mode: config.microsoftGraph.mode,
+    graphAuthMode: config.microsoftGraph.graphAuthMode,
     isConfigured: activeConfig.isConfigured,
     validationError: activeConfig.validationError,
     defaultCalendarId: config.microsoftGraph.defaultCalendarId,

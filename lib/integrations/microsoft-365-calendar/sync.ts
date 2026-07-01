@@ -9,7 +9,12 @@ import {
 import {
   buildMicrosoftGraphPath,
   microsoftGraphFetch,
+  microsoftGraphFetchWithAccessToken,
 } from "@/lib/integrations/microsoft-365-calendar/client";
+import {
+  getMicrosoftDelegatedAccessToken,
+  type MicrosoftCalendarConnection,
+} from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import {
   buildMicrosoftCalendarEventPayload,
@@ -55,6 +60,7 @@ type SyncActor = {
 
 type BookingRecord = {
   id: string;
+  user_id: string;
   title: string;
   description: string | null;
   status: string;
@@ -167,6 +173,17 @@ type MicrosoftCalendarTargetResult =
       message: string;
     };
 
+type MicrosoftDelegatedCalendarTargetResult =
+  | {
+      ok: true;
+      calendarId: string;
+      accessToken: string;
+    }
+  | {
+      ok: false;
+      message: string;
+    };
+
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -240,6 +257,86 @@ export function resolveMicrosoftCalendarTarget({
   };
 }
 
+export async function resolveMicrosoftDelegatedCalendarTarget({
+  booking,
+  settings,
+  existingCalendarId,
+}: {
+  booking: BookingRecord;
+  settings: Pick<AppSettings, "allowedEmailDomains">;
+  existingCalendarId?: string | null;
+}): Promise<MicrosoftDelegatedCalendarTargetResult> {
+  const owner = getRecord(booking.profiles);
+  const ownerEmail = owner?.email.trim().toLowerCase() ?? "";
+
+  if (!ownerEmail || !isValidEmail(ownerEmail)) {
+    return {
+      ok: false,
+      message:
+        "Booking owner email is missing or invalid for delegated Microsoft 365 Calendar sync.",
+    };
+  }
+
+  if (settings.allowedEmailDomains.length === 0) {
+    return {
+      ok: false,
+      message:
+        "Allowed email domains must be configured before delegated booking-owner calendar sync can run.",
+    };
+  }
+
+  if (!isEmailAllowedByDomain(ownerEmail, settings.allowedEmailDomains)) {
+    return {
+      ok: false,
+      message:
+        "Booking owner email is outside the allowed company domains for delegated Microsoft 365 Calendar sync.",
+    };
+  }
+
+  const tokenResult = await getMicrosoftDelegatedAccessToken(booking.user_id);
+
+  if (!tokenResult.ok) {
+    return {
+      ok: false,
+      message: tokenResult.error,
+    };
+  }
+
+  const connection = tokenResult.connection as MicrosoftCalendarConnection;
+  const connectionEmail = connection.microsoft_email.trim().toLowerCase();
+  const storedCalendarId = existingCalendarId?.trim().toLowerCase();
+
+  if (!connectionEmail || !isValidEmail(connectionEmail)) {
+    return {
+      ok: false,
+      message:
+        "Booking owner's Microsoft Calendar connection is missing a valid email. Ask the user to reconnect Microsoft Calendar.",
+    };
+  }
+
+  if (connectionEmail !== ownerEmail) {
+    return {
+      ok: false,
+      message:
+        "Booking owner's Microsoft Calendar connection does not match their booking profile email. Ask the user to reconnect with their company account.",
+    };
+  }
+
+  if (storedCalendarId && storedCalendarId !== connectionEmail) {
+    return {
+      ok: false,
+      message:
+        "Existing Microsoft 365 Calendar event belongs to a different mailbox. Manual cleanup or resync is required.",
+    };
+  }
+
+  return {
+    ok: true,
+    calendarId: connectionEmail,
+    accessToken: tokenResult.accessToken,
+  };
+}
+
 async function getBookingForSync(bookingId: string) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -247,6 +344,7 @@ async function getBookingForSync(bookingId: string) {
     .select(
       `
       id,
+      user_id,
       title,
       description,
       status,
@@ -812,12 +910,19 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
 
     const existing = await getSyncRecord(bookingId);
     const settings = await getAppSettings();
-    const target = resolveMicrosoftCalendarTarget({
-      booking,
-      config,
-      settings,
-      existingCalendarId: existing?.external_calendar_id,
-    });
+    const target =
+      config.graphAuthMode === "delegated"
+        ? await resolveMicrosoftDelegatedCalendarTarget({
+            booking,
+            settings,
+            existingCalendarId: existing?.external_calendar_id,
+          })
+        : resolveMicrosoftCalendarTarget({
+            booking,
+            config,
+            settings,
+            existingCalendarId: existing?.external_calendar_id,
+          });
 
     if (!target.ok) {
       const record = await upsertSyncRecord({
@@ -854,21 +959,35 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
       booking: mapBookingForEvent(booking),
       timezone: settings.defaultTimezone,
     });
-    const path = existing?.external_event_id
-      ? buildMicrosoftGraphPath(
-          "users",
-          target.calendarId,
-          "events",
-          existing.external_event_id,
-        )
-      : buildMicrosoftGraphPath("users", target.calendarId, "events");
-    const response = await microsoftGraphFetch<MicrosoftGraphEventResponse>(
-      path,
-      {
-        method: existing?.external_event_id ? "PATCH" : "POST",
-        body: JSON.stringify(payload),
-      },
-    );
+    const method = existing?.external_event_id ? "PATCH" : "POST";
+    const requestInit = {
+      method,
+      body: JSON.stringify(payload),
+    };
+    const delegatedAccessToken =
+      "accessToken" in target && typeof target.accessToken === "string"
+        ? target.accessToken
+        : "";
+    const response =
+      config.graphAuthMode === "delegated"
+        ? await microsoftGraphFetchWithAccessToken<MicrosoftGraphEventResponse>(
+            existing?.external_event_id
+              ? buildMicrosoftGraphPath("me", "events", existing.external_event_id)
+              : buildMicrosoftGraphPath("me", "events"),
+            delegatedAccessToken,
+            requestInit,
+          )
+        : await microsoftGraphFetch<MicrosoftGraphEventResponse>(
+            existing?.external_event_id
+              ? buildMicrosoftGraphPath(
+                  "users",
+                  target.calendarId,
+                  "events",
+                  existing.external_event_id,
+                )
+              : buildMicrosoftGraphPath("users", target.calendarId, "events"),
+            requestInit,
+          );
 
     if (!response.ok) {
       throw new Error(response.error);
@@ -993,25 +1112,40 @@ export async function cancelMicrosoftCalendarEventForBooking(
       );
     }
 
-    const booking = existing.external_calendar_id
-      ? null
-      : await getBookingForSync(bookingId);
-    const settings = existing.external_calendar_id
-      ? null
-      : await getAppSettings();
-    const target = existing.external_calendar_id
-      ? ({ ok: true, calendarId: existing.external_calendar_id } as const)
-      : booking && settings
-        ? resolveMicrosoftCalendarTarget({
-            booking,
-            config,
-            settings,
-          })
-        : ({
-            ok: false,
-            message:
-              "Booking could not be found for Microsoft 365 Calendar cancellation.",
-          } as const);
+    const booking =
+      config.graphAuthMode === "delegated" || !existing.external_calendar_id
+        ? await getBookingForSync(bookingId)
+        : null;
+    const settings =
+      config.graphAuthMode === "delegated" || !existing.external_calendar_id
+        ? await getAppSettings()
+        : null;
+    const target =
+      config.graphAuthMode === "delegated"
+        ? booking && settings
+          ? await resolveMicrosoftDelegatedCalendarTarget({
+              booking,
+              settings,
+              existingCalendarId: existing.external_calendar_id,
+            })
+          : ({
+              ok: false,
+              message:
+                "Booking could not be found for delegated Microsoft 365 Calendar cancellation.",
+            } as const)
+        : existing.external_calendar_id
+          ? ({ ok: true, calendarId: existing.external_calendar_id } as const)
+          : booking && settings
+            ? resolveMicrosoftCalendarTarget({
+                booking,
+                config,
+                settings,
+              })
+            : ({
+                ok: false,
+                message:
+                  "Booking could not be found for Microsoft 365 Calendar cancellation.",
+              } as const);
 
     if (!target.ok) {
       const record = await upsertSyncRecord({
@@ -1044,11 +1178,27 @@ export async function cancelMicrosoftCalendarEventForBooking(
     }
 
     const calendarId = target.calendarId;
+    const delegatedAccessToken =
+      "accessToken" in target && typeof target.accessToken === "string"
+        ? target.accessToken
+        : "";
     failureCalendarId = calendarId;
-    const response = await microsoftGraphFetch<null>(
-      buildMicrosoftGraphPath("users", calendarId, "events", existing.external_event_id),
-      { method: "DELETE" },
-    );
+    const response =
+      config.graphAuthMode === "delegated"
+        ? await microsoftGraphFetchWithAccessToken<null>(
+            buildMicrosoftGraphPath("me", "events", existing.external_event_id),
+            delegatedAccessToken,
+            { method: "DELETE" },
+          )
+        : await microsoftGraphFetch<null>(
+            buildMicrosoftGraphPath(
+              "users",
+              calendarId,
+              "events",
+              existing.external_event_id,
+            ),
+            { method: "DELETE" },
+          );
 
     if (!response.ok && response.status !== 404) {
       throw new Error(response.error);

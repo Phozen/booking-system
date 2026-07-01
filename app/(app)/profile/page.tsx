@@ -1,6 +1,7 @@
 import { LockKeyhole } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
+import { getOwnMicrosoftCalendarConnectionStatus } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { getOwnProfile } from "@/lib/profile/queries";
 import {
   formatContactAdministratorMessage,
@@ -8,18 +9,25 @@ import {
 } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
+import { MicrosoftCalendarConnectionCard } from "@/components/profile/microsoft-calendar-connection-card";
 import { ProfileDetail } from "@/components/profile/profile-detail";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ calendar?: "connected" | "error" }>;
+}) {
   const { user } = await requireUser();
   const supabase = await createClient();
-  const [profile, settings] = await Promise.all([
+  const [profile, settings, calendarConnection, params] = await Promise.all([
     getOwnProfile(supabase, user.id),
     getAppSettings(),
+    getOwnMicrosoftCalendarConnectionStatus(user.id),
+    searchParams,
   ]);
 
   if (!profile) {
@@ -47,6 +55,10 @@ export default async function ProfilePage() {
         <ProfileDetail profile={profile} />
         <div className="grid gap-6">
           <ProfileForm profile={profile} />
+          <MicrosoftCalendarConnectionCard
+            connection={calendarConnection}
+            calendarMessage={params.calendar}
+          />
           <Alert variant="info">
             <LockKeyhole className="size-4" aria-hidden="true" />
             <AlertDescription>
