@@ -120,9 +120,6 @@ export async function loginWithMicrosoftAction(): Promise<void> {
       options: {
         redirectTo,
         scopes: "openid email profile offline_access User.Read Calendars.ReadWrite",
-        queryParams: {
-          prompt: "consent",
-        },
       },
     });
 
