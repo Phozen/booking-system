@@ -36,13 +36,15 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
             <UserRound className="size-5" aria-hidden="true" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="break-words text-lg font-semibold tracking-normal">
               {profile.fullName || "Unnamed user"}
             </h2>
-            <p className="mt-1 inline-flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground">
+            <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
               <Mail className="size-4 shrink-0" aria-hidden="true" />
-              {profile.email}
+              <span className="min-w-0 break-words leading-5 [overflow-wrap:anywhere]">
+                {profile.email}
+              </span>
             </p>
           </div>
         </div>

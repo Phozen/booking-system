@@ -412,56 +412,63 @@ export function BookingForm({
           </FormFieldError>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="startTime">Start time</Label>
-          <Input
-            id="startTime"
-            name="startTime"
-            type="time"
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              "startTime-helper",
-              fieldErrors.startTime && "startTime-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.startTime)}
-            required
-          />
-          <FormFieldHelper id="startTime-helper">
-            Back-to-back bookings are allowed. For example, 10:00-11:00 and
-            11:00-12:00 do not conflict.
-          </FormFieldHelper>
-          <FormFieldError id="startTime-error">
-            {fieldErrors.startTime}
-          </FormFieldError>
-        </div>
-
         <BookingAvailabilityTimeline
           facilityId={selectedFacility}
           facilityName={selectedFacilityDetails?.name}
           date={previewValues.date}
         />
 
-        <div className="grid gap-2">
-          <Label htmlFor="endTime">End time</Label>
-          <Input
-            id="endTime"
-            name="endTime"
-            type="time"
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              "endTime-helper",
-              fieldErrors.endTime && "endTime-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.endTime)}
-            required
-          />
-          <FormFieldHelper id="endTime-helper">
-            End time must be after the start time.
+        <fieldset className="grid gap-2 sm:col-span-2">
+          <legend className="text-sm font-medium">Time</legend>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2">
+            <div className="grid min-w-0 gap-1">
+              <Label htmlFor="startTime" className="text-xs text-muted-foreground">
+                Start
+              </Label>
+              <Input
+                id="startTime"
+                name="startTime"
+                type="time"
+                disabled={!hasFacilities || isPending}
+                aria-describedby={getFieldDescribedBy(
+                  "time-helper",
+                  fieldErrors.startTime && "startTime-error",
+                )}
+                aria-invalid={Boolean(fieldErrors.startTime)}
+                required
+              />
+            </div>
+            <span className="pb-2 text-sm text-muted-foreground" aria-hidden="true">
+              to
+            </span>
+            <div className="grid min-w-0 gap-1">
+              <Label htmlFor="endTime" className="text-xs text-muted-foreground">
+                End
+              </Label>
+              <Input
+                id="endTime"
+                name="endTime"
+                type="time"
+                disabled={!hasFacilities || isPending}
+                aria-describedby={getFieldDescribedBy(
+                  "time-helper",
+                  fieldErrors.endTime && "endTime-error",
+                )}
+                aria-invalid={Boolean(fieldErrors.endTime)}
+                required
+              />
+            </div>
+          </div>
+          <FormFieldHelper id="time-helper">
+            Times use {settings.defaultTimezone}. Back-to-back bookings are allowed.
           </FormFieldHelper>
+          <FormFieldError id="startTime-error">
+            {fieldErrors.startTime}
+          </FormFieldError>
           <FormFieldError id="endTime-error">
             {fieldErrors.endTime}
           </FormFieldError>
-        </div>
+        </fieldset>
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="title">Purpose</Label>

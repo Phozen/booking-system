@@ -83,14 +83,38 @@ export function RecurringBookingForm({
           <Label htmlFor="attendeeCount">Attendee count</Label>
           <Input id="attendeeCount" name="attendeeCount" type="number" min={0} disabled={pending} />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="startTime">Start time</Label>
-          <Input id="startTime" name="startTime" type="time" disabled={pending} required />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="endTime">End time</Label>
-          <Input id="endTime" name="endTime" type="time" disabled={pending} required />
-        </div>
+        <fieldset className="grid gap-2 sm:col-span-2">
+          <legend className="text-sm font-medium">Time</legend>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2">
+            <div className="grid min-w-0 gap-1">
+              <Label htmlFor="startTime" className="text-xs text-muted-foreground">
+                Start
+              </Label>
+              <Input
+                id="startTime"
+                name="startTime"
+                type="time"
+                disabled={pending}
+                required
+              />
+            </div>
+            <span className="pb-2 text-sm text-muted-foreground" aria-hidden="true">
+              to
+            </span>
+            <div className="grid min-w-0 gap-1">
+              <Label htmlFor="endTime" className="text-xs text-muted-foreground">
+                End
+              </Label>
+              <Input
+                id="endTime"
+                name="endTime"
+                type="time"
+                disabled={pending}
+                required
+              />
+            </div>
+          </div>
+        </fieldset>
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="title">Purpose</Label>
           <Input id="title" name="title" maxLength={160} disabled={pending} required />
