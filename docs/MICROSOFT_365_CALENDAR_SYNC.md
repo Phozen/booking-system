@@ -18,7 +18,7 @@ When `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`, 
 
 ## Recommended V1 Architecture
 
-Recommended v1 target: central booking calendar mailbox.
+Recommended v1 targets: central booking calendar mailbox for shared operational visibility, or booking-owner mailboxes for company-only deployments where every staff account belongs to the same Microsoft 365 tenant.
 
 Example:
 
@@ -26,11 +26,11 @@ Example:
 booking-calendar@company.com
 ```
 
-This keeps operations simple because the app writes confirmed bookings to one configured calendar through Microsoft Graph application permissions.
+The central calendar keeps operations simple because the app writes confirmed bookings to one configured calendar through Microsoft Graph application permissions. Booking-owner mode writes each event to the booking owner's company mailbox while keeping the same one-way, server-side sync model.
 
 Facility or room resource calendars are the best long-term model if the company already maintains Microsoft 365 room calendars. That model can be added later by mapping facilities to external calendar IDs.
 
-Organizer personal calendars are not recommended for v1 because they usually require delegated OAuth, user consent, and more complex permission handling.
+Delegated personal-calendar OAuth is not implemented. Booking-owner mode uses app-only Microsoft Graph permissions and should be constrained by IT with an Exchange Application Access Policy or mail-enabled security group.
 
 ## Sync Target Options
 
@@ -71,9 +71,9 @@ Tradeoff:
 
 ### Option 3: Organizer Calendar
 
-Events sync to the booking owner's personal calendar.
+Events sync to the booking owner's company mailbox calendar.
 
-This is not recommended for v1. It usually needs delegated permissions, OAuth, and user-level token management.
+This is supported for company-only Microsoft 365 tenants through `MICROSOFT_SYNC_MODE=booking_owner_calendar`. It does not use delegated permissions, OAuth, or user-level token management.
 
 ## Sync Behavior By Booking Status
 
@@ -193,13 +193,14 @@ Supported sync modes:
 
 - `disabled`
 - `central_calendar`
+- `booking_owner_calendar`
 - `facility_calendars`
 
 Keep `MICROSOFT_CLIENT_SECRET` server-only. Never prefix Microsoft secrets with `NEXT_PUBLIC_`.
 
 Keep `N8N_CALENDAR_WEBHOOK_SECRET` server-only. The Booking System sends it only in the `x-booking-system-secret` request header and never in the JSON payload. Do not show webhook URLs or secrets in the UI.
 
-`MICROSOFT_DEFAULT_CALENDAR_ID` is treated as the central booking calendar mailbox user ID or user principal name. The v1 Graph path is:
+`MICROSOFT_DEFAULT_CALENDAR_ID` is required only for `central_calendar` mode and is treated as the central booking calendar mailbox user ID or user principal name. The central Graph path is:
 
 ```txt
 /users/{MICROSOFT_DEFAULT_CALENDAR_ID}/events
@@ -210,6 +211,14 @@ For example:
 ```txt
 MICROSOFT_DEFAULT_CALENDAR_ID=booking-calendar@company.com
 ```
+
+In `booking_owner_calendar` mode, the app uses the booking owner's `profiles.email` as the Microsoft Graph user target:
+
+```txt
+/users/{bookingOwnerEmail}/events
+```
+
+The booking owner email must be valid and match `system_settings.allowed_email_domains`. If the domain allowlist is empty, or the email is missing, malformed, or outside the allowlist, the sync attempt is marked `skipped` with a safe reason. Existing synced events keep using the stored `booking_calendar_syncs.external_calendar_id` for update/delete, even if the profile email changes later.
 
 ## Database Sync Tracking
 
@@ -234,6 +243,7 @@ Employees do not directly access sync records. Admins and Super Admins can view 
 
 - Microsoft client secret must stay server-only.
 - Microsoft Graph tokens must never be exposed to client components.
+- For booking-owner mode, Microsoft Graph application permissions should be limited by Exchange Application Access Policy or a mail-enabled security group covering only company staff mailboxes.
 - n8n webhook URLs and webhook secret must stay server-only.
 - n8n webhook secret is sent as `x-booking-system-secret`, not in the JSON body.
 - Do not store access tokens in browser storage.
@@ -358,7 +368,7 @@ The page shows:
 - Enabled/disabled state.
 - Sync mode.
 - Whether required env configuration is present.
-- Default calendar target.
+- Calendar target, shown as a central mailbox ID or booking-owner mailbox mode.
 - Recent sync records.
 - Attempts and sanitized errors.
 - Retry action for records with a related booking.
@@ -367,11 +377,12 @@ The page does not show client secrets, access tokens, or raw Microsoft responses
 
 ## Manual IT Setup Checklist
 
-- [ ] Choose central calendar mailbox for v1, or confirm room-calendar strategy.
-- [ ] Create or identify the Microsoft 365 calendar/mailbox.
+- [ ] Choose central calendar mailbox, booking-owner mailbox mode, or confirm room-calendar strategy.
+- [ ] Create or identify the Microsoft 365 calendar/mailbox for central mode, or confirm all booking owner emails are company Microsoft 365 mailboxes.
 - [ ] Create Microsoft Entra app registration.
 - [ ] Grant the required Microsoft Graph calendar permissions.
-- [ ] Provide tenant ID, client ID, client secret, and calendar ID to the deployment owner.
+- [ ] For booking-owner mode, constrain application access to company staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
+- [ ] Provide tenant ID, client ID, client secret, and central calendar ID if using central mode to the deployment owner.
 - [ ] Add Microsoft env vars in Vercel as server-side variables.
 - [ ] Apply database migration `0014_microsoft_calendar_sync_groundwork.sql`.
 - [ ] Keep sync disabled until Stage 2 code is deployed and verified.
@@ -411,9 +422,9 @@ https://graph.microsoft.com/.default
    - Leave one required Microsoft variable blank.
    - Confirm booking succeeds and sync record shows a safe configuration error.
 3. Confirmed booking sync:
-   - Configure real Microsoft Entra values and a central booking calendar mailbox.
+   - Configure real Microsoft Entra values and either a central booking calendar mailbox or `MICROSOFT_SYNC_MODE=booking_owner_calendar` with allowed email domains configured.
    - Create a confirmed booking.
-   - Confirm Outlook event appears and sync record is `synced`.
+   - Confirm Outlook event appears in the expected mailbox and sync record is `synced`.
 4. Approval sync:
    - Create a pending booking.
    - Approve it.

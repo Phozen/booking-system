@@ -4,6 +4,7 @@ import { createAuditLogSafely } from "@/lib/audit/log";
 import {
   getMicrosoftCalendarSyncConfig,
   getN8nCalendarSyncConfig,
+  type MicrosoftCalendarSyncConfig,
 } from "@/lib/integrations/microsoft-365-calendar/config";
 import {
   buildMicrosoftGraphPath,
@@ -28,7 +29,11 @@ import type {
   MicrosoftCalendarSyncStatus,
   MicrosoftGraphEventResponse,
 } from "@/lib/integrations/microsoft-365-calendar/types";
-import { getAppSettings } from "@/lib/settings/queries";
+import {
+  getAppSettings,
+  isEmailAllowedByDomain,
+  type AppSettings,
+} from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type SyncRecord = {
@@ -149,6 +154,89 @@ function mapBookingForN8nEvent(record: BookingRecord): N8nCalendarBookingForEven
           fullName: owner.full_name,
         }
       : null,
+  };
+}
+
+type MicrosoftCalendarTargetResult =
+  | {
+      ok: true;
+      calendarId: string;
+    }
+  | {
+      ok: false;
+      message: string;
+    };
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export function resolveMicrosoftCalendarTarget({
+  booking,
+  config,
+  settings,
+  existingCalendarId,
+}: {
+  booking: BookingRecord;
+  config: Pick<
+    MicrosoftCalendarSyncConfig,
+    "mode" | "defaultCalendarId"
+  >;
+  settings: Pick<AppSettings, "allowedEmailDomains">;
+  existingCalendarId?: string | null;
+}): MicrosoftCalendarTargetResult {
+  const storedCalendarId = existingCalendarId?.trim();
+
+  if (storedCalendarId) {
+    return { ok: true, calendarId: storedCalendarId };
+  }
+
+  if (config.mode === "central_calendar") {
+    const defaultCalendarId = config.defaultCalendarId.trim();
+
+    return defaultCalendarId
+      ? { ok: true, calendarId: defaultCalendarId }
+      : {
+          ok: false,
+          message:
+            "Microsoft 365 central calendar target is not configured.",
+        };
+  }
+
+  if (config.mode === "booking_owner_calendar") {
+    const owner = getRecord(booking.profiles);
+    const ownerEmail = owner?.email.trim().toLowerCase() ?? "";
+
+    if (!ownerEmail || !isValidEmail(ownerEmail)) {
+      return {
+        ok: false,
+        message:
+          "Booking owner email is missing or invalid for Microsoft 365 Calendar sync.",
+      };
+    }
+
+    if (settings.allowedEmailDomains.length === 0) {
+      return {
+        ok: false,
+        message:
+          "Allowed email domains must be configured before booking-owner calendar sync can run.",
+      };
+    }
+
+    if (!isEmailAllowedByDomain(ownerEmail, settings.allowedEmailDomains)) {
+      return {
+        ok: false,
+        message:
+          "Booking owner email is outside the allowed company domains for Microsoft 365 Calendar sync.",
+      };
+    }
+
+    return { ok: true, calendarId: ownerEmail };
+  }
+
+  return {
+    ok: false,
+    message: "Microsoft 365 facility calendar sync mode is not implemented.",
   };
 }
 
@@ -696,6 +784,8 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
     };
   }
 
+  let failureCalendarId: string | null = config.defaultCalendarId || null;
+
   try {
     const booking = await getBookingForSync(bookingId);
 
@@ -722,6 +812,44 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
 
     const existing = await getSyncRecord(bookingId);
     const settings = await getAppSettings();
+    const target = resolveMicrosoftCalendarTarget({
+      booking,
+      config,
+      settings,
+      existingCalendarId: existing?.external_calendar_id,
+    });
+
+    if (!target.ok) {
+      const record = await upsertSyncRecord({
+        bookingId,
+        calendarId: existing?.external_calendar_id ?? null,
+        eventId: existing?.external_event_id ?? null,
+        status: "skipped",
+        lastError: target.message,
+        attempts: existing?.attempts ?? 0,
+      });
+
+      await auditCalendarSync({
+        bookingId,
+        status: "skipped",
+        actor,
+        summary: "Skipped Microsoft 365 Calendar sync for booking.",
+        metadata: {
+          syncId: record.id,
+          reason: target.message,
+        },
+      });
+
+      return {
+        status: "skipped",
+        message: target.message,
+        bookingId,
+        syncId: record.id,
+        externalEventId: existing?.external_event_id,
+      };
+    }
+
+    failureCalendarId = target.calendarId;
     const payload = buildMicrosoftCalendarEventPayload({
       booking: mapBookingForEvent(booking),
       timezone: settings.defaultTimezone,
@@ -729,11 +857,11 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
     const path = existing?.external_event_id
       ? buildMicrosoftGraphPath(
           "users",
-          config.defaultCalendarId,
+          target.calendarId,
           "events",
           existing.external_event_id,
         )
-      : buildMicrosoftGraphPath("users", config.defaultCalendarId, "events");
+      : buildMicrosoftGraphPath("users", target.calendarId, "events");
     const response = await microsoftGraphFetch<MicrosoftGraphEventResponse>(
       path,
       {
@@ -750,7 +878,7 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
       response.data?.id ?? existing?.external_event_id ?? null;
     const record = await upsertSyncRecord({
       bookingId,
-      calendarId: config.defaultCalendarId,
+      calendarId: target.calendarId,
       eventId: externalEventId,
       status: "synced",
       lastError: null,
@@ -766,7 +894,7 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
         : "Created Microsoft 365 Calendar event for booking.",
       metadata: {
         syncId: record.id,
-        externalCalendarId: config.defaultCalendarId,
+        externalCalendarId: target.calendarId,
       },
     });
 
@@ -781,7 +909,7 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
     const existing = await getSyncRecord(bookingId).catch(() => null);
     const record = await tryMarkFailed({
       bookingId,
-      calendarId: config.defaultCalendarId || existing?.external_calendar_id || null,
+      calendarId: existing?.external_calendar_id ?? failureCalendarId,
       eventId: existing?.external_event_id ?? null,
       error,
     });
@@ -836,6 +964,8 @@ export async function cancelMicrosoftCalendarEventForBooking(
     };
   }
 
+  let failureCalendarId: string | null = config.defaultCalendarId || null;
+
   try {
     const existing = await getSyncRecord(bookingId);
 
@@ -863,7 +993,58 @@ export async function cancelMicrosoftCalendarEventForBooking(
       );
     }
 
-    const calendarId = existing.external_calendar_id || config.defaultCalendarId;
+    const booking = existing.external_calendar_id
+      ? null
+      : await getBookingForSync(bookingId);
+    const settings = existing.external_calendar_id
+      ? null
+      : await getAppSettings();
+    const target = existing.external_calendar_id
+      ? ({ ok: true, calendarId: existing.external_calendar_id } as const)
+      : booking && settings
+        ? resolveMicrosoftCalendarTarget({
+            booking,
+            config,
+            settings,
+          })
+        : ({
+            ok: false,
+            message:
+              "Booking could not be found for Microsoft 365 Calendar cancellation.",
+          } as const);
+
+    if (!target.ok) {
+      const record = await upsertSyncRecord({
+        bookingId,
+        calendarId: null,
+        eventId: existing.external_event_id,
+        status: "skipped",
+        lastError: target.message,
+        attempts: existing.attempts,
+      });
+
+      await auditCalendarSync({
+        bookingId,
+        status: "skipped",
+        actor,
+        summary: "Skipped Microsoft 365 Calendar cancellation for booking.",
+        metadata: {
+          syncId: record.id,
+          reason: target.message,
+        },
+      });
+
+      return {
+        status: "skipped",
+        message: target.message,
+        bookingId,
+        syncId: record.id,
+        externalEventId: existing.external_event_id,
+      };
+    }
+
+    const calendarId = target.calendarId;
+    failureCalendarId = calendarId;
     const response = await microsoftGraphFetch<null>(
       buildMicrosoftGraphPath("users", calendarId, "events", existing.external_event_id),
       { method: "DELETE" },
@@ -907,7 +1088,7 @@ export async function cancelMicrosoftCalendarEventForBooking(
     const existing = await getSyncRecord(bookingId).catch(() => null);
     const record = await tryMarkFailed({
       bookingId,
-      calendarId: config.defaultCalendarId || existing?.external_calendar_id || null,
+      calendarId: existing?.external_calendar_id ?? failureCalendarId,
       eventId: existing?.external_event_id ?? null,
       error,
     });

@@ -398,7 +398,7 @@ Add future custom-domain URLs when a domain is ready.
 
 See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environment variables, Supabase setup, first-admin promotion, storage checks, smoke tests, and rollback notes.
 
-App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and should remain disabled until Microsoft Entra app registration and the central calendar target are ready.
+App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and should remain disabled until Microsoft Entra app registration and either the central calendar target or booking-owner mailbox mode is ready.
 
 ## Integration Readiness
 
@@ -425,7 +425,7 @@ SMTP_USER
 SMTP_PASSWORD
 ```
 
-Microsoft 365 Calendar sync is ready for live testing once migration `0014` is applied, Microsoft Entra app registration is complete, Graph application permissions/admin consent are granted, and the central booking calendar mailbox is configured.
+Microsoft 365 Calendar sync is ready for live testing once migration `0014` is applied, Microsoft Entra app registration is complete, Graph application permissions/admin consent are granted, and either the central booking calendar mailbox or booking-owner mailbox mode is configured. For `MICROSOFT_SYNC_MODE=booking_owner_calendar`, configure allowed company email domains and ask IT to constrain app-only Graph access to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
 
 See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and external IT checklist.
 

@@ -1,6 +1,7 @@
 export const microsoftCalendarSyncModes = [
   "disabled",
   "central_calendar",
+  "booking_owner_calendar",
   "facility_calendars",
 ] as const;
 
@@ -140,7 +141,9 @@ export function getMicrosoftCalendarSyncConfig(
     ["MICROSOFT_TENANT_ID", config.tenantId],
     ["MICROSOFT_CLIENT_ID", config.clientId],
     ["MICROSOFT_CLIENT_SECRET", config.clientSecret],
-    ["MICROSOFT_DEFAULT_CALENDAR_ID", config.defaultCalendarId],
+    ...(config.mode === "central_calendar"
+      ? ([["MICROSOFT_DEFAULT_CALENDAR_ID", config.defaultCalendarId]] as const)
+      : []),
   ] as const;
   const missingKeys = requiredValues
     .filter(([, value]) => !value)

@@ -396,8 +396,9 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm only sanitized sync errors are documented for `last_error`.
 - [ ] Confirm disabled sync does not call Microsoft Graph and booking flows still succeed.
 - [ ] Enable sync with missing config and confirm booking flows still succeed while sync records show safe configuration errors.
-- [ ] Configure real Microsoft env vars and create a confirmed booking; confirm Outlook event appears in the central calendar and sync record is `synced`.
-- [ ] Approve a pending booking; confirm Outlook event appears in the central calendar.
+- [ ] Configure real Microsoft env vars and create a confirmed booking; confirm Outlook event appears in the configured central calendar or booking owner's company mailbox and sync record is `synced`.
+- [ ] Approve a pending booking; confirm Outlook event appears in the expected Microsoft 365 mailbox.
+- [ ] In `booking_owner_calendar` mode, confirm missing, malformed, outside-domain, or empty-domain-allowlist owner email cases are marked `skipped` without rolling back the booking change.
 - [ ] Cancel a synced confirmed booking; confirm Outlook event is removed and sync record is `cancelled`.
 - [ ] Force a failed sync and retry from `/admin/integrations/microsoft-calendar` as Super Admin.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is hidden/denied for Admin and Employee roles.

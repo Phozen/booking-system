@@ -75,6 +75,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [x] Microsoft Graph tokens must never be exposed to client components or browser storage when sync is implemented.
 - [x] SMTP provider errors are sanitized before being stored in email notification records.
 - [x] Microsoft 365 calendar sync and n8n webhook errors must be sanitized before being stored in sync tracking records.
+- [x] Booking-owner Microsoft 365 calendar sync skips owner emails that are missing, malformed, outside allowed company domains, or not protected by a configured domain allowlist.
 - [x] `.env.local` and `.env*` files are ignored by Git.
 - [x] Secrets are not displayed in UI.
 
@@ -131,6 +132,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Confirm employees cannot select `booking_calendar_syncs` records.
 - [ ] Confirm admins can view future sync records only through approved admin tooling.
 - [ ] Confirm Microsoft 365 Calendar sync remains disabled until Microsoft Entra setup and manual Graph sync QA are ready.
+- [ ] If `MICROSOFT_SYNC_MODE=booking_owner_calendar`, confirm IT constrained app-only Graph calendar access to company staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
 - [ ] Confirm Microsoft client secrets and future Graph tokens are not exposed in browser bundles or UI.
 - [ ] Confirm n8n webhook URLs and `N8N_CALENDAR_WEBHOOK_SECRET` are not exposed in browser bundles, UI, or raw sync errors.
 - [ ] Confirm `/admin/integrations/microsoft-calendar` is Super Admin only.

@@ -96,7 +96,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
             Calendar target
           </p>
           <p className="mt-1 break-words text-sm text-muted-foreground">
-            {status.defaultCalendarId || "Not set"}
+            {status.calendarTarget || "Not set"}
           </p>
         </div>
       </section>

@@ -62,8 +62,8 @@ Server-side app defaults:
 - [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra setup and manual Graph sync QA are complete.
 - [ ] `MICROSOFT_TENANT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
 - [ ] `MICROSOFT_CLIENT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
-- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID.
-- [ ] `MICROSOFT_SYNC_MODE=disabled` until Microsoft 365 Calendar sync is ready to test.
+- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID when using `central_calendar`.
+- [ ] `MICROSOFT_SYNC_MODE=disabled` until Microsoft 365 Calendar sync is ready to test; use `booking_owner_calendar` only after allowed company domains are configured.
 - [ ] `MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0`, unless a different Microsoft Graph endpoint is intentionally required.
 - [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 
@@ -150,11 +150,12 @@ Email can stay disabled for MVP testing.
 
 Microsoft 365 Calendar sync is separate from SMTP email delivery and should remain disabled until Microsoft Entra setup and manual Graph sync QA are ready.
 
-- [ ] Recommended v1 target is a central booking calendar mailbox.
+- [ ] Recommended v1 target is either a central booking calendar mailbox or booking-owner company mailboxes for single-tenant company use.
 - [ ] Microsoft Graph calendar sync is not confused with Microsoft 365 SMTP email settings.
 - [ ] Microsoft Entra app registration and permissions are reviewed by IT before enabling sync.
 - [ ] `MICROSOFT_CLIENT_SECRET` is stored only in Vercel environment variables.
-- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is the central booking calendar mailbox user ID or user principal name.
+- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is the central booking calendar mailbox user ID or user principal name when using `central_calendar`.
+- [ ] If using `booking_owner_calendar`, allowed company email domains are configured and Microsoft Graph app-only access is constrained to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
 - [ ] `/admin/integrations/microsoft-calendar` is available to Super Admins only.
 - [ ] Disabled sync, missing-config sync, confirmed-booking sync, approval sync, cancellation sync, and retry have been manually tested before production enablement.
 - [ ] `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed by the deployment owner and IT.

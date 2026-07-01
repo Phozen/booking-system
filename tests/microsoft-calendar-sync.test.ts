@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import { buildMicrosoftCalendarEventPayload } from "@/lib/integrations/microsoft-365-calendar/event-mapper";
+import { buildMicrosoftGraphPath } from "@/lib/integrations/microsoft-365-calendar/client";
 import {
   buildN8nCalendarCreatePayload,
   buildN8nCalendarDeletePayload,
@@ -10,6 +11,9 @@ import {
   sendN8nCalendarDeleteWebhook,
   sendN8nCalendarUpdateWebhook,
 } from "@/lib/integrations/microsoft-365-calendar/n8n-webhook";
+import { resolveMicrosoftCalendarTarget } from "@/lib/integrations/microsoft-365-calendar/sync";
+
+vi.mock("server-only", () => ({}));
 
 function getConfiguredN8nConfig() {
   return {
@@ -31,6 +35,131 @@ function getConfiguredN8nConfig() {
 }
 
 describe("Microsoft 365 calendar sync helpers", () => {
+  function getTargetBooking(ownerEmail: string | null) {
+    return {
+      id: "booking-1",
+      title: "Planning",
+      description: null,
+      status: "confirmed",
+      starts_at: "2026-05-14T02:00:00.000Z",
+      ends_at: "2026-05-14T03:00:00.000Z",
+      attendee_count: 4,
+      catering_required: false,
+      catering_type: null,
+      catering_pax: null,
+      catering_serving_time: null,
+      catering_dietary_notes: null,
+      catering_notes: null,
+      facilities: {
+        name: "Meeting Room 1",
+        level: "Level 5",
+        type: "meeting_room",
+      },
+      profiles: ownerEmail
+        ? {
+            email: ownerEmail,
+            full_name: "Owner User",
+          }
+        : null,
+    };
+  }
+
+  it("resolves central Microsoft Graph sync to the configured mailbox", () => {
+    const target = resolveMicrosoftCalendarTarget({
+      booking: getTargetBooking("owner@example.com"),
+      config: {
+        mode: "central_calendar",
+        defaultCalendarId: "booking-calendar@example.com",
+      },
+      settings: { allowedEmailDomains: ["example.com"] },
+    });
+
+    expect(target).toEqual({
+      ok: true,
+      calendarId: "booking-calendar@example.com",
+    });
+  });
+
+  it("resolves booking-owner Microsoft Graph sync to the owner mailbox", () => {
+    const target = resolveMicrosoftCalendarTarget({
+      booking: getTargetBooking("Owner@Example.com"),
+      config: {
+        mode: "booking_owner_calendar",
+        defaultCalendarId: "",
+      },
+      settings: { allowedEmailDomains: ["example.com"] },
+    });
+
+    expect(target).toEqual({
+      ok: true,
+      calendarId: "owner@example.com",
+    });
+    expect(
+      target.ok
+        ? buildMicrosoftGraphPath("users", target.calendarId, "events")
+        : "",
+    ).toBe("users/owner%40example.com/events");
+  });
+
+  it("keeps existing Microsoft Graph event targets for updates and deletes", () => {
+    const target = resolveMicrosoftCalendarTarget({
+      booking: getTargetBooking("new-owner@example.com"),
+      config: {
+        mode: "booking_owner_calendar",
+        defaultCalendarId: "",
+      },
+      settings: { allowedEmailDomains: ["example.com"] },
+      existingCalendarId: "old-owner@example.com",
+    });
+
+    expect(target).toEqual({
+      ok: true,
+      calendarId: "old-owner@example.com",
+    });
+  });
+
+  it.each([
+    {
+      label: "missing",
+      ownerEmail: null,
+      allowedEmailDomains: ["example.com"],
+      message: "missing or invalid",
+    },
+    {
+      label: "malformed",
+      ownerEmail: "not-an-email",
+      allowedEmailDomains: ["example.com"],
+      message: "missing or invalid",
+    },
+    {
+      label: "outside domain",
+      ownerEmail: "owner@other.example",
+      allowedEmailDomains: ["example.com"],
+      message: "outside the allowed company domains",
+    },
+    {
+      label: "no allowlist",
+      ownerEmail: "owner@example.com",
+      allowedEmailDomains: [],
+      message: "Allowed email domains must be configured",
+    },
+  ])(
+    "skips booking-owner Microsoft Graph sync for $label owner email",
+    ({ ownerEmail, allowedEmailDomains, message }) => {
+      const target = resolveMicrosoftCalendarTarget({
+        booking: getTargetBooking(ownerEmail),
+        config: {
+          mode: "booking_owner_calendar",
+          defaultCalendarId: "",
+        },
+        settings: { allowedEmailDomains },
+      });
+
+      expect(target.ok).toBe(false);
+      expect(target.ok ? "" : target.message).toContain(message);
+    },
+  );
+
   it("maps confirmed bookings to safe Microsoft Graph event payloads", () => {
     const payload = buildMicrosoftCalendarEventPayload({
       timezone: "Asia/Kuala_Lumpur",

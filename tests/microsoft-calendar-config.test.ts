@@ -158,6 +158,22 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.validationError).not.toContain("super-secret-value");
   });
 
+  it("supports booking-owner calendar mode without a default calendar ID", () => {
+    const config = getMicrosoftCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "microsoft_graph",
+      MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",
+      MICROSOFT_SYNC_MODE: "booking_owner_calendar",
+      MICROSOFT_TENANT_ID: "tenant",
+      MICROSOFT_CLIENT_ID: "client",
+      MICROSOFT_CLIENT_SECRET: "secret",
+    });
+
+    expect(config.enabled).toBe(true);
+    expect(config.mode).toBe("booking_owner_calendar");
+    expect(config.isConfigured).toBe(true);
+    expect(config.missingKeys).toEqual([]);
+  });
+
   it("uses the Microsoft Graph base URL fallback", () => {
     const config = getMicrosoftCalendarSyncConfig({
       MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",
@@ -175,6 +191,9 @@ describe("Microsoft 365 calendar sync config", () => {
   it("normalizes unsupported modes to disabled", () => {
     expect(parseMicrosoftCalendarSyncMode("central_calendar")).toBe(
       "central_calendar",
+    );
+    expect(parseMicrosoftCalendarSyncMode("booking_owner_calendar")).toBe(
+      "booking_owner_calendar",
     );
     expect(parseMicrosoftCalendarSyncMode("facility_calendars")).toBe(
       "facility_calendars",

@@ -33,6 +33,8 @@ SMTP_PASSWORD=PASTE_MICROSOFT_365_MAILBOX_PASSWORD_OR_APP_PASSWORD_HERE
 # Microsoft 365 Calendar sync disabled until IT setup is ready
 CALENDAR_SYNC_PROVIDER=disabled
 MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
+# Use central_calendar for MICROSOFT_DEFAULT_CALENDAR_ID, or
+# booking_owner_calendar for each booking owner's company mailbox.
 MICROSOFT_SYNC_MODE=disabled
 MICROSOFT_TENANT_ID=
 MICROSOFT_CLIENT_ID=

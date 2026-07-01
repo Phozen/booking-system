@@ -61,8 +61,9 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | External requirement: Entra app | Pending IT | Create Microsoft Entra app registration. |
 | External requirement: Graph permission | Pending IT | Grant `Calendars.ReadWrite` application permission or IT-approved equivalent. |
 | External requirement: admin consent | Pending IT | Tenant admin consent is required for application permissions. |
-| External requirement: central calendar mailbox | Pending IT | `MICROSOFT_DEFAULT_CALENDAR_ID` should be the central booking calendar mailbox user ID or UPN. |
-| External requirement: env credentials | Pending IT/deployment | Tenant ID, client ID, client secret, default calendar ID. |
+| External requirement: calendar target | Pending IT | Use `MICROSOFT_DEFAULT_CALENDAR_ID` for `central_calendar`, or `MICROSOFT_SYNC_MODE=booking_owner_calendar` with configured allowed company domains. |
+| External requirement: mailbox access scope | Pending IT | For booking-owner mode, constrain app-only Graph access to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group. |
+| External requirement: env credentials | Pending IT/deployment | Tenant ID, client ID, client secret, and central calendar ID only when using `central_calendar`. |
 | Manual test: confirmed booking creates event | Pending credentials | Enable sync and create/approve a confirmed booking. |
 | Manual test: cancelled booking removes event | Pending credentials | Cancel a synced confirmed booking. |
 | Manual test: retry failed sync | Pending credentials | Retry from the Super Admin integration page. |
@@ -72,11 +73,11 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 ### Microsoft 365 Calendar Verification Steps
 
 1. Apply migrations `0014` and `0021` before enabling real sync.
-2. Set Microsoft Entra and central calendar env vars in Vercel.
+2. Set Microsoft Entra env vars in Vercel, plus `MICROSOFT_DEFAULT_CALENDAR_ID` for central mode.
 3. Redeploy the app.
-4. Enable sync with `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` and `MICROSOFT_SYNC_MODE=central_calendar`.
+4. Enable sync with `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` and either `MICROSOFT_SYNC_MODE=central_calendar` or `MICROSOFT_SYNC_MODE=booking_owner_calendar`.
 5. Create or approve a confirmed booking.
-6. Confirm the Outlook event appears in the central booking calendar.
+6. Confirm the Outlook event appears in the configured central calendar or the booking owner's company mailbox.
 7. Cancel the synced booking.
 8. Confirm the Outlook event is removed and the sync record is `cancelled`.
 9. Force a failed sync in a controlled test and retry from `/admin/integrations/microsoft-calendar`.

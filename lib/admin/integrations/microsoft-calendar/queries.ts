@@ -119,6 +119,10 @@ export async function getMicrosoftCalendarIntegrationStatus() {
     config.provider === "n8n_webhook"
       ? config.n8nWebhook
       : config.microsoftGraph;
+  const calendarTarget =
+    config.microsoftGraph.mode === "booking_owner_calendar"
+      ? "Booking owner mailbox"
+      : config.microsoftGraph.defaultCalendarId;
 
   return {
     provider: config.provider,
@@ -127,6 +131,7 @@ export async function getMicrosoftCalendarIntegrationStatus() {
     isConfigured: activeConfig.isConfigured,
     validationError: activeConfig.validationError,
     defaultCalendarId: config.microsoftGraph.defaultCalendarId,
+    calendarTarget,
     graphBaseUrl: config.microsoftGraph.graphBaseUrl,
     n8nCreateWebhookConfigured: config.n8nWebhook.createWebhookConfigured,
     n8nUpdateWebhookConfigured: config.n8nWebhook.updateWebhookConfigured,
