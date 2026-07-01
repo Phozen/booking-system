@@ -17,11 +17,13 @@ function BookingSection({
   bookings,
   emptyMessage,
   emptyDescription,
+  muted = false,
 }: {
   title: string;
   bookings: EmployeeBooking[];
   emptyMessage: string;
   emptyDescription: string;
+  muted?: boolean;
 }) {
   return (
     <section className="grid gap-3">
@@ -35,7 +37,7 @@ function BookingSection({
       {bookings.length > 0 ? (
         <div className="grid gap-3">
           {bookings.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} />
+            <BookingCard key={booking.id} booking={booking} muted={muted} />
           ))}
         </div>
       ) : (
@@ -141,6 +143,7 @@ export function MyBookingsList({
         bookings={groupedBookings.history}
         emptyMessage="No previous bookings yet."
         emptyDescription="Completed, expired, and rejected room requests will appear here for reference."
+        muted
       />
       <BookingSection
         title="Cancelled"

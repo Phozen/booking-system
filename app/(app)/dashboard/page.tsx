@@ -33,24 +33,16 @@ export default async function DashboardPage() {
         {employeeNavigation.map((item) => {
           const Icon = item.icon;
           const tone = employeeFeatureStyles[item.tone];
-          const descriptions: Record<(typeof employeeNavigation)[number]["href"], string> = {
-            "/bookings/new": "Choose room, date, time, and catering.",
-            "/calendar": "Pick a day and book from the schedule.",
-            "/my-bookings": "Open, edit, print, or cancel requests.",
-            "/invitations": "Review meetings you were invited to.",
-          };
-
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`grid min-h-48 gap-4 rounded-lg border p-5 shadow-lg ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 ${tone.home}`}
+              className={`grid min-h-48 place-items-center gap-5 rounded-lg border p-6 text-center shadow-lg ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 ${tone.home}`}
             >
-              <div className={`flex size-16 items-center justify-center rounded-lg ring-1 ${tone.icon}`}>
-                <Icon className="size-9" aria-hidden="true" />
+              <div className={`flex size-20 items-center justify-center rounded-xl ring-1 ${tone.icon}`}>
+                <Icon className="size-12" aria-hidden="true" />
               </div>
-              <h2 className="text-2xl font-bold tracking-normal">{item.title}</h2>
-              <p className="text-base leading-6 opacity-90">{descriptions[item.href]}</p>
+              <h2 className="text-3xl font-bold tracking-normal">{item.title}</h2>
             </Link>
           );
         })}

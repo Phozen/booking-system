@@ -25,7 +25,6 @@ import {
   formatFacilityType,
 } from "@/lib/facilities/format";
 import {
-  formatEffectiveApprovalCopy,
   formatEffectiveApprovalLabel,
   type AppSettings,
 } from "@/lib/settings/app-settings";
@@ -353,7 +352,7 @@ export function BookingForm({
                   <p className="text-xs font-medium uppercase text-muted-foreground">
                     Selected facility
                   </p>
-                  <h2 className="mt-1 font-semibold tracking-normal">
+                  <h2 className="mt-1 text-2xl font-bold tracking-normal sm:text-3xl">
                     {selectedFacilityDetails.name}
                   </h2>
                   <p className="mt-1 text-muted-foreground">
@@ -375,15 +374,16 @@ export function BookingForm({
                   )}
                 </span>
               </div>
-              <p className="text-xs text-sky-800 dark:text-sky-200">
-                {formatEffectiveApprovalCopy(
-                  selectedFacilityDetails.requiresApproval,
-                  settings,
-                )}
-              </p>
               <p className="text-xs text-muted-foreground">
                 {selectedFacilityDetails.equipment.length > 0
-                  ? `Equipment: ${selectedFacilityDetails.equipment.slice(0, 4).join(", ")}${selectedFacilityDetails.equipment.length > 4 ? "..." : ""}`
+                  ? `Equipment: ${selectedFacilityDetails.equipment
+                      .slice(0, 4)
+                      .map((item) =>
+                        item.quantity > 1
+                          ? `${item.name} (${item.quantity})`
+                          : item.name,
+                      )
+                      .join(", ")}${selectedFacilityDetails.equipment.length > 4 ? "..." : ""}`
                   : "No equipment listed."}
               </p>
             </div>

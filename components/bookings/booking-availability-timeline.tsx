@@ -79,13 +79,13 @@ function overlaps(start: number, end: number, blocks: BusyBlock[]) {
 function blockColor(type: BusyBlock["type"]) {
   switch (type) {
     case "confirmed":
-      return "border-red-200 bg-red-100 text-red-950 dark:border-red-900 dark:bg-red-950/45 dark:text-red-100";
+      return "border-red-600 bg-red-200 text-red-950 shadow-red-900/20 dark:border-red-500 dark:bg-red-950/80 dark:text-red-50";
     case "pending":
-      return "border-amber-200 bg-amber-100 text-amber-950 dark:border-amber-900 dark:bg-amber-950/45 dark:text-amber-100";
+      return "border-amber-600 bg-amber-200 text-amber-950 shadow-amber-900/20 dark:border-amber-500 dark:bg-amber-950/80 dark:text-amber-50";
     case "blocked":
-      return "border-slate-300 bg-slate-200 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100";
+      return "border-slate-600 bg-slate-300 text-slate-950 shadow-slate-900/20 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-50";
     case "maintenance":
-      return "border-purple-200 bg-purple-100 text-purple-950 dark:border-purple-900 dark:bg-purple-950/45 dark:text-purple-100";
+      return "border-purple-600 bg-purple-200 text-purple-950 shadow-purple-900/20 dark:border-purple-500 dark:bg-purple-950/80 dark:text-purple-50";
   }
 }
 
@@ -454,14 +454,12 @@ export function BookingAvailabilityTimeline({
                     <div
                       key={mode}
                       className={cn(
-                        "absolute left-0 right-0 flex cursor-ns-resize items-center justify-between px-2",
+                        "absolute left-0 right-0 flex cursor-ns-resize justify-center px-2",
                         isStart ? "-top-2" : "-bottom-2",
                       )}
                       onPointerDown={(event) => beginBlockDrag(event, mode)}
                     >
-                      <span className="size-4 rounded-full border-2 border-primary bg-background shadow-sm" />
-                      <span className="h-3 w-10 rounded-full border-2 border-primary bg-background shadow-sm" />
-                      <span className="size-4 rounded-full border-2 border-primary bg-background shadow-sm" />
+                      <span className="h-3 w-14 rounded-full border-2 border-primary bg-background shadow-sm" />
                     </div>
                   );
                 })}
@@ -493,7 +491,7 @@ export function BookingAvailabilityTimeline({
               size="icon"
               onClick={() => adjust("start", -STEP_MINUTES)}
               disabled={disabled || !date}
-              aria-label="Move start time earlier by 15 minutes"
+              aria-label="Move start time earlier by 30 minutes"
             >
               <Minus className="size-4" aria-hidden="true" />
             </Button>
@@ -506,7 +504,7 @@ export function BookingAvailabilityTimeline({
               size="icon"
               onClick={() => adjust("start", STEP_MINUTES)}
               disabled={disabled || !date}
-              aria-label="Move start time later by 15 minutes"
+              aria-label="Move start time later by 30 minutes"
             >
               <Plus className="size-4" aria-hidden="true" />
             </Button>
@@ -536,7 +534,7 @@ export function BookingAvailabilityTimeline({
               size="icon"
               onClick={() => adjust("end", -STEP_MINUTES)}
               disabled={disabled || !date}
-              aria-label="Move end time earlier by 15 minutes"
+              aria-label="Move end time earlier by 30 minutes"
             >
               <Minus className="size-4" aria-hidden="true" />
             </Button>
@@ -549,7 +547,7 @@ export function BookingAvailabilityTimeline({
               size="icon"
               onClick={() => adjust("end", STEP_MINUTES)}
               disabled={disabled || !date}
-              aria-label="Move end time later by 15 minutes"
+              aria-label="Move end time later by 30 minutes"
             >
               <Plus className="size-4" aria-hidden="true" />
             </Button>

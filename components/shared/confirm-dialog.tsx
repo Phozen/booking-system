@@ -6,6 +6,7 @@ import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { centeredDialogClassName } from "@/components/shared/dialog-styles";
 
 export function ConfirmDialog({
   triggerLabel,
@@ -76,7 +77,7 @@ export function ConfirmDialog({
         ref={dialogRef}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="max-h-[90dvh] w-[min(92vw,30rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl ring-1 ring-primary/15 backdrop:bg-slate-950/45"
+        className={centeredDialogClassName}
       >
         <div className="grid gap-4 p-5">
           <div className="flex gap-3">

@@ -7,6 +7,7 @@ import { ArrowRight, CalendarClock, MapPin, UserRound, X } from "lucide-react";
 import { formatBookingDate, formatBookingWindow } from "@/lib/bookings/format";
 import type { CalendarBooking } from "@/lib/calendar/group-bookings";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { centeredDialogClassName } from "@/components/shared/dialog-styles";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +73,7 @@ export function CalendarBookingItem({
         <dialog
           ref={dialogRef}
           aria-labelledby={titleId}
-          className="max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl ring-1 ring-primary/15 backdrop:bg-slate-950/45"
+          className={`${centeredDialogClassName} pointer-events-auto`}
         >
           <div className="grid gap-4 p-5">
             <div className="flex items-start justify-between gap-3">
@@ -185,7 +186,7 @@ export function CalendarBookingItem({
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="max-h-[90dvh] w-[min(92vw,32rem)] overflow-y-auto rounded-lg border border-border/70 bg-card p-0 text-foreground shadow-xl ring-1 ring-primary/15 backdrop:bg-slate-950/45"
+        className={`${centeredDialogClassName} pointer-events-auto`}
       >
         <div className="grid gap-4 p-5">
           <div className="flex items-start justify-between gap-3">

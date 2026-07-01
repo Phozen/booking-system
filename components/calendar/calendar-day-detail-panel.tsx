@@ -22,35 +22,93 @@ function getLocalMinutes(value: string, timezone: string) {
   return Math.min(24 * 60, Math.max(0, (hour === 24 ? 0 : hour) * 60 + minute));
 }
 
-function TimelineBlock({
-  booking,
-  timezone,
-}: {
+type TimelineLayoutBlock = {
   booking: CalendarBooking;
-  timezone: string;
+  start: number;
+  end: number;
+  column: number;
+  columns: number;
+};
+
+function layoutTimelineBlocks(
+  bookings: CalendarBooking[],
+  timezone: string,
+): TimelineLayoutBlock[] {
+  const blocks = bookings
+    .map((booking) => {
+      const start = getLocalMinutes(booking.startsAt, timezone);
+      return {
+        booking,
+        start,
+        end: Math.max(start + 15, getLocalMinutes(booking.endsAt, timezone)),
+      };
+    })
+    .sort((a, b) => a.start - b.start || a.end - b.end);
+  const clusters: (typeof blocks)[] = [];
+  let currentCluster: typeof blocks = [];
+  let clusterEnd = -1;
+
+  for (const block of blocks) {
+    if (currentCluster.length === 0 || block.start < clusterEnd) {
+      currentCluster.push(block);
+      clusterEnd = Math.max(clusterEnd, block.end);
+    } else {
+      clusters.push(currentCluster);
+      currentCluster = [block];
+      clusterEnd = block.end;
+    }
+  }
+
+  if (currentCluster.length > 0) {
+    clusters.push(currentCluster);
+  }
+
+  return clusters.flatMap((cluster) => {
+    const columnEnds: number[] = [];
+    const assigned = cluster.map((block) => {
+      const column = columnEnds.findIndex((end) => end <= block.start);
+      const nextColumn = column === -1 ? columnEnds.length : column;
+      columnEnds[nextColumn] = block.end;
+      return { ...block, column: nextColumn };
+    });
+    const columns = Math.max(1, columnEnds.length);
+
+    return assigned.map((block) => ({
+      ...block,
+      columns,
+    }));
+  });
+}
+
+function TimelineBlock({
+  block,
+}: {
+  block: TimelineLayoutBlock;
 }) {
-  const start = getLocalMinutes(booking.startsAt, timezone);
-  const end = Math.max(start + 15, getLocalMinutes(booking.endsAt, timezone));
-  const top = (start / 1440) * 100;
-  const height = ((Math.min(end, 1440) - start) / 1440) * 100;
+  const top = (block.start / 1440) * 100;
+  const height = ((Math.min(block.end, 1440) - block.start) / 1440) * 100;
+  const width = 100 / block.columns;
+  const left = block.column * width;
 
   return (
     <div
       className={cn(
-        "absolute left-16 right-2 rounded-md border px-2 py-1 text-xs shadow-sm",
-        booking.status === "confirmed"
+        "absolute rounded-md border px-2 py-1 text-xs shadow-sm",
+        block.booking.status === "confirmed"
           ? "border-sky-300 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100"
           : "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100",
       )}
       style={{
         top: `${top}%`,
+        left: `${left}%`,
+        width: `calc(${width}% - 0.25rem)`,
         minHeight: "1.75rem",
         height: `${Math.max(height, 3)}%`,
       }}
     >
-      <p className="truncate font-medium">{booking.title}</p>
+      <p className="truncate font-medium">{block.booking.title}</p>
       <p className="truncate opacity-80">
-        {formatBookingWindow(booking.startsAt, booking.endsAt)}
+        {formatBookingWindow(block.booking.startsAt, block.booking.endsAt)}
       </p>
     </div>
   );
@@ -66,6 +124,7 @@ export function CalendarDayDetailPanel({
   timezone: string;
 }) {
   const hourMarks = Array.from({ length: 13 }, (_, index) => index * 2);
+  const timelineBlocks = layoutTimelineBlocks(bookings, timezone);
 
   return (
     <aside className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
@@ -130,13 +189,11 @@ export function CalendarDayDetailPanel({
                 </span>
               </div>
             ))}
-            {bookings.map((booking) => (
-              <TimelineBlock
-                key={booking.id}
-                booking={booking}
-                timezone={timezone}
-              />
-            ))}
+            <div className="absolute bottom-0 left-16 right-2 top-0">
+              {timelineBlocks.map((block) => (
+                <TimelineBlock key={block.booking.id} block={block} />
+              ))}
+            </div>
           </div>
         </div>
       ) : (

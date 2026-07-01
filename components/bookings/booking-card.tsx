@@ -25,12 +25,20 @@ function getBookingCardTone(status: EmployeeBooking["status"]) {
   }
 }
 
-export function BookingCard({ booking }: { booking: EmployeeBooking }) {
+export function BookingCard({
+  booking,
+  muted = false,
+}: {
+  booking: EmployeeBooking;
+  muted?: boolean;
+}) {
   return (
     <article
       className={cn(
         "grid gap-3 rounded-lg border p-4 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center",
-        getBookingCardTone(booking.status),
+        muted
+          ? "border-slate-300 bg-slate-100 text-slate-600 opacity-80 ring-1 ring-slate-200/80 dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-300"
+          : getBookingCardTone(booking.status),
       )}
     >
       <div className="min-w-0">
