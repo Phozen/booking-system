@@ -4,7 +4,7 @@ import { CalendarPlus } from "lucide-react";
 import type { CalendarDay } from "@/lib/calendar/date-range";
 import type { CalendarBooking } from "@/lib/calendar/group-bookings";
 import { formatBookingWindow } from "@/lib/bookings/format";
-import { CalendarBookingItem } from "@/components/calendar/calendar-booking-item";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -94,7 +94,27 @@ export function CalendarDayDetailPanel({
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="grid gap-2">
             {bookings.map((booking) => (
-              <CalendarBookingItem key={booking.id} booking={booking} />
+              <div
+                key={booking.id}
+                className="grid gap-2 rounded-lg border border-border/70 bg-background p-3 text-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium">{booking.title}</span>
+                  <StatusBadge kind="booking" status={booking.status} />
+                </div>
+                <dl className="grid gap-1 text-muted-foreground">
+                  <div>
+                    <dt className="sr-only">Time</dt>
+                    <dd>{formatBookingWindow(booking.startsAt, booking.endsAt)}</dd>
+                  </div>
+                  <div>
+                    <dt className="sr-only">Location</dt>
+                    <dd>
+                      {booking.facilityName}, {booking.facilityLevel}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             ))}
           </div>
 

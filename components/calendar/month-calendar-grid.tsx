@@ -66,34 +66,40 @@ export function MonthCalendarGrid({
             <div
               key={day.key}
               className={cn(
-                "min-h-36 border-r border-t border-border/70 bg-background/70 p-2 last:border-r-0",
+                "relative min-h-36 border-r border-t border-border/70 bg-background/70 p-2 last:border-r-0",
                 day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/30",
                 isSelected && "bg-accent/60 ring-2 ring-inset ring-primary/50",
               )}
             >
-              <div className="mb-2 flex items-center justify-between gap-2">
+              {getDayHref ? (
                 <Link
-                  href={getDayHref?.(day.key) ?? "#"}
+                  href={getDayHref(day.key)}
+                  className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45"
+                  aria-label={`Select ${day.weekdayLabel}, ${day.shortLabel}`}
+                  aria-current={isSelected ? "date" : undefined}
+                />
+              ) : null}
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span
                   className={cn(
-                    "inline-flex size-8 items-center justify-center rounded-full text-sm font-semibold transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "relative z-10 inline-flex size-8 items-center justify-center rounded-full text-sm font-semibold",
                     day.isToday &&
                       "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
                     isSelected &&
                       "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
                   )}
                   aria-label={`${day.weekdayLabel}, ${day.shortLabel}`}
-                  aria-current={isSelected ? "date" : undefined}
                 >
                   {day.dateNumber}
-                </Link>
+                </span>
                 {bookings.length > 0 ? (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="relative z-10 text-xs text-muted-foreground">
                     {bookings.length} booking{bookings.length === 1 ? "" : "s"}
                   </span>
                 ) : null}
               </div>
 
-              <div className="grid gap-1 pr-1">
+              <div className="pointer-events-none relative z-10 grid gap-1 pr-1">
                 {bookings.length > 0 ? (
                   bookings.slice(0, 2).map((booking) => (
                     <CalendarBookingItem
@@ -103,20 +109,12 @@ export function MonthCalendarGrid({
                     />
                   ))
                 ) : (
-                  <Link
-                    href={getDayHref?.(day.key) ?? "#"}
-                    className="rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    Select day
-                  </Link>
+                  <p className="text-xs text-muted-foreground">No bookings</p>
                 )}
                 {bookings.length > 2 ? (
-                  <Link
-                    href={getDayHref?.(day.key) ?? "#"}
-                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
-                  >
+                  <span className="text-xs font-medium text-primary">
                     View {bookings.length - 2} more
-                  </Link>
+                  </span>
                 ) : null}
               </div>
             </div>

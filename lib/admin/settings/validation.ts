@@ -45,6 +45,7 @@ export const settingsFormSchema = z.object({
     }),
   defaultApprovalRequired: z.boolean(),
   allowFacilityApprovalOverride: z.boolean(),
+  recurringBookingsEnabled: z.boolean(),
   calendarVisibilityMode: z.enum(calendarVisibilityModes),
   defaultTimezone: z.string().trim().min(1, "Enter a default timezone."),
   reminderOffsetsMinutesText: z
@@ -77,6 +78,10 @@ export function formDataToSettingsValues(formData: FormData) {
     allowFacilityApprovalOverride: getCheckboxValue(
       formData,
       "allowFacilityApprovalOverride",
+    ),
+    recurringBookingsEnabled: getCheckboxValue(
+      formData,
+      "recurringBookingsEnabled",
     ),
     calendarVisibilityMode: getTextValue(formData, "calendarVisibilityMode"),
     defaultTimezone: getTextValue(formData, "defaultTimezone"),

@@ -28,7 +28,7 @@ export function AppHeader({
       <div className="relative mx-auto flex min-h-16 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-6">
           <Link
-            href="/bookings/new"
+            href="/dashboard"
             className="shrink-0 rounded-sm text-base font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {appName}

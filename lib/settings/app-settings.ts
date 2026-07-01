@@ -11,6 +11,7 @@ export type AppSettings = {
   allowedEmailDomains: string[];
   defaultApprovalRequired: boolean;
   allowFacilityApprovalOverride: boolean;
+  recurringBookingsEnabled: boolean;
   calendarVisibilityMode: CalendarVisibilityMode;
   defaultTimezone: string;
   reminderOffsetsMinutes: number[];
@@ -29,6 +30,7 @@ export const baseDefaultAppSettings: AppSettings = {
   allowedEmailDomains: [],
   defaultApprovalRequired: false,
   allowFacilityApprovalOverride: true,
+  recurringBookingsEnabled: false,
   calendarVisibilityMode: "my_bookings_only",
   defaultTimezone: "Asia/Kuala_Lumpur",
   reminderOffsetsMinutes: [1440, 60],
@@ -42,6 +44,7 @@ export const settingKeyMap = {
   allowedEmailDomains: "allowed_email_domains",
   defaultApprovalRequired: "default_approval_required",
   allowFacilityApprovalOverride: "facility_approval_override_enabled",
+  recurringBookingsEnabled: "recurring_bookings_enabled",
   calendarVisibilityMode: "calendar_visibility_mode",
   defaultTimezone: "default_timezone",
   reminderOffsetsMinutes: "reminder_offsets_minutes",
@@ -102,6 +105,10 @@ export function mapSettingsRowsToAppSettings(
       typeof approvalOverride === "boolean"
         ? approvalOverride
         : fallback.allowFacilityApprovalOverride,
+    recurringBookingsEnabled:
+      typeof values.get(settingKeyMap.recurringBookingsEnabled) === "boolean"
+        ? Boolean(values.get(settingKeyMap.recurringBookingsEnabled))
+        : fallback.recurringBookingsEnabled,
     calendarVisibilityMode: parseCalendarVisibilityMode(
       values.get(settingKeyMap.calendarVisibilityMode) ??
         fallback.calendarVisibilityMode,
@@ -160,6 +167,13 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.allowFacilityApprovalOverride,
       value: settings.allowFacilityApprovalOverride,
       description: "Whether facilities can override the default approval setting.",
+      is_public: false,
+    },
+    {
+      key: settingKeyMap.recurringBookingsEnabled,
+      value: settings.recurringBookingsEnabled,
+      description:
+        "Whether employees can create recurring booking series.",
       is_public: false,
     },
     {

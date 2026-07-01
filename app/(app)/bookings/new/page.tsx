@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Repeat } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
@@ -65,15 +65,6 @@ export default async function NewBookingPage({
           >
             <ArrowLeft data-icon="inline-start" />
             Calendar
-          </Link>
-        }
-        primaryAction={
-          <Link
-            href="/bookings/recurring/new"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <Repeat data-icon="inline-start" />
-            Recurring booking
           </Link>
         }
       />

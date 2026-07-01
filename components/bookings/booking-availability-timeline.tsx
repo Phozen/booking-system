@@ -6,8 +6,10 @@ import { AlertCircle, CalendarClock, Loader2, Minus, Plus } from "lucide-react";
 import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const STEP_MINUTES = 15;
+const STEP_MINUTES = 30;
 const DEFAULT_DURATION_MINUTES = 60;
 const FALLBACK_START_MINUTES = 8 * 60;
 const FALLBACK_END_MINUTES = 18 * 60;
@@ -25,6 +27,12 @@ type BusyBlock = {
   start: number;
   end: number;
 };
+
+type DragState =
+  | { mode: "create"; anchor: number }
+  | { mode: "move"; pointerStart: number; start: number; end: number }
+  | { mode: "resize-start"; pointerStart: number; start: number; end: number }
+  | { mode: "resize-end"; pointerStart: number; start: number; end: number };
 
 function parseTime(value: string) {
   const match = /^(\d{2}):(\d{2})$/.exec(value);
@@ -90,6 +98,8 @@ export function BookingAvailabilityTimeline({
   endTime,
   onTimeChange,
   disabled = false,
+  startTimeError,
+  endTimeError,
 }: {
   facilityId: string;
   facilityName?: string;
@@ -99,9 +109,11 @@ export function BookingAvailabilityTimeline({
   endTime: string;
   onTimeChange: (startTime: string, endTime: string) => void;
   disabled?: boolean;
+  startTimeError?: string;
+  endTimeError?: string;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const dragAnchor = useRef<number | null>(null);
+  const dragState = useRef<DragState | null>(null);
   const [items, setItems] = useState<AvailabilityTimelineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -233,22 +245,58 @@ export function BookingAvailabilityTimeline({
     if (overlaps(minutes, end, busyBlocks)) return;
 
     event.currentTarget.setPointerCapture(event.pointerId);
-    dragAnchor.current = minutes;
+    dragState.current = { mode: "create", anchor: minutes };
     commitRange(minutes, end);
   }
 
+  function beginBlockDrag(
+    event: PointerEvent<HTMLDivElement>,
+    mode: "move" | "resize-start" | "resize-end",
+  ) {
+    if (disabled || selectedStart === null || selectedEnd === null) return;
+    const pointerStart = minutesFromPointer(event);
+    if (pointerStart === null) return;
+
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragState.current = {
+      mode,
+      pointerStart,
+      start: selectedStart,
+      end: selectedEnd,
+    };
+  }
+
   function moveSelection(event: PointerEvent<HTMLDivElement>) {
-    if (dragAnchor.current === null) return;
+    const currentDrag = dragState.current;
+    if (!currentDrag) return;
     const minutes = minutesFromPointer(event);
     if (minutes === null) return;
 
-    const start = Math.min(dragAnchor.current, minutes);
-    const end = Math.max(dragAnchor.current + STEP_MINUTES, minutes + STEP_MINUTES);
-    commitRange(start, end);
+    if (currentDrag.mode === "create") {
+      const start = Math.min(currentDrag.anchor, minutes);
+      const end = Math.max(currentDrag.anchor + STEP_MINUTES, minutes + STEP_MINUTES);
+      commitRange(start, end);
+      return;
+    }
+
+    const delta = roundToStep(minutes - currentDrag.pointerStart);
+
+    if (currentDrag.mode === "move") {
+      commitRange(currentDrag.start + delta, currentDrag.end + delta);
+      return;
+    }
+
+    if (currentDrag.mode === "resize-start") {
+      commitRange(currentDrag.start + delta, currentDrag.end);
+      return;
+    }
+
+    commitRange(currentDrag.start, currentDrag.end + delta);
   }
 
   function endSelection() {
-    dragAnchor.current = null;
+    dragState.current = null;
   }
 
   function adjust(edge: "start" | "end", delta: number) {
@@ -281,7 +329,7 @@ export function BookingAvailabilityTimeline({
           </p>
         </div>
         <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
-          15 min blocks
+          30 min blocks
         </div>
       </div>
 
@@ -312,7 +360,7 @@ export function BookingAvailabilityTimeline({
             role="application"
             aria-label={`Availability timeline for ${facilityName ?? "selected facility"} on ${date}`}
             className={cn(
-              "relative min-h-[360px] overflow-hidden rounded-lg border bg-background touch-none",
+              "relative min-h-[520px] overflow-hidden rounded-lg border bg-background touch-none",
               disabled ? "opacity-60" : "cursor-crosshair",
             )}
             onPointerDown={beginSelection}
@@ -323,16 +371,30 @@ export function BookingAvailabilityTimeline({
             {hourMarks.slice(0, -1).map((minute) => (
               <div
                 key={minute}
-                className="absolute left-0 right-0 border-t border-border/70"
+                className="absolute left-0 right-0 border-t border-border"
                 style={{
                   top: `${((minute - windowStart) / windowMinutes) * 100}%`,
                 }}
               >
-                <span className="absolute left-2 top-1 text-[11px] text-muted-foreground lg:hidden">
+                <span className="absolute left-2 top-1 rounded bg-background px-1 text-xs font-medium text-muted-foreground lg:hidden">
                   {formatTime(minute)}
                 </span>
               </div>
             ))}
+            {Array.from(
+              { length: Math.floor(windowMinutes / STEP_MINUTES) },
+              (_, index) => windowStart + index * STEP_MINUTES,
+            ).map((minute) =>
+              minute % 60 === 0 ? null : (
+                <div
+                  key={minute}
+                  className="absolute left-14 right-0 border-t border-dashed border-border/60 sm:left-18"
+                  style={{
+                    top: `${((minute - windowStart) / windowMinutes) * 100}%`,
+                  }}
+                />
+              ),
+            )}
 
             {loading ? (
               <div className="absolute inset-0 z-20 grid place-items-center bg-background/80">
@@ -364,8 +426,12 @@ export function BookingAvailabilityTimeline({
 
             {hasSelection ? (
               <div
+                onPointerDown={(event) => beginBlockDrag(event, "move")}
+                onPointerMove={moveSelection}
+                onPointerUp={endSelection}
+                onPointerCancel={endSelection}
                 className={cn(
-                  "absolute left-6 right-6 z-10 rounded-md border-2 px-3 py-2 text-sm shadow-md sm:left-10",
+                  "absolute left-6 right-6 z-10 cursor-grab rounded-md border-2 px-3 py-2 text-sm shadow-md active:cursor-grabbing sm:left-10",
                   hasSelectionConflict
                     ? "border-destructive bg-destructive/15 text-destructive"
                     : "border-primary bg-primary/15 text-primary",
@@ -381,6 +447,24 @@ export function BookingAvailabilityTimeline({
                 <div className="text-xs">
                   {hasSelectionConflict ? "Conflicts with unavailable time" : "Selected time"}
                 </div>
+                {(["resize-start", "resize-end"] as const).map((mode) => {
+                  const isStart = mode === "resize-start";
+
+                  return (
+                    <div
+                      key={mode}
+                      className={cn(
+                        "absolute left-0 right-0 flex cursor-ns-resize items-center justify-between px-2",
+                        isStart ? "-top-2" : "-bottom-2",
+                      )}
+                      onPointerDown={(event) => beginBlockDrag(event, mode)}
+                    >
+                      <span className="size-4 rounded-full border-2 border-primary bg-background shadow-sm" />
+                      <span className="h-3 w-10 rounded-full border-2 border-primary bg-background shadow-sm" />
+                      <span className="size-4 rounded-full border-2 border-primary bg-background shadow-sm" />
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
           </div>
@@ -389,9 +473,19 @@ export function BookingAvailabilityTimeline({
 
       <div className="grid gap-3 rounded-lg border bg-background p-3 sm:grid-cols-2">
         <div className="grid gap-2">
-          <span className="text-xs font-medium uppercase text-muted-foreground">
+          <Label htmlFor="startTime" className="text-xs font-medium uppercase text-muted-foreground">
             Start time
-          </span>
+          </Label>
+          <Input
+            id="startTime"
+            name="startTime"
+            type="time"
+            step={STEP_MINUTES * 60}
+            value={startTime}
+            onChange={(event) => onTimeChange(event.target.value, endTime)}
+            disabled={disabled}
+            aria-invalid={Boolean(startTimeError)}
+          />
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -417,11 +511,24 @@ export function BookingAvailabilityTimeline({
               <Plus className="size-4" aria-hidden="true" />
             </Button>
           </div>
+          {startTimeError ? (
+            <p className="text-sm text-destructive">{startTimeError}</p>
+          ) : null}
         </div>
         <div className="grid gap-2">
-          <span className="text-xs font-medium uppercase text-muted-foreground">
+          <Label htmlFor="endTime" className="text-xs font-medium uppercase text-muted-foreground">
             End time
-          </span>
+          </Label>
+          <Input
+            id="endTime"
+            name="endTime"
+            type="time"
+            step={STEP_MINUTES * 60}
+            value={endTime}
+            onChange={(event) => onTimeChange(startTime, event.target.value)}
+            disabled={disabled}
+            aria-invalid={Boolean(endTimeError)}
+          />
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -447,6 +554,9 @@ export function BookingAvailabilityTimeline({
               <Plus className="size-4" aria-hidden="true" />
             </Button>
           </div>
+          {endTimeError ? (
+            <p className="text-sm text-destructive">{endTimeError}</p>
+          ) : null}
         </div>
       </div>
     </section>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CalendarDays, CalendarPlus, ClipboardList, UserPlus } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import {
@@ -11,7 +10,9 @@ import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
 import { buttonVariants } from "@/components/ui/button";
+import { employeeNavigation } from "@/config/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -28,46 +29,28 @@ export default async function DashboardPage() {
         description={`Choose the next booking task for ${user.email}.`}
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          {
-            href: "/bookings/new",
-            title: "New booking",
-            description: "Choose room, date, time, and catering.",
-            icon: CalendarPlus,
-          },
-          {
-            href: "/calendar",
-            title: "Calendar",
-            description: "Pick a day and book from the schedule.",
-            icon: CalendarDays,
-          },
-          {
-            href: "/my-bookings",
-            title: "My bookings",
-            description: "Open, edit, print, or cancel requests.",
-            icon: ClipboardList,
-          },
-          {
-            href: "/invitations",
-            title: "Invitations",
-            description: "Review meetings you were invited to.",
-            icon: UserPlus,
-          },
-        ].map((item) => {
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {employeeNavigation.map((item) => {
           const Icon = item.icon;
+          const tone = employeeFeatureStyles[item.tone];
+          const descriptions: Record<(typeof employeeNavigation)[number]["href"], string> = {
+            "/bookings/new": "Choose room, date, time, and catering.",
+            "/calendar": "Pick a day and book from the schedule.",
+            "/my-bookings": "Open, edit, print, or cancel requests.",
+            "/invitations": "Review meetings you were invited to.",
+          };
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="grid min-h-36 gap-3 rounded-lg border border-border/80 bg-card p-4 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
+              className={`grid min-h-48 gap-4 rounded-lg border p-5 shadow-lg ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 ${tone.home}`}
             >
-              <div className="flex size-11 items-center justify-center rounded-md border border-border/70 bg-background text-primary">
-                <Icon className="size-6" aria-hidden="true" />
+              <div className={`flex size-16 items-center justify-center rounded-lg ring-1 ${tone.icon}`}>
+                <Icon className="size-9" aria-hidden="true" />
               </div>
-              <h2 className="text-lg font-semibold tracking-normal">{item.title}</h2>
-              <p className="text-sm leading-5 text-muted-foreground">{item.description}</p>
+              <h2 className="text-2xl font-bold tracking-normal">{item.title}</h2>
+              <p className="text-base leading-6 opacity-90">{descriptions[item.href]}</p>
             </Link>
           );
         })}

@@ -9,6 +9,7 @@ import {
   getAdminNavigationGroups,
 } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
 
 function isActivePath(
   pathname: string,
@@ -34,6 +35,7 @@ function NavigationLink({
   const pathname = usePathname();
   const active = isActivePath(pathname, item.href, item.match);
   const Icon = item.icon;
+  const tone = "tone" in item ? employeeFeatureStyles[item.tone].nav : null;
 
   return (
     <Link
@@ -43,8 +45,13 @@ function NavigationLink({
       className={cn(
         "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
         compact ? "w-full" : "h-9",
-        active
+        tone && "border shadow-sm",
+        active && tone
+          ? tone
+          : active
           ? "border-primary/80 bg-primary text-primary-foreground shadow-primary/20"
+          : tone
+            ? `${tone} opacity-90 hover:opacity-100`
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
       )}
     >

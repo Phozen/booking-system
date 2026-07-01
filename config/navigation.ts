@@ -25,10 +25,10 @@ export const authNavigation = [
 ] as const;
 
 export const employeeNavigation = [
-  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
-  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact" },
-  { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact" },
-  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
+  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact", tone: "blue" },
+  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact", tone: "emerald" },
+  { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact", tone: "amber" },
+  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact", tone: "violet" },
 ] as const;
 
 export const adminNavigation = [

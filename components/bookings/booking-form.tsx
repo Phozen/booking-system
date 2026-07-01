@@ -459,67 +459,9 @@ export function BookingForm({
             }))
           }
           disabled={!hasFacilities || isPending}
+          startTimeError={fieldErrors.startTime}
+          endTimeError={fieldErrors.endTime}
         />
-
-        <fieldset className="grid gap-2 sm:col-span-2">
-          <legend className="text-sm font-medium">Time</legend>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2">
-            <div className="grid min-w-0 gap-1">
-              <Label htmlFor="startTime" className="text-xs text-muted-foreground">
-                Start
-              </Label>
-              <Input
-                id="startTime"
-                name="startTime"
-                type="time"
-                value={previewValues.startTime}
-                onChange={(event) =>
-                  setPreviewField("startTime", event.target.value)
-                }
-                disabled={!hasFacilities || isPending}
-                aria-describedby={getFieldDescribedBy(
-                  "time-helper",
-                  fieldErrors.startTime && "startTime-error",
-                )}
-                aria-invalid={Boolean(fieldErrors.startTime)}
-                required
-              />
-            </div>
-            <span className="pb-2 text-sm text-muted-foreground" aria-hidden="true">
-              to
-            </span>
-            <div className="grid min-w-0 gap-1">
-              <Label htmlFor="endTime" className="text-xs text-muted-foreground">
-                End
-              </Label>
-              <Input
-                id="endTime"
-                name="endTime"
-                type="time"
-                value={previewValues.endTime}
-                onChange={(event) =>
-                  setPreviewField("endTime", event.target.value)
-                }
-                disabled={!hasFacilities || isPending}
-                aria-describedby={getFieldDescribedBy(
-                  "time-helper",
-                  fieldErrors.endTime && "endTime-error",
-                )}
-                aria-invalid={Boolean(fieldErrors.endTime)}
-                required
-              />
-            </div>
-          </div>
-          <FormFieldHelper id="time-helper">
-            Times use {settings.defaultTimezone}. Back-to-back bookings are allowed.
-          </FormFieldHelper>
-          <FormFieldError id="startTime-error">
-            {fieldErrors.startTime}
-          </FormFieldError>
-          <FormFieldError id="endTime-error">
-            {fieldErrors.endTime}
-          </FormFieldError>
-        </fieldset>
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="title">Purpose</Label>

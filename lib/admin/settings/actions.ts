@@ -52,6 +52,7 @@ export async function updateSystemSettingsAction(
     allowedEmailDomains: parsed.data.allowedEmailDomainsText,
     defaultApprovalRequired: parsed.data.defaultApprovalRequired,
     allowFacilityApprovalOverride: parsed.data.allowFacilityApprovalOverride,
+    recurringBookingsEnabled: parsed.data.recurringBookingsEnabled,
     calendarVisibilityMode: parsed.data.calendarVisibilityMode,
     defaultTimezone: parsed.data.defaultTimezone,
     reminderOffsetsMinutes: parsed.data.reminderOffsetsMinutesText,

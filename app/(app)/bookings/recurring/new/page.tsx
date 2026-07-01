@@ -3,15 +3,18 @@ import { ArrowLeft } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
+import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
 import { RecurringBookingForm } from "@/components/bookings/recurring/recurring-booking-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewRecurringBookingPage() {
   await requireUser();
+  const settings = await getAppSettings();
   const supabase = await createClient();
   const facilities = await getBookableFacilities(supabase);
 
@@ -32,7 +35,17 @@ export default async function NewRecurringBookingPage() {
           </Link>
         }
       />
-      <RecurringBookingForm facilities={facilities} />
+      {settings.recurringBookingsEnabled ? (
+        <RecurringBookingForm facilities={facilities} />
+      ) : (
+        <Alert>
+          <AlertTitle>Recurring bookings are disabled</AlertTitle>
+          <AlertDescription>
+            A Super Admin can enable recurring booking creation from System
+            Settings.
+          </AlertDescription>
+        </Alert>
+      )}
     </main>
   );
 }
