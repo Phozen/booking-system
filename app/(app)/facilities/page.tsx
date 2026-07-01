@@ -26,8 +26,8 @@ export default async function FacilitiesPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         eyebrow="Rooms"
-        title="Find a room"
-        description="Compare capacity, equipment, level, and approval requirements before choosing a time slot."
+        title="Rooms"
+        description="Use this lightweight room list when capacity, level, or equipment matters. Book directly when you know the room."
       />
 
       {facilities.length > 0 ? (

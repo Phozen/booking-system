@@ -27,6 +27,7 @@ function formatNotificationType(type: EmailNotificationType) {
     booking_approval: "Booking Approval",
     booking_rejection: "Booking Rejection",
     booking_cancellation: "Booking Cancellation",
+    booking_catering_request: "Catering Request",
     booking_reminder: "Booking Reminder",
     booking_invitation: "Booking Invitation",
     booking_invitation_accepted: "Invitation Accepted",

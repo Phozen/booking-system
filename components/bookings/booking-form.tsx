@@ -45,6 +45,7 @@ import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
+import { FacilityPhoto } from "@/components/facilities/facility-photo";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -126,10 +127,12 @@ function getBookingAlertCopy(state: BookingActionResult) {
 export function BookingForm({
   facilities,
   selectedFacilityId,
+  initialDate,
   settings,
 }: {
   facilities: Facility[];
   selectedFacilityId?: string;
+  initialDate?: string;
   settings: AppSettings;
 }) {
   const [state, formAction, isPending] = useActionState(
@@ -145,7 +148,7 @@ export function BookingForm({
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
   const [cateringRequired, setCateringRequired] = useState(false);
   const [previewValues, setPreviewValues] = useState<BookingPreviewValues>({
-    date: "",
+    date: initialDate ?? "",
     startTime: "",
     endTime: "",
     title: "",
@@ -186,6 +189,16 @@ export function BookingForm({
       title: getValue("title"),
       attendeeCount: getValue("attendeeCount"),
     });
+  }
+
+  function setPreviewField<Key extends keyof BookingPreviewValues>(
+    key: Key,
+    value: BookingPreviewValues[Key],
+  ) {
+    setPreviewValues((current) => ({
+      ...current,
+      [key]: value,
+    }));
   }
 
   function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
@@ -327,40 +340,53 @@ export function BookingForm({
         </div>
 
         {selectedFacilityDetails ? (
-          <aside className="grid gap-3 rounded-lg border border-sky-200 bg-sky-50/70 p-4 text-sm text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 sm:col-span-2 dark:border-sky-900 dark:bg-sky-950/25 dark:text-sky-100">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">
-                  Selected facility
-                </p>
-                <h2 className="mt-1 font-semibold tracking-normal">
-                  {selectedFacilityDetails.name}
-                </h2>
-                <p className="mt-1 text-muted-foreground">
-                  {selectedFacilityDetails.level} -{" "}
-                  {formatFacilityType(selectedFacilityDetails.type)}
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-2 text-sky-800 dark:text-sky-200">
-                <Users className="size-4" aria-hidden="true" />
-                Capacity {selectedFacilityDetails.capacity}
-              </div>
+          <aside className="grid gap-4 rounded-lg border border-sky-200 bg-sky-50/70 p-4 text-sm text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 sm:col-span-2 sm:grid-cols-[180px_minmax(0,1fr)] dark:border-sky-900 dark:bg-sky-950/25 dark:text-sky-100">
+            <div className="min-h-36 overflow-hidden rounded-md border border-sky-200 bg-background dark:border-sky-900">
+              <FacilityPhoto
+                facility={selectedFacilityDetails}
+                className="aspect-[4/3] min-h-36"
+              />
             </div>
-            <div className="inline-flex items-start gap-2 text-sky-800 dark:text-sky-200">
-              <ShieldCheck className="mt-0.5 size-4" aria-hidden="true" />
-              <span>
-                {formatEffectiveApprovalLabel(
+            <div className="grid gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase text-muted-foreground">
+                    Selected facility
+                  </p>
+                  <h2 className="mt-1 font-semibold tracking-normal">
+                    {selectedFacilityDetails.name}
+                  </h2>
+                  <p className="mt-1 text-muted-foreground">
+                    {selectedFacilityDetails.level} -{" "}
+                    {formatFacilityType(selectedFacilityDetails.type)}
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 text-sky-800 dark:text-sky-200">
+                  <Users className="size-4" aria-hidden="true" />
+                  Capacity {selectedFacilityDetails.capacity}
+                </div>
+              </div>
+              <div className="inline-flex items-start gap-2 text-sky-800 dark:text-sky-200">
+                <ShieldCheck className="mt-0.5 size-4" aria-hidden="true" />
+                <span>
+                  {formatEffectiveApprovalLabel(
+                    selectedFacilityDetails.requiresApproval,
+                    settings,
+                  )}
+                </span>
+              </div>
+              <p className="text-xs text-sky-800 dark:text-sky-200">
+                {formatEffectiveApprovalCopy(
                   selectedFacilityDetails.requiresApproval,
                   settings,
                 )}
-              </span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {selectedFacilityDetails.equipment.length > 0
+                  ? `Equipment: ${selectedFacilityDetails.equipment.slice(0, 4).join(", ")}${selectedFacilityDetails.equipment.length > 4 ? "..." : ""}`
+                  : "No equipment listed."}
+              </p>
             </div>
-            <p className="text-xs text-sky-800 dark:text-sky-200">
-              {formatEffectiveApprovalCopy(
-                selectedFacilityDetails.requiresApproval,
-                settings,
-              )}
-            </p>
           </aside>
         ) : null}
 
@@ -370,6 +396,8 @@ export function BookingForm({
             id="date"
             name="date"
             type="date"
+            value={previewValues.date}
+            onChange={(event) => setPreviewField("date", event.target.value)}
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
               "date-helper",
@@ -393,6 +421,10 @@ export function BookingForm({
             min={0}
             inputMode="numeric"
             placeholder="Optional"
+            value={previewValues.attendeeCount}
+            onChange={(event) =>
+              setPreviewField("attendeeCount", event.target.value)
+            }
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
               "attendeeCount-helper",
@@ -416,6 +448,17 @@ export function BookingForm({
           facilityId={selectedFacility}
           facilityName={selectedFacilityDetails?.name}
           date={previewValues.date}
+          timezone={settings.defaultTimezone}
+          startTime={previewValues.startTime}
+          endTime={previewValues.endTime}
+          onTimeChange={(startTime, endTime) =>
+            setPreviewValues((current) => ({
+              ...current,
+              startTime,
+              endTime,
+            }))
+          }
+          disabled={!hasFacilities || isPending}
         />
 
         <fieldset className="grid gap-2 sm:col-span-2">
@@ -429,6 +472,10 @@ export function BookingForm({
                 id="startTime"
                 name="startTime"
                 type="time"
+                value={previewValues.startTime}
+                onChange={(event) =>
+                  setPreviewField("startTime", event.target.value)
+                }
                 disabled={!hasFacilities || isPending}
                 aria-describedby={getFieldDescribedBy(
                   "time-helper",
@@ -449,6 +496,10 @@ export function BookingForm({
                 id="endTime"
                 name="endTime"
                 type="time"
+                value={previewValues.endTime}
+                onChange={(event) =>
+                  setPreviewField("endTime", event.target.value)
+                }
                 disabled={!hasFacilities || isPending}
                 aria-describedby={getFieldDescribedBy(
                   "time-helper",
@@ -476,6 +527,8 @@ export function BookingForm({
             id="title"
             name="title"
             maxLength={160}
+            value={previewValues.title}
+            onChange={(event) => setPreviewField("title", event.target.value)}
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
               "title-helper",

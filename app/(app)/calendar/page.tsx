@@ -25,6 +25,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
+import { CalendarDayDetailPanel } from "@/components/calendar/calendar-day-detail-panel";
 import { CalendarControls } from "@/components/calendar/calendar-controls";
 import { MonthCalendarGrid } from "@/components/calendar/month-calendar-grid";
 import { PageHeader } from "@/components/shared/page-header";
@@ -80,6 +81,7 @@ export default async function EmployeeCalendarPage({
     month?: string | string[];
     status?: string | string[];
     view?: string | string[];
+    date?: string | string[];
   }>;
 }) {
   const { user, profile } = await requireUser();
@@ -115,6 +117,26 @@ export default async function EmployeeCalendarPage({
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
+  const requestedDate = Array.isArray(params.date) ? params.date[0] : params.date;
+  const selectedDay =
+    days.find((day) => day.key === requestedDate) ??
+    days.find((day) => day.isToday) ??
+    days[0];
+  const selectedBookings = groupedBookings[selectedDay.key] ?? [];
+  const getDayHref = (dayKey: string) => {
+    const query = new URLSearchParams();
+
+    query.set("month", selectedMonth.value);
+    if (selectedStatus) {
+      query.set("status", selectedStatus);
+    }
+    if (selectedView !== "my") {
+      query.set("view", selectedView);
+    }
+    query.set("date", dayKey);
+
+    return `/calendar?${query.toString()}`;
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -139,7 +161,19 @@ export default async function EmployeeCalendarPage({
         timezone={settings.defaultTimezone}
       />
 
-      <MonthCalendarGrid days={days} groupedBookings={groupedBookings} />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <MonthCalendarGrid
+          days={days}
+          groupedBookings={groupedBookings}
+          selectedDate={selectedDay.key}
+          getDayHref={getDayHref}
+        />
+        <CalendarDayDetailPanel
+          day={selectedDay}
+          bookings={selectedBookings}
+          timezone={settings.defaultTimezone}
+        />
+      </div>
       <BookingAgendaList days={days} groupedBookings={groupedBookings} />
     </main>
   );

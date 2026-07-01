@@ -3,6 +3,7 @@ export type EmailNotificationType =
   | "booking_approval"
   | "booking_rejection"
   | "booking_cancellation"
+  | "booking_catering_request"
   | "booking_reminder"
   | "booking_invitation"
   | "booking_invitation_accepted"

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, CalendarDays, CalendarPlus, ClipboardList } from "lucide-react";
+import { CalendarDays, CalendarPlus, ClipboardList, UserPlus } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import {
@@ -24,49 +24,35 @@ export default async function DashboardPage() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         eyebrow="Room booking"
-        title="Your booking workspace"
-        description={`Find a room, check pending requests, and keep track of confirmed time slots for ${user.email}.`}
-        primaryAction={
-          <Link href="/bookings/new" className={buttonVariants()}>
-            <CalendarPlus data-icon="inline-start" />
-            Book a room
-          </Link>
-        }
-        secondaryAction={
-          <Link
-            href="/my-bookings"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            View all bookings
-          </Link>
-        }
+        title="Quick actions"
+        description={`Choose the next booking task for ${user.email}.`}
       />
 
-      <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
-            href: "/facilities",
-            title: "Find a room",
-            description: "Capacity, equipment, and approval rules.",
-            icon: Building2,
-          },
-          {
             href: "/bookings/new",
-            title: "Book a time slot",
-            description: "Choose room, date, attendees, and purpose.",
+            title: "New booking",
+            description: "Choose room, date, time, and catering.",
             icon: CalendarPlus,
           },
           {
             href: "/calendar",
-            title: "Check the calendar",
-            description: "See room usage across the month.",
+            title: "Calendar",
+            description: "Pick a day and book from the schedule.",
             icon: CalendarDays,
           },
           {
             href: "/my-bookings",
-            title: "Manage requests",
-            description: "Pending, confirmed, history, and cancelled.",
+            title: "My bookings",
+            description: "Open, edit, print, or cancel requests.",
             icon: ClipboardList,
+          },
+          {
+            href: "/invitations",
+            title: "Invitations",
+            description: "Review meetings you were invited to.",
+            icon: UserPlus,
           },
         ].map((item) => {
           const Icon = item.icon;
@@ -75,12 +61,12 @@ export default async function DashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="grid gap-2 rounded-lg border border-border/80 bg-card p-3 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
+              className="grid min-h-36 gap-3 rounded-lg border border-border/80 bg-card p-4 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
             >
-              <div className="flex size-8 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground">
-                <Icon className="size-5" aria-hidden="true" />
+              <div className="flex size-11 items-center justify-center rounded-md border border-border/70 bg-background text-primary">
+                <Icon className="size-6" aria-hidden="true" />
               </div>
-              <h2 className="font-medium tracking-normal">{item.title}</h2>
+              <h2 className="text-lg font-semibold tracking-normal">{item.title}</h2>
               <p className="text-sm leading-5 text-muted-foreground">{item.description}</p>
             </Link>
           );
@@ -129,10 +115,10 @@ export default async function DashboardPage() {
             description="Start with the room list when capacity or equipment matters, or book directly if you already know the room and time."
             action={
               <Link
-                href="/facilities"
+                href="/bookings/new"
                 className={buttonVariants({ variant: "outline" })}
               >
-                Find a room
+                New booking
               </Link>
             }
           />

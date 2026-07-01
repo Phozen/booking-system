@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, CalendarPlus, Users } from "lucide-react";
 
-import {
-  formatFacilityType,
-  formatRequiresApproval,
-} from "@/lib/facilities/format";
+import { formatFacilityType } from "@/lib/facilities/format";
 import type { Facility } from "@/lib/facilities/queries";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -41,7 +38,7 @@ export function FacilityCard({ facility }: { facility: Facility }) {
           <StatusBadge kind="facility" status={facility.status} />
         </div>
 
-        <dl className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt className="text-xs font-medium uppercase text-muted-foreground">Room type</dt>
             <dd>{formatFacilityType(facility.type)}</dd>
@@ -59,16 +56,18 @@ export function FacilityCard({ facility }: { facility: Facility }) {
               <EquipmentSummary facility={facility} />
             </dd>
           </div>
-          <div>
-            <dt className="text-xs font-medium uppercase text-muted-foreground">Booking rule</dt>
-            <dd className="inline-flex items-center gap-1">
-              <ShieldCheck className="size-3.5" aria-hidden="true" />
-              {formatRequiresApproval(facility.requiresApproval)}
-            </dd>
-          </div>
         </dl>
 
-        <div className="mt-auto flex justify-end">
+        <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Link
+            href={`/bookings/new?facilityId=${facility.id}`}
+            className={buttonVariants({
+              className: "w-full sm:w-fit",
+            })}
+          >
+            <CalendarPlus data-icon="inline-start" />
+            Book
+          </Link>
           <Link
             href={`/facilities/${facility.slug}`}
             className={buttonVariants({
@@ -76,7 +75,7 @@ export function FacilityCard({ facility }: { facility: Facility }) {
               className: "w-full sm:w-fit",
             })}
           >
-            Check availability
+            Details
             <ArrowRight data-icon="inline-end" />
           </Link>
         </div>

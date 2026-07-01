@@ -23,6 +23,10 @@ import {
 } from "@/lib/bookings/validation";
 import { cateringValuesToDetails } from "@/lib/bookings/catering/validation";
 import {
+  formatCateringServingTime,
+  formatCateringType,
+} from "@/lib/bookings/catering/format";
+import {
   getAppSettings,
   getEffectiveApprovalRequired,
 } from "@/lib/settings/queries";
@@ -169,6 +173,111 @@ async function insertBookingConfirmationNotification({
     }
   } catch (error) {
     console.error("Booking confirmation notification unavailable", error);
+  }
+}
+
+async function insertCateringRequestNotifications({
+  booking,
+  requesterEmail,
+  requesterName,
+  facilityName,
+}: {
+  booking: CreatedBookingRecord;
+  requesterEmail: string | undefined;
+  requesterName: string | null | undefined;
+  facilityName: string;
+}) {
+  if (!booking.catering_required) {
+    return;
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { data: admins, error: adminsError } = await supabase
+      .from("profiles")
+      .select("id,email,full_name")
+      .in("role", ["admin", "super_admin"])
+      .eq("status", "active");
+
+    if (adminsError) {
+      console.error("Catering notification admin lookup failed", {
+        bookingId: booking.id,
+        message: adminsError.message,
+      });
+      return;
+    }
+
+    const recipients = ((admins as {
+      id: string;
+      email: string | null;
+      full_name: string | null;
+    }[] | null) ?? []).filter((admin) => admin.email);
+
+    if (recipients.length === 0) {
+      return;
+    }
+
+    const bookingWindow = formatEmailBookingWindow(
+      booking.starts_at,
+      booking.ends_at,
+    );
+    const { data, error } = await supabase
+      .from("email_notifications")
+      .insert(
+        recipients.map((admin) => ({
+          type: "booking_catering_request",
+          status: "queued",
+          recipient_email: admin.email,
+          recipient_user_id: admin.id,
+          subject: `Catering requested: ${booking.title}`,
+          body: `${requesterName || requesterEmail || "A user"} requested ${formatCateringType(booking.catering_type)} for ${facilityName} on ${bookingWindow}.`,
+          template_name: "booking_catering_request",
+          template_data: {
+            bookingId: booking.id,
+            title: booking.title,
+            facilityName,
+            attendeeCount: booking.attendee_count,
+            startsAt: booking.starts_at,
+            endsAt: booking.ends_at,
+            status: booking.status,
+            requesterName,
+            requesterEmail,
+            cateringType: booking.catering_type,
+            cateringPax: booking.catering_pax,
+            cateringServingTime: booking.catering_serving_time,
+            cateringServingTimeLabel: formatCateringServingTime(
+              booking.catering_serving_time,
+            ),
+            cateringDietaryNotes: booking.catering_dietary_notes,
+            cateringNotes: booking.catering_notes,
+          },
+          related_booking_id: booking.id,
+          idempotency_key: `booking-catering-request:${booking.id}:${admin.email}`,
+        })),
+      )
+      .select("id");
+
+    if (error && error.code !== "23505") {
+      console.error("Catering notification insert failed", {
+        bookingId: booking.id,
+        message: error.message,
+      });
+      return;
+    }
+
+    for (const notification of (data as { id: string }[] | null) ?? []) {
+      const result = await processEmailNotificationNow(notification.id, supabase);
+
+      if (result.sent === 0) {
+        console.error("Catering notification immediate send did not complete", {
+          bookingId: booking.id,
+          notificationId: notification.id,
+          result,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Catering notification unavailable", error);
   }
 }
 
@@ -383,6 +492,12 @@ export async function createBookingAction(
   await insertBookingConfirmationNotification({
     booking,
     recipientEmail: user.email,
+    facilityName: availability.facility.name,
+  });
+  await insertCateringRequestNotifications({
+    booking,
+    requesterEmail: user.email,
+    requesterName: profile?.full_name,
     facilityName: availability.facility.name,
   });
   if (booking.status === "confirmed") {

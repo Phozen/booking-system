@@ -1,161 +1,454 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CalendarClock } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { AlertCircle, CalendarClock, Loader2, Minus, Plus } from "lucide-react";
 
 import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
-import { formatBookingWindow } from "@/lib/bookings/format";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-const typeClassNames: Record<AvailabilityTimelineItem["type"], string> = {
-  available:
-    "border-emerald-300 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/25 dark:text-emerald-100",
-  confirmed:
-    "border-sky-300 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/25 dark:text-sky-100",
-  pending:
-    "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/25 dark:text-amber-100",
-  blocked:
-    "border-rose-300 bg-rose-50 text-rose-950 dark:border-rose-900 dark:bg-rose-950/25 dark:text-rose-100",
-  maintenance:
-    "border-violet-300 bg-violet-50 text-violet-950 dark:border-violet-900 dark:bg-violet-950/25 dark:text-violet-100",
+const STEP_MINUTES = 15;
+const DEFAULT_DURATION_MINUTES = 60;
+const FALLBACK_START_MINUTES = 8 * 60;
+const FALLBACK_END_MINUTES = 18 * 60;
+
+type AvailabilityResponse = {
+  items?: AvailabilityTimelineItem[];
+  error?: string;
 };
 
-type LoadState =
-  | { status: "idle"; key: string; items: AvailabilityTimelineItem[]; message: string }
-  | { status: "error"; key: string; items: AvailabilityTimelineItem[]; message: string }
-  | { status: "success"; key: string; items: AvailabilityTimelineItem[]; message: string };
+type BusyBlock = {
+  id: string;
+  type: Exclude<AvailabilityTimelineItem["type"], "available">;
+  label: string;
+  detail: string | null;
+  start: number;
+  end: number;
+};
+
+function parseTime(value: string) {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+
+  return hour * 60 + minute;
+}
+
+function formatTime(minutes: number) {
+  const clamped = Math.max(0, Math.min(24 * 60 - STEP_MINUTES, minutes));
+  const hour = Math.floor(clamped / 60);
+  const minute = clamped % 60;
+
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function roundToStep(minutes: number) {
+  return Math.round(minutes / STEP_MINUTES) * STEP_MINUTES;
+}
+
+function getLocalMinutes(value: string, timezone: string) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(value));
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
+  const minute = Number(
+    parts.find((part) => part.type === "minute")?.value ?? 0,
+  );
+
+  return (hour === 24 ? 0 : hour) * 60 + minute;
+}
+
+function overlaps(start: number, end: number, blocks: BusyBlock[]) {
+  return blocks.some((block) => start < block.end && end > block.start);
+}
+
+function blockColor(type: BusyBlock["type"]) {
+  switch (type) {
+    case "confirmed":
+      return "border-red-200 bg-red-100 text-red-950 dark:border-red-900 dark:bg-red-950/45 dark:text-red-100";
+    case "pending":
+      return "border-amber-200 bg-amber-100 text-amber-950 dark:border-amber-900 dark:bg-amber-950/45 dark:text-amber-100";
+    case "blocked":
+      return "border-slate-300 bg-slate-200 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100";
+    case "maintenance":
+      return "border-purple-200 bg-purple-100 text-purple-950 dark:border-purple-900 dark:bg-purple-950/45 dark:text-purple-100";
+  }
+}
 
 export function BookingAvailabilityTimeline({
   facilityId,
   facilityName,
   date,
+  timezone,
+  startTime,
+  endTime,
+  onTimeChange,
+  disabled = false,
 }: {
   facilityId: string;
   facilityName?: string;
   date: string;
+  timezone: string;
+  startTime: string;
+  endTime: string;
+  onTimeChange: (startTime: string, endTime: string) => void;
+  disabled?: boolean;
 }) {
-  const [state, setState] = useState<LoadState>({
-    status: "idle",
-    key: "",
-    items: [],
-    message: "Select a facility and date to view availability.",
-  });
-  const selectedKey = facilityId && date ? `${facilityId}:${date}` : "";
-  const isLoading = Boolean(selectedKey && state.key !== selectedKey);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const dragAnchor = useRef<number | null>(null);
+  const [items, setItems] = useState<AvailabilityTimelineItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!selectedKey) {
+    if (!facilityId || !date) {
       return;
     }
 
     const controller = new AbortController();
+    queueMicrotask(() => {
+      if (!controller.signal.aborted) {
+        setLoading(true);
+        setError(null);
+      }
+    });
 
     fetch(
-      `/api/facility-availability?facilityId=${encodeURIComponent(
-        facilityId,
-      )}&date=${encodeURIComponent(date)}`,
+      `/api/facility-availability?facilityId=${encodeURIComponent(facilityId)}&date=${encodeURIComponent(date)}`,
       { signal: controller.signal },
     )
       .then(async (response) => {
+        const payload = (await response.json()) as AvailabilityResponse;
         if (!response.ok) {
-          throw new Error("Unable to load availability.");
+          throw new Error(payload.error ?? "Availability could not be loaded.");
         }
-
-        return (await response.json()) as {
-          items?: AvailabilityTimelineItem[];
-        };
+        setItems(payload.items ?? []);
       })
-      .then((data) => {
-        setState({
-          status: "success",
-          key: selectedKey,
-          items: data.items ?? [],
-          message:
-            data.items?.length === 0
-              ? "No timeline data for this date."
-              : "Availability loaded.",
-        });
-      })
-      .catch((error: Error) => {
-        if (error.name === "AbortError") {
+      .catch((fetchError: unknown) => {
+        if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
           return;
         }
-
-        setState({
-          status: "error",
-          key: selectedKey,
-          items: [],
-          message:
-            "Unable to load availability. You can still submit; conflicts will be checked before booking is created.",
-        });
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Availability could not be loaded.",
+        );
+        setItems([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       });
 
     return () => controller.abort();
-  }, [date, facilityId, selectedKey]);
+  }, [facilityId, date]);
+
+  const timelineItems = useMemo(
+    () => (facilityId && date ? items : []),
+    [date, facilityId, items],
+  );
+
+  const busyBlocks = useMemo(
+    () =>
+      timelineItems
+        .filter((item) => item.type !== "available")
+        .map((item) => ({
+          id: item.id,
+          type: item.type,
+          label: item.label,
+          detail: item.detail,
+          start: getLocalMinutes(item.startsAt, timezone),
+          end: getLocalMinutes(item.endsAt, timezone),
+        }))
+        .filter((item): item is BusyBlock => item.end > item.start)
+        .sort((a, b) => a.start - b.start),
+    [timelineItems, timezone],
+  );
+
+  const selectedStart = parseTime(startTime);
+  const selectedEnd = parseTime(endTime);
+  const hasSelection =
+    selectedStart !== null && selectedEnd !== null && selectedEnd > selectedStart;
+
+  const windowStart = Math.max(
+    0,
+    Math.floor(
+      Math.min(
+        FALLBACK_START_MINUTES,
+        selectedStart ?? FALLBACK_START_MINUTES,
+        ...busyBlocks.map((block) => block.start),
+      ) / 60,
+    ) * 60,
+  );
+  const windowEnd = Math.min(
+    24 * 60,
+    Math.ceil(
+      Math.max(
+        FALLBACK_END_MINUTES,
+        selectedEnd ?? FALLBACK_END_MINUTES,
+        ...busyBlocks.map((block) => block.end),
+      ) / 60,
+    ) * 60,
+  );
+  const windowMinutes = Math.max(60, windowEnd - windowStart);
+  const hasSelectionConflict =
+    hasSelection && overlaps(selectedStart, selectedEnd, busyBlocks);
+
+  function minutesFromPointer(event: PointerEvent<HTMLDivElement>) {
+    const element = trackRef.current;
+    if (!element) return null;
+
+    const rect = element.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+    return Math.max(
+      windowStart,
+      Math.min(windowEnd - STEP_MINUTES, roundToStep(windowStart + ratio * windowMinutes)),
+    );
+  }
+
+  function commitRange(start: number, end: number) {
+    const nextStart = Math.max(windowStart, Math.min(start, windowEnd - STEP_MINUTES));
+    const nextEnd = Math.max(nextStart + STEP_MINUTES, Math.min(end, windowEnd));
+
+    if (overlaps(nextStart, nextEnd, busyBlocks)) {
+      return;
+    }
+
+    onTimeChange(formatTime(nextStart), formatTime(nextEnd));
+  }
+
+  function beginSelection(event: PointerEvent<HTMLDivElement>) {
+    if (disabled || loading || !date || !facilityId) return;
+    const minutes = minutesFromPointer(event);
+    if (minutes === null) return;
+
+    const end = Math.min(minutes + DEFAULT_DURATION_MINUTES, windowEnd);
+    if (overlaps(minutes, end, busyBlocks)) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragAnchor.current = minutes;
+    commitRange(minutes, end);
+  }
+
+  function moveSelection(event: PointerEvent<HTMLDivElement>) {
+    if (dragAnchor.current === null) return;
+    const minutes = minutesFromPointer(event);
+    if (minutes === null) return;
+
+    const start = Math.min(dragAnchor.current, minutes);
+    const end = Math.max(dragAnchor.current + STEP_MINUTES, minutes + STEP_MINUTES);
+    commitRange(start, end);
+  }
+
+  function endSelection() {
+    dragAnchor.current = null;
+  }
+
+  function adjust(edge: "start" | "end", delta: number) {
+    const start = selectedStart ?? FALLBACK_START_MINUTES;
+    const end = selectedEnd ?? start + DEFAULT_DURATION_MINUTES;
+
+    if (edge === "start") {
+      commitRange(start + delta, end);
+    } else {
+      commitRange(start, end + delta);
+    }
+  }
+
+  const hourMarks = [];
+  for (let minute = windowStart; minute <= windowEnd; minute += 60) {
+    hourMarks.push(minute);
+  }
 
   return (
-    <section
-      className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 shadow-sm ring-1 ring-primary/10 sm:col-span-2"
-      aria-live="polite"
-      aria-busy={isLoading}
-    >
-      <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/25">
-          <CalendarClock className="size-4" aria-hidden="true" />
-        </span>
+    <section className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-4 sm:col-span-2">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold tracking-normal">
-            Availability for selected date
+          <h2 className="flex items-center gap-2 font-medium tracking-normal">
+            <CalendarClock className="size-4 text-muted-foreground" aria-hidden="true" />
+            Availability and time
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Use this timeline to choose a time that does not overlap with
-            bookings, blocked periods, or maintenance.
+            Drag on the day timeline or use the time controls below. Unavailable
+            blocks cannot be selected.
           </p>
-          {facilityName && date ? (
-            <p className="mt-1 text-xs text-muted-foreground">
-              {facilityName} on {date}
-            </p>
-          ) : null}
+        </div>
+        <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
+          15 min blocks
         </div>
       </div>
 
-      {!selectedKey ? (
-        <p className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-          Select a facility and date to view availability.
-        </p>
-      ) : isLoading ? (
-        <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-          <LoadingSpinner size="sm" label="Loading availability" />
-          <span>Loading availability...</span>
+      {!date ? (
+        <div className="rounded-lg border border-dashed bg-background p-4 text-sm text-muted-foreground">
+          Choose a date to view availability for {facilityName ?? "this facility"}.
         </div>
-      ) : state.status === "error" ? (
-        <p
-          className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/25 dark:text-amber-100"
-        >
-          {state.message}
-        </p>
+      ) : error ? (
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4" aria-hidden="true" />
+          <span>{error}</span>
+        </div>
       ) : (
-        <div className="grid gap-2">
-          {state.items.length > 0 ? (
-            state.items.map((item) => (
+        <div className="grid gap-3 lg:grid-cols-[6rem_minmax(0,1fr)]">
+          <div className="hidden text-xs text-muted-foreground lg:block">
+            {hourMarks.map((minute) => (
               <div
-                key={item.id}
-                className={`grid gap-1 rounded-lg border p-3 text-sm sm:grid-cols-[7rem_8rem_minmax(0,1fr)] sm:items-center ${typeClassNames[item.type]}`}
+                key={minute}
+                className="relative"
+                style={{ height: `${Math.max(40, 720 / hourMarks.length)}px` }}
               >
-                <p className="font-semibold">{item.label}</p>
-                <p>{formatBookingWindow(item.startsAt, item.endsAt)}</p>
-                <p className="min-w-0 break-words text-current/80">
-                  {item.detail}
-                </p>
+                {formatTime(minute)}
               </div>
-            ))
-          ) : (
-            <p className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-              No timeline data for this date.
-            </p>
-          )}
+            ))}
+          </div>
+          <div
+            ref={trackRef}
+            role="application"
+            aria-label={`Availability timeline for ${facilityName ?? "selected facility"} on ${date}`}
+            className={cn(
+              "relative min-h-[360px] overflow-hidden rounded-lg border bg-background touch-none",
+              disabled ? "opacity-60" : "cursor-crosshair",
+            )}
+            onPointerDown={beginSelection}
+            onPointerMove={moveSelection}
+            onPointerUp={endSelection}
+            onPointerCancel={endSelection}
+          >
+            {hourMarks.slice(0, -1).map((minute) => (
+              <div
+                key={minute}
+                className="absolute left-0 right-0 border-t border-border/70"
+                style={{
+                  top: `${((minute - windowStart) / windowMinutes) * 100}%`,
+                }}
+              >
+                <span className="absolute left-2 top-1 text-[11px] text-muted-foreground lg:hidden">
+                  {formatTime(minute)}
+                </span>
+              </div>
+            ))}
+
+            {loading ? (
+              <div className="absolute inset-0 z-20 grid place-items-center bg-background/80">
+                <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Loading availability
+                </span>
+              </div>
+            ) : null}
+
+            {busyBlocks.map((block) => (
+              <div
+                key={block.id}
+                className={cn(
+                  "absolute left-16 right-3 rounded-md border px-3 py-2 text-xs shadow-sm sm:left-20",
+                  blockColor(block.type),
+                )}
+                style={{
+                  top: `${((block.start - windowStart) / windowMinutes) * 100}%`,
+                  height: `${Math.max(7, ((block.end - block.start) / windowMinutes) * 100)}%`,
+                }}
+              >
+                <div className="font-medium">
+                  {formatTime(block.start)} - {formatTime(block.end)}
+                </div>
+                <div className="truncate">{block.detail ?? block.label}</div>
+              </div>
+            ))}
+
+            {hasSelection ? (
+              <div
+                className={cn(
+                  "absolute left-6 right-6 z-10 rounded-md border-2 px-3 py-2 text-sm shadow-md sm:left-10",
+                  hasSelectionConflict
+                    ? "border-destructive bg-destructive/15 text-destructive"
+                    : "border-primary bg-primary/15 text-primary",
+                )}
+                style={{
+                  top: `${((selectedStart - windowStart) / windowMinutes) * 100}%`,
+                  height: `${Math.max(8, ((selectedEnd - selectedStart) / windowMinutes) * 100)}%`,
+                }}
+              >
+                <div className="font-semibold">
+                  {startTime} - {endTime}
+                </div>
+                <div className="text-xs">
+                  {hasSelectionConflict ? "Conflicts with unavailable time" : "Selected time"}
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
       )}
+
+      <div className="grid gap-3 rounded-lg border bg-background p-3 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <span className="text-xs font-medium uppercase text-muted-foreground">
+            Start time
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => adjust("start", -STEP_MINUTES)}
+              disabled={disabled || !date}
+              aria-label="Move start time earlier by 15 minutes"
+            >
+              <Minus className="size-4" aria-hidden="true" />
+            </Button>
+            <span className="min-w-20 text-center font-medium">
+              {startTime || "--:--"}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => adjust("start", STEP_MINUTES)}
+              disabled={disabled || !date}
+              aria-label="Move start time later by 15 minutes"
+            >
+              <Plus className="size-4" aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+        <div className="grid gap-2">
+          <span className="text-xs font-medium uppercase text-muted-foreground">
+            End time
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => adjust("end", -STEP_MINUTES)}
+              disabled={disabled || !date}
+              aria-label="Move end time earlier by 15 minutes"
+            >
+              <Minus className="size-4" aria-hidden="true" />
+            </Button>
+            <span className="min-w-20 text-center font-medium">
+              {endTime || "--:--"}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => adjust("end", STEP_MINUTES)}
+              disabled={disabled || !date}
+              aria-label="Move end time later by 15 minutes"
+            >
+              <Plus className="size-4" aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

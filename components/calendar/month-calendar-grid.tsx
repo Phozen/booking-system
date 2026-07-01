@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { CalendarDay } from "@/lib/calendar/date-range";
 import type { GroupedCalendarBookings } from "@/lib/calendar/group-bookings";
 import { CalendarBookingItem } from "@/components/calendar/calendar-booking-item";
@@ -9,9 +11,13 @@ const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export function MonthCalendarGrid({
   days,
   groupedBookings,
+  selectedDate,
+  getDayHref,
 }: {
   days: CalendarDay[];
   groupedBookings: GroupedCalendarBookings;
+  selectedDate?: string;
+  getDayHref?: (dayKey: string) => string;
 }) {
   const hasBookings = Object.values(groupedBookings).some(
     (bookings) => bookings.length > 0,
@@ -54,6 +60,7 @@ export function MonthCalendarGrid({
         ))}
         {days.map((day) => {
           const bookings = groupedBookings[day.key] ?? [];
+          const isSelected = selectedDate === day.key;
 
           return (
             <div
@@ -61,19 +68,24 @@ export function MonthCalendarGrid({
               className={cn(
                 "min-h-36 border-r border-t border-border/70 bg-background/70 p-2 last:border-r-0",
                 day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/30",
+                isSelected && "bg-accent/60 ring-2 ring-inset ring-primary/50",
               )}
             >
               <div className="mb-2 flex items-center justify-between gap-2">
-                <span
+                <Link
+                  href={getDayHref?.(day.key) ?? "#"}
                   className={cn(
-                    "inline-flex size-7 items-center justify-center rounded-full text-sm font-semibold",
+                    "inline-flex size-8 items-center justify-center rounded-full text-sm font-semibold transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     day.isToday &&
+                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                    isSelected &&
                       "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
                   )}
                   aria-label={`${day.weekdayLabel}, ${day.shortLabel}`}
+                  aria-current={isSelected ? "date" : undefined}
                 >
                   {day.dateNumber}
-                </span>
+                </Link>
                 {bookings.length > 0 ? (
                   <span className="text-xs text-muted-foreground">
                     {bookings.length} booking{bookings.length === 1 ? "" : "s"}
@@ -81,9 +93,9 @@ export function MonthCalendarGrid({
                 ) : null}
               </div>
 
-              <div className="grid max-h-28 gap-1 overflow-y-auto pr-1">
+              <div className="grid gap-1 pr-1">
                 {bookings.length > 0 ? (
-                  bookings.map((booking) => (
+                  bookings.slice(0, 2).map((booking) => (
                     <CalendarBookingItem
                       key={booking.id}
                       booking={booking}
@@ -91,8 +103,21 @@ export function MonthCalendarGrid({
                     />
                   ))
                 ) : (
-                  <p className="text-xs text-muted-foreground">No bookings</p>
+                  <Link
+                    href={getDayHref?.(day.key) ?? "#"}
+                    className="rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Select day
+                  </Link>
                 )}
+                {bookings.length > 2 ? (
+                  <Link
+                    href={getDayHref?.(day.key) ?? "#"}
+                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    View {bookings.length - 2} more
+                  </Link>
+                ) : null}
               </div>
             </div>
           );

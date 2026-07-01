@@ -23,10 +23,10 @@ export const dynamic = "force-dynamic";
 export default async function NewBookingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ facilityId?: string }>;
+  searchParams: Promise<{ date?: string; facilityId?: string }>;
 }) {
   const { profile } = await requireUser();
-  const { facilityId } = await searchParams;
+  const { date, facilityId } = await searchParams;
   const settings = await getAppSettings();
 
   let facilities: Facility[] = [];
@@ -45,6 +45,8 @@ export default async function NewBookingPage({
   )
     ? facilityId
     : undefined;
+  const selectedDate =
+    date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined;
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -53,16 +55,16 @@ export default async function NewBookingPage({
         title="Create booking"
         description="Choose a facility, date, and time. The system checks conflicts before saving."
         breadcrumbs={[
-          { label: "Facilities", href: "/facilities" },
+          { label: "Calendar", href: "/calendar" },
           { label: "Create booking" },
         ]}
         secondaryAction={
           <Link
-            href="/facilities"
+            href={selectedDate ? `/calendar?date=${selectedDate}` : "/calendar"}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
-            Facilities
+            Calendar
           </Link>
         }
         primaryAction={
@@ -98,6 +100,7 @@ export default async function NewBookingPage({
           <BookingForm
             facilities={facilities}
             selectedFacilityId={selectedFacilityId}
+            initialDate={selectedDate}
             settings={settings}
           />
         </section>

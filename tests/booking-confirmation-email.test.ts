@@ -71,6 +71,7 @@ const profile = {
   email: user.email,
   role: "employee",
   status: "active",
+  full_name: "Employee User",
 };
 const facility = {
   id: "22222222-2222-4222-8222-222222222222",
@@ -120,12 +121,15 @@ function createForm(overrides: Record<string, string> = {}) {
 function createActionMocks({
   approvalRequired = false,
   booking = confirmedBooking,
+  admins = [],
 }: {
   approvalRequired?: boolean;
-  booking?: typeof confirmedBooking;
+  booking?: Record<string, unknown>;
+  admins?: { id: string; email: string; full_name: string | null }[];
 } = {}) {
   const rpc = vi.fn().mockResolvedValue({ data: booking, error: null });
   const userSupabase = { rpc };
+  let lastEmailInsert: unknown;
   const emailQuery = {
     maybeSingle: vi.fn().mockResolvedValue({
       data: { id: "44444444-4444-4444-8444-444444444444" },
@@ -134,12 +138,37 @@ function createActionMocks({
     select: vi.fn(),
     insert: vi.fn(),
   };
-  emailQuery.insert.mockReturnValue(emailQuery);
-  emailQuery.select.mockReturnValue(emailQuery);
+  emailQuery.insert.mockImplementation((payload: unknown) => {
+    lastEmailInsert = payload;
+    return emailQuery;
+  });
+  emailQuery.select.mockImplementation(() => {
+    if (Array.isArray(lastEmailInsert)) {
+      return Promise.resolve({
+        data: lastEmailInsert.map((_, index) => ({
+          id: `55555555-5555-4555-8555-55555555555${index}`,
+        })),
+        error: null,
+      });
+    }
+
+    return emailQuery;
+  });
+  const profilesQuery = {
+    select: vi.fn(),
+    in: vi.fn(),
+    eq: vi.fn().mockResolvedValue({ data: admins, error: null }),
+  };
+  profilesQuery.select.mockReturnValue(profilesQuery);
+  profilesQuery.in.mockReturnValue(profilesQuery);
   const adminSupabase = {
     from: vi.fn((table: string) => {
       if (table === "email_notifications") {
         return emailQuery;
+      }
+
+      if (table === "profiles") {
+        return profilesQuery;
       }
 
       return {
@@ -170,7 +199,7 @@ function createActionMocks({
     message: "Processed booking confirmation email notification.",
   });
 
-  return { rpc, emailQuery };
+  return { rpc, emailQuery, profilesQuery };
 }
 
 describe("booking confirmation email queueing", () => {
@@ -241,6 +270,74 @@ describe("booking confirmation email queueing", () => {
     expect(inserted.recipient_email).toBe(user.email);
     expect(JSON.stringify(inserted)).not.toContain("TEST_EMAIL_TO");
   });
+
+  it("queues catering requests to active admins when catering is required", async () => {
+    const cateringBooking = {
+      ...confirmedBooking,
+      catering_required: true,
+      catering_type: "vip_catering",
+      catering_pax: 8,
+      catering_serving_time: "before_meeting",
+      catering_dietary_notes: "Halal",
+      catering_notes: "Serve before arrival",
+    };
+    const { emailQuery, profilesQuery } = createActionMocks({
+      booking: cateringBooking,
+      admins: [
+        {
+          id: "66666666-6666-4666-8666-666666666666",
+          email: "admin@example.com",
+          full_name: "Admin User",
+        },
+      ],
+    });
+
+    await expect(
+      createBookingAction(
+        { status: "idle", message: "" },
+        createForm({
+          cateringRequired: "yes",
+          cateringType: "vip_catering",
+          cateringPax: "8",
+          cateringServingTime: "before_meeting",
+          cateringDietaryNotes: "Halal",
+          cateringNotes: "Serve before arrival",
+        }),
+      ),
+    ).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(profilesQuery.in).toHaveBeenCalledWith("role", [
+      "admin",
+      "super_admin",
+    ]);
+    const cateringInsert = emailQuery.insert.mock.calls.find(([payload]) =>
+      Array.isArray(payload),
+    )?.[0] as Record<string, unknown>[] | undefined;
+    expect(cateringInsert).toEqual([
+      expect.objectContaining({
+        type: "booking_catering_request",
+        status: "queued",
+        recipient_email: "admin@example.com",
+        recipient_user_id: "66666666-6666-4666-8666-666666666666",
+        subject: "Catering requested: Planning Session",
+        template_name: "booking_catering_request",
+        related_booking_id: confirmedBooking.id,
+        idempotency_key: `booking-catering-request:${confirmedBooking.id}:admin@example.com`,
+      }),
+    ]);
+    expect(cateringInsert?.[0].template_data).toEqual(
+      expect.objectContaining({
+        bookingId: confirmedBooking.id,
+        requesterEmail: user.email,
+        requesterName: "Employee User",
+        cateringType: "vip_catering",
+        cateringPax: 8,
+        cateringServingTime: "before_meeting",
+        cateringDietaryNotes: "Halal",
+        cateringNotes: "Serve before arrival",
+      }),
+    );
+  });
 });
 
 describe("booking confirmation email template", () => {
@@ -275,5 +372,37 @@ describe("booking confirmation email template", () => {
     );
     expect(rendered.html).toContain("Attendee count");
     expect(rendered.html).toContain("4");
+  });
+
+  it("renders catering request details for admins", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_catering_request",
+      recipientEmail: "admin@example.com",
+      subject: "Catering requested: Planning Session",
+      body: "A booking was created with catering requested.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+        facilityName: "Board Room",
+        startsAt: "2037-01-01T01:00:00.000Z",
+        endsAt: "2037-01-01T02:00:00.000Z",
+        requesterName: "Employee User",
+        cateringType: "vip_catering",
+        cateringPax: 8,
+        cateringServingTime: "before_meeting",
+        cateringDietaryNotes: "Halal",
+        cateringNotes: "Serve before arrival",
+      },
+    });
+
+    expect(rendered.subject).toBe("Catering requested: Planning Session");
+    expect(rendered.text).toContain("Requester: Employee User");
+    expect(rendered.text).toContain(
+      "Catering type: VIP / management meeting catering",
+    );
+    expect(rendered.text).toContain("Catering pax: 8");
+    expect(rendered.text).toContain("Serving time: Before meeting");
+    expect(rendered.text).toContain("Dietary notes: Halal");
   });
 });

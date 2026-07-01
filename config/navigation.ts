@@ -25,12 +25,10 @@ export const authNavigation = [
 ] as const;
 
 export const employeeNavigation = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, match: "exact" },
-  { title: "Facilities", href: "/facilities", icon: Building2, match: "prefix" },
+  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
   { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact" },
-  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
-  { title: "New Booking", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
   { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact" },
+  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
 ] as const;
 
 export const adminNavigation = [

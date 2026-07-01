@@ -1,4 +1,8 @@
 import { formatBookingDate, formatBookingTime } from "@/lib/bookings/format";
+import {
+  formatCateringServingTime,
+  formatCateringType,
+} from "@/lib/bookings/catering/format";
 import type {
   EmailNotificationType,
   EmailTemplateInput,
@@ -112,6 +116,19 @@ export function renderEmailTemplate(
   const invitationStatus = getStringValue(input.templateData, "invitationStatus");
   const actorName = getStringValue(input.templateData, "actorName");
   const actorEmail = getStringValue(input.templateData, "actorEmail");
+  const requesterName = getStringValue(input.templateData, "requesterName");
+  const requesterEmail = getStringValue(input.templateData, "requesterEmail");
+  const cateringType = getStringValue(input.templateData, "cateringType");
+  const cateringPax = getDisplayValue(input.templateData, "cateringPax");
+  const cateringServingTime = getStringValue(
+    input.templateData,
+    "cateringServingTime",
+  );
+  const cateringDietaryNotes = getStringValue(
+    input.templateData,
+    "cateringDietaryNotes",
+  );
+  const cateringNotes = getStringValue(input.templateData, "cateringNotes");
   const link = getBookingLink(input.appUrl, bookingId);
   const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
   const startTime = startsAt ? formatBookingTime(startsAt) : null;
@@ -128,6 +145,20 @@ export function renderEmailTemplate(
     { label: "Status", value: status },
     { label: "Invitation status", value: invitationStatus },
     { label: "Responded by", value: actorName ?? actorEmail },
+    { label: "Requester", value: requesterName ?? requesterEmail },
+    {
+      label: "Catering type",
+      value: cateringType ? formatCateringType(cateringType) : null,
+    },
+    { label: "Catering pax", value: cateringPax },
+    {
+      label: "Serving time",
+      value: cateringServingTime
+        ? formatCateringServingTime(cateringServingTime)
+        : null,
+    },
+    { label: "Dietary notes", value: cateringDietaryNotes },
+    { label: "Catering notes", value: cateringNotes },
     { label: "Rejection reason", value: rejectionReason },
     { label: "Cancellation reason", value: cancellationReason },
   ];
@@ -137,6 +168,7 @@ export function renderEmailTemplate(
     booking_approval: "Your booking has been approved.",
     booking_rejection: "Your booking has been rejected.",
     booking_cancellation: "Your booking has been cancelled.",
+    booking_catering_request: "A booking was created with catering requested.",
     booking_reminder: "This is a reminder for your upcoming booking.",
     booking_invitation: "You have been invited to a booking.",
     booking_invitation_accepted: "A booking invitation has been accepted.",
@@ -148,6 +180,7 @@ export function renderEmailTemplate(
     booking_approval: `Booking approved: ${title}`,
     booking_rejection: `Booking rejected: ${title}`,
     booking_cancellation: `Booking cancelled: ${title}`,
+    booking_catering_request: `Catering requested: ${title}`,
     booking_reminder: `Booking reminder: ${title}`,
     booking_invitation: `Booking invitation: ${title}`,
     booking_invitation_accepted: `Invitation accepted: ${title}`,
