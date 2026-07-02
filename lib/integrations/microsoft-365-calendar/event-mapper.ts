@@ -15,6 +15,10 @@ export type MicrosoftCalendarBookingForEvent = {
     email: string;
     fullName: string | null;
   } | null;
+  attendees: {
+    email: string;
+    name: string | null;
+  }[];
 };
 
 function escapeHtml(value: string) {
@@ -49,6 +53,43 @@ function buildBookingLink(bookingId: string, appUrl: string | undefined) {
   return baseUrl ? `${baseUrl}/admin/bookings/${bookingId}` : null;
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function buildAttendees(
+  booking: MicrosoftCalendarBookingForEvent,
+): NonNullable<MicrosoftGraphEventPayload["attendees"]> {
+  const ownerEmail = booking.owner?.email.trim().toLowerCase() ?? "";
+  const seen = new Set<string>();
+
+  return booking.attendees
+    .map((attendee) => ({
+      email: attendee.email.trim().toLowerCase(),
+      name: attendee.name?.trim() || attendee.email.trim(),
+    }))
+    .filter((attendee) => {
+      if (
+        !attendee.email ||
+        !isValidEmail(attendee.email) ||
+        attendee.email === ownerEmail ||
+        seen.has(attendee.email)
+      ) {
+        return false;
+      }
+
+      seen.add(attendee.email);
+      return true;
+    })
+    .map((attendee) => ({
+      emailAddress: {
+        address: attendee.email,
+        name: attendee.name,
+      },
+      type: "required" as const,
+    }));
+}
+
 export function buildMicrosoftCalendarEventPayload({
   booking,
   timezone,
@@ -76,6 +117,8 @@ export function buildMicrosoftCalendarEventPayload({
       : null,
   ].filter(Boolean);
 
+  const attendees = buildAttendees(booking);
+
   return {
     subject: `Booking: ${booking.title} - ${facilityName}`,
     body: {
@@ -94,5 +137,6 @@ export function buildMicrosoftCalendarEventPayload({
       displayName: `${facilityName}, ${facilityLevel}`,
     },
     showAs: "busy",
+    ...(attendees.length > 0 ? { attendees } : {}),
   };
 }

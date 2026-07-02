@@ -219,6 +219,7 @@ describe("Microsoft 365 calendar sync helpers", () => {
           email: "owner@example.com",
           fullName: "Owner User",
         },
+        attendees: [],
       },
     });
 
@@ -237,6 +238,52 @@ describe("Microsoft 365 calendar sync helpers", () => {
       "https://booking.example.com/admin/bookings/booking-1",
     );
     expect(payload).not.toHaveProperty("attendees");
+  });
+
+  it("maps pending and accepted invitees to Microsoft Graph attendees", () => {
+    const payload = buildMicrosoftCalendarEventPayload({
+      timezone: "Asia/Kuala_Lumpur",
+      booking: {
+        id: "booking-1",
+        title: "Planning",
+        description: null,
+        status: "confirmed",
+        startsAt: "2026-05-14T02:00:00.000Z",
+        endsAt: "2026-05-14T03:00:00.000Z",
+        facility: {
+          name: "Meeting Room 1",
+          level: "Level 5",
+        },
+        owner: {
+          email: "owner@example.com",
+          fullName: "Owner User",
+        },
+        attendees: [
+          { email: "pending@example.com", name: "Pending User" },
+          { email: "ACCEPTED@example.com", name: "Accepted User" },
+          { email: "owner@example.com", name: "Owner User" },
+          { email: "accepted@example.com", name: "Duplicate Accepted" },
+          { email: "not-an-email", name: "Invalid User" },
+        ],
+      },
+    });
+
+    expect(payload.attendees).toEqual([
+      {
+        emailAddress: {
+          address: "pending@example.com",
+          name: "Pending User",
+        },
+        type: "required",
+      },
+      {
+        emailAddress: {
+          address: "accepted@example.com",
+          name: "Accepted User",
+        },
+        type: "required",
+      },
+    ]);
   });
 
   it("sanitizes token and secret-like Microsoft errors", () => {

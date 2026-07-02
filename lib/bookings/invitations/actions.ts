@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { InvitationActionResult } from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
+import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   canInviteUser,
   formDataToInvitationResponseValues,
@@ -21,6 +22,7 @@ type BookingForInvitation = {
   id: string;
   user_id: string;
   title: string;
+  status: string;
   starts_at: string;
   ends_at: string;
   facilities: { name: string; level: string } | { name: string; level: string }[] | null;
@@ -72,7 +74,7 @@ async function getBookingForInvitationAction(
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "id,user_id,title,starts_at,ends_at,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
+      "id,user_id,title,status,starts_at,ends_at,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -82,6 +84,42 @@ async function getBookingForInvitationAction(
   }
 
   return data as unknown as BookingForInvitation | null;
+}
+
+async function syncConfirmedInvitationAttendeesSafely({
+  booking,
+  actor,
+  reason,
+}: {
+  booking: Pick<BookingForInvitation, "id" | "status">;
+  actor: { id: string; email?: string | null };
+  reason: string;
+}) {
+  if (booking.status !== "confirmed") {
+    return;
+  }
+
+  try {
+    const result = await syncConfirmedBookingToMicrosoftCalendar(booking.id, {
+      userId: actor.id,
+      email: actor.email,
+      reason,
+    });
+
+    if (result.status === "failed") {
+      console.error("Invitation attendee calendar resync failed", {
+        bookingId: booking.id,
+        reason,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error("Invitation attendee calendar resync unavailable", {
+      bookingId: booking.id,
+      reason,
+      error,
+    });
+  }
 }
 
 async function queueInvitationNotification({
@@ -267,6 +305,14 @@ export async function inviteUserToBookingAction(
     },
     status: "pending",
   });
+  await syncConfirmedInvitationAttendeesSafely({
+    booking,
+    actor: {
+      id: user.id,
+      email: user.email,
+    },
+    reason: "invitation_created",
+  });
 
   revalidateInvitationPaths(booking.id);
 
@@ -296,7 +342,7 @@ export async function removeInvitationAction(
   const { data, error } = await supabase
     .from("booking_invitations")
     .select(
-      "id,booking_id,invited_user_id,invited_by,status,response_message,responded_at,bookings!booking_invitations_booking_id_fkey(id,user_id,title),invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,full_name)",
+      "id,booking_id,invited_user_id,invited_by,status,response_message,responded_at,bookings!booking_invitations_booking_id_fkey(id,user_id,title,status),invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,full_name)",
     )
     .eq("id", parsed.data)
     .maybeSingle();
@@ -309,7 +355,10 @@ export async function removeInvitationAction(
   }
 
   const invitation = data as unknown as ExistingInvitation & {
-    bookings: { id: string; user_id: string; title: string } | { id: string; user_id: string; title: string }[] | null;
+    bookings:
+      | { id: string; user_id: string; title: string; status: string }
+      | { id: string; user_id: string; title: string; status: string }[]
+      | null;
     invited_user: ProfileForInvitation | ProfileForInvitation[] | null;
   };
   const booking = firstRecord(invitation.bookings);
@@ -357,6 +406,14 @@ export async function removeInvitationAction(
     },
     { bookingId: booking.id, invitationId: invitation.id },
   );
+  await syncConfirmedInvitationAttendeesSafely({
+    booking,
+    actor: {
+      id: user.id,
+      email: user.email,
+    },
+    reason: "invitation_removed",
+  });
 
   revalidateInvitationPaths(booking.id);
 
@@ -388,7 +445,7 @@ export async function respondToInvitationAction(
   const { data, error } = await supabase
     .from("booking_invitations")
     .select(
-      "id,booking_id,invited_user_id,invited_by,status,response_message,responded_at,bookings!booking_invitations_booking_id_fkey(id,user_id,title,starts_at,ends_at,facilities(name,level),profiles!bookings_user_id_fkey(id,email,full_name)),invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,full_name)",
+      "id,booking_id,invited_user_id,invited_by,status,response_message,responded_at,bookings!booking_invitations_booking_id_fkey(id,user_id,title,status,starts_at,ends_at,facilities(name,level),profiles!bookings_user_id_fkey(id,email,full_name)),invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,full_name)",
     )
     .eq("id", parsed.data.invitationId)
     .maybeSingle();
@@ -491,6 +548,17 @@ export async function respondToInvitationAction(
       status: parsed.data.status,
     });
   }
+  await syncConfirmedInvitationAttendeesSafely({
+    booking,
+    actor: {
+      id: user.id,
+      email: user.email,
+    },
+    reason:
+      parsed.data.status === "accepted"
+        ? "invitation_accepted"
+        : "invitation_declined",
+  });
 
   revalidateInvitationPaths(booking.id);
 

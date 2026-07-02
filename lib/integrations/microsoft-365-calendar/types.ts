@@ -31,6 +31,13 @@ export type MicrosoftGraphEventPayload = {
     displayName: string;
   };
   showAs: "busy";
+  attendees?: {
+    emailAddress: {
+      address: string;
+      name?: string;
+    };
+    type: "required";
+  }[];
 };
 
 export type MicrosoftGraphEventResponse = {

@@ -95,6 +95,23 @@ type BookingRecord = {
         full_name: string | null;
       }[]
     | null;
+  booking_invitations?: (
+    | {
+        status: string;
+        invited_user:
+          | {
+              email: string | null;
+              full_name: string | null;
+              status: string | null;
+            }
+          | {
+              email: string | null;
+              full_name: string | null;
+              status: string | null;
+            }[]
+          | null;
+      }
+  )[] | null;
 };
 
 function getRecord<T>(value: T | T[] | null | undefined) {
@@ -104,6 +121,30 @@ function getRecord<T>(value: T | T[] | null | undefined) {
 function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForEvent {
   const facility = getRecord(record.facilities);
   const owner = getRecord(record.profiles);
+  const ownerEmail = owner?.email.trim().toLowerCase() ?? "";
+  const seenAttendeeEmails = new Set<string>();
+  const attendees = (record.booking_invitations ?? [])
+    .filter((invitation) =>
+      ["pending", "accepted"].includes(invitation.status),
+    )
+    .map((invitation) => getRecord(invitation.invited_user))
+    .filter((profile) => profile?.status === "active")
+    .map((profile) => ({
+      email: profile?.email?.trim().toLowerCase() ?? "",
+      name: profile?.full_name?.trim() || profile?.email?.trim() || null,
+    }))
+    .filter((attendee) => {
+      if (
+        !attendee.email ||
+        attendee.email === ownerEmail ||
+        seenAttendeeEmails.has(attendee.email)
+      ) {
+        return false;
+      }
+
+      seenAttendeeEmails.add(attendee.email);
+      return true;
+    });
 
   return {
     id: record.id,
@@ -124,6 +165,7 @@ function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForE
           fullName: owner.full_name,
         }
       : null,
+    attendees,
   };
 }
 
@@ -365,6 +407,14 @@ async function getBookingForSync(bookingId: string) {
       profiles!bookings_user_id_fkey (
         email,
         full_name
+      ),
+      booking_invitations (
+        status,
+        invited_user:profiles!booking_invitations_invited_user_id_fkey (
+          email,
+          full_name,
+          status
+        )
       )
     `,
     )
