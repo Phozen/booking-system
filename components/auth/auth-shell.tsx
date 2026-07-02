@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { getCompanyDisplayName } from "@/lib/settings/app-settings";
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AuthShell({
@@ -13,7 +13,7 @@ export function AuthShell({
   companyName: string;
   children: ReactNode;
 }) {
-  const displayCompanyName = getCompanyDisplayName({ companyName });
+  void companyName;
 
   return (
     <main className="relative flex min-h-svh overflow-hidden bg-background px-4 py-6 sm:px-6 lg:px-8">
@@ -30,13 +30,11 @@ export function AuthShell({
         <div className="self-start">
           <Link
             href="/"
-            className="inline-flex w-fit rounded-sm text-2xl font-semibold tracking-normal text-foreground drop-shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-3xl"
+            className="inline-flex w-fit rounded-md bg-white/90 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {appName}
+            <CompanyLogo className="w-40 sm:w-48" priority />
+            <span className="sr-only">{appName}</span>
           </Link>
-          <p className="mt-2 w-fit rounded-full border border-white/35 bg-card/75 px-3 py-1 text-sm font-medium text-foreground shadow-sm backdrop-blur">
-            {displayCompanyName}
-          </p>
         </div>
 
         <div className="w-full lg:self-center">{children}</div>

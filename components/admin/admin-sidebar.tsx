@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeftRight } from "lucide-react";
 
+import { CompanyLogo } from "@/components/shared/company-logo";
 import { AdminNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
 import { buttonVariants } from "@/components/ui/button";
@@ -20,9 +21,10 @@ export function AdminSidebar({
         <div className="border-b border-sidebar-border pb-4">
           <Link
             href="/admin/dashboard"
-            className="rounded-sm text-base font-semibold tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex rounded-md bg-white px-3 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {appName}
+            <CompanyLogo className="w-36" priority />
+            <span className="sr-only">{appName}</span>
           </Link>
           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Admin console
