@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { CompanyLogo } from "@/components/shared/company-logo";
+import { CompanyBrand } from "@/components/shared/company-logo";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { UserMenu } from "@/components/shared/user-menu";
 
@@ -36,9 +36,9 @@ export function AdminShell({
             <div>
               <Link
                 href="/admin/dashboard"
-                className="inline-flex rounded-md bg-white px-2 py-1 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex rounded-md bg-white px-3 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <CompanyLogo className="w-28" priority />
+                <CompanyBrand logoClassName="w-20" priority />
                 <span className="sr-only">{appName}</span>
               </Link>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

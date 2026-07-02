@@ -113,7 +113,7 @@ export function buildMicrosoftCalendarEventPayload({
     `<p><strong>Organizer:</strong> ${escapeHtml(organizer)}</p>`,
     `<p><strong>Status:</strong> ${escapeHtml(booking.status)}</p>`,
     bookingLink
-      ? `<p><a href="${escapeHtml(bookingLink)}">View booking in Booking System</a></p>`
+      ? `<p><a href="${escapeHtml(bookingLink)}">View booking in QBook</a></p>`
       : null,
   ].filter(Boolean);
 

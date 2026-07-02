@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/login-form";
+import { productName } from "@/components/shared/company-logo";
 import { Button } from "@/components/ui/button";
 
 export type LoginSearchParams = Record<string, string | string[] | undefined>;
@@ -53,7 +54,7 @@ export function LoginPanel({
         </div>
         <div className="grid gap-1">
           <CardTitle className="text-2xl font-semibold tracking-normal">
-            Sign in to Booking System
+            Sign in to {productName}
           </CardTitle>
           <CardDescription>
             Continue with your company account to manage bookings and schedules.

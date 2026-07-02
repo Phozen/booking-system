@@ -57,7 +57,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
       <PageHeader
         eyebrow="Super admin area"
         title="Microsoft 365 Calendar"
-        description="Monitor one-way Booking System calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
+        description="Monitor one-way QBook calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
       />
 
       <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-6">

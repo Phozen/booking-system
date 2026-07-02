@@ -1,5 +1,5 @@
 export const appConfig = {
-  name: process.env.APP_NAME ?? "Booking System",
+  name: process.env.APP_NAME ?? "QBook",
   description: "Internal company facility booking system.",
   companyName: process.env.COMPANY_NAME ?? "",
   timezone: process.env.APP_TIMEZONE ?? "Asia/Kuala_Lumpur",

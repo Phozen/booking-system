@@ -23,7 +23,7 @@ export type SystemSettingRow = {
 };
 
 export const baseDefaultAppSettings: AppSettings = {
-  appName: "Booking System",
+  appName: "QBook",
   companyName: "",
   systemContactEmail: "",
   registrationEnabled: true,

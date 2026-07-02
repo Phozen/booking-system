@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CompanyLogo } from "@/components/shared/company-logo";
+import { CompanyBrand } from "@/components/shared/company-logo";
 import { EmployeeNavigation } from "@/components/shared/nav-links";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { UserMenu } from "@/components/shared/user-menu";
@@ -30,9 +30,9 @@ export function AppHeader({
         <div className="flex min-w-0 flex-1 items-center gap-6">
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md bg-white px-2 py-1 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="shrink-0 rounded-md bg-white px-3 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CompanyLogo className="w-28 sm:w-32" priority />
+            <CompanyBrand logoClassName="w-20 sm:w-24" priority />
             <span className="sr-only">{appName}</span>
           </Link>
           <div className="hidden min-w-0 flex-1 overflow-hidden 2xl:flex">

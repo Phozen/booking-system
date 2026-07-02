@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { CompanyLogo } from "@/components/shared/company-logo";
+import { CompanyBrand } from "@/components/shared/company-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AuthShell({
@@ -32,7 +32,11 @@ export function AuthShell({
             href="/"
             className="inline-flex w-fit rounded-md bg-white/90 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CompanyLogo className="w-40 sm:w-48" priority />
+            <CompanyBrand
+              logoClassName="w-28 sm:w-32"
+              textClassName="text-2xl sm:text-3xl"
+              priority
+            />
             <span className="sr-only">{appName}</span>
           </Link>
         </div>
