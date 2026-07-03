@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-qbook: var(--font-fredoka);
+  --font-qbook: var(--font-quicksand);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -183,17 +183,12 @@
 
   .qbook-content-card {
     margin: 1.25rem auto 1.75rem;
-    width: min(100% - 1.5rem, 84rem);
+    width: min(100% - 1.5rem, 72rem);
     min-height: calc(100svh - 7rem);
     overflow: clip;
     border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
     border-radius: var(--radius-lg);
-    background:
-      linear-gradient(
-        to bottom,
-        color-mix(in oklch, var(--card) 98%, transparent),
-        color-mix(in oklch, var(--card) 94%, transparent)
-      );
+    background: var(--card);
     box-shadow: 0 22px 60px rgb(15 23 42 / 0.14);
     backdrop-filter: blur(10px);
   }

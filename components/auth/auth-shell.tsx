@@ -34,7 +34,7 @@ export function AuthShell({
           >
             <CompanyBrand
               className="gap-4"
-              logoClassName="w-28 sm:w-36"
+              logoClassName="w-24 sm:w-32"
               textClassName="text-5xl sm:text-6xl"
               priority
             />

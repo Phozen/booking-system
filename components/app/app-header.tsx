@@ -33,8 +33,8 @@ export function AppHeader({
             className="shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <CompanyBrand
-              logoClassName="w-20 sm:w-24"
-              textClassName="text-3xl"
+              logoClassName="w-16 sm:w-20"
+              textClassName="text-4xl sm:text-5xl"
               priority
             />
             <span className="sr-only">{appName}</span>
