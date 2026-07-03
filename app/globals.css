@@ -181,8 +181,8 @@
   }
 
   .qbook-content-card {
-    margin: 1rem auto 1.5rem;
-    width: min(100% - 1rem, 96rem);
+    margin: 1.25rem auto 1.75rem;
+    width: min(100% - 1.5rem, 84rem);
     min-height: calc(100svh - 7rem);
     overflow: clip;
     border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
@@ -190,8 +190,8 @@
     background:
       linear-gradient(
         to bottom,
-        color-mix(in oklch, var(--background) 96%, transparent),
-        color-mix(in oklch, var(--background) 91%, transparent)
+        color-mix(in oklch, var(--card) 98%, transparent),
+        color-mix(in oklch, var(--card) 94%, transparent)
       );
     box-shadow: 0 22px 60px rgb(15 23 42 / 0.14);
     backdrop-filter: blur(10px);
