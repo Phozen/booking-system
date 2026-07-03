@@ -17,13 +17,13 @@ export function AdminSidebar({
 }) {
   return (
     <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar print:hidden lg:block">
-      <div className="sticky top-0 flex h-svh flex-col gap-5 p-4">
+      <div className="sticky top-0 flex h-svh flex-col gap-5 bg-[linear-gradient(to_bottom,var(--sidebar),color-mix(in_oklch,var(--sidebar)_88%,transparent)),url('/office-login-background.png')] bg-[length:auto_100%,cover] bg-center p-4">
         <div className="border-b border-sidebar-border pb-4">
           <Link
             href="/admin/dashboard"
             className="inline-flex rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CompanyBrand logoClassName="w-24" textClassName="text-base" priority />
+            <CompanyBrand logoClassName="w-28" textClassName="text-xl" priority />
             <span className="sr-only">{appName}</span>
           </Link>
           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

@@ -18,7 +18,7 @@ export function AuthShell({
   return (
     <main className="relative flex min-h-svh overflow-hidden bg-background px-4 py-6 sm:px-6 lg:px-8">
       <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        className="pointer-events-none absolute inset-0 bg-[length:100%_auto] bg-top bg-no-repeat"
         style={{ backgroundImage: "url('/office-login-background.png')" }}
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background/95 via-background/76 to-background/38 dark:from-background/96 dark:via-background/82 dark:to-background/52" />
@@ -35,7 +35,7 @@ export function AuthShell({
             <CompanyBrand
               className="gap-4"
               logoClassName="w-36 sm:w-44"
-              textClassName="text-4xl text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.55)] sm:text-5xl"
+              textClassName="text-5xl font-bold text-zinc-950 drop-shadow-[0_2px_8px_rgba(255,255,255,0.95)] dark:text-white dark:drop-shadow-[0_3px_10px_rgba(0,0,0,0.65)] sm:text-6xl"
               priority
             />
             <span className="sr-only">{appName}</span>

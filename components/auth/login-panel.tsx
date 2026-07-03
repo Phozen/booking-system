@@ -1,4 +1,4 @@
-import { LogIn, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 import { loginWithMicrosoftAction } from "@/lib/auth/actions";
 import {
@@ -12,7 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LoginForm } from "@/components/auth/login-form";
+import { EmailLoginDisclosure } from "@/components/auth/email-login-disclosure";
+import { MicrosoftLogo } from "@/components/auth/microsoft-logo";
 import { productName } from "@/components/shared/company-logo";
 import { Button } from "@/components/ui/button";
 
@@ -64,16 +65,11 @@ export function LoginPanel({
       <CardContent className="grid gap-4 px-5 pb-5 sm:px-6 sm:pb-6">
         <form action={loginWithMicrosoftAction}>
           <Button type="submit" size="lg" className="h-12 w-full text-base">
-            <LogIn className="size-5" aria-hidden="true" />
+            <MicrosoftLogo className="size-5" />
             Continue with Microsoft
           </Button>
         </form>
-        <div className="flex items-center gap-3 text-xs uppercase text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          <span>or</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-        <LoginForm initialMessage={initialMessage} />
+        <EmailLoginDisclosure initialMessage={initialMessage} />
       </CardContent>
     </Card>
   );
