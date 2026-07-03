@@ -164,3 +164,31 @@
     @apply bg-primary/15 text-foreground;
   }
 }
+
+@layer components {
+  .qbook-office-surface {
+    background-image:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--background) 90%, transparent),
+        color-mix(in oklch, var(--background) 82%, transparent)
+      ),
+      url("/office-login-background.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: min(100vw, 1180px) auto;
+  }
+
+  .qbook-office-panel {
+    background-image:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--popover) 90%, transparent),
+        color-mix(in oklch, var(--popover) 84%, transparent)
+      ),
+      url("/office-login-background.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}

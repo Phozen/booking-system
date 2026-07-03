@@ -19,7 +19,7 @@ export default async function EmployeeLayout({
   const profileCompletion = getMissingProfileFields(profile);
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    <div className="qbook-office-surface flex min-h-svh flex-col bg-background">
       <SkipLink />
       <AppHeader
         appName={settings.appName}

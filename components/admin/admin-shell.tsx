@@ -28,17 +28,17 @@ export function AdminShell({
   );
 
   return (
-    <div className="flex min-h-svh bg-background">
+    <div className="qbook-office-surface flex min-h-svh bg-background">
       <AdminSidebar appName={appName} email={email} role={role} />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 border-b border-border bg-background print:hidden lg:hidden">
-          <div className="relative flex min-h-16 items-center justify-between gap-4 px-4">
+        <header className="sticky top-0 z-40 border-b border-border bg-background/92 backdrop-blur print:hidden lg:hidden">
+          <div className="relative flex min-h-20 items-center justify-between gap-4 px-4">
             <div>
               <Link
                 href="/admin/dashboard"
                 className="inline-flex rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <CompanyBrand logoClassName="w-24" textClassName="text-xl" priority />
+                <CompanyBrand logoClassName="w-28" textClassName="text-3xl" priority />
                 <span className="sr-only">{appName}</span>
               </Link>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
