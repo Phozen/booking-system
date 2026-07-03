@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
@@ -16,7 +13,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -54,19 +50,7 @@ export default async function NewBookingPage({
         eyebrow="Employee booking"
         title="Create booking"
         description="Choose a facility, date, and time. The system checks conflicts before saving."
-        breadcrumbs={[
-          { label: "Calendar", href: "/calendar" },
-          { label: "Create booking" },
-        ]}
-        secondaryAction={
-          <Link
-            href={selectedDate ? `/calendar?date=${selectedDate}` : "/calendar"}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Calendar
-          </Link>
-        }
+        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
       />
 
       {profile?.status !== "active" ? (
