@@ -30,9 +30,13 @@ export function AppHeader({
         <div className="flex min-w-0 flex-1 items-center gap-6">
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md bg-white px-3 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CompanyBrand logoClassName="w-20 sm:w-24" priority />
+            <CompanyBrand
+              logoClassName="w-20 sm:w-24"
+              textClassName="text-base"
+              priority
+            />
             <span className="sr-only">{appName}</span>
           </Link>
           <div className="hidden min-w-0 flex-1 overflow-hidden 2xl:flex">

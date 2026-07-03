@@ -36,9 +36,9 @@ export function AdminShell({
             <div>
               <Link
                 href="/admin/dashboard"
-                className="inline-flex rounded-md bg-white px-3 py-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <CompanyBrand logoClassName="w-20" priority />
+                <CompanyBrand logoClassName="w-20" textClassName="text-base" priority />
                 <span className="sr-only">{appName}</span>
               </Link>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

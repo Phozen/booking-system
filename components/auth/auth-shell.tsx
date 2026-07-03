@@ -30,11 +30,12 @@ export function AuthShell({
         <div className="self-start">
           <Link
             href="/"
-            className="inline-flex w-fit rounded-md bg-white/90 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex w-fit rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <CompanyBrand
-              logoClassName="w-28 sm:w-32"
-              textClassName="text-2xl sm:text-3xl"
+              className="gap-4"
+              logoClassName="w-36 sm:w-44"
+              textClassName="text-4xl text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.55)] sm:text-5xl"
               priority
             />
             <span className="sr-only">{appName}</span>

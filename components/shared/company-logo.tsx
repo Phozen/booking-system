@@ -18,7 +18,10 @@ export function CompanyLogo({
       width={512}
       height={300}
       priority={priority}
-      className={cn("h-auto w-28 object-contain", className)}
+      className={cn(
+        "h-auto w-28 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.28)] saturate-125 contrast-110",
+        className,
+      )}
     />
   );
 }
@@ -39,7 +42,7 @@ export function CompanyBrand({
       <CompanyLogo className={logoClassName} priority={priority} />
       <span
         className={cn(
-          "text-lg font-semibold tracking-normal text-foreground",
+          "text-lg font-semibold tracking-normal text-foreground drop-shadow-[0_2px_5px_rgba(255,255,255,0.85)]",
           textClassName,
         )}
       >
