@@ -27,6 +27,7 @@ export default async function DashboardPage() {
         eyebrow="Room booking"
         title="Quick actions"
         description={`Choose the next booking task for ${user.email}.`}
+        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
       />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

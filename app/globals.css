@@ -192,7 +192,7 @@
     overflow: clip;
     border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
     border-radius: var(--radius-lg);
-    background: var(--card);
+    background: color-mix(in oklch, var(--card) 92%, transparent);
     box-shadow: 0 22px 60px rgb(15 23 42 / 0.14);
     backdrop-filter: blur(10px);
   }

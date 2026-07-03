@@ -32,6 +32,7 @@ export default async function MyBookingsPage({
         eyebrow="Your bookings"
         title="Requests and room bookings"
         description="Check which bookings are ready to use, which still need approval, and which have moved into history."
+        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
         primaryAction={
           <Link href="/bookings/new" className={buttonVariants()}>
             <CalendarPlus data-icon="inline-start" />
