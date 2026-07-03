@@ -176,7 +176,25 @@
       url("/office-login-background.png");
     background-position: center top;
     background-repeat: no-repeat;
-    background-size: min(100vw, 1180px) auto;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  .qbook-content-card {
+    margin: 1rem auto 1.5rem;
+    width: min(100% - 1rem, 96rem);
+    min-height: calc(100svh - 7rem);
+    overflow: clip;
+    border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
+    border-radius: var(--radius-lg);
+    background:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--background) 96%, transparent),
+        color-mix(in oklch, var(--background) 91%, transparent)
+      );
+    box-shadow: 0 22px 60px rgb(15 23 42 / 0.14);
+    backdrop-filter: blur(10px);
   }
 
   .qbook-office-panel {

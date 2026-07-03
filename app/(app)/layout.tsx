@@ -33,7 +33,7 @@ export default async function EmployeeLayout({
           profileHref="/profile"
         />
       ) : null}
-      <div id="main-content" tabIndex={-1} className="contents">
+      <div id="main-content" tabIndex={-1} className="qbook-content-card">
         {children}
       </div>
     </div>

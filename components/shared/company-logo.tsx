@@ -42,7 +42,7 @@ export function CompanyBrand({
       <CompanyLogo className={logoClassName} priority={priority} />
       <span
         className={cn(
-          "text-xl font-semibold tracking-normal text-foreground drop-shadow-[0_2px_5px_rgba(255,255,255,0.85)]",
+          "bg-gradient-to-r from-emerald-700 via-foreground to-amber-600 bg-clip-text text-xl font-black tracking-tight text-transparent drop-shadow-[0_2px_5px_rgba(255,255,255,0.85)] dark:from-emerald-300 dark:via-white dark:to-amber-300",
           textClassName,
         )}
       >
