@@ -42,7 +42,7 @@ export function CompanyBrand({
       <CompanyLogo className={logoClassName} priority={priority} />
       <span
         className={cn(
-          "qbook-wordmark bg-gradient-to-r from-emerald-700 via-foreground to-amber-600 bg-clip-text text-xl font-bold tracking-normal text-transparent dark:from-emerald-300 dark:via-white dark:to-amber-300",
+          "qbook-wordmark inline-block bg-gradient-to-r from-emerald-700 via-foreground to-amber-600 bg-clip-text pb-1 text-xl font-bold leading-none tracking-normal text-transparent dark:from-emerald-300 dark:via-white dark:to-amber-300",
           textClassName,
         )}
       >

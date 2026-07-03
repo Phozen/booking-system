@@ -19,9 +19,9 @@ export const employeeFeatureStyles: Record<
     icon: "bg-white/20 text-white ring-white/30",
   },
   amber: {
-    nav: "border-amber-500 bg-amber-500 text-amber-950 shadow-amber-700/25 hover:border-amber-600 hover:bg-amber-600",
-    home: "border-amber-500 bg-amber-500 text-amber-950 shadow-amber-700/25 hover:border-amber-600 hover:bg-amber-600",
-    icon: "bg-white/25 text-amber-950 ring-white/35",
+    nav: "border-amber-500 bg-amber-500 text-white shadow-amber-700/25 hover:border-amber-600 hover:bg-amber-600",
+    home: "border-amber-500 bg-amber-500 text-white shadow-amber-700/25 hover:border-amber-600 hover:bg-amber-600",
+    icon: "bg-white/25 text-white ring-white/35",
   },
   violet: {
     nav: "border-violet-600 bg-violet-600 text-white shadow-violet-700/25 hover:border-violet-700 hover:bg-violet-700",
