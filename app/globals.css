@@ -167,6 +167,10 @@
 }
 
 @layer components {
+  .qbook-wordmark {
+    font-family: var(--font-qbook), var(--font-sans), sans-serif;
+  }
+
   .qbook-office-surface {
     background-image:
       linear-gradient(
