@@ -33,7 +33,7 @@ export function AppHeader({
             className="shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <CompanyBrand
-              logoClassName="w-28 sm:w-32"
+              logoClassName="w-20 sm:w-24"
               textClassName="text-3xl"
               priority
             />

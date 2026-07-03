@@ -34,8 +34,8 @@ export function AuthShell({
           >
             <CompanyBrand
               className="gap-4"
-              logoClassName="w-36 sm:w-44"
-              textClassName="text-5xl drop-shadow-[0_2px_8px_rgba(255,255,255,0.95)] dark:drop-shadow-[0_3px_10px_rgba(0,0,0,0.65)] sm:text-6xl"
+              logoClassName="w-28 sm:w-36"
+              textClassName="text-5xl sm:text-6xl"
               priority
             />
             <span className="sr-only">{appName}</span>
