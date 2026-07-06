@@ -73,10 +73,10 @@ export function UserMenu({
         </Link>
         {currentArea === "employee" ? (
           <Link
-            href="/notification-preferences"
+            href="/notifications"
             className={buttonVariants({ variant: "outline", size: "icon" })}
-            aria-label="Notification preferences"
-            title="Notification preferences"
+            aria-label="Notifications"
+            title="Notifications"
           >
             <Bell aria-hidden="true" />
           </Link>

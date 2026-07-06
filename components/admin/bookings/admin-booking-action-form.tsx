@@ -82,7 +82,7 @@ export function AdminBookingActionForm({
         />
       </div>
 
-      <div className="grid sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <div className="-mx-4 -mb-4 grid border-t border-border/90 bg-muted/25 px-4 py-4 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         {confirmation ? (
           <ConfirmDialog
             triggerLabel={submitLabel}

@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { LoadingSpinnerBubble } from "@/components/shared/loading-spinner";
 import { SkeletonCard, SkeletonTable } from "@/components/shared/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -19,13 +19,7 @@ export function RouteLoading({
       )}
     >
       <div className="mx-auto flex min-h-56 w-full max-w-sm flex-col items-center justify-center gap-4 text-center text-sm text-muted-foreground">
-        <div className="rounded-full border border-primary/15 bg-card/90 p-6 shadow-lg shadow-primary/10 ring-1 ring-primary/10">
-          <LoadingSpinner
-            size="xl"
-            label={label}
-            className="text-primary"
-          />
-        </div>
+        <LoadingSpinnerBubble label={label} />
         <p className="font-medium text-foreground">{label}</p>
       </div>
       {variant === "table" ? (

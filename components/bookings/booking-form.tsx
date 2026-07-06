@@ -740,7 +740,7 @@ export function BookingForm({
         </section>
       ) : null}
 
-      <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <div className="flex flex-col-reverse gap-3 border-t border-border/90 bg-muted/25 px-3 py-5 sm:flex-row sm:justify-end sm:px-0 [&>*]:w-full sm:[&>*]:w-auto">
         <Link
           href="/facilities"
           className={buttonVariants({ variant: "outline" })}

@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { LoadingSpinnerBubble } from "@/components/shared/loading-spinner";
 import { Skeleton } from "@/components/shared/skeleton";
 
 export default function AuthLoading() {
@@ -10,13 +10,10 @@ export default function AuthLoading() {
         aria-live="polite"
       >
         <div className="flex flex-col items-center justify-center gap-4 py-4 text-center">
-          <div className="rounded-full border border-primary/15 bg-background/80 p-6 shadow-lg shadow-primary/10 ring-1 ring-primary/10">
-            <LoadingSpinner
-              size="xl"
-              label="Loading secure form..."
-              className="text-primary"
-            />
-          </div>
+          <LoadingSpinnerBubble
+            label="Loading secure form..."
+            className="bg-background/80"
+          />
           <p className="text-sm font-medium">Loading secure form...</p>
         </div>
         <div className="grid gap-3" aria-hidden="true">

@@ -21,6 +21,7 @@ export function AppHeader({
       currentArea="employee"
       profileHref="/profile"
       className="grid gap-3"
+      controlsClassName="flex-row flex-wrap items-center justify-start"
     />
   );
 

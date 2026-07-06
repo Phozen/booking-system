@@ -39,3 +39,22 @@ export function LoadingSpinner({
     </span>
   );
 }
+
+export function LoadingSpinnerBubble({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "grid size-28 shrink-0 place-items-center rounded-full border border-primary/15 bg-card/90 shadow-lg shadow-primary/10 ring-1 ring-primary/10",
+        className,
+      )}
+    >
+      <LoadingSpinner size="xl" label={label} className="text-primary" />
+    </div>
+  );
+}

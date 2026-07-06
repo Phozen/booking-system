@@ -105,7 +105,7 @@ export function ConfirmDialog({
               </div>
             </div>
           </div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <div className="-mx-5 -mb-5 mt-1 flex flex-col-reverse gap-2 border-t border-border/90 bg-muted/35 px-5 py-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"

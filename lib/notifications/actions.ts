@@ -50,6 +50,7 @@ export async function updateNotificationPreferencesAction(
     };
   }
 
+  revalidatePath("/profile");
   revalidatePath("/notification-preferences");
 
   return {

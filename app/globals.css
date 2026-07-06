@@ -209,4 +209,24 @@
     background-repeat: no-repeat;
     background-size: cover;
   }
+
+  @media (max-width: 639px) {
+    .qbook-office-surface,
+    .qbook-office-panel {
+      background-image: none;
+      background-color: var(--background);
+    }
+
+    .qbook-content-card {
+      margin: 0;
+      width: 100%;
+      min-height: calc(100svh - 5rem);
+      border-inline: 0;
+      border-bottom: 0;
+      border-radius: 0;
+      background: var(--background);
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
 }
