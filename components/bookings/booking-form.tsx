@@ -329,13 +329,13 @@ export function BookingForm({
         </Alert>
       ) : null}
 
-      <section className="grid gap-4 rounded-lg border-l-4 border-l-blue-500 bg-blue-50/35 p-4 ring-1 ring-border/70 dark:bg-blue-950/10 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-lg border-l-4 border-l-blue-500 bg-blue-50/35 p-4 ring-1 ring-border/70 dark:bg-blue-950/10">
         <div className="sm:col-span-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
             Step 1
           </p>
           <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Room, date, and time
+            Venue
           </h2>
         </div>
 
@@ -423,7 +423,19 @@ export function BookingForm({
           </aside>
         ) : null}
 
-        <div className="grid gap-2">
+      </section>
+
+      <section className="grid gap-4 rounded-lg border-l-4 border-l-emerald-500 bg-emerald-50/35 p-4 ring-1 ring-border/70 dark:bg-emerald-950/10">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+            Step 2
+          </p>
+          <h2 className="mt-1 text-lg font-bold tracking-normal">
+            Time
+          </h2>
+        </div>
+
+        <div className="grid gap-2 sm:max-w-md">
           <Label htmlFor="date">Date</Label>
           <Input
             id="date"
@@ -445,41 +457,6 @@ export function BookingForm({
           <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="attendeeCount">Attendee count</Label>
-          <Input
-            id="attendeeCount"
-            name="attendeeCount"
-            type="number"
-            min={0}
-            inputMode="numeric"
-            placeholder={
-              selectedFacilityDetails
-                ? `Optional (Max. ${selectedFacilityDetails.capacity})`
-                : "Optional"
-            }
-            value={previewValues.attendeeCount}
-            onChange={(event) =>
-              setPreviewField("attendeeCount", event.target.value)
-            }
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              "attendeeCount-helper",
-              fieldErrors.attendeeCount && "attendeeCount-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.attendeeCount)}
-          />
-          <FormFieldHelper id="attendeeCount-helper">
-            Optional
-            {selectedFacilityDetails
-              ? ` (Max. ${selectedFacilityDetails.capacity} people)`
-              : ""}
-          </FormFieldHelper>
-          <FormFieldError id="attendeeCount-error">
-            {fieldErrors.attendeeCount}
-          </FormFieldError>
-        </div>
-
         <BookingAvailabilityTimeline
           facilityId={selectedFacility}
           facilityName={selectedFacilityDetails?.name}
@@ -499,82 +476,104 @@ export function BookingForm({
           startTimeError={fieldErrors.startTime}
           endTimeError={fieldErrors.endTime}
         />
-
-        <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="title">Purpose</Label>
-          <Input
-            id="title"
-            name="title"
-            maxLength={160}
-            placeholder="Meeting name / event name"
-            value={previewValues.title}
-            onChange={(event) => setPreviewField("title", event.target.value)}
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              "title-helper",
-              fieldErrors.title && "title-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.title)}
-            required
-          />
-          <FormFieldHelper id="title-helper">
-            Meeting name / event name.
-          </FormFieldHelper>
-          <FormFieldError id="title-error">{fieldErrors.title}</FormFieldError>
-        </div>
       </section>
 
-      <section className="grid gap-4 rounded-lg border-l-4 border-l-slate-400 bg-muted/20 p-4 ring-1 ring-border/70">
+      <section className="grid gap-5 rounded-lg border-l-4 border-l-amber-500 bg-amber-50/35 p-4 text-sm ring-1 ring-border/70 dark:bg-amber-950/10">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Step 2
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+            Step 3
           </p>
           <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Description
+            Details
           </h2>
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
-          <textarea
-            id="description"
-            name="description"
-            rows={5}
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              "description-helper",
-              fieldErrors.description && "description-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.description)}
-            className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
-          />
-          <FormFieldHelper id="description-helper">
-            Optional notes.
-          </FormFieldHelper>
-          <FormFieldError id="description-error">
-            {fieldErrors.description}
-          </FormFieldError>
-        </div>
-      </section>
-
-      <section className="grid gap-4 rounded-lg border-l-4 border-l-amber-500 bg-amber-50/35 p-4 text-sm ring-1 ring-border/70 dark:bg-amber-950/10">
-        <div className="flex items-start gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-200">
-            <Coffee className="size-4" aria-hidden="true" />
-          </span>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-              Step 3
-            </p>
-            <h2 className="text-base font-semibold tracking-normal">
-              Food & drinks / catering
-            </h2>
-          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="cateringRequired">Food/drinks required?</Label>
+            <Label htmlFor="title">Purpose</Label>
+            <Input
+              id="title"
+              name="title"
+              maxLength={160}
+              placeholder="Meeting name / event name"
+              value={previewValues.title}
+              onChange={(event) => setPreviewField("title", event.target.value)}
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                "title-helper",
+                fieldErrors.title && "title-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.title)}
+              required
+            />
+            <FormFieldHelper id="title-helper">
+              Meeting name / event name.
+            </FormFieldHelper>
+            <FormFieldError id="title-error">{fieldErrors.title}</FormFieldError>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="attendeeCount">Attendee count</Label>
+            <Input
+              id="attendeeCount"
+              name="attendeeCount"
+              type="number"
+              min={0}
+              inputMode="numeric"
+              placeholder={
+                selectedFacilityDetails
+                  ? `Optional (Max. ${selectedFacilityDetails.capacity})`
+                  : "Optional"
+              }
+              value={previewValues.attendeeCount}
+              onChange={(event) =>
+                setPreviewField("attendeeCount", event.target.value)
+              }
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                "attendeeCount-helper",
+                fieldErrors.attendeeCount && "attendeeCount-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.attendeeCount)}
+            />
+            <FormFieldHelper id="attendeeCount-helper">
+              Optional
+              {selectedFacilityDetails
+                ? ` (Max. ${selectedFacilityDetails.capacity} people)`
+                : ""}
+            </FormFieldHelper>
+            <FormFieldError id="attendeeCount-error">
+              {fieldErrors.attendeeCount}
+            </FormFieldError>
+          </div>
+
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="description">Description</Label>
+            <textarea
+              id="description"
+              name="description"
+              rows={5}
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                "description-helper",
+                fieldErrors.description && "description-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.description)}
+              className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+            />
+            <FormFieldHelper id="description-helper">
+              Optional notes.
+            </FormFieldHelper>
+            <FormFieldError id="description-error">
+              {fieldErrors.description}
+            </FormFieldError>
+          </div>
+
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
+              <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+              Food/drinks required?
+            </Label>
             <select
               id="cateringRequired"
               name="cateringRequired"
