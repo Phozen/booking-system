@@ -43,9 +43,12 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
-        compact ? "w-full" : "h-9",
-        tone && "border shadow-sm",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border shadow-xs shadow-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
+        tone
+          ? "px-4 py-2.5 text-base font-bold"
+          : "px-3 py-2 text-sm font-medium",
+        compact ? "w-full" : tone ? "h-11" : "h-9",
+        tone && "border shadow-md",
         active && tone
           ? tone
           : active
@@ -55,7 +58,7 @@ function NavigationLink({
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
       )}
     >
-      <Icon className="size-4" aria-hidden="true" />
+      <Icon className={tone ? "size-5" : "size-4"} aria-hidden="true" />
       {item.title}
     </Link>
   );
