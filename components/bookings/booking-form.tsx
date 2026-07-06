@@ -51,6 +51,13 @@ const initialState: BookingActionResult = {
   message: "",
 };
 
+const cateringRequestItems = [
+  { value: "Drinking water", label: "Water" },
+  { value: "Coffee / tea", label: "Coffee / tea" },
+  { value: "Light refreshments", label: "Refreshments" },
+  { value: "Snacks", label: "Snacks" },
+] as const;
+
 type BookingFieldId =
   | "facilityId"
   | "date"
@@ -146,6 +153,8 @@ export function BookingForm({
   const [selectedFacility, setSelectedFacility] = useState(initialFacilityId);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
   const [cateringRequired, setCateringRequired] = useState(false);
+  const [selectedCateringItems, setSelectedCateringItems] = useState<string[]>([]);
+  const [cateringNotes, setCateringNotes] = useState("");
   const [previewValues, setPreviewValues] = useState<BookingPreviewValues>({
     date: initialDate ?? "",
     startTime: "",
@@ -173,6 +182,14 @@ export function BookingForm({
       previewValues.title ||
       previewValues.attendeeCount,
   );
+  const combinedCateringNotes = [
+    selectedCateringItems.length > 0
+      ? `Request list: ${selectedCateringItems.join(", ")}`
+      : "",
+    cateringNotes.trim(),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   function updatePreview(form: HTMLFormElement) {
     const formData = new FormData(form);
@@ -256,6 +273,14 @@ export function BookingForm({
     setFieldErrors({});
   }
 
+  function toggleCateringItem(value: string) {
+    setSelectedCateringItems((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value],
+    );
+  }
+
   return (
     <form
       action={formAction}
@@ -330,8 +355,7 @@ export function BookingForm({
             ))}
           </select>
           <FormFieldHelper id="facilityId-helper">
-            Choose an active facility. Approval requirements depend on system
-            and facility settings.
+            Select a room.
           </FormFieldHelper>
           <FormFieldError id="facilityId-error">
             {fieldErrors.facilityId}
@@ -407,7 +431,7 @@ export function BookingForm({
             required
           />
           <FormFieldHelper id="date-helper">
-            Booking times use {settings.defaultTimezone}.
+            Uses {settings.defaultTimezone}.
           </FormFieldHelper>
           <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>
@@ -420,7 +444,11 @@ export function BookingForm({
             type="number"
             min={0}
             inputMode="numeric"
-            placeholder="Optional"
+            placeholder={
+              selectedFacilityDetails
+                ? `Optional (Max. ${selectedFacilityDetails.capacity})`
+                : "Optional"
+            }
             value={previewValues.attendeeCount}
             onChange={(event) =>
               setPreviewField("attendeeCount", event.target.value)
@@ -433,11 +461,10 @@ export function BookingForm({
             aria-invalid={Boolean(fieldErrors.attendeeCount)}
           />
           <FormFieldHelper id="attendeeCount-helper">
-            Optional. Keep within{" "}
+            Optional
             {selectedFacilityDetails
-              ? `${selectedFacilityDetails.capacity} people for this facility`
-              : "the facility capacity"}
-            .
+              ? ` (Max. ${selectedFacilityDetails.capacity} people)`
+              : ""}
           </FormFieldHelper>
           <FormFieldError id="attendeeCount-error">
             {fieldErrors.attendeeCount}
@@ -459,6 +486,7 @@ export function BookingForm({
             }))
           }
           disabled={!hasFacilities || isPending}
+          locked={!previewValues.date}
           startTimeError={fieldErrors.startTime}
           endTimeError={fieldErrors.endTime}
         />
@@ -469,6 +497,7 @@ export function BookingForm({
             id="title"
             name="title"
             maxLength={160}
+            placeholder="Meeting name / event name"
             value={previewValues.title}
             onChange={(event) => setPreviewField("title", event.target.value)}
             disabled={!hasFacilities || isPending}
@@ -480,7 +509,7 @@ export function BookingForm({
             required
           />
           <FormFieldHelper id="title-helper">
-            Use a short purpose such as Team planning or Client presentation.
+            Meeting name / event name.
           </FormFieldHelper>
           <FormFieldError id="title-error">{fieldErrors.title}</FormFieldError>
         </div>
@@ -501,26 +530,22 @@ export function BookingForm({
           className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
         />
         <FormFieldHelper id="description-helper">
-          Optional. Add setup notes or extra context for the booking.
+          Optional notes.
         </FormFieldHelper>
         <FormFieldError id="description-error">
           {fieldErrors.description}
         </FormFieldError>
       </div>
 
-      <section className="grid gap-4 rounded-lg border border-amber-200 bg-amber-50/60 p-4 text-amber-950 shadow-sm shadow-amber-500/10 ring-1 ring-amber-200/60 dark:border-amber-900 dark:bg-amber-950/25 dark:text-amber-100">
+      <section className="grid gap-4 border-t border-border/80 pt-5 text-sm">
         <div className="flex items-start gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-200">
             <Coffee className="size-4" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="font-semibold tracking-normal">
+            <h2 className="text-base font-semibold tracking-normal">
               Food & drinks / catering
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Add refreshment details if this meeting needs water, drinks,
-              meals, or VIP catering.
-            </p>
           </div>
         </div>
 
@@ -540,14 +565,36 @@ export function BookingForm({
               <option value="no">No</option>
               <option value="yes">Yes</option>
             </select>
-            <FormFieldHelper id="cateringRequired-helper">
-              Select Yes for any food, drinks, meals, or management meeting
-              catering support.
-            </FormFieldHelper>
           </div>
 
           {cateringRequired ? (
             <>
+              <div className="grid gap-2 sm:col-span-2">
+                <Label>Request list</Label>
+                <div className="flex flex-wrap gap-2">
+                  {cateringRequestItems.map((item) => {
+                    const selected = selectedCateringItems.includes(item.value);
+
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => toggleCateringItem(item.value)}
+                        disabled={!hasFacilities || isPending}
+                        aria-pressed={selected}
+                        className={
+                          selected
+                            ? "rounded-full border border-amber-500 bg-amber-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors"
+                            : "rounded-full border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-amber-400 hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-amber-950/30"
+                        }
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="cateringType">Request type</Label>
                 <select
@@ -555,7 +602,6 @@ export function BookingForm({
                   name="cateringType"
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
-                    "cateringType-helper",
                     fieldErrors.cateringType && "cateringType-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringType)}
@@ -569,9 +615,6 @@ export function BookingForm({
                     </option>
                   ))}
                 </select>
-                <FormFieldHelper id="cateringType-helper">
-                  Choose the closest request. Use Other for custom needs.
-                </FormFieldHelper>
                 <FormFieldError id="cateringType-error">
                   {fieldErrors.cateringType}
                 </FormFieldError>
@@ -595,8 +638,7 @@ export function BookingForm({
                   required
                 />
                 <FormFieldHelper id="cateringPax-helper">
-                  Defaults can follow attendee count, but adjust if catering is
-                  needed for a different number.
+                  Required pax.
                 </FormFieldHelper>
                 <FormFieldError id="cateringPax-error">
                   {fieldErrors.cateringPax}
@@ -626,7 +668,7 @@ export function BookingForm({
                   ))}
                 </select>
                 <FormFieldHelper id="cateringServingTime-helper">
-                  Tell Admin/Facilities when the request should be ready.
+                  Required serving time.
                 </FormFieldHelper>
                 <FormFieldError id="cateringServingTime-error">
                   {fieldErrors.cateringServingTime}
@@ -652,8 +694,7 @@ export function BookingForm({
                   className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 />
                 <FormFieldHelper id="cateringDietaryNotes-helper">
-                  Optional, but useful for dietary restrictions, allergies, or
-                  VIP setup details.
+                  Allergies or dietary needs.
                 </FormFieldHelper>
                 <FormFieldError id="cateringDietaryNotes-error">
                   {fieldErrors.cateringDietaryNotes}
@@ -666,8 +707,9 @@ export function BookingForm({
                 </Label>
                 <textarea
                   id="cateringNotes"
-                  name="cateringNotes"
                   rows={3}
+                  value={cateringNotes}
+                  onChange={(event) => setCateringNotes(event.target.value)}
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
                     "cateringNotes-helper",
@@ -676,8 +718,13 @@ export function BookingForm({
                   aria-invalid={Boolean(fieldErrors.cateringNotes)}
                   className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 />
+                <input
+                  type="hidden"
+                  name="cateringNotes"
+                  value={combinedCateringNotes}
+                />
                 <FormFieldHelper id="cateringNotes-helper">
-                  Optional. Add setup, timing, or supplier instructions.
+                  Setup or supplier notes.
                 </FormFieldHelper>
                 <FormFieldError id="cateringNotes-error">
                   {fieldErrors.cateringNotes}
@@ -689,7 +736,7 @@ export function BookingForm({
       </section>
 
       {hasPreviewDetails ? (
-        <section className="grid gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+        <section className="grid gap-3 rounded-lg border-2 border-primary/45 bg-primary/10 p-4 shadow-md shadow-primary/10 ring-2 ring-primary/15">
           <div className="flex items-start gap-3">
             <CalendarClock
               className="mt-0.5 size-4 text-muted-foreground"

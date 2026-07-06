@@ -17,7 +17,6 @@ export default async function NotificationsPage() {
         eyebrow="Notifications"
         title="Notifications"
         description="Review booking alerts and updates that need your attention."
-        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
       />
 
       <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm">

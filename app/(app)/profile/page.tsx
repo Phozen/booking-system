@@ -50,11 +50,10 @@ export default async function ProfilePage({
       <PageHeader
         eyebrow="Account"
         title="Your profile"
-        description="View your account details and update safe contact fields used across the booking system."
-        breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Profile" }]}
+        description="View your account details and update contact fields."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
         <ProfileDetail profile={profile} />
         <div className="grid gap-6">
           <ProfileForm profile={profile} />
@@ -62,7 +61,7 @@ export default async function ProfilePage({
             connection={calendarConnection}
             calendarMessage={params.calendar}
           />
-          <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/5">
+          <section className="border-t border-border/80 pt-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-normal">
                 Notification preferences

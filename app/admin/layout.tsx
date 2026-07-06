@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           profileHref="/admin/profile"
         />
       ) : null}
-      <div id="main-content" tabIndex={-1} className="qbook-content-card">
+      <div id="main-content" tabIndex={-1} className="min-w-0 flex-1">
         {children}
       </div>
     </AdminShell>

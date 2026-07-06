@@ -50,7 +50,6 @@ export default async function NewBookingPage({
         eyebrow="Employee booking"
         title="Create booking"
         description="Choose a facility, date, and time. The system checks conflicts before saving."
-        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
       />
 
       {profile?.status !== "active" ? (

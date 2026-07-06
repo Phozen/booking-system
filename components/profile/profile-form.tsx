@@ -60,7 +60,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   return (
     <form
       action={formAction}
-      className="grid gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/5"
+      className="grid gap-5 border-t border-border/80 pt-5"
       noValidate
       onSubmit={validateBeforeSubmit}
     >
@@ -74,8 +74,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           Edit profile
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Update contact details that help colleagues and admins identify you in
-          bookings and reports.
+          Update contact details used in bookings and reports.
         </p>
       </div>
 
@@ -100,7 +99,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             required
           />
           <FormFieldHelper id="fullName-helper">
-            Required. This is shown in admin user and booking views.
+            Required display name.
           </FormFieldHelper>
           <FormFieldError id="fullName-error">
             {fieldErrors.fullName}
@@ -120,7 +119,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             aria-invalid={Boolean(fieldErrors.department)}
           />
           <FormFieldHelper id="department-helper">
-            Optional. For example, Finance or Operations.
+            Optional department.
           </FormFieldHelper>
           <FormFieldError id="department-error">
             {fieldErrors.department}
@@ -140,7 +139,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             aria-invalid={Boolean(fieldErrors.phone)}
           />
           <FormFieldHelper id="phone-helper">
-            Optional internal contact number.
+            Optional phone number.
           </FormFieldHelper>
           <FormFieldError id="phone-error">{fieldErrors.phone}</FormFieldError>
         </div>

@@ -1,11 +1,7 @@
 import Link from "next/link";
-import { CalendarDays, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
-import {
-  getCurrentCalendarMonth,
-  shiftCalendarMonth,
-  type CalendarMonth,
-} from "@/lib/calendar/date-range";
+import type { CalendarMonth } from "@/lib/calendar/date-range";
 import type { BookingStatus } from "@/lib/bookings/queries";
 import type { CalendarViewMode } from "@/lib/calendar/visibility";
 import type { Facility } from "@/lib/facilities/queries";
@@ -50,7 +46,6 @@ export function CalendarControls({
   selectedMonth,
   selectedStatus,
   selectedFacilityId,
-  timezone,
   facilities,
   showFacilityFilter,
   selectedView,
@@ -66,15 +61,8 @@ export function CalendarControls({
   selectedView?: CalendarViewMode;
   showViewToggle?: boolean;
 }) {
-  const previousMonth = shiftCalendarMonth(selectedMonth, -1, timezone);
-  const nextMonth = shiftCalendarMonth(selectedMonth, 1, timezone);
-  const currentMonth = getCurrentCalendarMonth(new Date(), timezone);
-
   return (
-    <AdminFilterBar
-      title="Calendar controls"
-      description="Choose a month and optional filters. Booking items remain clickable links."
-    >
+    <AdminFilterBar title="Calendar controls">
       <div className="grid gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -85,59 +73,13 @@ export function CalendarControls({
               {selectedMonth.label}
             </h2>
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={buildHref({
-                basePath,
-                month: previousMonth,
-                status: selectedStatus,
-                facilityId: selectedFacilityId,
-                view: selectedView,
-              })}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <ChevronLeft data-icon="inline-start" />
-              Previous month
-            </Link>
-            <Link
-              href={buildHref({
-                basePath,
-                month: currentMonth,
-                status: selectedStatus,
-                facilityId: selectedFacilityId,
-                view: selectedView,
-              })}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <RotateCcw data-icon="inline-start" />
-              Current month
-            </Link>
-            <Link
-              href={buildHref({
-                basePath,
-                month: nextMonth,
-                status: selectedStatus,
-                facilityId: selectedFacilityId,
-                view: selectedView,
-              })}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Next month
-              <ChevronRight data-icon="inline-end" />
-            </Link>
-          </div>
         </div>
 
         {showViewToggle ? (
           <nav
             aria-label="Calendar visibility"
-            className="flex flex-col gap-2 rounded-lg border border-border/70 bg-background/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-lg border border-border/70 bg-background/70 p-3 sm:flex-row sm:items-center sm:justify-end"
           >
-            <p className="text-sm text-muted-foreground">
-              All bookings shows room usage across the company. You can only
-              manage bookings you own or are invited to.
-            </p>
             <div className="grid grid-cols-2 gap-2 sm:flex">
               <Link
                 href={buildHref({

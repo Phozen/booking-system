@@ -17,7 +17,6 @@ export default async function InvitationsPage() {
         eyebrow="Collaboration"
         title="Invitations"
         description="Review meetings you have been invited to and respond to pending invitations."
-        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
       />
 
       <InvitationsPageList invitations={invitations} />

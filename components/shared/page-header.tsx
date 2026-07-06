@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "grid gap-4 border-b border-border/75 bg-background pb-5",
+        "grid gap-4 border-b border-border/70 pb-5",
         className,
       )}
     >

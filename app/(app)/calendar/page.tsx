@@ -143,7 +143,6 @@ export default async function EmployeeCalendarPage({
       <PageHeader
         eyebrow="Employee bookings"
         title="Booking Calendar"
-        className="rounded-lg border border-border/70 bg-card p-5 shadow-sm"
         description={
           selectedStatus
             ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`

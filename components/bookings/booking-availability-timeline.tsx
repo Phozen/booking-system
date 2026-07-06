@@ -98,6 +98,7 @@ export function BookingAvailabilityTimeline({
   endTime,
   onTimeChange,
   disabled = false,
+  locked = false,
   startTimeError,
   endTimeError,
 }: {
@@ -109,6 +110,7 @@ export function BookingAvailabilityTimeline({
   endTime: string;
   onTimeChange: (startTime: string, endTime: string) => void;
   disabled?: boolean;
+  locked?: boolean;
   startTimeError?: string;
   endTimeError?: string;
 }) {
@@ -212,6 +214,7 @@ export function BookingAvailabilityTimeline({
   const windowMinutes = Math.max(60, windowEnd - windowStart);
   const hasSelectionConflict =
     hasSelection && overlaps(selectedStart, selectedEnd, busyBlocks);
+  const controlsDisabled = disabled || locked;
 
   function minutesFromPointer(event: PointerEvent<HTMLDivElement>) {
     const element = trackRef.current;
@@ -237,7 +240,7 @@ export function BookingAvailabilityTimeline({
   }
 
   function beginSelection(event: PointerEvent<HTMLDivElement>) {
-    if (disabled || loading || !date || !facilityId) return;
+    if (controlsDisabled || loading || !date || !facilityId) return;
     const minutes = minutesFromPointer(event);
     if (minutes === null) return;
 
@@ -253,7 +256,7 @@ export function BookingAvailabilityTimeline({
     event: PointerEvent<HTMLDivElement>,
     mode: "move" | "resize-start" | "resize-end",
   ) {
-    if (disabled || selectedStart === null || selectedEnd === null) return;
+    if (controlsDisabled || selectedStart === null || selectedEnd === null) return;
     const pointerStart = minutesFromPointer(event);
     if (pointerStart === null) return;
 
@@ -316,7 +319,7 @@ export function BookingAvailabilityTimeline({
   }
 
   return (
-    <section className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-4 sm:col-span-2">
+    <section className="grid gap-3 border-y border-border/80 bg-muted/15 py-4 sm:col-span-2">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 font-medium tracking-normal">
@@ -324,8 +327,7 @@ export function BookingAvailabilityTimeline({
             Availability and time
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Drag on the day timeline or use the time controls below. Unavailable
-            blocks cannot be selected.
+            Pick a date first, then drag or enter times.
           </p>
         </div>
         <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
@@ -334,7 +336,7 @@ export function BookingAvailabilityTimeline({
       </div>
 
       {!date ? (
-        <div className="rounded-lg border border-dashed bg-background p-4 text-sm text-muted-foreground">
+        <div className="rounded-lg bg-background/70 p-4 text-sm text-muted-foreground ring-1 ring-border/70">
           Choose a date to view availability for {facilityName ?? "this facility"}.
         </div>
       ) : error ? (
@@ -361,7 +363,7 @@ export function BookingAvailabilityTimeline({
             aria-label={`Availability timeline for ${facilityName ?? "selected facility"} on ${date}`}
             className={cn(
               "relative min-h-[520px] overflow-hidden rounded-lg border bg-background touch-none",
-              disabled ? "opacity-60" : "cursor-crosshair",
+              controlsDisabled ? "opacity-60" : "cursor-crosshair",
             )}
             onPointerDown={beginSelection}
             onPointerMove={moveSelection}
@@ -469,7 +471,7 @@ export function BookingAvailabilityTimeline({
         </div>
       )}
 
-      <div className="grid gap-3 rounded-lg border bg-background p-3 sm:grid-cols-2">
+      <div className="grid gap-3 bg-background/70 p-3 ring-1 ring-border/70 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="startTime" className="text-xs font-medium uppercase text-muted-foreground">
             Start time
@@ -481,7 +483,7 @@ export function BookingAvailabilityTimeline({
             step={STEP_MINUTES * 60}
             value={startTime}
             onChange={(event) => onTimeChange(event.target.value, endTime)}
-            disabled={disabled}
+            disabled={controlsDisabled}
             aria-invalid={Boolean(startTimeError)}
           />
           <div className="flex items-center gap-2">
@@ -490,7 +492,7 @@ export function BookingAvailabilityTimeline({
               variant="outline"
               size="icon"
               onClick={() => adjust("start", -STEP_MINUTES)}
-              disabled={disabled || !date}
+              disabled={controlsDisabled || !date}
               aria-label="Move start time earlier by 30 minutes"
             >
               <Minus className="size-4" aria-hidden="true" />
@@ -503,7 +505,7 @@ export function BookingAvailabilityTimeline({
               variant="outline"
               size="icon"
               onClick={() => adjust("start", STEP_MINUTES)}
-              disabled={disabled || !date}
+              disabled={controlsDisabled || !date}
               aria-label="Move start time later by 30 minutes"
             >
               <Plus className="size-4" aria-hidden="true" />
@@ -524,7 +526,7 @@ export function BookingAvailabilityTimeline({
             step={STEP_MINUTES * 60}
             value={endTime}
             onChange={(event) => onTimeChange(startTime, event.target.value)}
-            disabled={disabled}
+            disabled={controlsDisabled}
             aria-invalid={Boolean(endTimeError)}
           />
           <div className="flex items-center gap-2">
@@ -533,7 +535,7 @@ export function BookingAvailabilityTimeline({
               variant="outline"
               size="icon"
               onClick={() => adjust("end", -STEP_MINUTES)}
-              disabled={disabled || !date}
+              disabled={controlsDisabled || !date}
               aria-label="Move end time earlier by 30 minutes"
             >
               <Minus className="size-4" aria-hidden="true" />
@@ -546,7 +548,7 @@ export function BookingAvailabilityTimeline({
               variant="outline"
               size="icon"
               onClick={() => adjust("end", STEP_MINUTES)}
-              disabled={disabled || !date}
+              disabled={controlsDisabled || !date}
               aria-label="Move end time later by 30 minutes"
             >
               <Plus className="size-4" aria-hidden="true" />
