@@ -16,9 +16,7 @@ import {
 } from "@/lib/bookings/validation";
 import {
   cateringServingTimeOptions,
-  cateringTypeOptions,
   formatCateringServingTime,
-  formatCateringType,
 } from "@/lib/bookings/catering/format";
 import type { Facility } from "@/lib/facilities/queries";
 import {
@@ -51,11 +49,16 @@ const initialState: BookingActionResult = {
   message: "",
 };
 
-const cateringRequestItems = [
-  { value: "Drinking water", label: "Water" },
-  { value: "Coffee / tea", label: "Coffee / tea" },
-  { value: "Light refreshments", label: "Refreshments" },
+const drinkRequestItems = [
+  { value: "Water", label: "Water" },
+  { value: "Coffee", label: "Coffee" },
+  { value: "Tea", label: "Tea" },
+] as const;
+
+const foodRequestItems = [
   { value: "Snacks", label: "Snacks" },
+  { value: "Packed meals", label: "Packed meals" },
+  { value: "Catering", label: "Catering" },
 ] as const;
 
 type BookingFieldId =
@@ -153,7 +156,10 @@ export function BookingForm({
   const [selectedFacility, setSelectedFacility] = useState(initialFacilityId);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
   const [cateringRequired, setCateringRequired] = useState(false);
-  const [selectedCateringItems, setSelectedCateringItems] = useState<string[]>([]);
+  const [selectedDrinkItems, setSelectedDrinkItems] = useState<string[]>([]);
+  const [selectedFoodItems, setSelectedFoodItems] = useState<string[]>([]);
+  const [otherDrinkRequest, setOtherDrinkRequest] = useState("");
+  const [otherFoodRequest, setOtherFoodRequest] = useState("");
   const [cateringNotes, setCateringNotes] = useState("");
   const [previewValues, setPreviewValues] = useState<BookingPreviewValues>({
     date: initialDate ?? "",
@@ -182,10 +188,33 @@ export function BookingForm({
       previewValues.title ||
       previewValues.attendeeCount,
   );
+  const drinkRequests = [
+    ...selectedDrinkItems,
+    otherDrinkRequest.trim() ? `Other drinks: ${otherDrinkRequest.trim()}` : "",
+  ].filter(Boolean);
+  const foodRequests = [
+    ...selectedFoodItems,
+    otherFoodRequest.trim() ? `Other food: ${otherFoodRequest.trim()}` : "",
+  ].filter(Boolean);
+  const derivedCateringType =
+    selectedFoodItems.includes("Catering")
+      ? "buffet_catering"
+      : selectedFoodItems.includes("Packed meals")
+        ? "packed_meals"
+        : selectedFoodItems.includes("Snacks")
+          ? "snacks"
+          : selectedDrinkItems.includes("Coffee") || selectedDrinkItems.includes("Tea")
+            ? "coffee_tea"
+            : selectedDrinkItems.includes("Water")
+              ? "water"
+              : otherDrinkRequest.trim() || otherFoodRequest.trim()
+                ? "other"
+                : "";
   const combinedCateringNotes = [
-    selectedCateringItems.length > 0
-      ? `Request list: ${selectedCateringItems.join(", ")}`
+    drinkRequests.length > 0
+      ? `Drinks: ${drinkRequests.join(", ")}`
       : "",
+    foodRequests.length > 0 ? `Food: ${foodRequests.join(", ")}` : "",
     cateringNotes.trim(),
   ]
     .filter(Boolean)
@@ -273,8 +302,11 @@ export function BookingForm({
     setFieldErrors({});
   }
 
-  function toggleCateringItem(value: string) {
-    setSelectedCateringItems((current) =>
+  function toggleRequestItem(
+    value: string,
+    setter: (updater: (current: string[]) => string[]) => void,
+  ) {
+    setter((current) =>
       current.includes(value)
         ? current.filter((item) => item !== value)
         : [...current, value],
@@ -591,56 +623,117 @@ export function BookingForm({
 
           {cateringRequired ? (
             <>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label>Request list</Label>
-                <div className="flex flex-wrap gap-2">
-                  {cateringRequestItems.map((item) => {
-                    const selected = selectedCateringItems.includes(item.value);
+              <input
+                type="hidden"
+                name="cateringType"
+                value={derivedCateringType}
+              />
 
-                    return (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => toggleCateringItem(item.value)}
-                        disabled={!hasFacilities || isPending}
-                        aria-pressed={selected}
-                        className={
-                          selected
-                            ? "rounded-full border border-amber-500 bg-amber-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors"
-                            : "rounded-full border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-amber-400 hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-amber-950/30"
-                        }
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
+              <div className="grid gap-4 sm:col-span-2 lg:grid-cols-2">
+                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                  <legend className="px-1 text-sm font-semibold">
+                    Drinks
+                  </legend>
+                  <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                    {drinkRequestItems.map((item) => {
+                      const checked = selectedDrinkItems.includes(item.value);
+
+                      return (
+                        <label
+                          key={item.value}
+                          className="flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              toggleRequestItem(item.value, setSelectedDrinkItems)
+                            }
+                            disabled={!hasFacilities || isPending}
+                            className="size-4 accent-amber-600"
+                          />
+                          {item.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <label className="grid gap-1 text-sm font-medium">
+                    Other:
+                    <Input
+                      value={otherDrinkRequest}
+                      onChange={(event) =>
+                        setOtherDrinkRequest(event.target.value)
+                      }
+                      disabled={!hasFacilities || isPending}
+                      placeholder="Specify drinks"
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                  <legend className="px-1 text-sm font-semibold">
+                    Food
+                  </legend>
+                  <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                    {foodRequestItems.map((item) => {
+                      const checked = selectedFoodItems.includes(item.value);
+
+                      return (
+                        <label
+                          key={item.value}
+                          className="flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              toggleRequestItem(item.value, setSelectedFoodItems)
+                            }
+                            disabled={!hasFacilities || isPending}
+                            className="size-4 accent-amber-600"
+                          />
+                          {item.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <label className="grid gap-1 text-sm font-medium">
+                    Other:
+                    <Input
+                      value={otherFoodRequest}
+                      onChange={(event) =>
+                        setOtherFoodRequest(event.target.value)
+                      }
+                      disabled={!hasFacilities || isPending}
+                      placeholder="Specify food"
+                    />
+                  </label>
+                </fieldset>
+
+                <div className="lg:col-span-2">
+                  <FormFieldError id="cateringType-error">
+                    {fieldErrors.cateringType
+                      ? "Choose at least one food or drink item."
+                      : undefined}
+                  </FormFieldError>
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="cateringType">Request type</Label>
-                <select
-                  id="cateringType"
-                  name="cateringType"
-                  disabled={!hasFacilities || isPending}
-                  aria-describedby={getFieldDescribedBy(
-                    fieldErrors.cateringType && "cateringType-error",
-                  )}
-                  aria-invalid={Boolean(fieldErrors.cateringType)}
-                  required
-                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
-                >
-                  <option value="">Choose request type</option>
-                  {cateringTypeOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {formatCateringType(option)}
-                    </option>
-                  ))}
-                </select>
-                <FormFieldError id="cateringType-error">
-                  {fieldErrors.cateringType}
-                </FormFieldError>
-              </div>
+              {(drinkRequests.length > 0 || foodRequests.length > 0) ? (
+                <div className="grid gap-2 sm:col-span-2">
+                  <p className="text-sm font-medium">Selected requests</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[...drinkRequests, ...foodRequests].map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <div className="grid gap-2">
                 <Label htmlFor="cateringPax">Number of pax</Label>
