@@ -93,7 +93,7 @@ function TimelineBlock({
   return (
     <div
       className={cn(
-        "absolute rounded-md border px-2 py-1 text-xs shadow-sm",
+        "absolute overflow-hidden rounded-md border px-2 py-1.5 text-xs leading-tight shadow-sm",
         block.booking.status === "confirmed"
           ? "border-sky-300 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100"
           : "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100",
@@ -102,8 +102,8 @@ function TimelineBlock({
         top: `${top}%`,
         left: `${left}%`,
         width: `calc(${width}% - 0.25rem)`,
-        minHeight: "1.75rem",
-        height: `${Math.max(height, 3)}%`,
+        minHeight: "3.25rem",
+        height: `${Math.max(height, 6)}%`,
       }}
     >
       <p className="truncate font-medium">{block.booking.title}</p>
@@ -177,7 +177,7 @@ export function CalendarDayDetailPanel({
             ))}
           </div>
 
-          <div className="relative min-h-[560px] rounded-lg border bg-background">
+          <div className="relative min-h-[820px] rounded-lg border bg-background">
             {hourMarks.map((hour) => (
               <div
                 key={hour}
