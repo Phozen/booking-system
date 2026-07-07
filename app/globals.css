@@ -196,6 +196,22 @@
     backdrop-filter: blur(10px);
   }
 
+  .qbook-content-card:has(> main.max-w-4xl) {
+    width: min(100% - 1.5rem, 56rem);
+  }
+
+  .qbook-content-card:has(> main.max-w-5xl) {
+    width: min(100% - 1.5rem, 64rem);
+  }
+
+  .qbook-content-card:has(> main.max-w-6xl) {
+    width: min(100% - 1.5rem, 72rem);
+  }
+
+  .qbook-content-card:has(> main.max-w-7xl) {
+    width: min(100% - 1.5rem, 80rem);
+  }
+
   .qbook-office-panel {
     background-image:
       linear-gradient(
