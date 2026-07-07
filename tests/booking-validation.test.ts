@@ -47,6 +47,49 @@ describe("booking validation", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("limits booking requests to working hours", () => {
+    const beforeWorkingHours = bookingFormSchema.safeParse({
+      facilityId: "11111111-1111-4111-8111-111111111111",
+      date: "2026-06-01",
+      startTime: "07:00",
+      endTime: "08:00",
+      title: "Early setup",
+      attendeeCount: "8",
+      cateringRequired: "no",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
+    });
+    const afterWorkingHours = bookingFormSchema.safeParse({
+      facilityId: "11111111-1111-4111-8111-111111111111",
+      date: "2026-06-01",
+      startTime: "20:30",
+      endTime: "21:30",
+      title: "Late wrap-up",
+      attendeeCount: "8",
+      cateringRequired: "no",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
+    });
+    const boundary = bookingFormSchema.safeParse({
+      facilityId: "11111111-1111-4111-8111-111111111111",
+      date: "2026-06-01",
+      startTime: "07:30",
+      endTime: "21:00",
+      title: "Full day event",
+      attendeeCount: "8",
+      cateringRequired: "no",
+      cateringType: "",
+      cateringPax: "",
+      cateringServingTime: "",
+    });
+
+    expect(beforeWorkingHours.success).toBe(false);
+    expect(afterWorkingHours.success).toBe(false);
+    expect(boundary.success).toBe(true);
+  });
+
   it("requires catering type, pax, and serving time when catering is requested", () => {
     const missing = bookingFormSchema.safeParse({
       facilityId: "11111111-1111-4111-8111-111111111111",

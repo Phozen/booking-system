@@ -10,6 +10,8 @@ import {
   type BookingActionResult,
 } from "@/lib/bookings/actions";
 import {
+  BOOKING_WORKING_HOURS_END,
+  BOOKING_WORKING_HOURS_START,
   bookingFormSchema,
   formDataToBookingValues,
   getBookingDateRange,
@@ -220,6 +222,8 @@ export function BookingEditForm({
                 id="startTime"
                 name="startTime"
                 type="time"
+                min={BOOKING_WORKING_HOURS_START}
+                max={BOOKING_WORKING_HOURS_END}
                 defaultValue={start.time}
                 disabled={isPending}
                 aria-describedby={getFieldDescribedBy(
@@ -240,6 +244,8 @@ export function BookingEditForm({
                 id="endTime"
                 name="endTime"
                 type="time"
+                min={BOOKING_WORKING_HOURS_START}
+                max={BOOKING_WORKING_HOURS_END}
                 defaultValue={end.time}
                 disabled={isPending}
                 aria-describedby={getFieldDescribedBy(

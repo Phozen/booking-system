@@ -103,8 +103,8 @@ function createForm(overrides: Record<string, string> = {}) {
   const values = {
     facilityId: facility.id,
     date: "2037-01-01",
-    startTime: "01:00",
-    endTime: "02:00",
+    startTime: "10:00",
+    endTime: "11:00",
     title: "Planning Session",
     description: "Quarterly planning",
     attendeeCount: "4",

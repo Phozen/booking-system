@@ -9,6 +9,10 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const WORKDAY_START_MINUTES = 7 * 60 + 30;
+const WORKDAY_END_MINUTES = 21 * 60;
+const WORKDAY_MINUTES = WORKDAY_END_MINUTES - WORKDAY_START_MINUTES;
+
 function getLocalMinutes(value: string, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
@@ -20,6 +24,13 @@ function getLocalMinutes(value: string, timezone: string) {
   const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
 
   return Math.min(24 * 60, Math.max(0, (hour === 24 ? 0 : hour) * 60 + minute));
+}
+
+function formatTimelineHour(minutes: number) {
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
 type TimelineLayoutBlock = {
@@ -43,6 +54,11 @@ function layoutTimelineBlocks(
         end: Math.max(start + 15, getLocalMinutes(booking.endsAt, timezone)),
       };
     })
+    .filter(
+      (block) =>
+        block.end > WORKDAY_START_MINUTES &&
+        block.start < WORKDAY_END_MINUTES,
+    )
     .sort((a, b) => a.start - b.start || a.end - b.end);
   const clusters: (typeof blocks)[] = [];
   let currentCluster: typeof blocks = [];
@@ -85,8 +101,11 @@ function TimelineBlock({
 }: {
   block: TimelineLayoutBlock;
 }) {
-  const top = (block.start / 1440) * 100;
-  const height = ((Math.min(block.end, 1440) - block.start) / 1440) * 100;
+  const visibleStart = Math.max(block.start, WORKDAY_START_MINUTES);
+  const visibleEnd = Math.min(block.end, WORKDAY_END_MINUTES);
+  const top =
+    ((visibleStart - WORKDAY_START_MINUTES) / WORKDAY_MINUTES) * 100;
+  const height = ((visibleEnd - visibleStart) / WORKDAY_MINUTES) * 100;
   const width = 100 / block.columns;
   const left = block.column * width;
 
@@ -102,8 +121,7 @@ function TimelineBlock({
         top: `${top}%`,
         left: `${left}%`,
         width: `calc(${width}% - 0.25rem)`,
-        minHeight: "3.25rem",
-        height: `${Math.max(height, 6)}%`,
+        height: `calc(${Math.max(height, 4)}% - 0.125rem)`,
       }}
     >
       <p className="truncate font-medium">{block.booking.title}</p>
@@ -123,7 +141,11 @@ export function CalendarDayDetailPanel({
   bookings: CalendarBooking[];
   timezone: string;
 }) {
-  const hourMarks = Array.from({ length: 13 }, (_, index) => index * 2);
+  const hourMarks = [
+    WORKDAY_START_MINUTES,
+    ...Array.from({ length: 7 }, (_, index) => (index + 4) * 120),
+    WORKDAY_END_MINUTES,
+  ];
   const timelineBlocks = layoutTimelineBlocks(bookings, timezone);
 
   return (
@@ -177,15 +199,17 @@ export function CalendarDayDetailPanel({
             ))}
           </div>
 
-          <div className="relative min-h-[820px] rounded-lg border bg-background">
-            {hourMarks.map((hour) => (
+          <div className="relative min-h-[840px] rounded-lg border bg-background">
+            {hourMarks.map((minute) => (
               <div
-                key={hour}
+                key={minute}
                 className="absolute inset-x-0 border-t border-border/60"
-                style={{ top: `${(hour / 24) * 100}%` }}
+                style={{
+                  top: `${((minute - WORKDAY_START_MINUTES) / WORKDAY_MINUTES) * 100}%`,
+                }}
               >
                 <span className="absolute left-2 top-1 text-[0.7rem] text-muted-foreground">
-                  {String(hour).padStart(2, "0")}:00
+                  {formatTimelineHour(minute)}
                 </span>
               </div>
             ))}

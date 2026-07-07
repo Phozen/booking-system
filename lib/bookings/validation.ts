@@ -4,6 +4,15 @@ import { cateringFormSchema } from "@/lib/bookings/catering/validation";
 import { zonedDateTimeToUtc } from "@/lib/calendar/date-range";
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+export const BOOKING_WORKING_HOURS_START = "07:30";
+export const BOOKING_WORKING_HOURS_END = "21:00";
+export const BOOKING_WORKING_HOURS_LABEL = "7:30 AM and 9:00 PM";
+
+function timeToMinutes(value: string) {
+  const [hour, minute] = value.split(":").map(Number);
+
+  return hour * 60 + minute;
+}
 
 export const bookingFormSchema = z
   .object({
@@ -23,6 +32,33 @@ export const bookingFormSchema = z
           .max(100000, "Attendee count is too large."),
       ])
       .optional(),
+  })
+  .superRefine((values, context) => {
+    if (!timePattern.test(values.startTime) || !timePattern.test(values.endTime)) {
+      return;
+    }
+
+    const startMinutes = timeToMinutes(values.startTime);
+    const endMinutes = timeToMinutes(values.endTime);
+    const workingStart = timeToMinutes(BOOKING_WORKING_HOURS_START);
+    const workingEnd = timeToMinutes(BOOKING_WORKING_HOURS_END);
+    const message = `Booking times must be between ${BOOKING_WORKING_HOURS_LABEL}.`;
+
+    if (startMinutes < workingStart || startMinutes >= workingEnd) {
+      context.addIssue({
+        code: "custom",
+        path: ["startTime"],
+        message,
+      });
+    }
+
+    if (endMinutes <= workingStart || endMinutes > workingEnd) {
+      context.addIssue({
+        code: "custom",
+        path: ["endTime"],
+        message,
+      });
+    }
   })
   .and(cateringFormSchema);
 

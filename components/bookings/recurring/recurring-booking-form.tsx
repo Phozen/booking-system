@@ -9,6 +9,10 @@ import {
   previewRecurringBookingAction,
   type RecurringBookingActionResult,
 } from "@/lib/bookings/recurring/actions";
+import {
+  BOOKING_WORKING_HOURS_END,
+  BOOKING_WORKING_HOURS_START,
+} from "@/lib/bookings/validation";
 import { formatBookingWindow } from "@/lib/bookings/format";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -94,6 +98,8 @@ export function RecurringBookingForm({
                 id="startTime"
                 name="startTime"
                 type="time"
+                min={BOOKING_WORKING_HOURS_START}
+                max={BOOKING_WORKING_HOURS_END}
                 disabled={pending}
                 required
               />
@@ -109,6 +115,8 @@ export function RecurringBookingForm({
                 id="endTime"
                 name="endTime"
                 type="time"
+                min={BOOKING_WORKING_HOURS_START}
+                max={BOOKING_WORKING_HOURS_END}
                 disabled={pending}
                 required
               />
