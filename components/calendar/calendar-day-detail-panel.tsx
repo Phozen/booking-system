@@ -208,7 +208,14 @@ export function CalendarDayDetailPanel({
                   top: `${((minute - WORKDAY_START_MINUTES) / WORKDAY_MINUTES) * 100}%`,
                 }}
               >
-                <span className="absolute left-2 top-1 text-[0.7rem] text-muted-foreground">
+                <span
+                  className={cn(
+                    "absolute left-2 text-[0.7rem] text-muted-foreground",
+                    minute === WORKDAY_END_MINUTES
+                      ? "-top-1 -translate-y-full"
+                      : "top-1",
+                  )}
+                >
                   {formatTimelineHour(minute)}
                 </span>
               </div>

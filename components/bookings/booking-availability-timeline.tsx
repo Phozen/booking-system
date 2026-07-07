@@ -349,12 +349,21 @@ export function BookingAvailabilityTimeline({
         </div>
       ) : (
         <div className="grid gap-3 lg:grid-cols-[6rem_minmax(0,1fr)]">
-          <div className="hidden text-xs text-muted-foreground lg:block">
+          <div className="relative hidden min-h-[520px] text-xs text-muted-foreground lg:block">
             {hourMarks.map((minute) => (
               <div
                 key={minute}
-                className="relative"
-                style={{ height: `${Math.max(40, 720 / hourMarks.length)}px` }}
+                className={cn(
+                  "absolute left-0",
+                  minute === windowStart
+                    ? "top-0"
+                    : minute === windowEnd
+                      ? "-translate-y-full"
+                      : "-translate-y-1/2",
+                )}
+                style={{
+                  top: `${((minute - windowStart) / windowMinutes) * 100}%`,
+                }}
               >
                 {formatTime(minute)}
               </div>
