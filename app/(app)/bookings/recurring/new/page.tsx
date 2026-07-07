@@ -36,7 +36,7 @@ export default async function NewRecurringBookingPage() {
         }
       />
       {settings.recurringBookingsEnabled ? (
-        <RecurringBookingForm facilities={facilities} />
+        <RecurringBookingForm facilities={facilities} settings={settings} />
       ) : (
         <Alert>
           <AlertTitle>Recurring bookings are disabled</AlertTitle>

@@ -6,7 +6,10 @@ import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
 import { checkBookingAvailability } from "@/lib/bookings/availability";
 import { getFriendlyBookingError } from "@/lib/bookings/errors";
-import { normalizeAttendeeCount } from "@/lib/bookings/validation";
+import {
+  normalizeAttendeeCount,
+  validateBookingTimeWithinWindow,
+} from "@/lib/bookings/validation";
 import { getEffectiveApprovalRequired, getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -57,6 +60,16 @@ async function buildOccurrencePreview(formData: FormData) {
   }
 
   const settings = await getAppSettings();
+  const windowMessage = validateBookingTimeWithinWindow(parsed.data, settings);
+
+  if (windowMessage) {
+    return {
+      error: windowMessage,
+      parsed: null,
+      occurrences: [],
+    };
+  }
+
   const occurrences = generateRecurrenceOccurrences({
     startsOn: parsed.data.date,
     frequency: parsed.data.frequency,

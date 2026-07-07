@@ -172,6 +172,8 @@ export default async function EmployeeCalendarPage({
           day={selectedDay}
           bookings={selectedBookings}
           timezone={settings.defaultTimezone}
+          bookingWindowStart={settings.bookingWindowStart}
+          bookingWindowEnd={settings.bookingWindowEnd}
         />
       </div>
       <BookingAgendaList days={days} groupedBookings={groupedBookings} />

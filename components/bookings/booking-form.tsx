@@ -13,6 +13,7 @@ import {
   bookingFormSchema,
   formDataToBookingValues,
   getBookingDateRange,
+  validateBookingTimeWithinWindow,
 } from "@/lib/bookings/validation";
 import {
   cateringServingTimeOptions,
@@ -24,6 +25,7 @@ import {
 } from "@/lib/facilities/format";
 import {
   formatEffectiveApprovalLabel,
+  formatBookingWindowLabel,
   type AppSettings,
 } from "@/lib/settings/app-settings";
 import {
@@ -279,6 +281,15 @@ export function BookingForm({
         nextErrors.endTime = dateRange.message;
       }
 
+      const windowMessage = validateBookingTimeWithinWindow(
+        parsed.data,
+        settings,
+      );
+
+      if (windowMessage) {
+        nextErrors.endTime = windowMessage;
+      }
+
       const attendeeCount =
         parsed.data.attendeeCount === "" || parsed.data.attendeeCount === undefined
           ? null
@@ -494,6 +505,8 @@ export function BookingForm({
           facilityName={selectedFacilityDetails?.name}
           date={previewValues.date}
           timezone={settings.defaultTimezone}
+          bookingWindowStart={settings.bookingWindowStart}
+          bookingWindowEnd={settings.bookingWindowEnd}
           startTime={previewValues.startTime}
           endTime={previewValues.endTime}
           onTimeChange={(startTime, endTime) =>
@@ -508,6 +521,9 @@ export function BookingForm({
           startTimeError={fieldErrors.startTime}
           endTimeError={fieldErrors.endTime}
         />
+        <p className="text-sm text-muted-foreground">
+          Booking hours: {formatBookingWindowLabel(settings)}.
+        </p>
       </section>
 
       <section className="grid gap-5 rounded-lg border-l-4 border-l-amber-500 bg-amber-50/35 p-4 text-sm ring-1 ring-border/70 dark:bg-amber-950/10">

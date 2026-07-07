@@ -14,6 +14,8 @@ export type AppSettings = {
   recurringBookingsEnabled: boolean;
   calendarVisibilityMode: CalendarVisibilityMode;
   defaultTimezone: string;
+  bookingWindowStart: string;
+  bookingWindowEnd: string;
   reminderOffsetsMinutes: number[];
 };
 
@@ -33,6 +35,8 @@ export const baseDefaultAppSettings: AppSettings = {
   recurringBookingsEnabled: false,
   calendarVisibilityMode: "my_bookings_only",
   defaultTimezone: "Asia/Kuala_Lumpur",
+  bookingWindowStart: "08:00",
+  bookingWindowEnd: "19:00",
   reminderOffsetsMinutes: [1440, 60],
 };
 
@@ -47,8 +51,12 @@ export const settingKeyMap = {
   recurringBookingsEnabled: "recurring_bookings_enabled",
   calendarVisibilityMode: "calendar_visibility_mode",
   defaultTimezone: "default_timezone",
+  bookingWindowStart: "booking_window_start",
+  bookingWindowEnd: "booking_window_end",
   reminderOffsetsMinutes: "reminder_offsets_minutes",
 } as const;
+
+const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
@@ -59,6 +67,32 @@ function isPositiveIntegerArray(value: unknown): value is number[] {
     Array.isArray(value) &&
     value.every((item) => Number.isInteger(item) && item > 0)
   );
+}
+
+export function isBookingWindowTime(value: unknown): value is string {
+  return typeof value === "string" && timePattern.test(value);
+}
+
+export function timeStringToMinutes(value: string) {
+  const [hour, minute] = value.split(":").map(Number);
+
+  return hour * 60 + minute;
+}
+
+export function formatBookingWindowTime(value: string) {
+  const minutes = timeStringToMinutes(value);
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+
+export function formatBookingWindowLabel(
+  settings: Pick<AppSettings, "bookingWindowStart" | "bookingWindowEnd">,
+) {
+  return `${formatBookingWindowTime(settings.bookingWindowStart)} - ${formatBookingWindowTime(settings.bookingWindowEnd)}`;
 }
 
 export function normalizeDomain(value: string) {
@@ -75,6 +109,19 @@ export function mapSettingsRowsToAppSettings(
     values.get("allow_facility_approval_override");
   const allowedEmailDomains = values.get(settingKeyMap.allowedEmailDomains);
   const reminderOffsets = values.get(settingKeyMap.reminderOffsetsMinutes);
+  const rawBookingWindowStart = values.get(settingKeyMap.bookingWindowStart);
+  const rawBookingWindowEnd = values.get(settingKeyMap.bookingWindowEnd);
+  const hasValidBookingWindow =
+    isBookingWindowTime(rawBookingWindowStart) &&
+    isBookingWindowTime(rawBookingWindowEnd) &&
+    timeStringToMinutes(rawBookingWindowStart) <
+      timeStringToMinutes(rawBookingWindowEnd);
+  const bookingWindowStart = hasValidBookingWindow
+    ? rawBookingWindowStart
+    : fallback.bookingWindowStart;
+  const bookingWindowEnd = hasValidBookingWindow
+    ? rawBookingWindowEnd
+    : fallback.bookingWindowEnd;
 
   return {
     appName:
@@ -118,6 +165,8 @@ export function mapSettingsRowsToAppSettings(
       String(values.get(settingKeyMap.defaultTimezone)).trim()
         ? String(values.get(settingKeyMap.defaultTimezone)).trim()
         : fallback.defaultTimezone,
+    bookingWindowStart,
+    bookingWindowEnd,
     reminderOffsetsMinutes: isPositiveIntegerArray(reminderOffsets)
       ? [...new Set(reminderOffsets)].sort((a, b) => b - a)
       : fallback.reminderOffsetsMinutes,
@@ -187,6 +236,18 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.defaultTimezone,
       value: settings.defaultTimezone,
       description: "Default timezone for displaying booking times.",
+      is_public: true,
+    },
+    {
+      key: settingKeyMap.bookingWindowStart,
+      value: settings.bookingWindowStart,
+      description: "Earliest time of day users can start a booking.",
+      is_public: true,
+    },
+    {
+      key: settingKeyMap.bookingWindowEnd,
+      value: settings.bookingWindowEnd,
+      description: "Latest time of day users can end a booking.",
       is_public: true,
     },
     {

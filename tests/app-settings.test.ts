@@ -23,6 +23,8 @@ describe("app settings helpers", () => {
     expect(settings.registrationEnabled).toBe(true);
     expect(settings.calendarVisibilityMode).toBe("my_bookings_only");
     expect(settings.defaultTimezone).toBe("Asia/Kuala_Lumpur");
+    expect(settings.bookingWindowStart).toBe("08:00");
+    expect(settings.bookingWindowEnd).toBe("19:00");
   });
 
   it("normalizes public identity and domain settings", () => {
@@ -49,6 +51,22 @@ describe("app settings helpers", () => {
     ]);
 
     expect(settings.calendarVisibilityMode).toBe("all_users");
+  });
+
+  it("normalizes configurable booking windows", () => {
+    const settings = mapSettingsRowsToAppSettings([
+      { key: "booking_window_start", value: "09:30" },
+      { key: "booking_window_end", value: "17:30" },
+    ]);
+    const fallback = mapSettingsRowsToAppSettings([
+      { key: "booking_window_start", value: "19:00" },
+      { key: "booking_window_end", value: "08:00" },
+    ]);
+
+    expect(settings.bookingWindowStart).toBe("09:30");
+    expect(settings.bookingWindowEnd).toBe("17:30");
+    expect(fallback.bookingWindowStart).toBe("08:00");
+    expect(fallback.bookingWindowEnd).toBe("19:00");
   });
 
   it("formats contact-aware access and registration messages", () => {

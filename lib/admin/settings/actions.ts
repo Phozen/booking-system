@@ -55,6 +55,8 @@ export async function updateSystemSettingsAction(
     recurringBookingsEnabled: parsed.data.recurringBookingsEnabled,
     calendarVisibilityMode: parsed.data.calendarVisibilityMode,
     defaultTimezone: parsed.data.defaultTimezone,
+    bookingWindowStart: parsed.data.bookingWindowStart,
+    bookingWindowEnd: parsed.data.bookingWindowEnd,
     reminderOffsetsMinutes: parsed.data.reminderOffsetsMinutesText,
   };
   const rows = appSettingsToRows(newSettings).map((row) => ({

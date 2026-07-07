@@ -8,10 +8,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const WORKDAY_START_MINUTES = 7 * 60 + 30;
-const WORKDAY_END_MINUTES = 21 * 60;
-const WORKDAY_MINUTES = WORKDAY_END_MINUTES - WORKDAY_START_MINUTES;
+import { timeStringToMinutes } from "@/lib/settings/app-settings";
 
 function getLocalMinutes(value: string, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -44,6 +41,8 @@ type TimelineLayoutBlock = {
 function layoutTimelineBlocks(
   bookings: CalendarBooking[],
   timezone: string,
+  windowStart: number,
+  windowEnd: number,
 ): TimelineLayoutBlock[] {
   const blocks = bookings
     .map((booking) => {
@@ -56,8 +55,8 @@ function layoutTimelineBlocks(
     })
     .filter(
       (block) =>
-        block.end > WORKDAY_START_MINUTES &&
-        block.start < WORKDAY_END_MINUTES,
+        block.end > windowStart &&
+        block.start < windowEnd,
     )
     .sort((a, b) => a.start - b.start || a.end - b.end);
   const clusters: (typeof blocks)[] = [];
@@ -98,14 +97,18 @@ function layoutTimelineBlocks(
 
 function TimelineBlock({
   block,
+  windowStart,
+  windowEnd,
 }: {
   block: TimelineLayoutBlock;
+  windowStart: number;
+  windowEnd: number;
 }) {
-  const visibleStart = Math.max(block.start, WORKDAY_START_MINUTES);
-  const visibleEnd = Math.min(block.end, WORKDAY_END_MINUTES);
-  const top =
-    ((visibleStart - WORKDAY_START_MINUTES) / WORKDAY_MINUTES) * 100;
-  const height = ((visibleEnd - visibleStart) / WORKDAY_MINUTES) * 100;
+  const windowMinutes = Math.max(60, windowEnd - windowStart);
+  const visibleStart = Math.max(block.start, windowStart);
+  const visibleEnd = Math.min(block.end, windowEnd);
+  const top = ((visibleStart - windowStart) / windowMinutes) * 100;
+  const height = ((visibleEnd - visibleStart) / windowMinutes) * 100;
   const width = 100 / block.columns;
   const left = block.column * width;
 
@@ -136,17 +139,33 @@ export function CalendarDayDetailPanel({
   day,
   bookings,
   timezone,
+  bookingWindowStart,
+  bookingWindowEnd,
 }: {
   day: CalendarDay;
   bookings: CalendarBooking[];
   timezone: string;
+  bookingWindowStart: string;
+  bookingWindowEnd: string;
 }) {
+  const windowStart = timeStringToMinutes(bookingWindowStart);
+  const windowEnd = timeStringToMinutes(bookingWindowEnd);
+  const windowMinutes = Math.max(60, windowEnd - windowStart);
+  const firstFullTwoHour = Math.ceil(windowStart / 120) * 120;
   const hourMarks = [
-    WORKDAY_START_MINUTES,
-    ...Array.from({ length: 7 }, (_, index) => (index + 4) * 120),
-    WORKDAY_END_MINUTES,
-  ];
-  const timelineBlocks = layoutTimelineBlocks(bookings, timezone);
+    windowStart,
+    ...Array.from(
+      { length: Math.floor((windowEnd - firstFullTwoHour) / 120) + 1 },
+      (_, index) => firstFullTwoHour + index * 120,
+    ),
+    windowEnd,
+  ].filter((minute, index, minutes) => minutes.indexOf(minute) === index);
+  const timelineBlocks = layoutTimelineBlocks(
+    bookings,
+    timezone,
+    windowStart,
+    windowEnd,
+  );
 
   return (
     <aside className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
@@ -205,13 +224,13 @@ export function CalendarDayDetailPanel({
                 key={minute}
                 className="absolute inset-x-0 border-t border-border/60"
                 style={{
-                  top: `${((minute - WORKDAY_START_MINUTES) / WORKDAY_MINUTES) * 100}%`,
+                  top: `${((minute - windowStart) / windowMinutes) * 100}%`,
                 }}
               >
                 <span
                   className={cn(
                     "absolute left-2 text-[0.7rem] text-muted-foreground",
-                    minute === WORKDAY_END_MINUTES
+                    minute === windowEnd
                       ? "-top-1 -translate-y-full"
                       : "top-1",
                   )}
@@ -222,7 +241,12 @@ export function CalendarDayDetailPanel({
             ))}
             <div className="absolute bottom-0 left-16 right-2 top-0">
               {timelineBlocks.map((block) => (
-                <TimelineBlock key={block.booking.id} block={block} />
+                <TimelineBlock
+                  key={block.booking.id}
+                  block={block}
+                  windowStart={windowStart}
+                  windowEnd={windowEnd}
+                />
               ))}
             </div>
           </div>

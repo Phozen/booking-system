@@ -10,11 +10,10 @@ import {
   type BookingActionResult,
 } from "@/lib/bookings/actions";
 import {
-  BOOKING_WORKING_HOURS_END,
-  BOOKING_WORKING_HOURS_START,
   bookingFormSchema,
   formDataToBookingValues,
   getBookingDateRange,
+  validateBookingTimeWithinWindow,
 } from "@/lib/bookings/validation";
 import { getZonedBookingFormDateTime } from "@/lib/bookings/form-datetime";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
@@ -98,6 +97,15 @@ export function BookingEditForm({
       const range = getBookingDateRange(parsed.data, settings.defaultTimezone);
       if (range.message) {
         nextErrors.endTime = range.message;
+      }
+
+      const windowMessage = validateBookingTimeWithinWindow(
+        parsed.data,
+        settings,
+      );
+
+      if (windowMessage) {
+        nextErrors.endTime = windowMessage;
       }
     }
 
@@ -222,8 +230,8 @@ export function BookingEditForm({
                 id="startTime"
                 name="startTime"
                 type="time"
-                min={BOOKING_WORKING_HOURS_START}
-                max={BOOKING_WORKING_HOURS_END}
+                min={settings.bookingWindowStart}
+                max={settings.bookingWindowEnd}
                 defaultValue={start.time}
                 disabled={isPending}
                 aria-describedby={getFieldDescribedBy(
@@ -244,8 +252,8 @@ export function BookingEditForm({
                 id="endTime"
                 name="endTime"
                 type="time"
-                min={BOOKING_WORKING_HOURS_START}
-                max={BOOKING_WORKING_HOURS_END}
+                min={settings.bookingWindowStart}
+                max={settings.bookingWindowEnd}
                 defaultValue={end.time}
                 disabled={isPending}
                 aria-describedby={getFieldDescribedBy(

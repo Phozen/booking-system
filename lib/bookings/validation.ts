@@ -2,17 +2,14 @@ import { z } from "zod";
 
 import { cateringFormSchema } from "@/lib/bookings/catering/validation";
 import { zonedDateTimeToUtc } from "@/lib/calendar/date-range";
+import {
+  baseDefaultAppSettings,
+  formatBookingWindowLabel,
+  timeStringToMinutes,
+  type AppSettings,
+} from "@/lib/settings/app-settings";
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
-export const BOOKING_WORKING_HOURS_START = "07:30";
-export const BOOKING_WORKING_HOURS_END = "21:00";
-export const BOOKING_WORKING_HOURS_LABEL = "7:30 AM and 9:00 PM";
-
-function timeToMinutes(value: string) {
-  const [hour, minute] = value.split(":").map(Number);
-
-  return hour * 60 + minute;
-}
 
 export const bookingFormSchema = z
   .object({
@@ -32,33 +29,6 @@ export const bookingFormSchema = z
           .max(100000, "Attendee count is too large."),
       ])
       .optional(),
-  })
-  .superRefine((values, context) => {
-    if (!timePattern.test(values.startTime) || !timePattern.test(values.endTime)) {
-      return;
-    }
-
-    const startMinutes = timeToMinutes(values.startTime);
-    const endMinutes = timeToMinutes(values.endTime);
-    const workingStart = timeToMinutes(BOOKING_WORKING_HOURS_START);
-    const workingEnd = timeToMinutes(BOOKING_WORKING_HOURS_END);
-    const message = `Booking times must be between ${BOOKING_WORKING_HOURS_LABEL}.`;
-
-    if (startMinutes < workingStart || startMinutes >= workingEnd) {
-      context.addIssue({
-        code: "custom",
-        path: ["startTime"],
-        message,
-      });
-    }
-
-    if (endMinutes <= workingStart || endMinutes > workingEnd) {
-      context.addIssue({
-        code: "custom",
-        path: ["endTime"],
-        message,
-      });
-    }
   })
   .and(cateringFormSchema);
 
@@ -111,6 +81,37 @@ export function normalizeAttendeeCount(
   return attendeeCount === "" || attendeeCount === undefined
     ? null
     : attendeeCount;
+}
+
+export function validateBookingTimeWithinWindow(
+  values: Pick<BookingFormValues, "startTime" | "endTime">,
+  settings: Pick<AppSettings, "bookingWindowStart" | "bookingWindowEnd">,
+) {
+  if (!timePattern.test(values.startTime) || !timePattern.test(values.endTime)) {
+    return null;
+  }
+
+  const windowSettings = {
+    bookingWindowStart:
+      settings.bookingWindowStart ?? baseDefaultAppSettings.bookingWindowStart,
+    bookingWindowEnd:
+      settings.bookingWindowEnd ?? baseDefaultAppSettings.bookingWindowEnd,
+  };
+  const startMinutes = timeStringToMinutes(values.startTime);
+  const endMinutes = timeStringToMinutes(values.endTime);
+  const bookingWindowStart = timeStringToMinutes(windowSettings.bookingWindowStart);
+  const bookingWindowEnd = timeStringToMinutes(windowSettings.bookingWindowEnd);
+
+  if (
+    startMinutes < bookingWindowStart ||
+    startMinutes >= bookingWindowEnd ||
+    endMinutes <= bookingWindowStart ||
+    endMinutes > bookingWindowEnd
+  ) {
+    return `Booking times must be between ${formatBookingWindowLabel(windowSettings)}.`;
+  }
+
+  return null;
 }
 
 export function getBookingDateRange(values: Pick<

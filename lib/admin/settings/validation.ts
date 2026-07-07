@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 import { calendarVisibilityModes } from "@/lib/calendar/visibility";
+import {
+  isBookingWindowTime,
+  timeStringToMinutes,
+} from "@/lib/settings/app-settings";
 
 const domainPattern =
   /^(?!-)(?:[a-z0-9-]{1,63}\.)+[a-z]{2,63}$/i;
@@ -48,13 +52,33 @@ export const settingsFormSchema = z.object({
   recurringBookingsEnabled: z.boolean(),
   calendarVisibilityMode: z.enum(calendarVisibilityModes),
   defaultTimezone: z.string().trim().min(1, "Enter a default timezone."),
+  bookingWindowStart: z
+    .string()
+    .trim()
+    .refine(isBookingWindowTime, {
+      message: "Enter a valid start time.",
+    }),
+  bookingWindowEnd: z
+    .string()
+    .trim()
+    .refine(isBookingWindowTime, {
+      message: "Enter a valid end time.",
+    }),
   reminderOffsetsMinutesText: z
     .string()
     .transform(parseReminderOffsets)
     .refine((values) => values.length > 0, {
       message: "Enter at least one positive integer reminder offset.",
     }),
-});
+}).refine(
+  (values) =>
+    timeStringToMinutes(values.bookingWindowStart) <
+    timeStringToMinutes(values.bookingWindowEnd),
+  {
+    path: ["bookingWindowEnd"],
+    message: "End time must be after start time.",
+  },
+);
 
 export type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
@@ -85,6 +109,8 @@ export function formDataToSettingsValues(formData: FormData) {
     ),
     calendarVisibilityMode: getTextValue(formData, "calendarVisibilityMode"),
     defaultTimezone: getTextValue(formData, "defaultTimezone"),
+    bookingWindowStart: getTextValue(formData, "bookingWindowStart"),
+    bookingWindowEnd: getTextValue(formData, "bookingWindowEnd"),
     reminderOffsetsMinutesText: getTextValue(
       formData,
       "reminderOffsetsMinutes",

@@ -37,6 +37,8 @@ type SettingsFieldId =
   | "allowedEmailDomains"
   | "calendarVisibilityMode"
   | "defaultTimezone"
+  | "bookingWindowStart"
+  | "bookingWindowEnd"
   | "reminderOffsetsMinutes";
 
 type SettingsFieldErrors = Partial<Record<SettingsFieldId, string>>;
@@ -66,6 +68,8 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         systemContactEmail: getFirstError(errors.systemContactEmail),
         allowedEmailDomains: getFirstError(errors.allowedEmailDomainsText),
         defaultTimezone: getFirstError(errors.defaultTimezone),
+        bookingWindowStart: getFirstError(errors.bookingWindowStart),
+        bookingWindowEnd: getFirstError(errors.bookingWindowEnd),
         reminderOffsetsMinutes: getFirstError(
           errors.reminderOffsetsMinutesText,
         ),
@@ -359,6 +363,50 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             </FormFieldHelper>
             <FormFieldError id="reminderOffsetsMinutes-error">
               {fieldErrors.reminderOffsetsMinutes}
+            </FormFieldError>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="bookingWindowStart">Booking start time</Label>
+            <Input
+              id="bookingWindowStart"
+              name="bookingWindowStart"
+              type="time"
+              defaultValue={settings.bookingWindowStart}
+              aria-describedby={getFieldDescribedBy(
+                "bookingWindowStart-helper",
+                fieldErrors.bookingWindowStart && "bookingWindowStart-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.bookingWindowStart)}
+              required
+            />
+            <FormFieldHelper id="bookingWindowStart-helper">
+              Earliest allowed booking start.
+            </FormFieldHelper>
+            <FormFieldError id="bookingWindowStart-error">
+              {fieldErrors.bookingWindowStart}
+            </FormFieldError>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="bookingWindowEnd">Booking end time</Label>
+            <Input
+              id="bookingWindowEnd"
+              name="bookingWindowEnd"
+              type="time"
+              defaultValue={settings.bookingWindowEnd}
+              aria-describedby={getFieldDescribedBy(
+                "bookingWindowEnd-helper",
+                fieldErrors.bookingWindowEnd && "bookingWindowEnd-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.bookingWindowEnd)}
+              required
+            />
+            <FormFieldHelper id="bookingWindowEnd-helper">
+              Latest allowed booking end.
+            </FormFieldHelper>
+            <FormFieldError id="bookingWindowEnd-error">
+              {fieldErrors.bookingWindowEnd}
             </FormFieldError>
           </div>
         </div>

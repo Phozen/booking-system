@@ -8,10 +8,8 @@ import {
 } from "@/lib/admin/bookings/actions";
 import type { AdminBookingUserOption } from "@/lib/admin/bookings/queries";
 import {
-  BOOKING_WORKING_HOURS_END,
-  BOOKING_WORKING_HOURS_LABEL,
-  BOOKING_WORKING_HOURS_START,
-} from "@/lib/bookings/validation";
+  formatBookingWindowLabel,
+} from "@/lib/settings/app-settings";
 import type { Facility } from "@/lib/facilities/queries";
 import type { AppSettings } from "@/lib/settings/app-settings";
 import { formatFacilityType } from "@/lib/facilities/format";
@@ -124,8 +122,8 @@ export function AdminCreateBookingForm({
                 id="startTime"
                 name="startTime"
                 type="time"
-                min={BOOKING_WORKING_HOURS_START}
-                max={BOOKING_WORKING_HOURS_END}
+                min={settings.bookingWindowStart}
+                max={settings.bookingWindowEnd}
                 disabled={isPending}
                 required
               />
@@ -141,15 +139,15 @@ export function AdminCreateBookingForm({
                 id="endTime"
                 name="endTime"
                 type="time"
-                min={BOOKING_WORKING_HOURS_START}
-                max={BOOKING_WORKING_HOURS_END}
+                min={settings.bookingWindowStart}
+                max={settings.bookingWindowEnd}
                 disabled={isPending}
                 required
               />
             </div>
           </div>
           <FormFieldHelper id="time-helper">
-            Times use {settings.defaultTimezone}. Booking hours are {BOOKING_WORKING_HOURS_LABEL}.
+            Times use {settings.defaultTimezone}. Booking hours are {formatBookingWindowLabel(settings)}.
           </FormFieldHelper>
         </fieldset>
 

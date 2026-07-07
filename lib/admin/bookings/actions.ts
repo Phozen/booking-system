@@ -15,6 +15,7 @@ import {
   getBookingDateRange,
   getOptionalFormValue,
   normalizeAttendeeCount,
+  validateBookingTimeWithinWindow,
 } from "@/lib/bookings/validation";
 import {
   cancelMicrosoftCalendarEventForBooking,
@@ -389,6 +390,14 @@ export async function adminCreateBookingAction(
 
   const settings = await getAppSettings();
   const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
+  const windowMessage = validateBookingTimeWithinWindow(parsed.data, settings);
+
+  if (windowMessage) {
+    return {
+      status: "error",
+      message: windowMessage,
+    };
+  }
 
   if (!dateRange.startsAt || !dateRange.endsAt || dateRange.message) {
     return {

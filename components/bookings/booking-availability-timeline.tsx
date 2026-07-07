@@ -9,15 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  BOOKING_WORKING_HOURS_END,
-  BOOKING_WORKING_HOURS_LABEL,
-  BOOKING_WORKING_HOURS_START,
-} from "@/lib/bookings/validation";
+  formatBookingWindowLabel,
+  timeStringToMinutes,
+} from "@/lib/settings/app-settings";
 
 const STEP_MINUTES = 30;
 const DEFAULT_DURATION_MINUTES = 60;
-const WORKING_START_MINUTES = parseTime(BOOKING_WORKING_HOURS_START) ?? 7 * 60 + 30;
-const WORKING_END_MINUTES = parseTime(BOOKING_WORKING_HOURS_END) ?? 21 * 60;
 
 type AvailabilityResponse = {
   items?: AvailabilityTimelineItem[];
@@ -48,13 +45,6 @@ function parseTime(value: string) {
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
   return hour * 60 + minute;
-}
-
-function clampToWorkingHours(minutes: number) {
-  return Math.max(
-    WORKING_START_MINUTES,
-    Math.min(WORKING_END_MINUTES, minutes),
-  );
 }
 
 function formatTime(minutes: number) {
@@ -106,6 +96,8 @@ export function BookingAvailabilityTimeline({
   facilityName,
   date,
   timezone,
+  bookingWindowStart,
+  bookingWindowEnd,
   startTime,
   endTime,
   onTimeChange,
@@ -118,6 +110,8 @@ export function BookingAvailabilityTimeline({
   facilityName?: string;
   date: string;
   timezone: string;
+  bookingWindowStart: string;
+  bookingWindowEnd: string;
   startTime: string;
   endTime: string;
   onTimeChange: (startTime: string, endTime: string) => void;
@@ -128,6 +122,17 @@ export function BookingAvailabilityTimeline({
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<DragState | null>(null);
+  const windowStart = timeStringToMinutes(bookingWindowStart);
+  const windowEnd = timeStringToMinutes(bookingWindowEnd);
+  const windowMinutes = Math.max(60, windowEnd - windowStart);
+  const bookingWindowLabel = formatBookingWindowLabel({
+    bookingWindowStart,
+    bookingWindowEnd,
+  });
+
+  function clampToBookingWindow(minutes: number) {
+    return Math.max(windowStart, Math.min(windowEnd, minutes));
+  }
   const [items, setItems] = useState<AvailabilityTimelineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -194,13 +199,9 @@ export function BookingAvailabilityTimeline({
           end: getLocalMinutes(item.endsAt, timezone),
         }))
         .filter((item): item is BusyBlock => item.end > item.start)
-        .filter(
-          (item) =>
-            item.end > WORKING_START_MINUTES &&
-            item.start < WORKING_END_MINUTES,
-        )
+        .filter((item) => item.end > windowStart && item.start < windowEnd)
         .sort((a, b) => a.start - b.start),
-    [timelineItems, timezone],
+    [timelineItems, timezone, windowEnd, windowStart],
   );
 
   const selectedStart = parseTime(startTime);
@@ -208,9 +209,6 @@ export function BookingAvailabilityTimeline({
   const hasSelection =
     selectedStart !== null && selectedEnd !== null && selectedEnd > selectedStart;
 
-  const windowStart = WORKING_START_MINUTES;
-  const windowEnd = WORKING_END_MINUTES;
-  const windowMinutes = Math.max(60, windowEnd - windowStart);
   const hasSelectionConflict =
     hasSelection && overlaps(selectedStart, selectedEnd, busyBlocks);
   const controlsDisabled = disabled || locked;
@@ -302,7 +300,7 @@ export function BookingAvailabilityTimeline({
   }
 
   function adjust(edge: "start" | "end", delta: number) {
-    const start = selectedStart ?? WORKING_START_MINUTES;
+    const start = selectedStart ?? windowStart;
     const end = selectedEnd ?? start + DEFAULT_DURATION_MINUTES;
 
     if (edge === "start") {
@@ -312,11 +310,11 @@ export function BookingAvailabilityTimeline({
     }
   }
 
-  const firstFullHour = Math.ceil(WORKING_START_MINUTES / 60) * 60;
+  const firstFullHour = Math.ceil(windowStart / 60) * 60;
   const hourMarks = [
-    WORKING_START_MINUTES,
+    windowStart,
     ...Array.from(
-      { length: Math.floor((WORKING_END_MINUTES - firstFullHour) / 60) + 1 },
+      { length: Math.floor((windowEnd - firstFullHour) / 60) + 1 },
       (_, index) => firstFullHour + index * 60,
     ),
   ].filter((minute, index, minutes) => minutes.indexOf(minute) === index);
@@ -330,7 +328,7 @@ export function BookingAvailabilityTimeline({
             Availability and time
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pick a date first, then choose times between {BOOKING_WORKING_HOURS_LABEL}.
+            Pick a date first, then choose times between {bookingWindowLabel}.
           </p>
         </div>
         <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
@@ -427,8 +425,8 @@ export function BookingAvailabilityTimeline({
                   blockColor(block.type),
                 )}
                 style={{
-                  top: `${((clampToWorkingHours(block.start) - windowStart) / windowMinutes) * 100}%`,
-                  height: `${Math.max(7, ((clampToWorkingHours(block.end) - clampToWorkingHours(block.start)) / windowMinutes) * 100)}%`,
+                  top: `${((clampToBookingWindow(block.start) - windowStart) / windowMinutes) * 100}%`,
+                  height: `${Math.max(7, ((clampToBookingWindow(block.end) - clampToBookingWindow(block.start)) / windowMinutes) * 100)}%`,
                 }}
               >
                 <div className="font-medium">
@@ -451,8 +449,8 @@ export function BookingAvailabilityTimeline({
                     : "border-primary bg-primary/15 text-primary",
                 )}
                 style={{
-                  top: `${((clampToWorkingHours(selectedStart) - windowStart) / windowMinutes) * 100}%`,
-                  height: `${Math.max(8, ((clampToWorkingHours(selectedEnd) - clampToWorkingHours(selectedStart)) / windowMinutes) * 100)}%`,
+                  top: `${((clampToBookingWindow(selectedStart) - windowStart) / windowMinutes) * 100}%`,
+                  height: `${Math.max(8, ((clampToBookingWindow(selectedEnd) - clampToBookingWindow(selectedStart)) / windowMinutes) * 100)}%`,
                 }}
               >
                 <div className="font-semibold">
@@ -493,8 +491,8 @@ export function BookingAvailabilityTimeline({
             name="startTime"
             type="time"
             step={STEP_MINUTES * 60}
-            min={BOOKING_WORKING_HOURS_START}
-            max={BOOKING_WORKING_HOURS_END}
+            min={bookingWindowStart}
+            max={bookingWindowEnd}
             value={startTime}
             onChange={(event) => onTimeChange(event.target.value, endTime)}
             disabled={controlsDisabled || !date}
@@ -538,8 +536,8 @@ export function BookingAvailabilityTimeline({
             name="endTime"
             type="time"
             step={STEP_MINUTES * 60}
-            min={BOOKING_WORKING_HOURS_START}
-            max={BOOKING_WORKING_HOURS_END}
+            min={bookingWindowStart}
+            max={bookingWindowEnd}
             value={endTime}
             onChange={(event) => onTimeChange(startTime, event.target.value)}
             disabled={controlsDisabled || !date}

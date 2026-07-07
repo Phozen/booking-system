@@ -151,6 +151,8 @@ values
   ('facility_approval_override_enabled', 'true'::jsonb, 'Whether facilities can override the default approval setting.', false),
   ('reminder_offsets_minutes', '[1440, 60]'::jsonb, 'Reminder offsets before a confirmed booking starts.', false),
   ('default_timezone', '"Asia/Kuala_Lumpur"'::jsonb, 'Default timezone for displaying booking times.', true),
+  ('booking_window_start', '"08:00"'::jsonb, 'Earliest time of day users can start a booking.', true),
+  ('booking_window_end', '"19:00"'::jsonb, 'Latest time of day users can end a booking.', true),
   ('cancellation_rules', '{}'::jsonb, 'Reserved for future cancellation policy settings.', false)
 on conflict (key) do update
 set
