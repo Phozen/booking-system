@@ -89,7 +89,7 @@ function InvitationSection({
 }) {
   return (
     <section className="grid gap-3">
-      <div className="flex items-center justify-between border-b pb-2">
+      <div className="flex items-center justify-between pb-2">
         <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
         <span className="text-sm text-muted-foreground">
           {invitations.length}

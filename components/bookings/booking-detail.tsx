@@ -16,7 +16,6 @@ import type {
 import { formatFacilityType } from "@/lib/facilities/format";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
-import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
@@ -147,16 +146,6 @@ export function BookingDetail({
               </Link>
             </>
           ) : null}
-          <Link
-            href="/bookings/new"
-            className={buttonVariants({
-              variant: "outline",
-              className: "w-full sm:w-auto",
-            })}
-          >
-            <CalendarPlus data-icon="inline-start" />
-            Create another booking
-          </Link>
         </div>
       </header>
 
@@ -279,14 +268,6 @@ export function BookingDetail({
       </section>
 
       <CateringDetailsCard catering={booking.catering} />
-
-      {isOwnerView ? (
-        <CateringEditForm
-          bookingId={booking.id}
-          catering={booking.catering}
-          canEdit={booking.status === "pending" || booking.status === "confirmed"}
-        />
-      ) : null}
 
       <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
         <h2 className="text-lg font-semibold tracking-normal">Description</h2>
