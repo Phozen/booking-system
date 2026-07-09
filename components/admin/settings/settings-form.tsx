@@ -24,6 +24,7 @@ import {
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 
 const initialState: SettingsActionResult = {
   status: "idle",
@@ -89,6 +90,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
       noValidate
       onSubmit={validateBeforeSubmit}
     >
+      <OverlayLoader show={isPending} label="Saving settings..." />
       <ActionToastEffect
         state={state}
         successTitle="Settings saved"

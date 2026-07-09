@@ -46,6 +46,7 @@ import { PendingButtonContent } from "@/components/shared/pending-button-content
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -280,6 +281,8 @@ export function BookingEditForm({
       onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={validateBeforeSubmit}
     >
+      <OverlayLoader show={isPending} label="Saving changes..." />
+
       <ActionToastEffect
         state={state}
         successTitle="Booking updated"

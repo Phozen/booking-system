@@ -29,6 +29,7 @@ import {
   FormFieldError,
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -135,7 +136,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}
-
+      <OverlayLoader show={isPending} label="Saving facility..." />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="code">Code</Label>

@@ -15,6 +15,7 @@ export function RouteLoading({
     <main
       className={cn(
         "mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-6xl content-center gap-8 px-4 py-10 sm:px-6",
+        "animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out fill-mode-both",
         className,
       )}
     >

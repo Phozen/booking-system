@@ -17,6 +17,7 @@ export function SkeletonCard({ className }: { className?: string }) {
     <div
       className={cn(
         "grid gap-4 rounded-lg border border-border/75 bg-card p-5",
+        "animate-in fade-in zoom-in-95 duration-500 ease-out fill-mode-both",
         className,
       )}
       aria-hidden="true"
@@ -40,7 +41,7 @@ export function SkeletonTable({
 }) {
   return (
     <div
-      className="rounded-lg border border-border/75 bg-card p-4"
+      className="rounded-lg border border-border/75 bg-card p-4 animate-in fade-in zoom-in-95 duration-500 ease-out fill-mode-both"
       aria-hidden="true"
     >
       <div

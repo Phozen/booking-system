@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 
 export function CateringEditForm({
   bookingId,
@@ -38,6 +39,7 @@ export function CateringEditForm({
 
   return (
     <section className="grid gap-4 rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+      <OverlayLoader show={isPending} label="Saving catering details..." />
       <ActionToastEffect
         state={state}
         successTitle="Catering details updated"

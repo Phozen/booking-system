@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 
 const initialState: CancellationActionResult = {
   status: "idle",
@@ -53,6 +54,7 @@ export function CancelBookingForm({ bookingId }: { bookingId: string }) {
       action={formAction}
       className="grid gap-4 rounded-lg border p-4"
     >
+      <OverlayLoader show={isPending} label="Cancelling booking..." />
       <ActionToastEffect
         state={state}
         successTitle="Booking cancelled"

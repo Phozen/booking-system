@@ -44,6 +44,7 @@ import { PendingButtonContent } from "@/components/shared/pending-button-content
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
+import { OverlayLoader } from "@/components/shared/overlay-loader";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -331,19 +332,12 @@ export function BookingForm({
       onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={validateBeforeSubmit}
     >
-      {isPending ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6 shadow-2xl">
-            <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-sm font-medium text-foreground">Submitting booking...</p>
-          </div>
-        </div>
-      ) : null}
+      <OverlayLoader show={isPending} label="Creating booking..." />
 
       <ActionToastEffect
         state={state}
         successTitle="Booking created"
-        errorTitle="Booking unavailable"
+        errorTitle="Booking could not be created"
       />
 
       {state.status !== "idle" ? (
