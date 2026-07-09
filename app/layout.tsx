@@ -5,6 +5,7 @@ import { ViewTransitions } from "next-view-transitions";
 import { appConfig } from "@/config/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ToastProvider } from "@/components/shared/toast-provider";
+import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${quicksand.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
+          <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
           <ThemeProvider>
             {children}
             <ToastProvider />
