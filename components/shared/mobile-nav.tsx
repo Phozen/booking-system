@@ -53,11 +53,15 @@ export function MobileNav({
         )}
         {label}
       </Button>
-      {open ? (
-        <div
-          id={menuId}
-          className="qbook-office-panel absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border p-3 shadow-lg"
-        >
+      <div
+        id={menuId}
+        className={cn(
+          "qbook-office-panel absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border p-3 shadow-lg transition-all duration-200 ease-out origin-top",
+          open
+            ? "visible translate-y-0 scale-y-100 opacity-100"
+            : "invisible -translate-y-2 scale-y-95 opacity-0 pointer-events-none"
+        )}
+      >
           {variant === "admin" ? (
             <AdminNavigation compact onNavigate={close} role={role} />
           ) : (
@@ -78,7 +82,6 @@ export function MobileNav({
             </div>
           ) : null}
         </div>
-      ) : null}
     </div>
   );
 }

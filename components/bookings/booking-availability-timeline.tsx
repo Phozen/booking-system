@@ -434,7 +434,7 @@ export function BookingAvailabilityTimeline({
                 onPointerUp={endSelection}
                 onPointerCancel={endSelection}
                 className={cn(
-                  "absolute left-6 right-6 z-10 cursor-grab rounded-md border-2 px-3 py-2 text-sm shadow-md active:cursor-grabbing sm:left-10",
+                  "absolute left-16 right-3 z-10 cursor-grab rounded-md border-2 px-3 py-2 text-sm shadow-md active:cursor-grabbing sm:left-20",
                   hasSelectionConflict
                     ? "border-destructive bg-destructive/15 text-destructive"
                     : "border-primary bg-primary/15 text-primary",

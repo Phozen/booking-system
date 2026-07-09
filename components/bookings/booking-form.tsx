@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, CalendarClock, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
+import { AlertCircle, CalendarClock, CheckCircle2, Coffee, Loader2, ShieldCheck, Users } from "lucide-react";
 
 import {
   createBookingAction,
@@ -331,6 +331,15 @@ export function BookingForm({
       onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={validateBeforeSubmit}
     >
+      {isPending ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6 shadow-2xl">
+            <Loader2 className="size-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-foreground">Submitting booking...</p>
+          </div>
+        </div>
+      ) : null}
+
       <ActionToastEffect
         state={state}
         successTitle="Booking created"

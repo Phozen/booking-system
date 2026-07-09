@@ -218,10 +218,6 @@ export function BookingPrintForm({
               label="Required"
               value={formatCateringRequired(booking.catering.required)}
             />
-            <PrintField
-              label="Request type"
-              value={formatCateringType(booking.catering.type)}
-            />
             <PrintField label="Pax" value={booking.catering.pax} />
             <PrintField
               label="Serving time"
@@ -231,10 +227,31 @@ export function BookingPrintForm({
               label="Dietary / special notes"
               value={booking.catering.dietaryNotes}
             />
-            <PrintField
-              label="Additional notes"
-              value={booking.catering.notes}
-            />
+            {(() => {
+              const notes = booking.catering.notes || "";
+              const drinksMatch = notes.match(/Drinks:\s*([^\n]+)/);
+              const foodMatch = notes.match(/Food:\s*([^\n]+)/);
+              
+              let remainingNotes = notes;
+              if (drinksMatch) remainingNotes = remainingNotes.replace(drinksMatch[0], "");
+              if (foodMatch) remainingNotes = remainingNotes.replace(foodMatch[0], "");
+              remainingNotes = remainingNotes.trim();
+
+              return (
+                <>
+                  {drinksMatch ? (
+                    <PrintField label="Drinks" value={drinksMatch[1]} />
+                  ) : null}
+                  {foodMatch ? (
+                    <PrintField label="Food" value={foodMatch[1]} />
+                  ) : null}
+                  <PrintField
+                    label="Additional notes"
+                    value={remainingNotes || "-"}
+                  />
+                </>
+              );
+            })()}
           </dl>
         </Section>
 
