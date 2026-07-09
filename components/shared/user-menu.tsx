@@ -16,6 +16,7 @@ export function UserMenu({
   currentArea = "employee",
   profileHref,
   showModeSwitch = true,
+  onNavigate,
 }: {
   email?: string | null;
   role?: string | null;
@@ -25,6 +26,7 @@ export function UserMenu({
   currentArea?: "employee" | "admin";
   profileHref?: "/profile" | "/admin/profile";
   showModeSwitch?: boolean;
+  onNavigate?: () => void;
 }) {
   const adminRole = isAdminRole(role);
   const resolvedProfileHref =
@@ -36,11 +38,8 @@ export function UserMenu({
   return (
     <div className={className}>
       {showIdentity ? (
-        <div className="min-w-0 max-w-44">
-          <p
-            className="truncate text-sm font-medium"
-            title={email ?? "Signed in"}
-          >
+        <div className="min-w-0">
+          <p className="break-words text-sm font-medium leading-5 sm:truncate [overflow-wrap:anywhere]">
             {email ?? "Signed in"}
           </p>
           {role ? (
@@ -58,6 +57,7 @@ export function UserMenu({
           <Link
             href={switchHref}
             className={buttonVariants({ variant: "secondary", size: "sm" })}
+            onClick={onNavigate}
           >
             <ArrowLeftRight data-icon="inline-start" />
             {switchLabel}
@@ -67,7 +67,7 @@ export function UserMenu({
           href={resolvedProfileHref}
           className={buttonVariants({ variant: "outline", size: "icon" })}
           aria-label="Profile"
-          title="Profile"
+          onClick={onNavigate}
         >
           <UserRound aria-hidden="true" />
         </Link>
@@ -76,7 +76,7 @@ export function UserMenu({
             href="/notifications"
             className={buttonVariants({ variant: "outline", size: "icon" })}
             aria-label="Notifications"
-            title="Notifications"
+            onClick={onNavigate}
           >
             <Bell aria-hidden="true" />
           </Link>

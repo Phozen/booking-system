@@ -16,12 +16,13 @@ export function MobileNav({
 }: {
   variant: "employee" | "admin";
   label: string;
-  footer?: ReactNode;
+  footer?: (close: () => void) => ReactNode;
   className?: string;
   role?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
+  const close = () => setOpen(false);
 
   return (
     <div className={className}>
@@ -46,11 +47,11 @@ export function MobileNav({
           className="qbook-office-panel absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border p-3 shadow-lg"
         >
           {variant === "admin" ? (
-            <AdminNavigation compact onNavigate={() => setOpen(false)} role={role} />
+            <AdminNavigation compact onNavigate={close} role={role} />
           ) : (
-            <EmployeeNavigation compact onNavigate={() => setOpen(false)} />
+            <EmployeeNavigation compact onNavigate={close} />
           )}
-          {footer ? <div className="mt-4 border-t pt-3">{footer}</div> : null}
+          {footer ? <div className="mt-4 border-t pt-3">{footer(close)}</div> : null}
         </div>
       ) : null}
     </div>

@@ -14,7 +14,7 @@ export function AppHeader({
   email?: string | null;
   role?: string | null;
 }) {
-  const mobileFooter = (
+  const mobileFooter = (close: () => void) => (
     <UserMenu
       email={email}
       role={role}
@@ -22,6 +22,7 @@ export function AppHeader({
       profileHref="/profile"
       className="grid gap-3"
       controlsClassName="flex-row flex-wrap items-center justify-start"
+      onNavigate={close}
     />
   );
 

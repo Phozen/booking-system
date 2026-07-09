@@ -17,7 +17,7 @@ export function AdminShell({
   role?: string | null;
   children: ReactNode;
 }) {
-  const mobileFooter = (
+  const mobileFooter = (close: () => void) => (
     <UserMenu
       email={email}
       role={role}
@@ -25,6 +25,7 @@ export function AdminShell({
       profileHref="/admin/profile"
       className="grid gap-3"
       controlsClassName="flex-row flex-wrap items-center justify-start"
+      onNavigate={close}
     />
   );
 

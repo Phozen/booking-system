@@ -26,10 +26,9 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Room booking"
         title="Quick actions"
-        description={`Choose the next booking task for ${user.email}.`}
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {employeeNavigation.map((item) => {
           const Icon = item.icon;
           const tone = employeeFeatureStyles[item.tone];
@@ -37,12 +36,12 @@ export default async function DashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className={`grid min-h-48 place-items-center gap-5 rounded-lg border p-6 text-center shadow-lg ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 ${tone.home}`}
+              className={`grid min-h-32 cursor-pointer place-items-center gap-3 rounded-lg border p-4 text-center shadow-lg ring-1 ring-white/15 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:ring-2 hover:ring-white/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 sm:min-h-48 sm:gap-5 sm:p-6 ${tone.home}`}
             >
-              <div className={`flex size-20 items-center justify-center rounded-xl ring-1 ${tone.icon}`}>
-                <Icon className="size-12" aria-hidden="true" />
+              <div className={`flex size-14 items-center justify-center rounded-xl ring-1 sm:size-20 ${tone.icon}`}>
+                <Icon className="size-8 sm:size-12" aria-hidden="true" />
               </div>
-              <h2 className="text-3xl font-bold tracking-normal">{item.title}</h2>
+              <h2 className="text-xl font-bold tracking-normal sm:text-3xl">{item.title}</h2>
             </Link>
           );
         })}

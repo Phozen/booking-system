@@ -30,7 +30,7 @@ function DetailItem({
 
 export function ProfileDetail({ profile }: { profile: UserProfile }) {
   return (
-    <section className="grid content-start gap-5 border-t border-border/80 pt-5">
+    <section className="grid content-start gap-5 pt-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
@@ -40,9 +40,9 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
             <h2 className="break-words text-lg font-semibold tracking-normal">
               {profile.fullName || "Unnamed user"}
             </h2>
-            <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
+            <p className="mt-1 flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
               <Mail className="size-4 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 break-words leading-5 [overflow-wrap:anywhere]">
+              <span className="min-w-0 break-words leading-5 sm:truncate [overflow-wrap:anywhere]">
                 {profile.email}
               </span>
             </p>
