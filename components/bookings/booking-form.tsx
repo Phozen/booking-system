@@ -371,7 +371,7 @@ export function BookingForm({
         </Alert>
       ) : null}
 
-      <section className="grid gap-4 border-b border-border/80 pb-7">
+      <section className="grid gap-4 border-b-2 border-border pb-7">
         <div className="sm:col-span-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
             Step 1
@@ -463,7 +463,7 @@ export function BookingForm({
 
       </section>
 
-      <section className="grid gap-4 border-b border-border/80 pb-7">
+      <section className="grid gap-4 border-b-2 border-border pb-7">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
             Step 2
@@ -517,7 +517,7 @@ export function BookingForm({
         </p>
       </section>
 
-      <section className="grid gap-5 border-b border-border/80 pb-7 text-sm">
+      <section className="grid gap-5 border-b-2 border-border pb-7 text-sm">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
             Step 3

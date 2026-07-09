@@ -20,7 +20,7 @@ export function AdminShell({
     <div className="flex min-h-svh bg-background">
       <AdminSidebar appName={appName} email={email} role={role} />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 border-b border-sidebar-border bg-sidebar/92 backdrop-blur print:hidden lg:hidden">
+        <header className="qbook-header-panel sticky top-0 z-40 border-b border-sidebar-border shadow-sm shadow-foreground/5 backdrop-blur-xl print:hidden lg:hidden">
           <div className="relative flex min-h-20 items-center justify-between gap-4 px-4">
             <div>
               <Link

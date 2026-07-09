@@ -240,8 +240,7 @@
 
   @media (max-width: 639px) {
     .qbook-office-surface,
-    .qbook-office-panel,
-    .qbook-header-panel {
+    .qbook-office-panel {
       background-image: none;
       background-color: var(--background);
     }

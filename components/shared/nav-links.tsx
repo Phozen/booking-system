@@ -35,7 +35,9 @@ function NavigationLink({
   const pathname = usePathname();
   const active = isActivePath(pathname, item.href, item.match);
   const Icon = item.icon;
-  const tone = "tone" in item ? employeeFeatureStyles[item.tone].nav : null;
+  const featureStyle = "tone" in item ? employeeFeatureStyles[item.tone] : null;
+  const tone = featureStyle?.nav ?? null;
+  const activeTone = featureStyle?.navActive ?? null;
 
   return (
     <Link
@@ -48,11 +50,11 @@ function NavigationLink({
           ? "px-4 py-2.5 text-base font-bold"
           : "px-3 py-2 text-sm font-medium",
         compact ? "w-full" : tone ? "h-11" : "h-9",
-        tone && "border shadow-md active:translate-y-px",
-        active && tone
-          ? `${tone} translate-y-px ring-2 ring-white/70 ring-offset-2 ring-offset-background shadow-inner shadow-black/25`
+        tone && "border shadow-md active:scale-[0.98]",
+        active && activeTone
+          ? activeTone
           : active
-          ? "translate-y-px border-primary/80 bg-primary text-primary-foreground shadow-inner shadow-primary/25 ring-2 ring-primary/25"
+          ? "border-primary/90 bg-primary text-primary-foreground shadow-inner shadow-primary/25"
           : tone
             ? `${tone} opacity-90 hover:opacity-100`
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
