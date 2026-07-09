@@ -320,7 +320,6 @@ export function StatusBadge({
         className,
       )}
       aria-label={`${kindLabels[kind]} status: ${definition.label}. ${definition.description}`}
-      title={definition.description}
     >
       <span
         className={cn("size-1.5 rounded-full", definition.dotClassName)}

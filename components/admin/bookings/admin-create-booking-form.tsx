@@ -94,9 +94,6 @@ export function AdminCreateBookingForm({
         <div className="grid gap-2">
           <Label htmlFor="date">Date</Label>
           <Input id="date" name="date" type="date" disabled={isPending} required />
-          <FormFieldHelper id="date-helper">
-            Booking times use {settings.defaultTimezone}.
-          </FormFieldHelper>
         </div>
 
         <div className="grid gap-2">
@@ -147,7 +144,7 @@ export function AdminCreateBookingForm({
             </div>
           </div>
           <FormFieldHelper id="time-helper">
-            Times use {settings.defaultTimezone}. Booking hours are {formatBookingWindowLabel(settings)}.
+            Booking hours: {formatBookingWindowLabel(settings)} ({settings.defaultTimezone}).
           </FormFieldHelper>
         </fieldset>
 

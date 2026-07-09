@@ -48,11 +48,11 @@ function NavigationLink({
           ? "px-4 py-2.5 text-base font-bold"
           : "px-3 py-2 text-sm font-medium",
         compact ? "w-full" : tone ? "h-11" : "h-9",
-        tone && "border shadow-md",
+        tone && "border shadow-md active:translate-y-px",
         active && tone
-          ? tone
+          ? `${tone} translate-y-px ring-2 ring-white/70 ring-offset-2 ring-offset-background shadow-inner shadow-black/25`
           : active
-          ? "border-primary/80 bg-primary text-primary-foreground shadow-primary/20"
+          ? "translate-y-px border-primary/80 bg-primary text-primary-foreground shadow-inner shadow-primary/25 ring-2 ring-primary/25"
           : tone
             ? `${tone} opacity-90 hover:opacity-100`
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",

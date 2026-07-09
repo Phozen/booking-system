@@ -182,15 +182,11 @@ export function BookingEditForm({
             defaultValue={start.date}
             disabled={isPending}
             aria-describedby={getFieldDescribedBy(
-              "date-helper",
               fieldErrors.date && "date-error",
             )}
             aria-invalid={Boolean(fieldErrors.date)}
             required
           />
-          <FormFieldHelper id="date-helper">
-            Times use {settings.defaultTimezone}.
-          </FormFieldHelper>
           <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>
 

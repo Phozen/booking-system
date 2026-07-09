@@ -40,7 +40,6 @@ import {
   FormFieldError,
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
-import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
@@ -372,7 +371,7 @@ export function BookingForm({
         </Alert>
       ) : null}
 
-      <section className="grid gap-4 rounded-lg border-l-4 border-l-blue-500 bg-blue-50/35 p-4 ring-1 ring-border/70 dark:bg-blue-950/10">
+      <section className="grid gap-4 border-b border-border/80 pb-7">
         <div className="sm:col-span-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
             Step 1
@@ -391,7 +390,6 @@ export function BookingForm({
             onChange={(event) => setSelectedFacility(event.target.value)}
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
-              "facilityId-helper",
               fieldErrors.facilityId && "facilityId-error",
             )}
             aria-invalid={Boolean(fieldErrors.facilityId)}
@@ -406,9 +404,6 @@ export function BookingForm({
               </option>
             ))}
           </select>
-          <FormFieldHelper id="facilityId-helper">
-            Select a room.
-          </FormFieldHelper>
           <FormFieldError id="facilityId-error">
             {fieldErrors.facilityId}
           </FormFieldError>
@@ -468,7 +463,7 @@ export function BookingForm({
 
       </section>
 
-      <section className="grid gap-4 rounded-lg border-l-4 border-l-emerald-500 bg-emerald-50/35 p-4 ring-1 ring-border/70 dark:bg-emerald-950/10">
+      <section className="grid gap-4 border-b border-border/80 pb-7">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
             Step 2
@@ -488,15 +483,11 @@ export function BookingForm({
             onChange={(event) => setPreviewField("date", event.target.value)}
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
-              "date-helper",
               fieldErrors.date && "date-error",
             )}
             aria-invalid={Boolean(fieldErrors.date)}
             required
           />
-          <FormFieldHelper id="date-helper">
-            Uses {settings.defaultTimezone}.
-          </FormFieldHelper>
           <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>
 
@@ -526,7 +517,7 @@ export function BookingForm({
         </p>
       </section>
 
-      <section className="grid gap-5 rounded-lg border-l-4 border-l-amber-500 bg-amber-50/35 p-4 text-sm ring-1 ring-border/70 dark:bg-amber-950/10">
+      <section className="grid gap-5 border-b border-border/80 pb-7 text-sm">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
             Step 3
@@ -548,15 +539,11 @@ export function BookingForm({
               onChange={(event) => setPreviewField("title", event.target.value)}
               disabled={!hasFacilities || isPending}
               aria-describedby={getFieldDescribedBy(
-                "title-helper",
                 fieldErrors.title && "title-error",
               )}
               aria-invalid={Boolean(fieldErrors.title)}
               required
             />
-            <FormFieldHelper id="title-helper">
-              Meeting name / event name.
-            </FormFieldHelper>
             <FormFieldError id="title-error">{fieldErrors.title}</FormFieldError>
           </div>
 
@@ -579,17 +566,10 @@ export function BookingForm({
               }
               disabled={!hasFacilities || isPending}
               aria-describedby={getFieldDescribedBy(
-                "attendeeCount-helper",
                 fieldErrors.attendeeCount && "attendeeCount-error",
               )}
               aria-invalid={Boolean(fieldErrors.attendeeCount)}
             />
-            <FormFieldHelper id="attendeeCount-helper">
-              Optional
-              {selectedFacilityDetails
-                ? ` (Max. ${selectedFacilityDetails.capacity} people)`
-                : ""}
-            </FormFieldHelper>
             <FormFieldError id="attendeeCount-error">
               {fieldErrors.attendeeCount}
             </FormFieldError>
@@ -603,15 +583,11 @@ export function BookingForm({
               rows={5}
               disabled={!hasFacilities || isPending}
               aria-describedby={getFieldDescribedBy(
-                "description-helper",
                 fieldErrors.description && "description-error",
               )}
               aria-invalid={Boolean(fieldErrors.description)}
               className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
             />
-            <FormFieldHelper id="description-helper">
-              Optional notes.
-            </FormFieldHelper>
             <FormFieldError id="description-error">
               {fieldErrors.description}
             </FormFieldError>
@@ -762,15 +738,11 @@ export function BookingForm({
                   defaultValue={previewValues.attendeeCount}
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
-                    "cateringPax-helper",
                     fieldErrors.cateringPax && "cateringPax-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringPax)}
                   required
                 />
-                <FormFieldHelper id="cateringPax-helper">
-                  Required pax.
-                </FormFieldHelper>
                 <FormFieldError id="cateringPax-error">
                   {fieldErrors.cateringPax}
                 </FormFieldError>
@@ -783,7 +755,6 @@ export function BookingForm({
                   name="cateringServingTime"
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
-                    "cateringServingTime-helper",
                     fieldErrors.cateringServingTime &&
                       "cateringServingTime-error",
                   )}
@@ -798,9 +769,6 @@ export function BookingForm({
                     </option>
                   ))}
                 </select>
-                <FormFieldHelper id="cateringServingTime-helper">
-                  Required serving time.
-                </FormFieldHelper>
                 <FormFieldError id="cateringServingTime-error">
                   {fieldErrors.cateringServingTime}
                 </FormFieldError>
@@ -817,16 +785,12 @@ export function BookingForm({
                   placeholder="Vegetarian, halal, allergies, VIP requirements"
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
-                    "cateringDietaryNotes-helper",
                     fieldErrors.cateringDietaryNotes &&
                       "cateringDietaryNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringDietaryNotes)}
                   className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 />
-                <FormFieldHelper id="cateringDietaryNotes-helper">
-                  Allergies or dietary needs.
-                </FormFieldHelper>
                 <FormFieldError id="cateringDietaryNotes-error">
                   {fieldErrors.cateringDietaryNotes}
                 </FormFieldError>
@@ -843,7 +807,6 @@ export function BookingForm({
                   onChange={(event) => setCateringNotes(event.target.value)}
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
-                    "cateringNotes-helper",
                     fieldErrors.cateringNotes && "cateringNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringNotes)}
@@ -854,9 +817,6 @@ export function BookingForm({
                   name="cateringNotes"
                   value={combinedCateringNotes}
                 />
-                <FormFieldHelper id="cateringNotes-helper">
-                  Setup or supplier notes.
-                </FormFieldHelper>
                 <FormFieldError id="cateringNotes-error">
                   {fieldErrors.cateringNotes}
                 </FormFieldError>
@@ -918,7 +878,7 @@ export function BookingForm({
         </section>
       ) : null}
 
-      <div className="flex flex-col-reverse gap-3 border-t border-border/90 bg-muted/25 px-3 py-5 sm:flex-row sm:justify-end sm:px-0 [&>*]:w-full sm:[&>*]:w-auto">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Link
           href="/facilities"
           className={buttonVariants({ variant: "outline" })}

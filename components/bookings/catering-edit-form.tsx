@@ -16,7 +16,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
@@ -93,10 +92,6 @@ export function CateringEditForm({
               <option value="no">No</option>
               <option value="yes">Yes</option>
             </select>
-            <FormFieldHelper id={`cateringRequired-helper-${bookingId}`}>
-              Choose Yes when water, refreshments, meals, or VIP catering are
-              needed.
-            </FormFieldHelper>
           </div>
 
           {required ? (

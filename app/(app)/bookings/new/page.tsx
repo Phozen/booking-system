@@ -70,14 +70,12 @@ export default async function NewBookingPage({
           </AlertDescription>
         </Alert>
       ) : (
-        <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/5">
-          <BookingForm
-            facilities={facilities}
-            selectedFacilityId={selectedFacilityId}
-            initialDate={selectedDate}
-            settings={settings}
-          />
-        </section>
+        <BookingForm
+          facilities={facilities}
+          selectedFacilityId={selectedFacilityId}
+          initialDate={selectedDate}
+          settings={settings}
+        />
       )}
     </main>
   );
