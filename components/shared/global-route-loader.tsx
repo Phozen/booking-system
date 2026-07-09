@@ -29,7 +29,7 @@ export function GlobalRouteLoader() {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[100] bg-background fill-mode-both duration-500",
+        "fixed inset-0 z-30 bg-background/80 backdrop-blur-sm fill-mode-both duration-500",
         isFadingOut ? "animate-out fade-out" : "animate-in fade-in"
       )}
     >
