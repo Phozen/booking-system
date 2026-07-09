@@ -58,3 +58,15 @@ export async function updateNotificationPreferencesAction(
     message: "Notification preferences saved.",
   };
 }
+
+export async function markAllNotificationsSeenAction() {
+  const { user } = await requireUser();
+  if (!user) return;
+  const supabase = await createClient();
+  
+  const { markUserAppNotificationsSeen } = await import("@/lib/notifications/app-notifications");
+  await markUserAppNotificationsSeen(supabase, user.id);
+  
+  revalidatePath("/notifications");
+  revalidatePath("/", "layout");
+}

@@ -10,7 +10,9 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { markAllNotificationsSeenAction } from "@/lib/notifications/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -81,14 +83,23 @@ export default async function NotificationsPage() {
   const { user } = await requireUser();
   const supabase = await createClient();
   const notifications = await getUserAppNotifications(supabase, user.id);
-
-  if (notifications.some((notification) => !notification.seenAt)) {
-    await markUserAppNotificationsSeen(supabase, user.id);
-  }
+  const hasUnseen = notifications.some((n) => !n.seenAt);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <PageHeader eyebrow="Notifications" title="Notifications" />
+      <PageHeader 
+        eyebrow="Notifications" 
+        title="Notifications" 
+        primaryAction={
+          hasUnseen ? (
+            <form action={markAllNotificationsSeenAction}>
+              <Button type="submit" variant="outline" size="sm">
+                Mark all as read
+              </Button>
+            </form>
+          ) : null
+        }
+      />
 
       <section className="grid gap-3">
         {notifications.length > 0 ? (

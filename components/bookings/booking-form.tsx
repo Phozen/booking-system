@@ -469,7 +469,7 @@ export function BookingForm({
             Step 2
           </p>
           <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Time
+            Availability and Time
           </h2>
         </div>
 
