@@ -58,7 +58,7 @@ export function UserMenu({
         {adminRole && showModeSwitch ? (
           <Link
             href={switchHref}
-            className={buttonVariants({ variant: "secondary", size: "sm" })}
+            className={buttonVariants({ variant: "secondary" })}
             onClick={onNavigate}
           >
             <ArrowLeftRight data-icon="inline-start" />
@@ -96,7 +96,7 @@ export function UserMenu({
           </Link>
         ) : null}
         <form action={logoutAction}>
-          <Button type="submit" variant="outline" size="sm">
+          <Button type="submit" variant="outline">
             <LogOut data-icon="inline-start" />
             Log out
           </Button>

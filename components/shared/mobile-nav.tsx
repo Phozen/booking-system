@@ -36,7 +36,6 @@ export function MobileNav({
       <Button
         type="button"
         variant="outline"
-        size="sm"
         aria-expanded={open}
         aria-controls={menuId}
         className={cn(
