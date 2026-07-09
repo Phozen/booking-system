@@ -45,10 +45,6 @@ export function CateringDetailsCard({
         </Alert>
       ) : (
         <dl className="mt-5 grid gap-5 sm:grid-cols-2">
-          <DetailItem
-            label="Request type"
-            value={formatCateringType(catering.type)}
-          />
           <DetailItem label="Number of pax" value={catering.pax ?? "Not specified"} />
           <DetailItem
             label="Serving time"
@@ -58,12 +54,33 @@ export function CateringDetailsCard({
             label="Dietary / special notes"
             value={catering.dietaryNotes || "None"}
           />
-          <div className="sm:col-span-2">
-            <DetailItem
-              label="Additional catering notes"
-              value={catering.notes || "None"}
-            />
-          </div>
+          {(() => {
+            const notes = catering.notes || "";
+            const drinksMatch = notes.match(/Drinks:\s*([^\n]+)/);
+            const foodMatch = notes.match(/Food:\s*([^\n]+)/);
+            
+            let remainingNotes = notes;
+            if (drinksMatch) remainingNotes = remainingNotes.replace(drinksMatch[0], "");
+            if (foodMatch) remainingNotes = remainingNotes.replace(foodMatch[0], "");
+            remainingNotes = remainingNotes.trim();
+
+            return (
+              <>
+                {drinksMatch ? (
+                  <DetailItem label="Drinks" value={drinksMatch[1]} />
+                ) : null}
+                {foodMatch ? (
+                  <DetailItem label="Food" value={foodMatch[1]} />
+                ) : null}
+                <div className="sm:col-span-2">
+                  <DetailItem
+                    label="Additional catering notes"
+                    value={remainingNotes || "None"}
+                  />
+                </div>
+              </>
+            );
+          })()}
         </dl>
       )}
     </section>

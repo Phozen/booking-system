@@ -104,6 +104,7 @@ export function BookingAvailabilityTimeline({
   locked = false,
   startTimeError,
   endTimeError,
+  currentBookingId,
 }: {
   facilityId: string;
   facilityName?: string;
@@ -118,6 +119,7 @@ export function BookingAvailabilityTimeline({
   locked?: boolean;
   startTimeError?: string;
   endTimeError?: string;
+  currentBookingId?: string;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<DragState | null>(null);
@@ -183,7 +185,7 @@ export function BookingAvailabilityTimeline({
   const busyBlocks = useMemo(
     () =>
       timelineItems
-        .filter((item) => item.type !== "available")
+        .filter((item) => item.type !== "available" && item.id !== currentBookingId)
         .map((item) => ({
           id: item.id,
           type: item.type,
@@ -195,7 +197,7 @@ export function BookingAvailabilityTimeline({
         .filter((item): item is BusyBlock => item.end > item.start)
         .filter((item) => item.end > windowStart && item.start < windowEnd)
         .sort((a, b) => a.start - b.start),
-    [timelineItems, timezone, windowEnd, windowStart],
+    [timelineItems, timezone, windowEnd, windowStart, currentBookingId],
   );
 
   const selectedStart = parseTime(startTime);

@@ -439,6 +439,7 @@ export function BookingEditForm({
           locked={!previewValues.date}
           startTimeError={fieldErrors.startTime}
           endTimeError={fieldErrors.endTime}
+          currentBookingId={booking.id}
         />
         <p className="text-sm text-muted-foreground">
           Booking hours: {formatBookingWindowLabel(settings)}.
