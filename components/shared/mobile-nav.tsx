@@ -1,22 +1,27 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useId, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 import { AdminNavigation, EmployeeNavigation } from "@/components/shared/nav-links";
+import { UserMenu } from "@/components/shared/user-menu";
 import { Button } from "@/components/ui/button";
 
 export function MobileNav({
   variant,
   label,
-  footer,
+  userMenu,
   className,
   role,
 }: {
   variant: "employee" | "admin";
   label: string;
-  footer?: (close: () => void) => ReactNode;
+  userMenu?: {
+    email?: string | null;
+    role?: string | null;
+    currentArea: "employee" | "admin";
+    profileHref: "/profile" | "/admin/profile";
+  };
   className?: string;
   role?: string | null;
 }) {
@@ -51,7 +56,19 @@ export function MobileNav({
           ) : (
             <EmployeeNavigation compact onNavigate={close} />
           )}
-          {footer ? <div className="mt-4 border-t pt-3">{footer(close)}</div> : null}
+          {userMenu ? (
+            <div className="mt-4 border-t pt-3">
+              <UserMenu
+                email={userMenu.email}
+                role={userMenu.role}
+                currentArea={userMenu.currentArea}
+                profileHref={userMenu.profileHref}
+                className="grid gap-3"
+                controlsClassName="flex-row flex-wrap items-center justify-start"
+                onNavigate={close}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

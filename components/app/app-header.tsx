@@ -14,18 +14,6 @@ export function AppHeader({
   email?: string | null;
   role?: string | null;
 }) {
-  const mobileFooter = (close: () => void) => (
-    <UserMenu
-      email={email}
-      role={role}
-      currentArea="employee"
-      profileHref="/profile"
-      className="grid gap-3"
-      controlsClassName="flex-row flex-wrap items-center justify-start"
-      onNavigate={close}
-    />
-  );
-
   return (
     <header className="qbook-header-panel sticky top-0 z-40 border-b border-sidebar-border shadow-sm shadow-foreground/5 backdrop-blur-xl print:hidden">
       <div className="relative mx-auto flex min-h-20 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -58,7 +46,12 @@ export function AppHeader({
         <MobileNav
           variant="employee"
           label="Menu"
-          footer={mobileFooter}
+          userMenu={{
+            email,
+            role,
+            currentArea: "employee",
+            profileHref: "/profile",
+          }}
           className="2xl:hidden"
         />
       </div>

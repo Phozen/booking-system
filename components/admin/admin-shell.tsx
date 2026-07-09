@@ -4,7 +4,6 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { CompanyBrand } from "@/components/shared/company-logo";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { UserMenu } from "@/components/shared/user-menu";
 
 export function AdminShell({
   appName,
@@ -17,18 +16,6 @@ export function AdminShell({
   role?: string | null;
   children: ReactNode;
 }) {
-  const mobileFooter = (close: () => void) => (
-    <UserMenu
-      email={email}
-      role={role}
-      currentArea="admin"
-      profileHref="/admin/profile"
-      className="grid gap-3"
-      controlsClassName="flex-row flex-wrap items-center justify-start"
-      onNavigate={close}
-    />
-  );
-
   return (
     <div className="flex min-h-svh bg-background">
       <AdminSidebar appName={appName} email={email} role={role} />
@@ -50,7 +37,12 @@ export function AdminShell({
             <MobileNav
               variant="admin"
               label="Menu"
-              footer={mobileFooter}
+              userMenu={{
+                email,
+                role,
+                currentArea: "admin",
+                profileHref: "/admin/profile",
+              }}
               role={role}
               className="lg:hidden"
             />
