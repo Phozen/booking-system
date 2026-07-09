@@ -51,9 +51,6 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-medium">Next room bookings</h2>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Confirmed bookings are ready to use. Pending requests still need approval.
-            </p>
           </div>
         </div>
 

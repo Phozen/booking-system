@@ -49,7 +49,6 @@ export default async function NewBookingPage({
       <PageHeader
         eyebrow="Employee booking"
         title="Create booking"
-        description="Choose a facility, date, and time. The system checks conflicts before saving."
       />
 
       {profile?.status !== "active" ? (

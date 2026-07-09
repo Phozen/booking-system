@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { AdminNavigation, EmployeeNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function MobileNav({
   variant,
@@ -21,6 +22,7 @@ export function MobileNav({
     role?: string | null;
     currentArea: "employee" | "admin";
     profileHref: "/profile" | "/admin/profile";
+    unseenNotificationCount?: number;
   };
   className?: string;
   role?: string | null;
@@ -37,6 +39,11 @@ export function MobileNav({
         size="sm"
         aria-expanded={open}
         aria-controls={menuId}
+        className={cn(
+          "transition-[background-color,border-color,color,box-shadow,filter,transform] duration-150 ease-out active:translate-y-0.5 active:scale-[0.99] active:brightness-95 active:shadow-[inset_0_2px_5px_rgb(0_0_0_/_0.22)]",
+          open &&
+            "translate-y-0.5 scale-[0.99] border-primary/60 bg-accent/95 text-accent-foreground shadow-[inset_0_2px_5px_rgb(0_0_0_/_0.24)]",
+        )}
         onClick={() => setOpen((current) => !current)}
       >
         {open ? (
@@ -63,6 +70,7 @@ export function MobileNav({
                 role={userMenu.role}
                 currentArea={userMenu.currentArea}
                 profileHref={userMenu.profileHref}
+                unseenNotificationCount={userMenu.unseenNotificationCount}
                 className="grid gap-3"
                 controlsClassName="flex-row flex-wrap items-center justify-start"
                 onNavigate={close}

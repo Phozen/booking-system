@@ -15,6 +15,7 @@ export function UserMenu({
   showIdentity = true,
   currentArea = "employee",
   profileHref,
+  unseenNotificationCount = 0,
   showModeSwitch = true,
   onNavigate,
 }: {
@@ -25,6 +26,7 @@ export function UserMenu({
   showIdentity?: boolean;
   currentArea?: "employee" | "admin";
   profileHref?: "/profile" | "/admin/profile";
+  unseenNotificationCount?: number;
   showModeSwitch?: boolean;
   onNavigate?: () => void;
 }) {
@@ -74,11 +76,23 @@ export function UserMenu({
         {currentArea === "employee" ? (
           <Link
             href="/notifications"
-            className={buttonVariants({ variant: "outline", size: "icon" })}
-            aria-label="Notifications"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "icon" }),
+              "relative",
+            )}
+            aria-label={
+              unseenNotificationCount > 0
+                ? `Notifications, ${unseenNotificationCount} unseen`
+                : "Notifications"
+            }
             onClick={onNavigate}
           >
             <Bell aria-hidden="true" />
+            {unseenNotificationCount > 0 ? (
+              <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[0.65rem] font-bold leading-none text-destructive-foreground shadow-sm">
+                {unseenNotificationCount > 99 ? "99+" : unseenNotificationCount}
+              </span>
+            ) : null}
           </Link>
         ) : null}
         <form action={logoutAction}>

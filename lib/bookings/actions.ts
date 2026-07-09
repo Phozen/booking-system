@@ -31,6 +31,7 @@ import {
   getAppSettings,
   getEffectiveApprovalRequired,
 } from "@/lib/settings/queries";
+import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -129,6 +130,14 @@ async function insertBookingConfirmationNotification({
       booking.starts_at,
       booking.ends_at,
     );
+    await createAppNotification({
+      userId: booking.user_id,
+      type: "booking_confirmation",
+      title: `Booking confirmed: ${booking.title}`,
+      body: `Your booking for ${facilityName} is confirmed for ${bookingWindow}.`,
+      href: `/bookings/${booking.id}`,
+      relatedBookingId: booking.id,
+    });
     const { data, error } = await supabase
       .from("email_notifications")
       .insert({

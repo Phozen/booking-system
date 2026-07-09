@@ -85,7 +85,7 @@ function InvitationSection({
   title: string;
   invitations: InvitedBooking[];
   emptyTitle: string;
-  emptyDescription: string;
+  emptyDescription?: string;
 }) {
   return (
     <section className="grid gap-3">
@@ -152,19 +152,16 @@ export function InvitationsPageList({
         title="Pending invitations"
         invitations={byStatus.pending}
         emptyTitle="No pending invitations."
-        emptyDescription="New booking invitations that need your response will appear here."
       />
       <InvitationSection
         title="Accepted invitations"
         invitations={byStatus.accepted}
         emptyTitle="No accepted invitations."
-        emptyDescription="Accepted invited bookings will appear here."
       />
       <InvitationSection
         title="Declined invitations"
         invitations={byStatus.declined}
         emptyTitle="No declined invitations."
-        emptyDescription="Declined invitations remain here for reference."
       />
     </div>
   );

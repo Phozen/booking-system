@@ -39,6 +39,16 @@ export function CalendarBookingItem({
           <StatusBadge kind="booking" status={booking.status} />
         </dd>
       </div>
+      {booking.contextLabel ? (
+        <div>
+          <dt className="text-muted-foreground">Relationship</dt>
+          <dd className="mt-1">
+            <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              {booking.contextLabel}
+            </span>
+          </dd>
+        </div>
+      ) : null}
       <div>
         <dt className="text-muted-foreground">Time</dt>
         <dd>{formatBookingWindow(booking.startsAt, booking.endsAt)}</dd>
@@ -112,6 +122,14 @@ export function CalendarBookingItem({
         <StatusBadge kind="booking" status={booking.status} />
       </div>
 
+      {booking.contextLabel ? (
+        <div>
+          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            {booking.contextLabel}
+          </span>
+        </div>
+      ) : null}
+
       <dl className="grid min-w-0 gap-1 break-words text-muted-foreground">
         {!compact ? (
           <div className="inline-flex items-center gap-2">
@@ -141,14 +159,6 @@ export function CalendarBookingItem({
               aria-hidden="true"
             />
             <span>{booking.userLabel}</span>
-          </div>
-        ) : null}
-        {booking.contextLabel ? (
-          <div className="font-medium text-primary">{booking.contextLabel}</div>
-        ) : null}
-        {typeof booking.approvalRequired === "boolean" ? (
-          <div>
-            Approval {booking.approvalRequired ? "required" : "not required"}
           </div>
         ) : null}
       </dl>

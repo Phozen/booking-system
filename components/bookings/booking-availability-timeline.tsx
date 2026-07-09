@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  formatBookingWindowLabel,
   timeStringToMinutes,
 } from "@/lib/settings/app-settings";
 
@@ -125,11 +124,6 @@ export function BookingAvailabilityTimeline({
   const windowStart = timeStringToMinutes(bookingWindowStart);
   const windowEnd = timeStringToMinutes(bookingWindowEnd);
   const windowMinutes = Math.max(60, windowEnd - windowStart);
-  const bookingWindowLabel = formatBookingWindowLabel({
-    bookingWindowStart,
-    bookingWindowEnd,
-  });
-
   function clampToBookingWindow(minutes: number) {
     return Math.max(windowStart, Math.min(windowEnd, minutes));
   }
@@ -327,9 +321,6 @@ export function BookingAvailabilityTimeline({
             <CalendarClock className="size-4 text-muted-foreground" aria-hidden="true" />
             Availability and time
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Pick a date first, then choose times between {bookingWindowLabel}.
-          </p>
         </div>
         <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
           30 min blocks

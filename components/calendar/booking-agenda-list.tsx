@@ -21,9 +21,6 @@ export function BookingAgendaList({
         <h2 id="agenda-heading" className="font-semibold tracking-normal">
           Agenda view
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Mobile view groups bookings by date so each item stays easy to open.
-        </p>
       </div>
 
       {daysWithBookings.length > 0 ? (

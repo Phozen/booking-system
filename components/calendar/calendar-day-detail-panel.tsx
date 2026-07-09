@@ -254,7 +254,6 @@ export function CalendarDayDetailPanel({
       ) : (
         <EmptyState
           title="No bookings on this day"
-          description="Use the booking action to create a room booking for this date."
           action={
             <Link
               href={`/bookings/new?date=${encodeURIComponent(day.key)}`}

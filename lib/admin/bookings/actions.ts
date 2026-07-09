@@ -25,6 +25,7 @@ import {
   getAppSettings,
   getEffectiveApprovalRequired,
 } from "@/lib/settings/queries";
+import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -312,6 +313,15 @@ async function insertBookingEmail({
   if (!owner?.email) {
     return;
   }
+
+  await createAppNotification({
+    userId: booking.user_id,
+    type,
+    title: subject,
+    body,
+    href: `/bookings/${booking.id}`,
+    relatedBookingId: booking.id,
+  });
 
   const idempotencyKey =
     type === "booking_confirmation"

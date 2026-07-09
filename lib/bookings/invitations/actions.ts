@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { InvitationActionResult } from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
+import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   canInviteUser,
@@ -149,6 +150,14 @@ async function queueInvitationNotification({
       booking_invitation_accepted: `${actorLabel} accepted the invitation for ${booking.title}.`,
       booking_invitation_declined: `${actorLabel} declined the invitation for ${booking.title}.`,
     };
+    await createAppNotification({
+      userId: recipient.id,
+      type,
+      title: subjectByType[type],
+      body: bodyByType[type],
+      href: type === "booking_invitation" ? "/invitations" : `/bookings/${booking.id}`,
+      relatedBookingId: booking.id,
+    });
     const { error } = await supabase.from("email_notifications").insert({
       type,
       status: "queued",

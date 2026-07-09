@@ -5,7 +5,6 @@ import type { GroupedEmployeeBookings } from "@/lib/bookings/grouping";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import {
   Alert,
-  AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
 import { BookingCard } from "@/components/bookings/booking-card";
@@ -22,7 +21,7 @@ function BookingSection({
   title: string;
   bookings: EmployeeBooking[];
   emptyMessage: string;
-  emptyDescription: string;
+  emptyDescription?: string;
   muted?: boolean;
 }) {
   return (
@@ -70,10 +69,6 @@ export function MyBookingsList({
         <Alert variant="success">
           <CheckCircle2 aria-hidden="true" />
           <AlertTitle>Room booking saved</AlertTitle>
-          <AlertDescription>
-            Your booking is now in My Bookings. Confirmed bookings are ready to
-            use; pending requests are waiting for admin approval.
-          </AlertDescription>
         </Alert>
       ) : null}
 
@@ -130,7 +125,6 @@ export function MyBookingsList({
         title="Pending approval"
         bookings={groupedBookings.pending}
         emptyMessage="No requests waiting for approval."
-        emptyDescription="Approval-required room bookings will appear here until an admin confirms or rejects them."
       />
       <BookingSection
         title="Upcoming confirmed"
@@ -149,7 +143,6 @@ export function MyBookingsList({
         title="Cancelled"
         bookings={groupedBookings.cancelled}
         emptyMessage="No cancelled room bookings."
-        emptyDescription="Cancelled bookings stay here so you can verify what was released."
       />
     </div>
   );

@@ -1,5 +1,4 @@
 import { requireUser } from "@/lib/auth/guards";
-import { formatBookingStatus } from "@/lib/bookings/format";
 import {
   getCompanyCalendarBookings,
   getEmployeeCalendarBookings,
@@ -143,13 +142,6 @@ export default async function EmployeeCalendarPage({
       <PageHeader
         eyebrow="Employee bookings"
         title="Booking Calendar"
-        description={
-          selectedStatus
-            ? `Showing your ${formatBookingStatus(selectedStatus).toLowerCase()} owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-            : selectedView === "all"
-              ? `Showing company booking visibility for ${selectedMonth.label}. Other users' booking items show limited details. Times use ${settings.defaultTimezone}.`
-              : `Showing your owned and invited bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-        }
       />
 
       <CalendarControls

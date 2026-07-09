@@ -9,10 +9,12 @@ export function AppHeader({
   appName,
   email,
   role,
+  unseenNotificationCount = 0,
 }: {
   appName: string;
   email?: string | null;
   role?: string | null;
+  unseenNotificationCount?: number;
 }) {
   return (
     <header className="qbook-header-panel sticky top-0 z-40 border-b border-sidebar-border shadow-sm shadow-foreground/5 backdrop-blur-xl print:hidden">
@@ -40,6 +42,7 @@ export function AppHeader({
             showIdentity={false}
             currentArea="employee"
             profileHref="/profile"
+            unseenNotificationCount={unseenNotificationCount}
             className="flex items-center gap-2"
           />
         </div>
@@ -51,6 +54,7 @@ export function AppHeader({
             role,
             currentArea: "employee",
             profileHref: "/profile",
+            unseenNotificationCount,
           }}
           className="2xl:hidden"
         />

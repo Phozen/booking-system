@@ -1,7 +1,6 @@
 import { LockKeyhole } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
-import { getOwnMicrosoftCalendarConnectionStatus } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { getUserNotificationPreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/profile/queries";
 import {
@@ -10,7 +9,6 @@ import {
 } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
-import { MicrosoftCalendarConnectionCard } from "@/components/profile/microsoft-calendar-connection-card";
 import { ProfileDetail } from "@/components/profile/profile-detail";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { NotificationPreferencesForm } from "@/components/notifications/notification-preferences-form";
@@ -18,19 +16,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ calendar?: "connected" | "error" }>;
-}) {
+export default async function ProfilePage() {
   const { user } = await requireUser();
   const supabase = await createClient();
-  const [profile, settings, calendarConnection, notificationPreferences, params] = await Promise.all([
+  const [profile, settings, notificationPreferences] = await Promise.all([
     getOwnProfile(supabase, user.id),
     getAppSettings(),
-    getOwnMicrosoftCalendarConnectionStatus(user.id),
     getUserNotificationPreferences(supabase, user.id),
-    searchParams,
   ]);
 
   if (!profile) {
@@ -57,10 +49,6 @@ export default async function ProfilePage({
         <ProfileDetail profile={profile} />
         <div className="grid gap-6">
           <ProfileForm profile={profile} />
-          <MicrosoftCalendarConnectionCard
-            connection={calendarConnection}
-            calendarMessage={params.calendar}
-          />
           <section className="border-t border-border/80 pt-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-normal">

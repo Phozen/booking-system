@@ -45,16 +45,17 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border shadow-xs shadow-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border shadow-xs shadow-foreground/5 transition-[background-color,border-color,color,box-shadow,filter,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
         tone
           ? "px-4 py-2.5 text-base font-bold"
           : "px-3 py-2 text-sm font-medium",
         compact ? "w-full" : tone ? "h-11" : "h-9",
-        tone && "border shadow-md active:scale-[0.98]",
+        tone &&
+          "border shadow-md active:translate-y-0.5 active:scale-[0.99] active:brightness-90 active:shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.34)]",
         active && activeTone
-          ? activeTone
+          ? `${activeTone} translate-y-0.5 scale-[0.99]`
           : active
-          ? "border-primary/90 bg-primary text-primary-foreground shadow-inner shadow-primary/25"
+          ? "translate-y-0.5 scale-[0.99] border-primary/90 bg-primary text-primary-foreground shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.3)]"
           : tone
             ? `${tone} opacity-90 hover:opacity-100`
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",

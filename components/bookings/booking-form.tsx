@@ -835,9 +835,6 @@ export function BookingForm({
             />
             <div>
               <h2 className="font-medium tracking-normal">Booking summary</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Review the basics before creating your booking.
-              </p>
             </div>
           </div>
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
