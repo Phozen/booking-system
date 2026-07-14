@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Quicksand } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 
@@ -45,7 +46,9 @@ export default function RootLayout({
       >
         <body className="min-h-full flex flex-col">
           <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
-          <GlobalRouteLoader />
+          <Suspense fallback={null}>
+            <GlobalRouteLoader />
+          </Suspense>
           <ThemeProvider>
             {children}
             <ToastProvider />
