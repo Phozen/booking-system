@@ -186,6 +186,8 @@
   }
 
   .qbook-content-card {
+    display: flex;
+    justify-content: center;
     margin: 1.25rem auto 1.75rem;
     width: min(100% - 1.5rem, 72rem);
     overflow: clip;
@@ -246,13 +248,12 @@
     }
 
     .qbook-content-card {
-      margin: 0;
-      width: 100%;
-      min-height: calc(100svh - 5rem);
-      border-inline: 0;
-      border-bottom: 0;
-      border-radius: 0;
-      background: var(--background);
+      margin: 0.75rem auto 1rem;
+      width: min(100% - 1rem, 42rem);
+      min-height: auto;
+      border: 1px solid color-mix(in oklch, var(--border) 78%, transparent);
+      border-radius: var(--radius-lg);
+      background: var(--card);
       box-shadow: none;
       backdrop-filter: none;
     }

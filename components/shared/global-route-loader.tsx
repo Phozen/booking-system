@@ -1,27 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useLoadingStore } from "@/lib/store/use-loading-store";
 import { RouteLoading } from "./route-loading";
 import { cn } from "@/lib/utils";
 
 export function GlobalRouteLoader() {
-  const { isLoading, label, variant } = useLoadingStore();
+  const { isLoading, label, variant, setLoading } = useLoadingStore();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = `${pathname}?${searchParams.toString()}`;
+  const previousPath = useRef(currentPath);
   const [render, setRender] = useState(isLoading);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    if (isLoading) {
-      setRender(true);
-      setIsFadingOut(false);
-    } else {
-      setIsFadingOut(true);
-      const timeout = setTimeout(() => {
-        setRender(false);
-        setIsFadingOut(false);
-      }, 500); // Wait for the fade-out duration
-      return () => clearTimeout(timeout);
+    if (previousPath.current === currentPath) {
+      return;
     }
+
+    previousPath.current = currentPath;
+
+    if (!isLoading) {
+      return;
+    }
+
+    const timeout = setTimeout(() => setLoading(false), 120);
+
+    return () => clearTimeout(timeout);
+  }, [currentPath, isLoading, setLoading]);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    if (isLoading) {
+      timers.push(
+        setTimeout(() => {
+          setRender(true);
+          setIsFadingOut(false);
+        }, 0),
+      );
+    } else {
+      timers.push(setTimeout(() => setIsFadingOut(true), 0));
+      timers.push(
+        setTimeout(() => {
+          setRender(false);
+          setIsFadingOut(false);
+        }, 500),
+      );
+    }
+
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
   }, [isLoading]);
 
   if (!render) return null;

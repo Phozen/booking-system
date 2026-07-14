@@ -31,6 +31,7 @@ import {
 } from "@/components/shared/form-field-error";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 function requiresApprovalValue(value: boolean | null) {
@@ -96,7 +97,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
-      setFieldErrors({
+      const nextErrors = {
         code: getFirstError(errors.code),
         name: getFirstError(errors.name),
         slug: getFirstError(errors.slug),
@@ -106,7 +107,9 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         description: getFirstError(errors.description),
         status: getFirstError(errors.status),
         requiresApproval: getFirstError(errors.requiresApproval),
-      });
+      };
+      setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       return;
     }
 

@@ -20,6 +20,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
@@ -45,11 +46,13 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
-      setFieldErrors({
+      const nextErrors = {
         fullName: getFirstError(errors.fullName),
         department: getFirstError(errors.department),
         phone: getFirstError(errors.phone),
-      });
+      };
+      setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       event.preventDefault();
       return;
     }

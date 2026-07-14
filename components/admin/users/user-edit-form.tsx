@@ -25,6 +25,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
@@ -164,13 +165,15 @@ export function UserEditForm({
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
-      setFieldErrors({
+      const nextErrors = {
         fullName: getFirstError(errors.fullName),
         department: getFirstError(errors.department),
         phone: getFirstError(errors.phone),
         role: getFirstError(errors.role),
         status: getFirstError(errors.status),
-      });
+      };
+      setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       event.preventDefault();
       return;
     }

@@ -7,10 +7,30 @@ import {
   formatBookingDateTime,
   formatBookingWindow,
 } from "@/lib/bookings/format";
+import {
+  formatCateringServingTime,
+  formatCateringType,
+} from "@/lib/bookings/catering/format";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
+
+function formatCateringSummary(booking: AdminBooking) {
+  if (!booking.catering.required) {
+    return "Not requested";
+  }
+
+  return [
+    formatCateringType(booking.catering.type),
+    booking.catering.pax ? `${booking.catering.pax} pax` : null,
+    booking.catering.servingTime
+      ? formatCateringServingTime(booking.catering.servingTime)
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+}
 
 export function PendingApprovalsTable({
   bookings,
@@ -53,9 +73,7 @@ export function PendingApprovalsTable({
                 },
                 {
                   label: "Catering",
-                  value: booking.catering.required
-                    ? `${booking.catering.pax ?? "?"} pax`
-                    : "Not requested",
+                  value: formatCateringSummary(booking),
                 },
               ]}
               actions={
@@ -76,12 +94,12 @@ export function PendingApprovalsTable({
           <EmptyState
             className="bg-transparent"
             title="No pending approvals"
-              description="New room requests that need approval will appear here."
+            description="New room requests that need approval will appear here."
           />
         )
       }
     >
-        <table className="w-full min-w-[960px] border-collapse text-left text-sm">
+      <table className="w-full min-w-[960px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
@@ -117,9 +135,7 @@ export function PendingApprovalsTable({
                     {formatBookingDateTime(booking.createdAt)}
                   </td>
                   <td className="px-4 py-3">
-                    {booking.catering.required
-                      ? `${booking.catering.pax ?? "?"} pax`
-                      : "Not requested"}
+                    {formatCateringSummary(booking)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
@@ -150,7 +166,7 @@ export function PendingApprovalsTable({
               </tr>
             )}
           </tbody>
-        </table>
+      </table>
     </AdminTableShell>
   );
 }

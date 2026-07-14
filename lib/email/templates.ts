@@ -1,4 +1,8 @@
-import { formatBookingDate, formatBookingTime } from "@/lib/bookings/format";
+import {
+  formatBookingDate,
+  formatBookingTime,
+  formatBookingWindow,
+} from "@/lib/bookings/format";
 import {
   formatCateringServingTime,
   formatCateringType,
@@ -38,39 +42,66 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-function renderHtml({
-  title,
-  intro,
-  rows,
-  link,
-}: {
-  title: string;
-  intro: string;
-  rows: { label: string; value: string | null }[];
-  link: string;
-}) {
-  const details = rows
+type EmailDetailRow = { label: string; value: string | null };
+type EmailDetailSection = { title: string; rows: EmailDetailRow[] };
+
+function hasRows(section: EmailDetailSection) {
+  return section.rows.some((row) => row.value);
+}
+
+function renderSectionRows(rows: EmailDetailRow[]) {
+  return rows
     .filter((row) => row.value)
     .map(
       (row) => `
         <tr>
-          <td style="padding: 6px 12px 6px 0; color: #475569; font-weight: 600;">${escapeHtml(row.label)}</td>
-          <td style="padding: 6px 0; color: #0f172a;">${escapeHtml(row.value ?? "")}</td>
+          <td style="width: 38%; padding: 8px 14px 8px 0; color: #475569; font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; vertical-align: top;">${escapeHtml(row.label)}</td>
+          <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 600; vertical-align: top;">${escapeHtml(row.value ?? "")}</td>
         </tr>
+      `,
+    )
+    .join("");
+}
+
+function renderHtml({
+  title,
+  intro,
+  sections,
+  link,
+}: {
+  title: string;
+  intro: string;
+  sections: EmailDetailSection[];
+  link: string;
+}) {
+  const detailSections = sections
+    .filter(hasRows)
+    .map(
+      (section) => `
+        <section style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px; margin: 0 0 14px; background: #ffffff;">
+          <h2 style="font-size: 16px; margin: 0 0 12px; color: #0f172a;">${escapeHtml(section.title)}</h2>
+          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+            <tbody>${renderSectionRows(section.rows)}</tbody>
+          </table>
+        </section>
       `,
     )
     .join("");
 
   return `
-    <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.5;">
-      <h1 style="font-size: 20px; margin: 0 0 12px;">${escapeHtml(title)}</h1>
-      <p style="margin: 0 0 16px;">${escapeHtml(intro)}</p>
-      <table style="border-collapse: collapse; margin: 0 0 18px;">
-        <tbody>${details}</tbody>
-      </table>
-      <p style="margin: 0;">
-        <a href="${escapeHtml(link)}" style="color: #2563eb;">View booking details</a>
-      </p>
+    <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.5; background: #f8fafc; padding: 24px;">
+      <div style="max-width: 720px; margin: 0 auto;">
+        <header style="border-bottom: 1px solid #cbd5e1; padding: 0 0 18px; margin: 0 0 18px;">
+          <div style="font-size: 28px; font-weight: 800; color: #047857; letter-spacing: -0.02em;">QBook</div>
+          <div style="font-size: 12px; color: #64748b; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">Qhazanah Sabah Berhad</div>
+          <h1 style="font-size: 22px; margin: 16px 0 8px; color: #0f172a;">${escapeHtml(title)}</h1>
+          <p style="margin: 0; color: #475569;">${escapeHtml(intro)}</p>
+        </header>
+        ${detailSections}
+        <p style="margin: 18px 0 0;">
+          <a href="${escapeHtml(link)}" style="display: inline-block; border-radius: 8px; background: #2563eb; color: #ffffff; font-weight: 700; padding: 10px 14px; text-decoration: none;">View booking details</a>
+        </p>
+      </div>
     </div>
   `;
 }
@@ -78,18 +109,25 @@ function renderHtml({
 function renderText({
   title,
   intro,
-  rows,
+  sections,
   link,
 }: {
   title: string;
   intro: string;
-  rows: { label: string; value: string | null }[];
+  sections: EmailDetailSection[];
   link: string;
 }) {
-  const details = rows
-    .filter((row) => row.value)
-    .map((row) => `${row.label}: ${row.value}`)
-    .join("\n");
+  const details = sections
+    .filter(hasRows)
+    .map((section) => {
+      const rows = section.rows
+        .filter((row) => row.value)
+        .map((row) => `${row.label}: ${row.value}`)
+        .join("\n");
+
+      return `${section.title}\n${rows}`;
+    })
+    .join("\n\n");
 
   return `${title}\n\n${intro}\n\n${details}\n\nView booking details: ${link}`;
 }
@@ -133,34 +171,57 @@ export function renderEmailTemplate(
   const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
   const startTime = startsAt ? formatBookingTime(startsAt) : null;
   const endTime = endsAt ? formatBookingTime(endsAt) : null;
+  const bookingTime =
+    startsAt && endsAt ? formatBookingWindow(startsAt, endsAt) : null;
 
-  const rows = [
-    { label: "Booking title", value: title },
-    { label: "Facility", value: facilityName },
-    { label: "Level", value: facilityLevel },
-    { label: "Date", value: bookingDate },
-    { label: "Start time", value: startTime },
-    { label: "End time", value: endTime },
-    { label: "Attendee count", value: attendeeCount },
-    { label: "Status", value: status },
-    { label: "Invitation status", value: invitationStatus },
-    { label: "Responded by", value: actorName ?? actorEmail },
-    { label: "Requester", value: requesterName ?? requesterEmail },
+  const sections: EmailDetailSection[] = [
     {
-      label: "Catering type",
-      value: cateringType ? formatCateringType(cateringType) : null,
+      title: "Meeting details",
+      rows: [
+        { label: "Booking title", value: title },
+        { label: "Facility", value: facilityName },
+        { label: "Level", value: facilityLevel },
+        { label: "Date", value: bookingDate },
+        { label: "Time", value: bookingTime ?? [startTime, endTime].filter(Boolean).join(" - ") },
+        { label: "Start time", value: startTime },
+        { label: "End time", value: endTime },
+        { label: "Status", value: status },
+        { label: "Attendee count", value: attendeeCount },
+      ],
     },
-    { label: "Catering pax", value: cateringPax },
     {
-      label: "Serving time",
-      value: cateringServingTime
-        ? formatCateringServingTime(cateringServingTime)
-        : null,
+      title: "Requester / invitation details",
+      rows: [
+        { label: "Requester", value: requesterName ?? requesterEmail },
+        { label: "Invitation status", value: invitationStatus },
+        { label: "Responded by", value: actorName ?? actorEmail },
+      ],
     },
-    { label: "Dietary notes", value: cateringDietaryNotes },
-    { label: "Catering notes", value: cateringNotes },
-    { label: "Rejection reason", value: rejectionReason },
-    { label: "Cancellation reason", value: cancellationReason },
+    {
+      title: "Food & drinks / catering",
+      rows: [
+        {
+          label: "Catering type",
+          value: cateringType ? formatCateringType(cateringType) : null,
+        },
+        { label: "Catering pax", value: cateringPax },
+        {
+          label: "Serving time",
+          value: cateringServingTime
+            ? formatCateringServingTime(cateringServingTime)
+            : null,
+        },
+        { label: "Dietary notes", value: cateringDietaryNotes },
+        { label: "Notes", value: cateringNotes },
+      ],
+    },
+    {
+      title: "Outcome notes",
+      rows: [
+        { label: "Rejection reason", value: rejectionReason },
+        { label: "Cancellation reason", value: cancellationReason },
+      ],
+    },
   ];
 
   const introByType: Record<EmailNotificationType, string> = {
@@ -191,7 +252,7 @@ export function renderEmailTemplate(
 
   return {
     subject: input.subject || heading,
-    html: renderHtml({ title: heading, intro, rows, link }),
-    text: renderText({ title: heading, intro, rows, link }),
+    html: renderHtml({ title: heading, intro, sections, link }),
+    text: renderText({ title: heading, intro, sections, link }),
   };
 }

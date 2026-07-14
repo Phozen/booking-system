@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarPlus, CheckCircle2, Edit3, Printer, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Edit3, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -22,6 +22,7 @@ import { InvitationResponseActions } from "@/components/bookings/invitations/inv
 import { RecurringCancelActions } from "@/components/bookings/recurring/recurring-cancel-actions";
 import { StaticToastEffect } from "@/components/shared/static-toast-effect";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { RouteLoadingLink } from "@/components/shared/route-loading-link";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Alert,
@@ -123,8 +124,10 @@ export function BookingDetail({
           {isOwnerView ? (
             <>
               {booking.status === "pending" || booking.status === "confirmed" ? (
-                <Link
+                <RouteLoadingLink
                   href={`/bookings/${booking.id}/edit`}
+                  loadingLabel="Loading edit form..."
+                  loadingVariant="form"
                   className={buttonVariants({
                     variant: "outline",
                     className: "w-full sm:w-auto",
@@ -132,7 +135,7 @@ export function BookingDetail({
                 >
                   <Edit3 data-icon="inline-start" />
                   Edit / reschedule
-                </Link>
+                </RouteLoadingLink>
               ) : null}
               <Link
                 href={`/bookings/${booking.id}/print`}

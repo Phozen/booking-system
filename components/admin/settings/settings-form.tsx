@@ -22,6 +22,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
@@ -63,7 +64,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
-      setFieldErrors({
+      const nextErrors = {
         appName: getFirstError(errors.appName),
         companyName: getFirstError(errors.companyName),
         systemContactEmail: getFirstError(errors.systemContactEmail),
@@ -75,7 +76,9 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
           errors.reminderOffsetsMinutesText,
         ),
         calendarVisibilityMode: getFirstError(errors.calendarVisibilityMode),
-      });
+      };
+      setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       event.preventDefault();
       return;
     }

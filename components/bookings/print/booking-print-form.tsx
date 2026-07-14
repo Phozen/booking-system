@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CompanyBrand } from "@/components/shared/company-logo";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
@@ -13,7 +14,6 @@ import {
 import {
   formatCateringRequired,
   formatCateringServingTime,
-  formatCateringType,
 } from "@/lib/bookings/catering/format";
 import { getInvitationStatusLabel } from "@/lib/bookings/invitations/validation";
 import { formatFacilityType } from "@/lib/facilities/format";
@@ -114,16 +114,25 @@ export function BookingPrintForm({
 
       <article className="mx-auto grid max-w-4xl gap-5 bg-white p-6 shadow-sm print:max-w-none print:p-0 print:shadow-none">
         <header className="border-b border-zinc-300 pb-5">
-          <p className="text-sm font-medium text-zinc-600">{appName}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-zinc-950">
-            Booking Approval Form
-          </h1>
-          <p className="mt-2 text-sm text-zinc-600">
-            {companyName} | Booking reference: {booking.id}
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            Generated {formatBookingDateTime(new Date().toISOString())}
-          </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <CompanyBrand
+              logoClassName="w-24 print:w-24"
+              textClassName="text-4xl print:text-4xl"
+              priority
+            />
+            <div className="text-left sm:text-right">
+              <p className="text-sm font-medium text-zinc-600">{appName}</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-normal text-zinc-950">
+                Booking Approval Form
+              </h1>
+              <p className="mt-2 text-sm text-zinc-600">
+                {companyName} | Booking reference: {booking.id}
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Generated {formatBookingDateTime(new Date().toISOString())}
+              </p>
+            </div>
+          </div>
         </header>
 
         <Section title="Requester details">

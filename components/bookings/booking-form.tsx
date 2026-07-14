@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, CalendarClock, CheckCircle2, Coffee, Loader2, ShieldCheck, Users } from "lucide-react";
+import { AlertCircle, CalendarClock, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
 
 import {
   createBookingAction,
@@ -40,6 +40,7 @@ import {
   FormFieldError,
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
@@ -307,6 +308,7 @@ export function BookingForm({
     if (Object.values(nextErrors).some(Boolean)) {
       event.preventDefault();
       setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       return;
     }
 

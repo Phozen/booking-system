@@ -11,7 +11,7 @@ export function RouteLoading({
   return (
     <div
       className={cn(
-        "flex min-h-[calc(100svh-4rem)] w-full flex-col items-center justify-center gap-4 px-4 py-10 sm:px-6",
+        "mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-sm flex-col items-center justify-center gap-4 px-4 py-10 text-center sm:px-6",
         "animate-in fade-in zoom-in-95 duration-500 ease-out fill-mode-both",
         className,
       )}

@@ -4,7 +4,6 @@ import { Bell } from "lucide-react";
 import { requireUser } from "@/lib/auth/guards";
 import {
   getUserAppNotifications,
-  markUserAppNotificationsSeen,
   type AppNotification,
 } from "@/lib/notifications/app-notifications";
 import { createClient } from "@/lib/supabase/server";
@@ -52,7 +51,10 @@ function NotificationItem({ notification }: { notification: AppNotification }) {
             New
           </span>
         ) : null}
-        <time className="text-xs text-muted-foreground" dateTime={notification.createdAt}>
+        <time
+          className="text-xs text-muted-foreground"
+          dateTime={notification.createdAt}
+        >
           {formatNotificationTime(notification.createdAt)}
         </time>
       </div>
@@ -87,13 +89,18 @@ export default async function NotificationsPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <PageHeader 
-        eyebrow="Notifications" 
-        title="Notifications" 
+      <PageHeader
+        eyebrow="Notifications"
+        title="Notifications"
         primaryAction={
-          hasUnseen ? (
+          notifications.length > 0 ? (
             <form action={markAllNotificationsSeenAction}>
-              <Button type="submit" variant="outline" size="sm">
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={!hasUnseen}
+              >
                 Mark all as read
               </Button>
             </form>

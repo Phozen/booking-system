@@ -16,12 +16,12 @@ export function OverlayLoader({
   const [render, setRender] = useState(show);
   
   useEffect(() => {
-    if (show) {
-      setRender(true);
-    } else {
-      const timeout = setTimeout(() => setRender(false), 300); // Wait for animate-out to finish
-      return () => clearTimeout(timeout);
-    }
+    const timeout = setTimeout(
+      () => setRender(show),
+      show ? 0 : 300,
+    );
+
+    return () => clearTimeout(timeout);
   }, [show]);
 
   if (!render) return null;

@@ -3,7 +3,6 @@ import { Coffee } from "lucide-react";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import {
   formatCateringServingTime,
-  formatCateringType,
 } from "@/lib/bookings/catering/format";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 

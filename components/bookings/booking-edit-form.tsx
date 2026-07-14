@@ -1,8 +1,9 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
 
 import {
@@ -42,6 +43,7 @@ import {
   FormFieldError,
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
+import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
@@ -106,6 +108,7 @@ export function BookingEditForm({
     updateBookingAction.bind(null, booking.id),
     initialState,
   );
+  const router = useRouter();
   
   const start = getZonedBookingFormDateTime(
     booking.startsAt,
@@ -122,7 +125,13 @@ export function BookingEditForm({
   
   const [cateringRequired, setCateringRequired] = useState(booking.catering.required);
   
-  const [selectedDrinkItems, setSelectedDrinkItems] = useState<string[]>([]);
+  const [selectedDrinkItems, setSelectedDrinkItems] = useState<string[]>(
+    booking.catering.type === "coffee_tea"
+      ? ["Coffee", "Tea"]
+      : booking.catering.type === "water"
+        ? ["Water"]
+        : [],
+  );
   const [selectedFoodItems, setSelectedFoodItems] = useState<string[]>(
     booking.catering.type === "buffet_catering" ? ["Catering"] :
     booking.catering.type === "packed_meals" ? ["Packed meals"] :
@@ -144,6 +153,12 @@ export function BookingEditForm({
     () => facilities.find((facility) => facility.id === selectedFacility),
     [facilities, selectedFacility],
   );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      router.replace(`/bookings/${state.bookingId ?? booking.id}`);
+    }
+  }, [booking.id, router, state.bookingId, state.status]);
 
   const drinkRequests = [
     ...selectedDrinkItems,
@@ -167,6 +182,15 @@ export function BookingEditForm({
               : otherDrinkRequest.trim() || otherFoodRequest.trim()
                 ? "other"
                 : booking.catering.type || "";
+  const combinedCateringNotes = [
+    drinkRequests.length > 0
+      ? `Drinks: ${drinkRequests.join(", ")}`
+      : "",
+    foodRequests.length > 0 ? `Food: ${foodRequests.join(", ")}` : "",
+    cateringNotes.trim(),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   function updatePreview(form: HTMLFormElement) {
     const formData = new FormData(form);
@@ -256,6 +280,7 @@ export function BookingEditForm({
     if (Object.values(nextErrors).some(Boolean)) {
       event.preventDefault();
       setFieldErrors(nextErrors);
+      showFormValidationError(nextErrors);
       return;
     }
 
@@ -737,7 +762,6 @@ export function BookingEditForm({
                 </Label>
                 <textarea
                   id="cateringNotes"
-                  name="cateringNotes"
                   rows={4}
                   value={cateringNotes}
                   onChange={(e) => setCateringNotes(e.target.value)}
@@ -748,6 +772,11 @@ export function BookingEditForm({
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringNotes)}
                   className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                />
+                <input
+                  type="hidden"
+                  name="cateringNotes"
+                  value={combinedCateringNotes}
                 />
                 <FormFieldError id="cateringNotes-error">
                   {fieldErrors.cateringNotes}

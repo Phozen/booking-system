@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { AlertCircle, CalendarClock, Loader2, Minus, Plus } from "lucide-react";
+import { AlertCircle, Loader2, Minus, Plus } from "lucide-react";
 
 import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
 import { cn } from "@/lib/utils";
@@ -317,13 +317,7 @@ export function BookingAvailabilityTimeline({
 
   return (
     <section className="grid gap-3 border-y border-border/80 bg-muted/15 py-4 sm:col-span-2">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-2 font-medium tracking-normal">
-            <CalendarClock className="size-4 text-muted-foreground" aria-hidden="true" />
-            Availability and time
-          </h2>
-        </div>
+      <div className="flex justify-end">
         <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
           30 min blocks
         </div>
