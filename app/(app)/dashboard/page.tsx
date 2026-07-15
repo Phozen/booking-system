@@ -9,6 +9,7 @@ import { getMyUpcomingBookings } from "@/lib/bookings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { employeeNavigation } from "@/config/navigation";
@@ -27,19 +28,20 @@ export default async function DashboardPage() {
         title="Quick actions"
       />
 
-      <section aria-label="Quick actions" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-        {employeeNavigation.filter((item) => item.href !== "/dashboard").map((item) => {
+      <section aria-label="Quick actions" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {employeeNavigation.map((item) => {
           const Icon = item.icon;
+          const tone = employeeFeatureStyles[item.tone];
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="group grid min-h-28 place-items-center gap-3 rounded-lg border border-border/75 bg-card p-4 text-center shadow-sm shadow-foreground/5 transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-accent/45 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 sm:min-h-36 sm:p-5 dark:shadow-black/20"
+              className={`group grid min-h-32 place-items-center gap-3 rounded-lg border p-4 text-center shadow-lg transition-[background-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/60 sm:min-h-44 sm:gap-4 sm:p-6 ${tone.home}`}
             >
-              <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20 transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:size-14">
-                <Icon className="size-6 sm:size-7" aria-hidden="true" />
+              <div className={`flex size-14 items-center justify-center rounded-xl ring-1 sm:size-16 ${tone.icon}`}>
+                <Icon className="size-7 sm:size-9" aria-hidden="true" />
               </div>
-              <h2 className="text-base font-semibold tracking-normal sm:text-lg">{item.title}</h2>
+              <h2 className="text-lg font-bold tracking-normal sm:text-2xl">{item.title}</h2>
             </Link>
           );
         })}

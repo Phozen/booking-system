@@ -26,13 +26,10 @@ export const authNavigation = [
 ] as const;
 
 export const employeeNavigation = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, match: "exact" },
-  { title: "Facilities", href: "/facilities", icon: Building2, match: "prefix" },
-  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
-  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact" },
-  { title: "My bookings", href: "/my-bookings", icon: Clock, match: "exact" },
-  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
-  { title: "Waitlist", href: "/waitlist", icon: ListPlus, match: "exact" },
+  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact", tone: "blue" },
+  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact", tone: "emerald" },
+  { title: "My bookings", href: "/my-bookings", icon: Clock, match: "exact", tone: "amber" },
+  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact", tone: "violet" },
 ] as const;
 
 export const adminNavigation = [
