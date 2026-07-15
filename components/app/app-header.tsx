@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { AppNotification } from "@/lib/notifications/app-notifications";
 import { CompanyBrand } from "@/components/shared/company-logo";
 import { EmployeeNavigation } from "@/components/shared/nav-links";
 import { MobileNav } from "@/components/shared/mobile-nav";
@@ -9,11 +10,13 @@ export function AppHeader({
   appName,
   email,
   role,
+  notifications = [],
   unseenNotificationCount = 0,
 }: {
   appName: string;
   email?: string | null;
   role?: string | null;
+  notifications?: AppNotification[];
   unseenNotificationCount?: number;
 }) {
   return (
@@ -42,6 +45,7 @@ export function AppHeader({
             showIdentity={false}
             currentArea="employee"
             profileHref="/profile"
+            notifications={notifications}
             unseenNotificationCount={unseenNotificationCount}
             className="flex items-center gap-2"
           />
@@ -54,6 +58,7 @@ export function AppHeader({
             role,
             currentArea: "employee",
             profileHref: "/profile",
+            notifications,
             unseenNotificationCount,
           }}
           className="2xl:hidden"

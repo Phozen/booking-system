@@ -63,10 +63,24 @@ export async function markAllNotificationsSeenAction() {
   const { user } = await requireUser();
   if (!user) return;
   const supabase = await createClient();
-  
-  const { markUserAppNotificationsSeen } = await import("@/lib/notifications/app-notifications");
+
+  const { markUserAppNotificationsSeen } = await import(
+    "@/lib/notifications/app-notifications"
+  );
   await markUserAppNotificationsSeen(supabase, user.id);
-  
-  revalidatePath("/notifications");
+
+  revalidatePath("/", "layout");
+}
+
+export async function markNotificationSeenAction(notificationId: string) {
+  const { user } = await requireUser();
+  if (!user || !notificationId) return;
+  const supabase = await createClient();
+
+  const { markUserAppNotificationSeen } = await import(
+    "@/lib/notifications/app-notifications"
+  );
+  await markUserAppNotificationSeen(supabase, user.id, notificationId);
+
   revalidatePath("/", "layout");
 }

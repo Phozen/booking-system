@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { ArrowLeftRight, Bell, LogOut, UserRound } from "lucide-react";
+import { ArrowLeftRight, LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
 import { formatAppRole, isAdminRole } from "@/lib/auth/profile";
+import type { AppNotification } from "@/lib/notifications/app-notifications";
+import { NotificationPopover } from "@/components/notifications/notification-popover";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -15,6 +17,7 @@ export function UserMenu({
   showIdentity = true,
   currentArea = "employee",
   profileHref,
+  notifications = [],
   unseenNotificationCount = 0,
   showModeSwitch = true,
   onNavigate,
@@ -26,6 +29,7 @@ export function UserMenu({
   showIdentity?: boolean;
   currentArea?: "employee" | "admin";
   profileHref?: "/profile" | "/admin/profile";
+  notifications?: AppNotification[];
   unseenNotificationCount?: number;
   showModeSwitch?: boolean;
   onNavigate?: () => void;
@@ -74,26 +78,11 @@ export function UserMenu({
           <UserRound aria-hidden="true" />
         </Link>
         {currentArea === "employee" ? (
-          <Link
-            href="/notifications"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "relative",
-            )}
-            aria-label={
-              unseenNotificationCount > 0
-                ? `Notifications, ${unseenNotificationCount} unseen`
-                : "Notifications"
-            }
-            onClick={onNavigate}
-          >
-            <Bell aria-hidden="true" />
-            {unseenNotificationCount > 0 ? (
-              <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[0.65rem] font-bold leading-none text-destructive-foreground shadow-sm">
-                {unseenNotificationCount > 99 ? "99+" : unseenNotificationCount}
-              </span>
-            ) : null}
-          </Link>
+          <NotificationPopover
+            notifications={notifications}
+            unseenCount={unseenNotificationCount}
+            onNavigate={onNavigate}
+          />
         ) : null}
         <form action={logoutAction}>
           <Button type="submit" variant="outline">

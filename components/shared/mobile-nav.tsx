@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { AdminNavigation, EmployeeNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
 import { Button } from "@/components/ui/button";
+import type { AppNotification } from "@/lib/notifications/app-notifications";
 import { cn } from "@/lib/utils";
 
 export function MobileNav({
@@ -22,6 +23,7 @@ export function MobileNav({
     role?: string | null;
     currentArea: "employee" | "admin";
     profileHref: "/profile" | "/admin/profile";
+    notifications?: AppNotification[];
     unseenNotificationCount?: number;
   };
   className?: string;
@@ -73,6 +75,7 @@ export function MobileNav({
                 role={userMenu.role}
                 currentArea={userMenu.currentArea}
                 profileHref={userMenu.profileHref}
+                notifications={userMenu.notifications}
                 unseenNotificationCount={userMenu.unseenNotificationCount}
                 className="grid gap-3"
                 controlsClassName="flex-row flex-wrap items-center justify-start"

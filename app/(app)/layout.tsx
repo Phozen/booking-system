@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
 import { requireUser } from "@/lib/auth/guards";
-import { getUnseenAppNotificationCount } from "@/lib/notifications/app-notifications";
+import {
+  getUnseenAppNotificationCount,
+  getUserAppNotifications,
+} from "@/lib/notifications/app-notifications";
 import { getMissingProfileFields } from "@/lib/profile/completion";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -19,10 +22,10 @@ export default async function EmployeeLayout({
   const { user, profile } = await requireUser();
   const settings = await getAppSettings();
   const supabase = await createClient();
-  const unseenNotificationCount = await getUnseenAppNotificationCount(
-    supabase,
-    user.id,
-  );
+  const [notifications, unseenNotificationCount] = await Promise.all([
+    getUserAppNotifications(supabase, user.id),
+    getUnseenAppNotificationCount(supabase, user.id),
+  ]);
   const profileCompletion = getMissingProfileFields(profile);
 
   return (
@@ -32,6 +35,7 @@ export default async function EmployeeLayout({
         appName={settings.appName}
         email={user.email}
         role={profile.role}
+        notifications={notifications}
         unseenNotificationCount={unseenNotificationCount}
       />
       {!profileCompletion.isComplete ? (

@@ -151,3 +151,24 @@ export async function markUserAppNotificationsSeen(
     });
   }
 }
+
+export async function markUserAppNotificationSeen(
+  supabase: SupabaseClient,
+  userId: string,
+  notificationId: string,
+) {
+  const { error } = await supabase
+    .from("app_notifications")
+    .update({ seen_at: new Date().toISOString() })
+    .eq("id", notificationId)
+    .eq("user_id", userId)
+    .is("seen_at", null);
+
+  if (error) {
+    console.error("Mark app notification seen failed", {
+      userId,
+      notificationId,
+      message: error.message,
+    });
+  }
+}
