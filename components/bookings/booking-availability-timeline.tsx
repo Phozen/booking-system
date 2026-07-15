@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { AlertCircle, Loader2, Minus, Plus } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -295,17 +294,6 @@ export function BookingAvailabilityTimeline({
     dragState.current = null;
   }
 
-  function adjust(edge: "start" | "end", delta: number) {
-    const start = selectedStart ?? windowStart;
-    const end = selectedEnd ?? start + DEFAULT_DURATION_MINUTES;
-
-    if (edge === "start") {
-      commitRange(start + delta, end);
-    } else {
-      commitRange(start, end + delta);
-    }
-  }
-
   const firstFullHour = Math.ceil(windowStart / 60) * 60;
   const hourMarks = [
     windowStart,
@@ -316,10 +304,61 @@ export function BookingAvailabilityTimeline({
   ].filter((minute, index, minutes) => minutes.indexOf(minute) === index);
 
   return (
-    <section className="grid gap-3 border-y border-border/80 bg-muted/15 py-4 sm:col-span-2">
-      <div className="flex justify-end">
-        <div className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
-          30 min blocks
+    <section className="grid gap-4 rounded-lg border border-border/75 bg-muted/15 p-4 shadow-sm sm:col-span-2 sm:p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="font-semibold tracking-normal">Choose a time</h3>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Enter start and end times, or drag across an available space below.
+          </p>
+        </div>
+        <span className="w-fit rounded-full border border-border/75 bg-background px-3 py-1 text-xs text-muted-foreground">
+          30-minute intervals
+        </span>
+      </div>
+
+      <div className="grid gap-4 rounded-lg border border-border/70 bg-background p-4 sm:grid-cols-2">
+        <div className="grid content-start gap-2">
+          <Label htmlFor="startTime">Start time</Label>
+          <Input
+            id="startTime"
+            name="startTime"
+            type="time"
+            step={STEP_MINUTES * 60}
+            min={bookingWindowStart}
+            max={bookingWindowEnd}
+            value={startTime}
+            onChange={(event) => onTimeChange(event.target.value, endTime)}
+            disabled={controlsDisabled || !date}
+            aria-describedby={startTimeError ? "startTime-error" : undefined}
+            aria-invalid={Boolean(startTimeError)}
+          />
+          {startTimeError ? (
+            <p id="startTime-error" className="text-sm text-destructive">
+              {startTimeError}
+            </p>
+          ) : null}
+        </div>
+        <div className="grid content-start gap-2">
+          <Label htmlFor="endTime">End time</Label>
+          <Input
+            id="endTime"
+            name="endTime"
+            type="time"
+            step={STEP_MINUTES * 60}
+            min={bookingWindowStart}
+            max={bookingWindowEnd}
+            value={endTime}
+            onChange={(event) => onTimeChange(startTime, event.target.value)}
+            disabled={controlsDisabled || !date}
+            aria-describedby={endTimeError ? "endTime-error" : undefined}
+            aria-invalid={Boolean(endTimeError)}
+          />
+          {endTimeError ? (
+            <p id="endTime-error" className="text-sm text-destructive">
+              {endTimeError}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -334,7 +373,7 @@ export function BookingAvailabilityTimeline({
         </div>
       ) : (
         <div className="grid gap-3 lg:grid-cols-[6rem_minmax(0,1fr)]">
-          <div className="relative hidden min-h-[520px] text-xs text-muted-foreground lg:block">
+          <div className="relative hidden min-h-[min(32rem,65svh)] text-xs text-muted-foreground lg:block">
             {hourMarks.map((minute) => (
               <div
                 key={minute}
@@ -359,7 +398,7 @@ export function BookingAvailabilityTimeline({
             role="application"
             aria-label={`Availability timeline for ${facilityName ?? "selected facility"} on ${date}`}
             className={cn(
-              "relative min-h-[520px] overflow-hidden rounded-lg border bg-background touch-none",
+              "relative min-h-[min(32rem,65svh)] overflow-hidden rounded-lg border bg-background touch-none",
               controlsDisabled ? "opacity-60" : "cursor-crosshair",
             )}
             onPointerDown={beginSelection}
@@ -468,98 +507,6 @@ export function BookingAvailabilityTimeline({
         </div>
       )}
 
-      <div className="grid gap-3 bg-background/70 p-3 ring-1 ring-border/70 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="startTime" className="text-xs font-medium uppercase text-muted-foreground">
-            Start time
-          </Label>
-          <Input
-            id="startTime"
-            name="startTime"
-            type="time"
-            step={STEP_MINUTES * 60}
-            min={bookingWindowStart}
-            max={bookingWindowEnd}
-            value={startTime}
-            onChange={(event) => onTimeChange(event.target.value, endTime)}
-            disabled={controlsDisabled || !date}
-            aria-invalid={Boolean(startTimeError)}
-          />
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => adjust("start", -STEP_MINUTES)}
-              disabled={controlsDisabled || !date}
-              aria-label="Move start time earlier by 30 minutes"
-            >
-              <Minus className="size-4" aria-hidden="true" />
-            </Button>
-            <span className="min-w-20 text-center font-medium">
-              {startTime || "--:--"}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => adjust("start", STEP_MINUTES)}
-              disabled={controlsDisabled || !date}
-              aria-label="Move start time later by 30 minutes"
-            >
-              <Plus className="size-4" aria-hidden="true" />
-            </Button>
-          </div>
-          {startTimeError ? (
-            <p className="text-sm text-destructive">{startTimeError}</p>
-          ) : null}
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="endTime" className="text-xs font-medium uppercase text-muted-foreground">
-            End time
-          </Label>
-          <Input
-            id="endTime"
-            name="endTime"
-            type="time"
-            step={STEP_MINUTES * 60}
-            min={bookingWindowStart}
-            max={bookingWindowEnd}
-            value={endTime}
-            onChange={(event) => onTimeChange(startTime, event.target.value)}
-            disabled={controlsDisabled || !date}
-            aria-invalid={Boolean(endTimeError)}
-          />
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => adjust("end", -STEP_MINUTES)}
-              disabled={controlsDisabled || !date}
-              aria-label="Move end time earlier by 30 minutes"
-            >
-              <Minus className="size-4" aria-hidden="true" />
-            </Button>
-            <span className="min-w-20 text-center font-medium">
-              {endTime || "--:--"}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => adjust("end", STEP_MINUTES)}
-              disabled={controlsDisabled || !date}
-              aria-label="Move end time later by 30 minutes"
-            >
-              <Plus className="size-4" aria-hidden="true" />
-            </Button>
-          </div>
-          {endTimeError ? (
-            <p className="text-sm text-destructive">{endTimeError}</p>
-          ) : null}
-        </div>
-      </div>
     </section>
   );
 }
