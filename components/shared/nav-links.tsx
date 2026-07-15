@@ -9,7 +9,6 @@ import {
   getAdminNavigationGroups,
 } from "@/config/navigation";
 import { cn } from "@/lib/utils";
-import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
 
 function isActivePath(
   pathname: string,
@@ -35,9 +34,6 @@ function NavigationLink({
   const pathname = usePathname();
   const active = isActivePath(pathname, item.href, item.match);
   const Icon = item.icon;
-  const featureStyle = "tone" in item ? employeeFeatureStyles[item.tone] : null;
-  const tone = featureStyle?.nav ?? null;
-  const activeTone = featureStyle?.navActive ?? null;
 
   return (
     <Link
@@ -45,23 +41,14 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-md border shadow-xs shadow-foreground/5 transition-[background-color,border-color,color,box-shadow,filter,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
-        tone
-          ? "px-4 py-2.5 text-base font-bold"
-          : "px-3 py-2 text-sm font-medium",
-        compact ? "w-full" : tone ? "h-11" : "h-9",
-        tone &&
-          "border shadow-md active:translate-y-0.5 active:scale-[0.99] active:brightness-90 active:shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.34)]",
-        active && activeTone
-          ? `${activeTone} translate-y-0.5 scale-[0.99]`
-          : active
+        "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
+        compact ? "w-full" : "",
+        active
           ? "translate-y-0.5 scale-[0.99] border-primary/90 bg-primary text-primary-foreground shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.3)]"
-          : tone
-            ? `${tone} opacity-90 hover:opacity-100`
           : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
       )}
     >
-      <Icon className={tone ? "size-5" : "size-4"} aria-hidden="true" />
+      <Icon className="size-4" aria-hidden="true" />
       {item.title}
     </Link>
   );

@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
@@ -49,7 +51,7 @@ export function WaitlistRequestForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="facilityId">Requested facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             defaultValue={defaultFacilityId ?? ""}
@@ -62,7 +64,7 @@ export function WaitlistRequestForm({
                 {facility.name} - {facility.level} - {formatFacilityType(facility.type)}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldHelper id="facilityId-helper">
             Pick the preferred room, or leave it open if alternatives are acceptable.
           </FormFieldHelper>
@@ -112,7 +114,7 @@ export function WaitlistRequestForm({
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="reason">Reason / flexibility notes</Label>
-          <textarea
+          <Textarea
             id="reason"
             name="reason"
             rows={5}

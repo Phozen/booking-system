@@ -36,6 +36,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FormFieldError,
   getFieldDescribedBy,
@@ -388,7 +390,7 @@ export function BookingForm({
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="facilityId">Facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             value={selectedFacility}
@@ -399,7 +401,6 @@ export function BookingForm({
             )}
             aria-invalid={Boolean(fieldErrors.facilityId)}
             required
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
           >
             {facilities.map((facility) => (
               <option key={facility.id} value={facility.id}>
@@ -408,7 +409,7 @@ export function BookingForm({
                 {facility.capacity}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldError id="facilityId-error">
             {fieldErrors.facilityId}
           </FormFieldError>
@@ -582,7 +583,7 @@ export function BookingForm({
 
           <div className="grid gap-2 sm:col-span-2">
             <Label htmlFor="description">Description</Label>
-            <textarea
+            <Textarea
               id="description"
               name="description"
               rows={5}
@@ -591,7 +592,7 @@ export function BookingForm({
                 fieldErrors.description && "description-error",
               )}
               aria-invalid={Boolean(fieldErrors.description)}
-              className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+              className="min-h-28"
             />
             <FormFieldError id="description-error">
               {fieldErrors.description}
@@ -603,7 +604,7 @@ export function BookingForm({
               <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
               Food/drinks required?
             </Label>
-            <select
+            <Select
               id="cateringRequired"
               name="cateringRequired"
               defaultValue="no"
@@ -611,11 +612,10 @@ export function BookingForm({
                 setCateringRequired(event.target.value === "yes")
               }
               disabled={!hasFacilities || isPending}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
             >
               <option value="no">No</option>
               <option value="yes">Yes</option>
-            </select>
+            </Select>
           </div>
 
           {cateringRequired ? (
@@ -755,7 +755,7 @@ export function BookingForm({
 
               <div className="grid gap-2">
                 <Label htmlFor="cateringServingTime">Serving time</Label>
-                <select
+                <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
                   disabled={!hasFacilities || isPending}
@@ -765,7 +765,6 @@ export function BookingForm({
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringServingTime)}
                   required
-                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 >
                   <option value="">Choose serving time</option>
                   {cateringServingTimeOptions.map((option) => (
@@ -773,7 +772,7 @@ export function BookingForm({
                       {formatCateringServingTime(option)}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <FormFieldError id="cateringServingTime-error">
                   {fieldErrors.cateringServingTime}
                 </FormFieldError>
@@ -783,7 +782,7 @@ export function BookingForm({
                 <Label htmlFor="cateringDietaryNotes">
                   Dietary / special notes
                 </Label>
-                <textarea
+                <Textarea
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
                   rows={3}
@@ -794,7 +793,7 @@ export function BookingForm({
                       "cateringDietaryNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringDietaryNotes)}
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-20"
                 />
                 <FormFieldError id="cateringDietaryNotes-error">
                   {fieldErrors.cateringDietaryNotes}
@@ -805,7 +804,7 @@ export function BookingForm({
                 <Label htmlFor="cateringNotes">
                   Additional catering notes
                 </Label>
-                <textarea
+                <Textarea
                   id="cateringNotes"
                   rows={3}
                   value={cateringNotes}
@@ -815,7 +814,7 @@ export function BookingForm({
                     fieldErrors.cateringNotes && "cateringNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringNotes)}
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-20"
                 />
                 <input
                   type="hidden"

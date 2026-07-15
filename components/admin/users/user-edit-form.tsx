@@ -28,6 +28,7 @@ import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: UserActionResult = {
@@ -299,7 +300,7 @@ export function UserEditForm({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="role">Role</Label>
-            <select
+            <Select
               id="role"
               name="role"
               value={selectedRole}
@@ -317,7 +318,7 @@ export function UserEditForm({
                   {formatUserRole(role)}
                 </option>
               ))}
-            </select>
+            </Select>
             <FormFieldHelper id="role-helper">
               Admin users manage daily operations. Super Admin users can also
               manage users, roles, and system settings.
@@ -327,7 +328,7 @@ export function UserEditForm({
 
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
-            <select
+            <Select
               id="status"
               name="status"
               value={selectedStatus}
@@ -347,7 +348,7 @@ export function UserEditForm({
                   {formatUserStatus(status)}
                 </option>
               ))}
-            </select>
+            </Select>
             <FormFieldHelper id="status-helper">
               Disabled and pending users are blocked from protected app pages.
             </FormFieldHelper>

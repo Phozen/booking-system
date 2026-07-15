@@ -8,6 +8,8 @@ import {
 } from "@/lib/admin/audit-logs/validation";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 function formatOptionLabel(value: string) {
   if (value === "all") {
@@ -35,12 +37,11 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           <label htmlFor="dateFrom" className="text-sm font-medium">
             From
           </label>
-          <input
+          <Input
             id="dateFrom"
             name="dateFrom"
             type="date"
             defaultValue={filters.dateFrom}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -48,12 +49,11 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           <label htmlFor="dateTo" className="text-sm font-medium">
             To
           </label>
-          <input
+          <Input
             id="dateTo"
             name="dateTo"
             type="date"
             defaultValue={filters.dateTo}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -61,13 +61,12 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           <label htmlFor="actorEmail" className="text-sm font-medium">
             Actor email
           </label>
-          <input
+          <Input
             id="actorEmail"
             name="actorEmail"
             type="search"
             defaultValue={filters.actorEmail ?? ""}
             placeholder="name@company.com"
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -75,7 +74,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           <label htmlFor="action" className="text-sm font-medium">
             Action
           </label>
-          <select
+          <Select
             id="action"
             name="action"
             defaultValue={filters.action ?? "all"}
@@ -86,14 +85,14 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
                 {formatOptionLabel(action)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
           <label htmlFor="entityType" className="text-sm font-medium">
             Entity type
           </label>
-          <select
+          <Select
             id="entityType"
             name="entityType"
             defaultValue={filters.entityType ?? "all"}
@@ -104,7 +103,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
                 {formatOptionLabel(entityType)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <button

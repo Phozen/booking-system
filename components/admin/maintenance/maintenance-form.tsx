@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -137,7 +139,7 @@ export function MaintenanceForm({
         <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="facilityId">Facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             defaultValue={maintenanceClosure?.facilityId ?? ""}
@@ -152,7 +154,7 @@ export function MaintenanceForm({
                 {facility.name}, {facility.level} ({facility.code})
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
@@ -224,7 +226,7 @@ export function MaintenanceForm({
         {maintenanceClosure ? (
           <div className="grid gap-2 sm:col-span-2">
             <Label htmlFor="status">Status</Label>
-            <select
+            <Select
               id="status"
               name="status"
               defaultValue={maintenanceClosure.status}
@@ -235,7 +237,7 @@ export function MaintenanceForm({
                   {formatMaintenanceStatus(status)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         ) : (
           <input type="hidden" name="status" value="scheduled" />
@@ -253,7 +255,7 @@ export function MaintenanceForm({
 
       <div className="grid gap-2">
         <Label htmlFor="reason">Reason</Label>
-        <textarea
+        <Textarea
           id="reason"
           name="reason"
           defaultValue={maintenanceClosure?.reason ?? ""}

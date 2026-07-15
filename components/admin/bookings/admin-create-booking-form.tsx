@@ -17,6 +17,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -50,7 +52,7 @@ export function AdminCreateBookingForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="targetUserId">Booking owner</Label>
-          <select
+          <Select
             id="targetUserId"
             name="targetUserId"
             disabled={isPending}
@@ -65,7 +67,7 @@ export function AdminCreateBookingForm({
                 {user.department ? ` (${user.department})` : ""}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldHelper id="targetUserId-helper">
             Only active users can own admin-created bookings.
           </FormFieldHelper>
@@ -73,7 +75,7 @@ export function AdminCreateBookingForm({
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="facilityId">Facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             disabled={isPending}
@@ -88,7 +90,7 @@ export function AdminCreateBookingForm({
                 {facility.capacity}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
@@ -162,7 +164,7 @@ export function AdminCreateBookingForm({
 
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
-        <textarea
+        <Textarea
           id="description"
           name="description"
           rows={5}

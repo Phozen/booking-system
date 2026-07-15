@@ -45,7 +45,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${quicksand.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
-          <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
+          <NextTopLoader color="var(--primary)" showSpinner={false} />
           <Suspense fallback={null}>
             <GlobalRouteLoader />
           </Suspense>

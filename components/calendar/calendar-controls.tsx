@@ -8,6 +8,8 @@ import type { Facility } from "@/lib/facilities/queries";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 function buildHref({
   basePath,
@@ -125,12 +127,11 @@ export function CalendarControls({
             <label htmlFor="month" className="text-sm font-medium">
               Month
             </label>
-            <input
+            <Input
               id="month"
               name="month"
               type="month"
               defaultValue={selectedMonth.value}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
           </div>
 
@@ -138,11 +139,10 @@ export function CalendarControls({
             <label htmlFor="status" className="text-sm font-medium">
               Status
             </label>
-            <select
+            <Select
               id="status"
               name="status"
               defaultValue={selectedStatus ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {adminBookingStatusOptions.map((status) => (
                 <option key={status} value={status}>
@@ -151,7 +151,7 @@ export function CalendarControls({
                     : status.replaceAll("_", " ")}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {showFacilityFilter ? (
@@ -159,11 +159,10 @@ export function CalendarControls({
               <label htmlFor="facilityId" className="text-sm font-medium">
                 Facility
               </label>
-              <select
+              <Select
                 id="facilityId"
                 name="facilityId"
                 defaultValue={selectedFacilityId ?? "all"}
-                className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="all">All facilities</option>
                 {(facilities ?? []).map((facility) => (
@@ -171,7 +170,7 @@ export function CalendarControls({
                     {facility.name}, {facility.level}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           ) : (
             <input type="hidden" name="facilityId" value="all" />

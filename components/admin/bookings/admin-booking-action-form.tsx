@@ -7,6 +7,7 @@ import type { AdminBookingActionResult } from "@/lib/admin/bookings/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -72,7 +73,7 @@ export function AdminBookingActionForm({
 
       <div className="grid gap-2">
         <Label htmlFor={`${submitLabel}-remarks`}>{label}</Label>
-        <textarea
+        <Textarea
           id={`${submitLabel}-remarks`}
           name="remarks"
           rows={4}

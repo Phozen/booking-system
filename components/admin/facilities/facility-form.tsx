@@ -25,6 +25,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FormFieldError,
   getFieldDescribedBy,
@@ -211,7 +213,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
 
         <div className="grid gap-2">
           <Label htmlFor="type">Type</Label>
-          <select
+          <Select
             id="type"
             name="type"
             defaultValue={facility?.type ?? "meeting_room"}
@@ -219,14 +221,13 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.type && "type-error",
             )}
             aria-invalid={Boolean(fieldErrors.type)}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {facilityTypeOptions.map((type) => (
               <option key={type} value={type}>
                 {formatFacilityType(type as FacilityType)}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldError id="type-error">{fieldErrors.type}</FormFieldError>
         </div>
 
@@ -255,7 +256,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
 
         <div className="grid gap-2">
           <Label htmlFor="status">Status</Label>
-          <select
+          <Select
             id="status"
             name="status"
             defaultValue={facility?.status ?? "active"}
@@ -263,20 +264,19 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.status && "status-error",
             )}
             aria-invalid={Boolean(fieldErrors.status)}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {facilityStatusOptions.map((status) => (
               <option key={status} value={status}>
                 {formatFacilityStatus(status as FacilityStatus)}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldError id="status-error">{fieldErrors.status}</FormFieldError>
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="requiresApproval">Requires approval</Label>
-          <select
+          <Select
             id="requiresApproval"
             name="requiresApproval"
             defaultValue={requiresApprovalValue(facility?.requiresApproval ?? null)}
@@ -285,12 +285,11 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
               fieldErrors.requiresApproval && "requiresApproval-error",
             )}
             aria-invalid={Boolean(fieldErrors.requiresApproval)}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="inherit">Use system default</option>
             <option value="required">Required</option>
             <option value="not_required">Not required</option>
-          </select>
+          </Select>
           <FormFieldHelper id="requiresApproval-helper">
             Use system default unless this room needs different approval behavior.
           </FormFieldHelper>
@@ -303,7 +302,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
 
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
-        <textarea
+        <Textarea
           id="description"
           name="description"
           defaultValue={facility?.description ?? ""}
@@ -313,7 +312,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
             fieldErrors.description && "description-error",
           )}
           aria-invalid={Boolean(fieldErrors.description)}
-          className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-28"
         />
         <FormFieldHelper id="description-helper">
           Optional. Describe the space, layout, or booking guidance.

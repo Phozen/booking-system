@@ -10,6 +10,8 @@ import {
 } from "@/lib/admin/users/validation";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 function roleLabel(value: (typeof userRoleOptions)[number]) {
   return value === "all" ? "All roles" : formatUserRole(value);
@@ -30,13 +32,12 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
           <label htmlFor="search" className="text-sm font-medium">
             Search
           </label>
-          <input
+          <Input
             id="search"
             name="search"
             type="search"
             defaultValue={filters.search ?? ""}
             placeholder="Name, email, or department"
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -44,7 +45,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
           <label htmlFor="role" className="text-sm font-medium">
             Role
           </label>
-          <select
+          <Select
             id="role"
             name="role"
             defaultValue={filters.role ?? "all"}
@@ -55,14 +56,14 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
                 {roleLabel(role)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
           <label htmlFor="status" className="text-sm font-medium">
             Status
           </label>
-          <select
+          <Select
             id="status"
             name="status"
             defaultValue={filters.status ?? "all"}
@@ -73,7 +74,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
                 {statusLabel(status)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <button

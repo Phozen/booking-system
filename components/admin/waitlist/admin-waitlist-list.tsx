@@ -14,6 +14,8 @@ import { PendingButtonContent } from "@/components/shared/pending-button-content
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const initialState: WaitlistActionResult = {
   status: "idle",
@@ -36,7 +38,7 @@ function AdminWaitlistUpdateForm({ request }: { request: WaitlistRequest }) {
       <div className="grid gap-2 sm:grid-cols-[14rem_1fr_auto] sm:items-end">
         <div className="grid gap-1.5">
           <Label htmlFor={`status-${request.id}`}>Status</Label>
-          <select
+          <Select
             id={`status-${request.id}`}
             name="status"
             defaultValue={request.status}
@@ -48,11 +50,11 @@ function AdminWaitlistUpdateForm({ request }: { request: WaitlistRequest }) {
                 {formatWaitlistStatus(status)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor={`adminResponse-${request.id}`}>Admin response / alternative</Label>
-          <textarea
+          <Textarea
             id={`adminResponse-${request.id}`}
             name="adminResponse"
             rows={3}

@@ -39,6 +39,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FormFieldError,
   getFieldDescribedBy,
@@ -340,7 +342,7 @@ export function BookingEditForm({
 
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="facilityId">Facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             value={selectedFacility}
@@ -360,7 +362,7 @@ export function BookingEditForm({
                 {facility.capacity}
               </option>
             ))}
-          </select>
+          </Select>
           <FormFieldError id="facilityId-error">
             {fieldErrors.facilityId}
           </FormFieldError>
@@ -534,7 +536,7 @@ export function BookingEditForm({
 
           <div className="grid gap-2 sm:col-span-2">
             <Label htmlFor="description">Description</Label>
-            <textarea
+            <Textarea
               id="description"
               name="description"
               rows={5}
@@ -556,7 +558,7 @@ export function BookingEditForm({
               <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
               Food/drinks required?
             </Label>
-            <select
+            <Select
               id="cateringRequired"
               name="cateringRequired"
               value={cateringRequired ? "yes" : "no"}
@@ -568,7 +570,7 @@ export function BookingEditForm({
             >
               <option value="no">No</option>
               <option value="yes">Yes</option>
-            </select>
+            </Select>
           </div>
 
           {cateringRequired ? (
@@ -708,7 +710,7 @@ export function BookingEditForm({
 
               <div className="grid gap-2">
                 <Label htmlFor="cateringServingTime">Serving time</Label>
-                <select
+                <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
                   defaultValue={booking.catering.servingTime ?? ""}
@@ -727,7 +729,7 @@ export function BookingEditForm({
                       {formatCateringServingTime(option)}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <FormFieldError id="cateringServingTime-error">
                   {fieldErrors.cateringServingTime}
                 </FormFieldError>
@@ -737,7 +739,7 @@ export function BookingEditForm({
                 <Label htmlFor="cateringDietaryNotes">
                   Dietary / special notes
                 </Label>
-                <textarea
+                <Textarea
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
                   rows={3}
@@ -760,7 +762,7 @@ export function BookingEditForm({
                 <Label htmlFor="cateringNotes">
                   Additional notes
                 </Label>
-                <textarea
+                <Textarea
                   id="cateringNotes"
                   rows={4}
                   value={cateringNotes}

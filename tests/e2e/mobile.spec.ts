@@ -10,6 +10,26 @@ const employeeCredentials = getCredentials("employee");
 const adminCredentials = getCredentials("admin");
 
 test.describe("mobile smoke checks", () => {
+  test("public sign-in is usable without horizontal overflow", async ({ page }) => {
+    await page.goto("/login");
+
+    const emailDisclosure = page.getByRole("button", { name: "Email login" });
+    await expect(emailDisclosure).toBeVisible();
+
+    const disclosureBox = await emailDisclosure.boundingBox();
+    expect(disclosureBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+
+    await emailDisclosure.click();
+    await expect(page.getByLabel("Email")).toBeVisible();
+    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Log in$/i })).toBeVisible();
+  });
+
   test("employee dashboard is readable on mobile when credentials are available", async ({
     page,
   }) => {

@@ -15,6 +15,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
@@ -63,7 +65,7 @@ export function RecurringBookingForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="facilityId">Facility</Label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             disabled={pending || facilities.length === 0}
@@ -75,7 +77,7 @@ export function RecurringBookingForm({
                 {facility.name} - {facility.level} - {formatFacilityType(facility.type)} - Capacity {facility.capacity}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
@@ -128,7 +130,7 @@ export function RecurringBookingForm({
         </div>
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="description">Description</Label>
-          <textarea
+          <Textarea
             id="description"
             name="description"
             rows={4}
@@ -148,7 +150,7 @@ export function RecurringBookingForm({
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="grid gap-2">
             <Label htmlFor="frequency">Frequency</Label>
-            <select
+            <Select
               id="frequency"
               name="frequency"
               defaultValue="weekly"
@@ -158,7 +160,7 @@ export function RecurringBookingForm({
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
-            </select>
+            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="intervalCount">Every</Label>
@@ -166,7 +168,7 @@ export function RecurringBookingForm({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="endMode">End by</Label>
-            <select
+            <Select
               id="endMode"
               value={endMode}
               onChange={(event) => setEndMode(event.target.value as "count" | "date")}
@@ -175,7 +177,7 @@ export function RecurringBookingForm({
             >
               <option value="count">Occurrence count</option>
               <option value="date">End date</option>
-            </select>
+            </Select>
           </div>
           {endMode === "count" ? (
             <div className="grid gap-2 sm:col-span-3">

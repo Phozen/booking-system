@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -146,7 +148,7 @@ export function BlockedPeriodForm({
 
         <div className="grid gap-2">
           <Label htmlFor="scope">Scope</Label>
-          <select
+          <Select
             id="scope"
             name="scope"
             value={scope}
@@ -160,7 +162,7 @@ export function BlockedPeriodForm({
                 {formatBlockedPeriodScope(option)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         </div>
       </section>
@@ -231,7 +233,7 @@ export function BlockedPeriodForm({
 
       <div className="grid gap-2">
         <Label htmlFor="reason">Reason</Label>
-        <textarea
+        <Textarea
           id="reason"
           name="reason"
           defaultValue={blockedPeriod?.reason ?? ""}

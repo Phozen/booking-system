@@ -34,11 +34,11 @@ export function AppHeader({
             />
             <span className="sr-only">{appName}</span>
           </Link>
-          <div className="hidden min-w-0 flex-1 overflow-hidden 2xl:flex">
+          <div className="hidden min-w-0 flex-1 overflow-hidden xl:flex">
             <EmployeeNavigation />
           </div>
         </div>
-        <div className="hidden shrink-0 lg:block">
+        <div className="hidden shrink-0 xl:block">
           <UserMenu
             email={email}
             role={role}
@@ -61,7 +61,7 @@ export function AppHeader({
             notifications,
             unseenNotificationCount,
           }}
-          className="2xl:hidden"
+          className="xl:hidden"
         />
       </div>
     </header>

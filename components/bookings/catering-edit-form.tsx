@@ -14,6 +14,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
@@ -177,7 +179,7 @@ export function CateringEditForm({
               <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
               Food/drinks required?
             </Label>
-            <select
+            <Select
               id={`cateringRequired-${bookingId}`}
               name="cateringRequired"
               defaultValue={catering.required ? "yes" : "no"}
@@ -186,7 +188,7 @@ export function CateringEditForm({
             >
               <option value="no">No</option>
               <option value="yes">Yes</option>
-            </select>
+            </Select>
           </div>
 
           {required ? (
@@ -310,7 +312,7 @@ export function CateringEditForm({
                 <Label htmlFor={`cateringServingTime-${bookingId}`}>
                   Serving time
                 </Label>
-                <select
+                <Select
                   id={`cateringServingTime-${bookingId}`}
                   name="cateringServingTime"
                   defaultValue={catering.servingTime ?? ""}
@@ -323,14 +325,14 @@ export function CateringEditForm({
                       {formatCateringServingTime(option)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
                 <Label htmlFor={`cateringDietaryNotes-${bookingId}`}>
                   Dietary / special notes
                 </Label>
-                <textarea
+                <Textarea
                   id={`cateringDietaryNotes-${bookingId}`}
                   name="cateringDietaryNotes"
                   rows={3}
@@ -344,7 +346,7 @@ export function CateringEditForm({
                 <Label htmlFor={`cateringNotes-${bookingId}`}>
                   Additional catering notes
                 </Label>
-                <textarea
+                <Textarea
                   id={`cateringNotes-${bookingId}`}
                   rows={3}
                   value={cateringNotes}

@@ -11,6 +11,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
@@ -78,7 +79,7 @@ export function CancelBookingForm({ bookingId }: { bookingId: string }) {
 
       <div className="grid gap-2">
         <Label htmlFor="reason">Cancellation reason</Label>
-        <textarea
+        <Textarea
           id="reason"
           name="reason"
           rows={4}

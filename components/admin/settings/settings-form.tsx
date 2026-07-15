@@ -17,6 +17,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FormFieldError,
   getFieldDescribedBy,
@@ -197,7 +199,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
         <div className="grid gap-2">
           <Label htmlFor="allowedEmailDomains">Allowed email domains</Label>
-          <textarea
+          <Textarea
             id="allowedEmailDomains"
             name="allowedEmailDomains"
             defaultValue={settings.allowedEmailDomains.join(", ")}
@@ -208,7 +210,6 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
               fieldErrors.allowedEmailDomains && "allowedEmailDomains-error",
             )}
             aria-invalid={Boolean(fieldErrors.allowedEmailDomains)}
-            className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           <FormFieldHelper id="allowedEmailDomains-helper" className="text-xs">
             Leave empty to allow any valid email domain.
@@ -283,7 +284,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
         <div className="grid gap-2">
           <Label htmlFor="calendarVisibilityMode">Calendar visibility</Label>
-          <select
+          <Select
             id="calendarVisibilityMode"
             name="calendarVisibilityMode"
             defaultValue={settings.calendarVisibilityMode}
@@ -293,7 +294,6 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
                 "calendarVisibilityMode-error",
             )}
             aria-invalid={Boolean(fieldErrors.calendarVisibilityMode)}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="my_bookings_only">
               {getCalendarVisibilityLabel("my_bookings_only")}
@@ -304,7 +304,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             <option value="all_users">
               {getCalendarVisibilityLabel("all_users")}
             </option>
-          </select>
+          </Select>
           <FormFieldHelper id="calendarVisibilityMode-helper">
             My bookings only limits employees to owned/invited bookings.
             Admins only gives operational calendar visibility to Admin and

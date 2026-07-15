@@ -17,6 +17,7 @@ import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 export function AdminBookingsTable({
   bookings,
@@ -39,7 +40,7 @@ export function AdminBookingsTable({
           <label htmlFor="status" className="text-sm font-medium">
             Booking status
           </label>
-          <select
+          <Select
             id="status"
             name="status"
             defaultValue={selectedStatus ?? "all"}
@@ -50,14 +51,14 @@ export function AdminBookingsTable({
                 {status === "all" ? "All statuses" : status}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
           <label htmlFor="facilityId" className="text-sm font-medium">
             Room
           </label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             defaultValue={selectedFacilityId ?? "all"}
@@ -69,7 +70,7 @@ export function AdminBookingsTable({
                 {facility.name} - {facility.level}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <button

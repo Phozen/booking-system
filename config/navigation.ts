@@ -11,6 +11,7 @@ import {
   FileClock,
   Activity,
   LayoutDashboard,
+  ListPlus,
   Mail,
   PlugZap,
   Settings,
@@ -25,10 +26,13 @@ export const authNavigation = [
 ] as const;
 
 export const employeeNavigation = [
-  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact", tone: "blue" },
-  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact", tone: "emerald" },
-  { title: "My Bookings", href: "/my-bookings", icon: Clock, match: "exact", tone: "amber" },
-  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact", tone: "violet" },
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, match: "exact" },
+  { title: "Facilities", href: "/facilities", icon: Building2, match: "prefix" },
+  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact" },
+  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact" },
+  { title: "My bookings", href: "/my-bookings", icon: Clock, match: "exact" },
+  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact" },
+  { title: "Waitlist", href: "/waitlist", icon: ListPlus, match: "exact" },
 ] as const;
 
 export const adminNavigation = [
@@ -36,6 +40,7 @@ export const adminNavigation = [
   { title: "Calendar", href: "/admin/calendar", icon: CalendarDays, match: "exact" },
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
+  { title: "Waitlist", href: "/admin/waitlist", icon: ListPlus, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
   { title: "Equipment", href: "/admin/equipment", icon: Boxes, match: "prefix" },
   { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix", superAdminOnly: true },
@@ -66,6 +71,7 @@ export function getAdminNavigationGroups(role?: string | null) {
         [
           "/admin/bookings",
           "/admin/approvals",
+          "/admin/waitlist",
           "/admin/facilities",
           "/admin/equipment",
           "/admin/users",

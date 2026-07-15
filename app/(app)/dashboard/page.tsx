@@ -10,7 +10,6 @@ import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
-import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
 import { buttonVariants } from "@/components/ui/button";
 import { employeeNavigation } from "@/config/navigation";
 
@@ -28,20 +27,19 @@ export default async function DashboardPage() {
         title="Quick actions"
       />
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {employeeNavigation.map((item) => {
+      <section aria-label="Quick actions" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+        {employeeNavigation.filter((item) => item.href !== "/dashboard").map((item) => {
           const Icon = item.icon;
-          const tone = employeeFeatureStyles[item.tone];
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`grid min-h-32 cursor-pointer place-items-center gap-3 rounded-lg border p-4 text-center shadow-lg ring-1 ring-white/15 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:ring-2 hover:ring-white/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 sm:min-h-48 sm:gap-5 sm:p-6 ${tone.home}`}
+              className="group grid min-h-28 place-items-center gap-3 rounded-lg border border-border/75 bg-card p-4 text-center shadow-sm shadow-foreground/5 transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-accent/45 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45 sm:min-h-36 sm:p-5 dark:shadow-black/20"
             >
-              <div className={`flex size-14 items-center justify-center rounded-xl ring-1 sm:size-20 ${tone.icon}`}>
-                <Icon className="size-8 sm:size-12" aria-hidden="true" />
+              <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20 transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:size-14">
+                <Icon className="size-6 sm:size-7" aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold tracking-normal sm:text-3xl">{item.title}</h2>
+              <h2 className="text-base font-semibold tracking-normal sm:text-lg">{item.title}</h2>
             </Link>
           );
         })}

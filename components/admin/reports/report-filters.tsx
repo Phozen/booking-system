@@ -6,6 +6,8 @@ import type { ReportExportType, ReportFilters } from "@/lib/admin/reports/types"
 import type { Facility } from "@/lib/facilities/queries";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 const exports: { type: ReportExportType; label: string }[] = [
   { type: "booking-history", label: "Export booking history CSV" },
@@ -43,12 +45,11 @@ export function ReportFilters({
           <label htmlFor="dateFrom" className="text-sm font-medium">
             From
           </label>
-          <input
+          <Input
             id="dateFrom"
             name="dateFrom"
             type="date"
             defaultValue={filters.dateFrom}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -56,12 +57,11 @@ export function ReportFilters({
           <label htmlFor="dateTo" className="text-sm font-medium">
             To
           </label>
-          <input
+          <Input
             id="dateTo"
             name="dateTo"
             type="date"
             defaultValue={filters.dateTo}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
         </div>
 
@@ -69,7 +69,7 @@ export function ReportFilters({
           <label htmlFor="facilityId" className="text-sm font-medium">
             Facility
           </label>
-          <select
+          <Select
             id="facilityId"
             name="facilityId"
             defaultValue={filters.facilityId ?? "all"}
@@ -81,14 +81,14 @@ export function ReportFilters({
                 {facility.name} - {facility.level}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid gap-2">
           <label htmlFor="status" className="text-sm font-medium">
             Status
           </label>
-          <select
+          <Select
             id="status"
             name="status"
             defaultValue={filters.status ?? "all"}
@@ -99,7 +99,7 @@ export function ReportFilters({
                 {status === "all" ? "All statuses" : status}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <button

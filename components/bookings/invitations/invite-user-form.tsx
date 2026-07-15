@@ -12,6 +12,7 @@ import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 export function InviteUserForm({
   bookingId,
@@ -37,7 +38,7 @@ export function InviteUserForm({
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="grid gap-2">
         <Label htmlFor={fieldId}>Invite an active internal user</Label>
-        <select
+        <Select
           id={fieldId}
           name="invitedUserId"
           required
@@ -54,7 +55,7 @@ export function InviteUserForm({
               {candidate.fullName ? `${candidate.fullName} - ${candidate.email}` : candidate.email}
             </option>
           ))}
-        </select>
+        </Select>
         <FormFieldHelper id={helperId}>
           Disabled, pending, duplicate, and owner accounts cannot be invited.
         </FormFieldHelper>
