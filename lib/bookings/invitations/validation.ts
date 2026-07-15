@@ -20,6 +20,11 @@ export const inviteUserSchema = z.object({
   invitedUserId: invitedUserIdSchema,
 });
 
+export const inviteUsersSchema = z.object({
+  bookingId: invitationBookingIdSchema,
+  invitedUserIds: z.array(invitedUserIdSchema).min(1).max(50),
+});
+
 export const invitationResponseSchema = z.object({
   invitationId: invitationIdSchema,
   status: z.enum(invitationResponseStatuses),

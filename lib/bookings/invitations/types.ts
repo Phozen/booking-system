@@ -14,6 +14,10 @@ export type InvitationProfile = {
   fullName: string | null;
 };
 
+export type InviteCandidate = InvitationProfile & {
+  department: string | null;
+};
+
 export type BookingInvitation = {
   id: string;
   bookingId: string;
@@ -27,8 +31,6 @@ export type BookingInvitation = {
   invitedUser: InvitationProfile | null;
   inviter: InvitationProfile | null;
 };
-
-export type InviteCandidate = InvitationProfile;
 
 export type InvitedBooking = {
   invitation: BookingInvitation;

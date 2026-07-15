@@ -5,6 +5,7 @@ import {
   getInvitationContextLabel,
   getInvitationStatusLabel,
   inviteUserSchema,
+  inviteUsersSchema,
   invitationResponseSchema,
 } from "@/lib/bookings/invitations/validation";
 
@@ -24,6 +25,29 @@ describe("booking invitation validation", () => {
       inviteUserSchema.safeParse({
         bookingId: "not-a-uuid",
         invitedUserId: userId,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts a bounded batch of invitation targets", () => {
+    expect(
+      inviteUsersSchema.safeParse({
+        bookingId,
+        invitedUserIds: [userId],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      inviteUsersSchema.safeParse({
+        bookingId,
+        invitedUserIds: [],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      inviteUsersSchema.safeParse({
+        bookingId,
+        invitedUserIds: Array.from({ length: 51 }, () => userId),
       }).success,
     ).toBe(false);
   });

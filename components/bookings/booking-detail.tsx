@@ -9,10 +9,7 @@ import {
   isCancellableBooking,
 } from "@/lib/bookings/format";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
-import type {
-  BookingInvitation,
-  InviteCandidate,
-} from "@/lib/bookings/invitations/types";
+import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
@@ -64,7 +61,6 @@ export function BookingDetail({
   booking,
   viewerMode = "owner",
   invitations = [],
-  inviteCandidates = [],
   viewerInvitation,
   justCreated,
   highlightInvitations,
@@ -72,7 +68,6 @@ export function BookingDetail({
   booking: EmployeeBooking;
   viewerMode?: "owner" | "invitee";
   invitations?: BookingInvitation[];
-  inviteCandidates?: InviteCandidate[];
   viewerInvitation?: BookingInvitation | null;
   justCreated?: boolean;
   highlightInvitations?: boolean;
@@ -319,7 +314,6 @@ export function BookingDetail({
         <InvitationList
           bookingId={booking.id}
           invitations={invitations}
-          candidates={inviteCandidates}
           canManage
           highlight={highlightInvitations}
         />

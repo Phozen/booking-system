@@ -5,7 +5,6 @@ import type { EmployeeBooking } from "@/lib/bookings/queries";
 import { getMyBookingById } from "@/lib/bookings/queries";
 import {
   getInvitationsForBooking,
-  getInviteCandidatesForBooking,
   getInvitedBookingById,
 } from "@/lib/bookings/invitations/queries";
 import type { InvitedBooking } from "@/lib/bookings/invitations/types";
@@ -75,16 +74,12 @@ export default async function BookingDetailPage({
 
   if (booking) {
     const adminSupabase = createAdminClient();
-    const [invitations, inviteCandidates] = await Promise.all([
-      getInvitationsForBooking(adminSupabase, booking.id),
-      getInviteCandidatesForBooking(adminSupabase, booking.id, user.id),
-    ]);
+    const invitations = await getInvitationsForBooking(adminSupabase, booking.id);
 
     return (
       <BookingDetail
         booking={booking}
         invitations={invitations}
-        inviteCandidates={inviteCandidates}
         viewerMode="owner"
         justCreated={query.created === "1"}
         highlightInvitations={query.invite === "1"}

@@ -218,27 +218,81 @@ export async function getInvitationsForBooking(
   );
 }
 
-export async function getInviteCandidatesForBooking(
+function normalizeCandidateSearch(value: string) {
+  return value
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}\s@._+-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+}
+
+export async function searchInviteCandidatesForBooking(
   supabase: SupabaseClient,
   bookingId: string,
   ownerUserId: string,
-): Promise<InviteCandidate[]> {
+  searchValue: string,
+  limit = 20,
+): Promise<InviteCandidate[] | null> {
+  const { data: booking, error: bookingError } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("id", bookingId)
+    .eq("user_id", ownerUserId)
+    .maybeSingle();
+
+  if (bookingError) {
+    throw new Error("Unable to verify booking access.");
+  }
+
+  if (!booking) {
+    return null;
+  }
+
+  const search = normalizeCandidateSearch(searchValue);
+
+  if (search.length < 2) {
+    return [];
+  }
+
+  const resultLimit = Math.max(1, Math.min(limit, 20));
+  const pattern = `%${search}%`;
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select("id,email,full_name")
+    .select("id,email,full_name,department")
     .eq("status", "active")
     .neq("id", ownerUserId)
+    .or(
+      `full_name.ilike.${pattern},email.ilike.${pattern},department.ilike.${pattern}`,
+    )
     .order("full_name", { ascending: true })
-    .order("email", { ascending: true });
+    .order("email", { ascending: true })
+    .limit(resultLimit * 2);
 
   if (profilesError) {
-    throw new Error("Unable to load active users.");
+    throw new Error("Unable to search active users.");
+  }
+
+  const matchingProfiles =
+    (profiles as {
+      id: string;
+      email: string;
+      full_name: string | null;
+      department: string | null;
+    }[] | null) ?? [];
+
+  if (matchingProfiles.length === 0) {
+    return [];
   }
 
   const { data: existing, error: existingError } = await supabase
     .from("booking_invitations")
     .select("invited_user_id")
-    .eq("booking_id", bookingId);
+    .eq("booking_id", bookingId)
+    .in(
+      "invited_user_id",
+      matchingProfiles.map((profile) => profile.id),
+    );
 
   if (existingError) {
     throw new Error("Unable to load existing invitations.");
@@ -250,13 +304,14 @@ export async function getInviteCandidatesForBooking(
     ),
   );
 
-  return ((profiles as { id: string; email: string; full_name: string | null }[] | null) ??
-    [])
+  return matchingProfiles
     .filter((profile) => !invitedUserIds.has(profile.id))
+    .slice(0, resultLimit)
     .map((profile) => ({
       id: profile.id,
       email: profile.email,
       fullName: profile.full_name,
+      department: profile.department,
     }));
 }
 

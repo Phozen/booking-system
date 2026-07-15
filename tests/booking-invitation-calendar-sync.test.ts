@@ -31,6 +31,7 @@ vi.mock("@/lib/integrations/microsoft-365-calendar/sync", () => ({
 
 const {
   inviteUserToBookingAction,
+  inviteUsersToBookingAction,
   removeInvitationAction,
   respondToInvitationAction,
 } = await import("@/lib/bookings/invitations/actions");
@@ -43,6 +44,12 @@ const invitee = {
   id: "22222222-2222-4222-8222-222222222222",
   email: "invitee@example.com",
   full_name: "Invitee User",
+  status: "active",
+};
+const secondInvitee = {
+  id: "55555555-5555-4555-8555-555555555555",
+  email: "second@example.com",
+  full_name: "Second Invitee",
   status: "active",
 };
 const booking = {
@@ -185,6 +192,67 @@ function setupAdminClient({
   return queries;
 }
 
+function setupBatchAdminClient() {
+  const bookingQuery = createQuery({ data: booking, error: null });
+  const profileQuery = {
+    select: vi.fn(),
+    in: vi.fn(),
+  };
+  profileQuery.select.mockReturnValue(profileQuery);
+  profileQuery.in.mockResolvedValue({
+    data: [invitee, secondInvitee],
+    error: null,
+  });
+
+  const existingQuery = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    in: vi.fn(),
+  };
+  existingQuery.select.mockReturnValue(existingQuery);
+  existingQuery.eq.mockReturnValue(existingQuery);
+  existingQuery.in.mockResolvedValue({
+    data: [
+      {
+        ...invitation,
+        id: "66666666-6666-4666-8666-666666666666",
+        invited_user_id: secondInvitee.id,
+      },
+    ],
+    error: null,
+  });
+
+  const insertedInvitation = {
+    ...invitation,
+    invited_user_id: invitee.id,
+  };
+  const upsertSelect = vi.fn().mockResolvedValue({
+    data: [insertedInvitation],
+    error: null,
+  });
+  const invitationTable = {
+    select: vi.fn(() => existingQuery),
+    upsert: vi.fn(() => ({ select: upsertSelect })),
+  };
+  const insertSuccess = { insert: vi.fn().mockResolvedValue({ error: null }) };
+  const adminClient = {
+    from: vi.fn((table: string) => {
+      if (table === "bookings") return bookingQuery;
+      if (table === "profiles") return profileQuery;
+      if (table === "booking_invitations") return invitationTable;
+      return insertSuccess;
+    }),
+  };
+
+  mocks.createAdminClient.mockReturnValue(adminClient);
+  mocks.syncConfirmedBookingToMicrosoftCalendar.mockResolvedValue({
+    status: "synced",
+    message: "ok",
+  });
+
+  return { invitationTable, upsertSelect };
+}
+
 describe("booking invitation calendar attendee resync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -238,6 +306,35 @@ describe("booking invitation calendar attendee resync", () => {
 
     expect(result.status).toBe("success");
     expect(mocks.syncConfirmedBookingToMicrosoftCalendar).toHaveBeenCalled();
+  });
+
+  it("sends eligible batch invitations, reports duplicates, and syncs the calendar once", async () => {
+    const { invitationTable, upsertSelect } = setupBatchAdminClient();
+
+    const result = await inviteUsersToBookingAction(booking.id, [
+      invitee.id,
+      secondInvitee.id,
+    ]);
+
+    expect(result.status).toBe("success");
+    expect(result.invitedUserIds).toEqual([invitee.id]);
+    expect(result.failures).toEqual([
+      {
+        userId: secondInvitee.id,
+        message: "This user is already invited to the booking.",
+      },
+    ]);
+    expect(invitationTable.upsert).toHaveBeenCalledTimes(1);
+    expect(upsertSelect).toHaveBeenCalledTimes(1);
+    expect(mocks.syncConfirmedBookingToMicrosoftCalendar).toHaveBeenCalledTimes(1);
+    expect(mocks.syncConfirmedBookingToMicrosoftCalendar).toHaveBeenCalledWith(
+      booking.id,
+      {
+        userId: owner.id,
+        email: owner.email,
+        reason: "invitations_created",
+      },
+    );
   });
 
   it("resyncs attendees after accepting an invitation for a confirmed booking", async () => {

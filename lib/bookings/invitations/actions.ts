@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
-import type { InvitationActionResult } from "@/lib/bookings/invitations/action-state";
+import type {
+  InvitationActionResult,
+  InvitationBatchActionResult,
+  InvitationBatchFailure,
+} from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
@@ -16,6 +20,7 @@ import {
   invitationIdSchema,
   invitationResponseSchema,
   inviteUserSchema,
+  inviteUsersSchema,
 } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -328,6 +333,223 @@ export async function inviteUserToBookingAction(
   return {
     status: "success",
     message: `${formatProfileLabel(inviteeProfile)} has been invited.`,
+  };
+}
+
+export async function inviteUsersToBookingAction(
+  bookingId: string,
+  invitedUserIds: string[],
+): Promise<InvitationBatchActionResult> {
+  const { user } = await requireUser();
+  const parsed = inviteUsersSchema.safeParse({
+    bookingId,
+    invitedUserIds,
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Choose between 1 and 50 active internal users.",
+      invitedUserIds: [],
+      failures: [],
+    };
+  }
+
+  const uniqueInvitedUserIds = [...new Set(parsed.data.invitedUserIds)];
+
+  const supabase = createAdminClient();
+  const booking = await getBookingForInvitationAction(parsed.data.bookingId);
+
+  if (!booking || booking.user_id !== user.id) {
+    return {
+      status: "error",
+      message: "You can only invite users to bookings you own.",
+      invitedUserIds: [],
+      failures: [],
+    };
+  }
+
+  const [{ data: profiles, error: profilesError }, { data: existing, error: existingError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id,email,full_name,status")
+        .in("id", uniqueInvitedUserIds),
+      supabase
+        .from("booking_invitations")
+        .select("id,booking_id,invited_user_id,invited_by,status,response_message,responded_at")
+        .eq("booking_id", booking.id)
+        .in("invited_user_id", uniqueInvitedUserIds),
+    ]);
+
+  if (profilesError || existingError) {
+    return {
+      status: "error",
+      message: "Invitees could not be checked. Please try again.",
+      invitedUserIds: [],
+      failures: [],
+    };
+  }
+
+  const profilesById = new Map(
+    ((profiles as ProfileForInvitation[] | null) ?? []).map((profile) => [
+      profile.id,
+      profile,
+    ]),
+  );
+  const existingByUserId = new Map(
+    ((existing as ExistingInvitation[] | null) ?? []).map((invitation) => [
+      invitation.invited_user_id,
+      invitation,
+    ]),
+  );
+  const failures: InvitationBatchFailure[] = [];
+  const eligibleProfiles: ProfileForInvitation[] = [];
+
+  for (const invitedUserId of uniqueInvitedUserIds) {
+    const profile = profilesById.get(invitedUserId);
+
+    if (!profile) {
+      failures.push({
+        userId: invitedUserId,
+        message: "This user is no longer available.",
+      });
+      continue;
+    }
+
+    const permission = canInviteUser({
+      ownerUserId: user.id,
+      invitedUserId: profile.id,
+      invitedUserStatus: profile.status,
+      existingInvitation: existingByUserId.get(profile.id),
+    });
+
+    if (!permission.allowed) {
+      failures.push({ userId: profile.id, message: permission.message });
+      continue;
+    }
+
+    eligibleProfiles.push(profile);
+  }
+
+  if (eligibleProfiles.length === 0) {
+    return {
+      status: "error",
+      message: "No new invitations were sent.",
+      invitedUserIds: [],
+      failures,
+    };
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("booking_invitations")
+    .upsert(
+      eligibleProfiles.map((profile) => ({
+        booking_id: booking.id,
+        invited_user_id: profile.id,
+        invited_by: user.id,
+        status: "pending",
+      })),
+      {
+        onConflict: "booking_id,invited_user_id",
+        ignoreDuplicates: true,
+      },
+    )
+    .select("id,booking_id,invited_user_id,invited_by,status,response_message,responded_at");
+
+  if (insertError) {
+    console.error("Batch booking invitation insert failed", {
+      bookingId: booking.id,
+      inviteeCount: eligibleProfiles.length,
+      message: insertError.message,
+    });
+
+    return {
+      status: "error",
+      message: "Invitations could not be created. Your selections were preserved.",
+      invitedUserIds: [],
+      failures,
+    };
+  }
+
+  const invitations = (inserted as ExistingInvitation[] | null) ?? [];
+  const insertedUserIds = new Set(
+    invitations.map((invitation) => invitation.invited_user_id),
+  );
+
+  for (const profile of eligibleProfiles) {
+    if (!insertedUserIds.has(profile.id)) {
+      failures.push({
+        userId: profile.id,
+        message: "This user was already invited by another request.",
+      });
+    }
+  }
+
+  await Promise.all(
+    invitations.map(async (invitation) => {
+      const invitee = profilesById.get(invitation.invited_user_id);
+
+      if (!invitee) {
+        return;
+      }
+
+      await createAuditLogSafely(
+        supabase,
+        {
+          action: "create",
+          entityType: "booking",
+          entityId: booking.id,
+          actorUserId: user.id,
+          actorEmail: user.email,
+          summary: `Invited ${formatProfileLabel(invitee)} to booking ${booking.title}.`,
+          newValues: {
+            invitationId: invitation.id,
+            invitedUserId: invitee.id,
+            status: invitation.status,
+          },
+          metadata: { invitationId: invitation.id, batch: true },
+        },
+        { bookingId: booking.id, invitationId: invitation.id },
+      );
+
+      await queueInvitationNotification({
+        type: "booking_invitation",
+        booking,
+        recipient: invitee,
+        actor: {
+          id: user.id,
+          email: user.email ?? "",
+          full_name: null,
+        },
+        status: invitation.status,
+      });
+    }),
+  );
+
+  if (invitations.length > 0) {
+    await syncConfirmedInvitationAttendeesSafely({
+      booking,
+      actor: {
+        id: user.id,
+        email: user.email,
+      },
+      reason: "invitations_created",
+    });
+    revalidateInvitationPaths(booking.id);
+  }
+
+  const invitedIds = invitations.map((invitation) => invitation.invited_user_id);
+  const sentLabel = `${invitedIds.length} invitation${invitedIds.length === 1 ? "" : "s"} sent`;
+
+  return {
+    status: invitedIds.length > 0 ? "success" : "error",
+    message:
+      failures.length > 0
+        ? `${sentLabel}. ${failures.length} could not be sent and remain selected.`
+        : `${sentLabel}.`,
+    invitedUserIds: invitedIds,
+    failures,
   };
 }
 
