@@ -16,7 +16,7 @@ export default async function AdminFacilitiesPage() {
       <PageHeader
         eyebrow="Admin area"
         title="Facility management"
-        description="Manage facility records, status, capacity, approval behavior, photos, and archival state."
+        description="Manage facility details, long-term booking visibility, capacity, approval behavior, photos, and archival state. Schedule temporary closures under Facility unavailability."
       />
 
       <FacilitiesTable facilities={facilities} />

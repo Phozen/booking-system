@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState, useTransition } from "react";
@@ -10,14 +11,11 @@ import {
 } from "@/lib/facilities/actions";
 import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import {
-  facilityStatusOptions,
   facilityFormSchema,
   facilityTypeOptions,
-  type FacilityStatus,
   type FacilityType,
 } from "@/lib/facilities/validation";
 import {
-  formatFacilityStatus,
   formatFacilityType,
 } from "@/lib/facilities/format";
 import type { Facility } from "@/lib/facilities/queries";
@@ -255,22 +253,34 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">Booking visibility</Label>
           <Select
             id="status"
             name="status"
             defaultValue={facility?.status ?? "active"}
             aria-describedby={getFieldDescribedBy(
+              "status-helper",
               fieldErrors.status && "status-error",
             )}
             aria-invalid={Boolean(fieldErrors.status)}
           >
-            {facilityStatusOptions.map((status) => (
-              <option key={status} value={status}>
-                {formatFacilityStatus(status as FacilityStatus)}
+            <option value="active">Available for booking</option>
+            <option value="inactive">Unavailable indefinitely</option>
+            {facility?.status === "under_maintenance" ? (
+              <option value="under_maintenance">
+                Under Maintenance (legacy)
               </option>
-            ))}
+            ) : null}
+            {facility?.status === "archived" ? (
+              <option value="archived">Archived</option>
+            ) : null}
           </Select>
+          <FormFieldHelper id="status-helper">
+            Use indefinite unavailability only when this facility has no return date. For temporary closures or maintenance, use{" "}
+            <Link href="/admin/unavailability" className="font-medium text-foreground underline underline-offset-4">
+              Facility unavailability
+            </Link>.
+          </FormFieldHelper>
           <FormFieldError id="status-error">{fieldErrors.status}</FormFieldError>
         </div>
 

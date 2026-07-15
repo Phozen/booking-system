@@ -59,16 +59,16 @@ export default async function EditBlockedPeriodPage({
         }
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Blocked Dates", href: "/admin/blocked-dates" },
+          { label: "Unavailability", href: "/admin/unavailability" },
           { label: "Edit" },
         ]}
         secondaryAction={
           <Link
-            href="/admin/blocked-dates"
+            href="/admin/unavailability"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
-            Back to blocked dates
+            Back to unavailability
           </Link>
         }
       />
@@ -82,6 +82,7 @@ export default async function EditBlockedPeriodPage({
           blockedPeriod={blockedPeriod}
           facilities={facilities}
           timezone={settings.defaultTimezone}
+          returnPath="/admin/unavailability"
         />
       </section>
     </main>

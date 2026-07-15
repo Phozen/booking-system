@@ -53,10 +53,12 @@ export function BlockedPeriodForm({
   blockedPeriod,
   facilities,
   timezone,
+  returnPath = "/admin/blocked-dates",
 }: {
   blockedPeriod?: BlockedPeriod;
   facilities: Facility[];
   timezone: string;
+  returnPath?: string;
 }) {
   const router = useRouter();
   const [result, setResult] = useState<BlockedPeriodActionResult | null>(null);
@@ -302,7 +304,7 @@ export function BlockedPeriodForm({
           type="button"
           variant="outline"
           disabled={isBusy}
-          onClick={() => router.push("/admin/blocked-dates")}
+          onClick={() => router.push(returnPath)}
         >
           Cancel
         </Button>

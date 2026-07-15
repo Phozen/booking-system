@@ -64,8 +64,8 @@ export default async function AdminDashboardPage() {
           },
           {
             title: "Room availability",
-            description: "Block dates and record maintenance closures.",
-            href: "/admin/maintenance",
+            description: "Manage all closures and unavailable time in one place.",
+            href: "/admin/unavailability",
             icon: Wrench,
           },
         ].map((item) => {

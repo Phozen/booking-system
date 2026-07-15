@@ -35,6 +35,7 @@ type MaintenanceAuditRecord = {
 
 function revalidateMaintenancePaths(maintenanceClosureId?: string) {
   revalidatePath("/admin/maintenance");
+  revalidatePath("/admin/unavailability");
 
   if (maintenanceClosureId) {
     revalidatePath(`/admin/maintenance/${maintenanceClosureId}`);

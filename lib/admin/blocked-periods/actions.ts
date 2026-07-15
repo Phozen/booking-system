@@ -34,6 +34,7 @@ function getFriendlyBlockedPeriodError() {
 
 function revalidateBlockedPeriodPaths(blockedPeriodId?: string) {
   revalidatePath("/admin/blocked-dates");
+  revalidatePath("/admin/unavailability");
 
   if (blockedPeriodId) {
     revalidatePath(`/admin/blocked-dates/${blockedPeriodId}`);

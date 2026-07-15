@@ -61,16 +61,16 @@ export default async function EditMaintenanceClosurePage({
         }
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Maintenance", href: "/admin/maintenance" },
+          { label: "Unavailability", href: "/admin/unavailability" },
           { label: "Edit" },
         ]}
         secondaryAction={
           <Link
-            href="/admin/maintenance"
+            href="/admin/unavailability"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
-            Back to maintenance
+            Back to unavailability
           </Link>
         }
       />
@@ -85,6 +85,7 @@ export default async function EditMaintenanceClosurePage({
           maintenanceClosure={maintenanceClosure}
           facilities={facilities}
           timezone={settings.defaultTimezone}
+          returnPath="/admin/unavailability"
         />
       </section>
     </main>

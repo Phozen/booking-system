@@ -53,10 +53,12 @@ export function MaintenanceForm({
   maintenanceClosure,
   facilities,
   timezone,
+  returnPath = "/admin/maintenance",
 }: {
   maintenanceClosure?: MaintenanceClosure;
   facilities: Facility[];
   timezone: string;
+  returnPath?: string;
 }) {
   const router = useRouter();
   const [result, setResult] = useState<MaintenanceClosureActionResult | null>(
@@ -300,7 +302,7 @@ export function MaintenanceForm({
           type="button"
           variant="outline"
           disabled={isBusy}
-          onClick={() => router.push("/admin/maintenance")}
+          onClick={() => router.push(returnPath)}
         >
           Back
         </Button>
