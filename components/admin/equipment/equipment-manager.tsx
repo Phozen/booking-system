@@ -4,51 +4,24 @@ import { useActionState } from "react";
 
 import {
   createEquipmentAction,
-  toggleEquipmentActiveAction,
   type EquipmentActionResult,
 } from "@/lib/admin/equipment/actions";
 import type { EquipmentItem } from "@/lib/admin/equipment/queries";
+import { EquipmentItemManager } from "@/components/admin/equipment/equipment-item-manager";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { EmptyState } from "@/components/shared/empty-state";
+import { FormFieldError, getFieldDescribedBy } from "@/components/shared/form-field-error";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { Textarea } from "@/components/ui/textarea";
 
 const initialState: EquipmentActionResult = {
   status: "idle",
   message: "",
 };
-
-function EquipmentStatusForm({ item }: { item: EquipmentItem }) {
-  const [state, formAction, isPending] = useActionState(
-    toggleEquipmentActiveAction.bind(null, item.id, !item.isActive),
-    initialState,
-  );
-
-  return (
-    <form action={formAction} className="grid gap-2">
-      {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"}>
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
-      ) : null}
-      <Button
-        type="submit"
-        variant={item.isActive ? "outline" : "secondary"}
-        size="sm"
-        disabled={isPending}
-      >
-        <PendingButtonContent
-          pending={isPending}
-          pendingLabel={item.isActive ? "Archiving..." : "Restoring..."}
-        >
-          {item.isActive ? "Archive" : "Reactivate"}
-        </PendingButtonContent>
-      </Button>
-    </form>
-  );
-}
 
 export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) {
   const [state, formAction, isPending] = useActionState(
@@ -59,6 +32,11 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
   return (
     <div className="grid gap-6">
       <form action={formAction} className="grid gap-4 rounded-lg border bg-card p-5">
+        <ActionToastEffect
+          state={state}
+          successTitle="Equipment created"
+          errorTitle="Equipment could not be created"
+        />
         <div>
           <h2 className="font-semibold tracking-normal">Add equipment</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -73,15 +51,53 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" disabled={isPending} required />
+            <Input
+              id="name"
+              name="name"
+              disabled={isPending}
+              maxLength={120}
+              aria-describedby={getFieldDescribedBy(
+                state.fieldErrors?.name && "name-error",
+              )}
+              aria-invalid={Boolean(state.fieldErrors?.name)}
+              required
+            />
+            <FormFieldError id="name-error">
+              {state.fieldErrors?.name}
+            </FormFieldError>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="iconName">Icon name</Label>
-            <Input id="iconName" name="iconName" disabled={isPending} />
+            <Label htmlFor="iconName">Icon name (optional)</Label>
+            <Input
+              id="iconName"
+              name="iconName"
+              disabled={isPending}
+              maxLength={80}
+              aria-describedby={getFieldDescribedBy(
+                state.fieldErrors?.iconName && "icon-name-error",
+              )}
+              aria-invalid={Boolean(state.fieldErrors?.iconName)}
+            />
+            <FormFieldError id="icon-name-error">
+              {state.fieldErrors?.iconName}
+            </FormFieldError>
           </div>
           <div className="grid gap-2 sm:col-span-3">
-            <Label htmlFor="description">Description</Label>
-            <Input id="description" name="description" disabled={isPending} />
+            <Label htmlFor="description">Description (optional)</Label>
+            <Textarea
+              id="description"
+              name="description"
+              disabled={isPending}
+              maxLength={1000}
+              rows={3}
+              aria-describedby={getFieldDescribedBy(
+                state.fieldErrors?.description && "description-error",
+              )}
+              aria-invalid={Boolean(state.fieldErrors?.description)}
+            />
+            <FormFieldError id="description-error">
+              {state.fieldErrors?.description}
+            </FormFieldError>
           </div>
         </div>
         <div className="flex justify-end">
@@ -93,36 +109,28 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
         </div>
       </form>
 
-      <section className="rounded-lg border bg-card">
-        <div className="border-b p-5">
-          <h2 className="font-semibold tracking-normal">Equipment library</h2>
+      <section className="grid gap-4" aria-labelledby="equipment-library-heading">
+        <div>
+          <h2 id="equipment-library-heading" className="font-semibold tracking-normal">
+            Equipment library
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Archived equipment remains in historical facility records but is not
-            offered for new assignment.
+            Open an item to edit its details or availability. Archived equipment
+            remains in historical facility records but is not offered for new assignment.
           </p>
         </div>
-        <div className="divide-y">
-          {equipment.map((item) => (
-            <div
-              key={item.id}
-              className="grid gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-            >
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-medium">{item.name}</h3>
-                  <StatusBadge
-                    kind="user"
-                    status={item.isActive ? "active" : "disabled"}
-                  />
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {item.description || "No description."}
-                </p>
-              </div>
-              <EquipmentStatusForm item={item} />
-            </div>
-          ))}
-        </div>
+        {equipment.length > 0 ? (
+          <div className="grid gap-3">
+            {equipment.map((item) => (
+              <EquipmentItemManager key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No equipment yet"
+            description="Create the first equipment item to make it available for facility assignment."
+          />
+        )}
       </section>
     </div>
   );

@@ -59,4 +59,27 @@ test.describe("mobile smoke checks", () => {
     await expect(page.getByRole("heading", { name: /admin dashboard/i }).first()).toBeVisible();
     await expect(page.locator("body")).toBeVisible();
   });
+
+  test("equipment editor is usable on mobile when credentials are available", async ({
+    page,
+  }) => {
+    test.skip(!adminCredentials, missingCredentialsMessage("admin"));
+
+    if (!adminCredentials) {
+      return;
+    }
+
+    await login(page, adminCredentials);
+    await page.goto("/admin/equipment");
+    const equipmentItem = page.locator("details").first();
+
+    await equipmentItem.locator("summary").click();
+    await expect(equipmentItem.getByLabel("Name", { exact: true })).toBeVisible();
+    await expect(equipmentItem.getByRole("button", { name: "Save changes" })).toBeVisible();
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+  });
 });

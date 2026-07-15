@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 export type StatusBadgeKind =
   | "booking"
   | "facility"
+  | "equipment"
   | "maintenance"
   | "email"
   | "calendar-sync"
@@ -106,6 +107,20 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
     archived: {
       label: "Archived",
       description: "Facility is hidden from normal booking flows.",
+      className: statusClasses.zinc,
+      dotClassName: statusDots.zinc,
+    },
+  },
+  equipment: {
+    active: {
+      label: "Active",
+      description: "Equipment is available for facility assignment.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+    archived: {
+      label: "Archived",
+      description: "Equipment is unavailable for new facility assignments.",
       className: statusClasses.zinc,
       dotClassName: statusDots.zinc,
     },
@@ -285,6 +300,7 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
 const kindLabels: Record<StatusBadgeKind, string> = {
   booking: "Booking",
   facility: "Facility",
+  equipment: "Equipment",
   maintenance: "Maintenance",
   email: "Email",
   "calendar-sync": "Calendar sync",

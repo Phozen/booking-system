@@ -13,6 +13,7 @@ export const adminSmokeRoutes = [
   { path: "/admin/bookings", heading: /bookings/i },
   { path: "/admin/approvals", heading: /approvals/i },
   { path: "/admin/facilities", heading: /facilities/i },
+  { path: "/admin/equipment", heading: /equipment management/i },
   { path: "/admin/reports", heading: /reports/i },
 ];
 

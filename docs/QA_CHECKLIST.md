@@ -12,7 +12,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Rescheduling checks conflicts, blocked periods, maintenance closures, and capacity.
 - [ ] Admin can create a booking for an active user from `/admin/bookings/new`.
 - [ ] Admin can mark confirmed/historical bookings checked in, no-show, or reset usage tracking.
-- [ ] Admin can add, archive/reactivate, and assign equipment to facilities.
+- [ ] Admin can add, edit, archive/reactivate, and assign equipment to facilities.
 - [ ] User can save non-critical notification preferences from `/notification-preferences`.
 - [ ] Admin can queue due booking reminders from `/admin/email-notifications`; production cron queueing is verified separately.
 - [ ] Super Admin can open `/admin/system-health`, and the page does not display secrets.

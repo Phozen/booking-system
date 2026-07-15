@@ -41,7 +41,13 @@ export function missingCredentialsMessage(role: E2ERole) {
 
 export async function login(page: Page, credentials: Credentials) {
   await page.goto("/login");
-  await page.getByLabel("Email").fill(credentials.email);
+  const emailField = page.getByLabel("Email");
+
+  if (!(await emailField.isVisible())) {
+    await page.getByRole("button", { name: "Email login" }).click();
+  }
+
+  await emailField.fill(credentials.email);
   await page.getByLabel("Password").fill(credentials.password);
   await page.getByRole("button", { name: /^Log in$/i }).click();
   await expect(page).not.toHaveURL(/\/login(?:\?|$)/);

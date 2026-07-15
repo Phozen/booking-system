@@ -21,6 +21,7 @@ export const auditEntityTypeOptions = [
   "all",
   "user",
   "facility",
+  "equipment",
   "booking",
   "booking_approval",
   "blocked_period",
@@ -157,4 +158,3 @@ export function auditLogFiltersToSearchParams(
 
   return params;
 }
-

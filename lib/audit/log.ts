@@ -18,6 +18,7 @@ export type AuditActionType =
 export type AuditEntityType =
   | "user"
   | "facility"
+  | "equipment"
   | "booking"
   | "booking_approval"
   | "blocked_period"
@@ -81,4 +82,3 @@ export async function createAuditLogSafely(
     });
   }
 }
-
