@@ -476,13 +476,11 @@ Use this checklist after migrations are applied and the app is running with real
   blocked by server-side validation.
 - Toast notifications: confirm short success/error toasts appear for profile
   save, catering update, booking cancellation, invitation response, photo
-  upload, waitlist updates, recurring booking actions, and email queue actions
+  upload, recurring booking actions, and email queue actions
   while inline validation errors remain visible.
 - Facility timeline: verify employee and admin facility detail pages show
   available, booked, pending, blocked, and maintenance periods for a selected
   date without exposing employee-private details.
-- Waitlist: submit a request from `/waitlist`, cancel it as the owner, update it
-  from `/admin/waitlist`, and confirm unrelated employees cannot view it.
 - Recurring bookings: preview daily, weekly, and monthly recurrence rules;
   confirm conflicts are displayed before creation; create available occurrences
   and verify normal booking conflict rules remain enforced.

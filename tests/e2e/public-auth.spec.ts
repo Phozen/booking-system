@@ -20,16 +20,13 @@ test.describe("public and logged-out access", () => {
   });
 
   test("logged-out employee pages redirect to login", async ({ page }) => {
-    test.slow();
     await expectRedirectedToLogin(page, "/dashboard");
     await expectRedirectedToLogin(page, "/my-bookings");
     await expectRedirectedToLogin(page, "/calendar");
-    await expectRedirectedToLogin(page, "/waitlist");
     await expectRedirectedToLogin(page, "/profile");
   });
 
   test("logged-out admin pages redirect to login", async ({ page }) => {
     await expectRedirectedToLogin(page, "/admin/dashboard");
-    await expectRedirectedToLogin(page, "/admin/waitlist");
   });
 });

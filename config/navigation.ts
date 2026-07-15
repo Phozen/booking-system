@@ -11,7 +11,6 @@ import {
   FileClock,
   Activity,
   LayoutDashboard,
-  ListPlus,
   Mail,
   PlugZap,
   Settings,
@@ -37,7 +36,6 @@ export const adminNavigation = [
   { title: "Calendar", href: "/admin/calendar", icon: CalendarDays, match: "exact" },
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
-  { title: "Waitlist", href: "/admin/waitlist", icon: ListPlus, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
   { title: "Equipment", href: "/admin/equipment", icon: Boxes, match: "prefix" },
   { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix", superAdminOnly: true },
@@ -68,7 +66,6 @@ export function getAdminNavigationGroups(role?: string | null) {
         [
           "/admin/bookings",
           "/admin/approvals",
-          "/admin/waitlist",
           "/admin/facilities",
           "/admin/equipment",
           "/admin/users",

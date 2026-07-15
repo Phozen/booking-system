@@ -12,7 +12,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 - Tailwind CSS and shadcn/ui-style components
 - Resend or SMTP-ready email notification queue
 - Microsoft 365 Calendar one-way outbound sync support
-- Facility availability timeline, waitlist/alternative requests, and finite recurring bookings
+- Facility availability timeline and finite recurring bookings
 - Reporting enhancements, audit diff review, and backup/restore handoff docs
 - Vitest for unit tests
 - Vercel for deployment
@@ -247,35 +247,9 @@ Do not commit `.env.local`, `.env.vercel.local`, Supabase service role keys, SMT
 
 Apply Supabase migrations through the latest migration in `supabase/migrations`.
 
-Current migration set:
-
-```txt
-0001_extensions.sql
-0002_enums.sql
-0003_core_tables.sql
-0004_indexes.sql
-0005_functions_triggers.sql
-0006_rls_policies.sql
-0007_seed_data.sql
-0008_storage_notes.sql
-0009_security_hardening.sql
-0010_booking_invitations.sql
-0011_fix_booking_invitation_rls_recursion.sql
-0012_calendar_visibility_setting.sql
-0013_split_admin_roles.sql
-0014_microsoft_calendar_sync_groundwork.sql
-0015_booking_catering_details.sql
-0016_booking_usage_tracking.sql
-0017_booking_waitlist_requests.sql
-0018_user_notification_preferences.sql
-0019_booking_recurrence_series.sql
-0020_calendar_visibility_scope.sql
-0021_n8n_calendar_webhook_provider.sql
-0022_booking_mutation_rpcs.sql
-0023_harden_employee_cancellation_updates.sql
-0024_email_queue_claiming.sql
-0025_microsoft_delegated_calendar_connections.sql
-```
+Migration history is append-only. Apply every numbered SQL file in that
+directory in order; do not edit or skip older migrations on an existing
+environment.
 
 Typical commands:
 

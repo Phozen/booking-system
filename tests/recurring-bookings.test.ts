@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { generateRecurrenceOccurrences } from "@/lib/bookings/recurring/occurrences";
-import { waitlistRequestSchema } from "@/lib/waitlist/validation";
-import { formatWaitlistStatus } from "@/lib/waitlist/format";
 
 describe("recurrence occurrence generation", () => {
   it("generates weekly occurrences up to the requested count", () => {
@@ -41,27 +39,5 @@ describe("recurrence occurrence generation", () => {
     });
 
     expect(occurrences).toHaveLength(50);
-  });
-});
-
-describe("waitlist validation and labels", () => {
-  it("requires a purpose and valid time range inputs", () => {
-    const parsed = waitlistRequestSchema.safeParse({
-      facilityId: "",
-      date: "2026-06-01",
-      startTime: "09:00",
-      endTime: "10:00",
-      attendeeCount: "8",
-      title: "",
-      reason: "",
-    });
-
-    expect(parsed.success).toBe(false);
-  });
-
-  it("formats alternative status clearly", () => {
-    expect(formatWaitlistStatus("suggested_alternative")).toBe(
-      "Alternative suggested",
-    );
   });
 });

@@ -34,7 +34,6 @@ The database must enforce data integrity and should not rely only on frontend va
 Migrations `0016` through `0024` add the next operational foundations:
 
 - `0016_booking_usage_tracking.sql` adds booking usage tracking columns to `public.bookings`: `usage_status`, `checked_in_at`, `checked_in_by`, `no_show_marked_at`, and `no_show_marked_by`.
-- `0017_booking_waitlist_requests.sql` adds `public.booking_waitlist_requests` for non-reserving waitlist and alternative-slot requests.
 - `0018_user_notification_preferences.sql` adds `public.user_notification_preferences` for non-critical reminder and invitation preferences.
 - `0019_booking_recurrence_series.sql` adds `public.booking_recurrence_series` and optional occurrence links on `public.bookings`.
 - `0020_calendar_visibility_scope.sql` adds the calendar visibility setting used by the employee calendar.
@@ -43,15 +42,16 @@ Migrations `0016` through `0024` add the next operational foundations:
 - `0023_harden_employee_cancellation_updates.sql` hardens direct employee cancellation updates so only cancellation fields can change.
 - `0024_email_queue_claiming.sql` adds atomic email queue claim/mark RPCs, retry metadata, stale sending recovery, and idempotency support.
 
-Waitlist and recurrence implementation notes:
+Recurrence implementation notes:
 
-- `booking_waitlist_requests` stores non-reserving employee requests for
-  unavailable slots or alternatives. Employees can only see their own requests;
-  Admin/Super Admin users can manage all requests.
 - `booking_recurrence_series` stores the parent series metadata. Individual
   occurrences are normal `bookings` rows linked by `recurrence_series_id` and
   `recurrence_sequence`, so existing conflict, approval, audit, email, and
   calendar-sync behavior can continue to operate per booking.
+
+Migration `0030` retires the deprecated scheduling-request storage without
+deleting historical rows. The retired table is not accessible to application
+roles.
 
 These changes are additive and do not change existing booking conflict prevention, approval behavior, cancellation behavior, or role semantics.
 

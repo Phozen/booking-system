@@ -109,9 +109,9 @@ Deployed testing:
 The Playwright smoke suite includes non-destructive coverage for:
 
 - public/auth routes and logged-out redirects
-- employee dashboard, facilities, calendar, waitlist, recurring booking, and
-  profile pages
-- admin bookings, approvals, waitlist, facilities, reports, and access-control
+- employee dashboard, facilities, calendar, recurring booking, and profile
+  pages
+- admin bookings, approvals, facilities, reports, and access-control
   redirects
 - super admin users, settings, system health, and Microsoft Calendar
   integration pages

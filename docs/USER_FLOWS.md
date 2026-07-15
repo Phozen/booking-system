@@ -38,8 +38,8 @@ non-overlapping time but does not replace server-side conflict prevention.
 ### Toast feedback
 
 Short non-critical results such as profile saved, catering updated, invitation
-sent/responded, photo uploaded, waitlist updated, recurring booking action, and
-email queue processing may also appear as toast notifications. Inline alerts
+sent/responded, photo uploaded, recurring booking action, and email queue
+processing may also appear as toast notifications. Inline alerts
 and field-level validation remain the persistent source for important errors.
 
 ### Admin creates booking for user
@@ -2240,17 +2240,6 @@ The user flows are implemented when:
 
 ```
 ```
-## Waitlist and Alternative Requests
-
-- Employees use `/waitlist` when a preferred slot is unavailable or when they
-  want Admin to suggest another room/time.
-- A waitlist request captures preferred facility, date/time, attendee count,
-  purpose, and flexibility notes. It does not reserve a room and does not bypass
-  booking conflict checks.
-- Employees can view and cancel their own open requests.
-- Admin and Super Admin users review requests at `/admin/waitlist`, add an
-  alternative/response, and close or cancel the request.
-
 ## Recurring Bookings
 
 - Employees can create finite recurring bookings from

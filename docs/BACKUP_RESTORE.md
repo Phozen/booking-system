@@ -6,8 +6,8 @@ System. It is intentionally manual-first for the current deployment model.
 ## Backup Scope
 
 - Supabase PostgreSQL database, including migrations, RLS policies, bookings,
-  invitations, waitlist requests, recurrence series, reminders, audit logs, and
-  integration sync records.
+  invitations, recurrence series, reminders, audit logs, retired scheduling
+  request records, and integration sync records.
 - Supabase Storage bucket `facility-photos`.
 - Vercel environment variables.
 - GitHub repository and release history.
@@ -95,9 +95,9 @@ Server-only secrets include `SUPABASE_SERVICE_ROLE_KEY`, `EMAIL_API_KEY`,
 ## Restore Validation Checklist
 
 - Login, registration/reset-password links, and protected redirects work.
-- Employee dashboard, facilities, booking creation, invitations, waitlist, and
-  calendar load.
-- Admin bookings, approvals, facilities, equipment, waitlist, reports, audit
+- Employee dashboard, facilities, booking creation, invitations, and calendar
+  load.
+- Admin bookings, approvals, facilities, equipment, reports, audit
   logs, email notifications, and system health load.
 - Super Admin-only users/settings/integrations/system health routes are
   protected.

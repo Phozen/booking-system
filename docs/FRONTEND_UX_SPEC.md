@@ -2039,10 +2039,10 @@ Before considering frontend polish complete:
   a booking can be created.
 - Toast notifications are appropriate for short non-critical action feedback
   such as saved profile, updated catering, sent invitation, uploaded photo,
-  waitlist updates, and recurring booking actions. Validation errors and
+  and recurring booking actions. Validation errors and
   critical failures must keep inline alerts or field-level errors.
-- Waitlist and recurring booking flows must explain that conflict prevention
-  remains authoritative and that waitlist requests do not reserve rooms.
+- Recurring booking flows must explain that conflict prevention remains
+  authoritative.
 - Recurring booking previews must show available and unavailable occurrences
   before creation, with mobile-friendly stacked rows.
 - Report summary cards and simple bars should remain readable in light and dark

@@ -1136,7 +1136,6 @@ The system should be designed so the following can be added later:
 * Department-based booking permissions
 * Booking quotas
 * Auto-release if no check-in
-* Waitlist for fully booked facilities
 * Catering or equipment requests
 * Visitor registration
 * Multi-building support

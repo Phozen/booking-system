@@ -4,7 +4,6 @@ export const employeeSmokeRoutes = [
   { path: "/dashboard", heading: /dashboard/i },
   { path: "/facilities", heading: /facilities/i },
   { path: "/calendar", heading: /calendar/i },
-  { path: "/waitlist", heading: /waitlist|alternative/i },
   { path: "/bookings/recurring/new", heading: /recurring booking/i },
   { path: "/profile", heading: /profile/i },
 ];
@@ -13,7 +12,6 @@ export const adminSmokeRoutes = [
   { path: "/admin/dashboard", heading: /admin dashboard/i },
   { path: "/admin/bookings", heading: /bookings/i },
   { path: "/admin/approvals", heading: /approvals/i },
-  { path: "/admin/waitlist", heading: /waitlist|alternatives/i },
   { path: "/admin/facilities", heading: /facilities/i },
   { path: "/admin/reports", heading: /reports/i },
 ];
