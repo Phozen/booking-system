@@ -11,7 +11,7 @@ describe("production email schedule", () => {
 
     expect(config.crons).toContainEqual({
       path: "/api/cron/email/run",
-      schedule: "*/5 * * * *",
+      schedule: "0 0 * * *",
     });
   });
 });

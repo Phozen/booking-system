@@ -149,7 +149,7 @@ describe("email processing cron route", () => {
 
     expect(vercelConfig.crons).toContainEqual({
       path: "/api/cron/email/run",
-      schedule: "*/5 * * * *",
+      schedule: "0 0 * * *",
     });
     expect(vercelConfig.crons).not.toContainEqual(
       expect.objectContaining({ path: "/api/cron/email/process" }),

@@ -2,11 +2,7 @@
 
 ## Production schedule
 
-`vercel.json` invokes `GET /api/cron/email/run` every five minutes in UTC
-(`*/5 * * * *`). The route queues due reminders using idempotency keys, then
-atomically claims and sends up to 100 due emails. Configure a server-only
-`CRON_SECRET` in production; Vercel supplies it as a Bearer token. The deployment
-plan must support sub-daily cron, and the job runs only on production deployments.
+`vercel.json` invokes `GET /api/cron/email/run` once daily (`0 0 * * *`) as a Hobby-tier placeholder to bypass Vercel pricing restrictions. The actual production execution runs every 5 minutes and is triggered via an external scheduler (like cron-job.org) using the `CRON_SECRET` header. The route queues due reminders using idempotency keys, then atomically claims and sends up to 100 due emails. Configure a server-only `CRON_SECRET` in production; Vercel supplies it as a Bearer token, and the job runs only on production deployments.
 
 ## Monitoring contract
 

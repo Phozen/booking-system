@@ -262,11 +262,12 @@ See `docs/DATABASE_SCHEMA.md` for the full schema and RLS model.
 
 Booking edits, admin-created bookings, and recurring booking creation use dedicated database RPCs for authorization and validation. Finite recurring booking creation is transactional: the user previews candidate occurrences, then final creation succeeds for the full series or fails without creating orphaned occurrences if one slot becomes unavailable.
 
-Production uses one Vercel Cron job: `GET /api/cron/email/run` every five
-minutes (`*/5 * * * *`, UTC). It queues idempotent reminders before claiming
-and sending due email, and requires `Authorization: Bearer ${CRON_SECRET}`.
-HTTP 500 indicates an infrastructure/claim/marker failure; HTTP 503 indicates
-failed, overdue, stale, or exhausted queue rows. See
+Production uses one Vercel Cron job placeholder: `GET /api/cron/email/run` once
+daily (`0 0 * * *`, UTC) to comply with Hobby limitations. The actual production
+execution runs every 5 minutes and is triggered via an external scheduler (like
+cron-job.org) passing `Authorization: Bearer ${CRON_SECRET}` to queue idempotent
+reminders and process due emails. HTTP 500 indicates an infrastructure/claim/marker
+failure; HTTP 503 indicates failed, overdue, stale, or exhausted queue rows. See
 `docs/EMAIL_OPERATIONS.md` and `/admin/system-health` for recovery and evidence.
 
 ### Storage Setup
