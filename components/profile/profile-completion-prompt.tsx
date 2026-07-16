@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { CheckCircle2, UserRound, X } from "lucide-react";
+import { Circle, UserRound, X } from "lucide-react";
 
 import type { MissingProfileField } from "@/lib/profile/completion";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -87,7 +87,7 @@ export function ProfileCompletionPrompt({
                   key={field}
                   className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white/70 px-2 py-1 text-amber-900 dark:border-amber-500/40 dark:bg-background/30 dark:text-amber-50"
                 >
-                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                  <Circle className="size-3.5" aria-hidden="true" />
                   {field}
                 </li>
               ))}

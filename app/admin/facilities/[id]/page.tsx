@@ -12,6 +12,7 @@ import { getAppSettings } from "@/lib/settings/queries";
 import { FacilityForm } from "@/components/admin/facilities/facility-form";
 import { FacilityEquipmentManager } from "@/components/admin/facilities/facility-equipment-manager";
 import { FacilityArchiveAction } from "@/components/admin/facilities/facility-archive-action";
+import { FacilityDeleteAction } from "@/components/admin/facilities/facility-delete-action";
 import { FacilityPhotoManager } from "@/components/admin/facilities/facility-photo-manager";
 import { FacilityAvailabilityTimeline } from "@/components/facilities/facility-availability-timeline";
 import { PageHeader } from "@/components/shared/page-header";
@@ -96,6 +97,10 @@ export default async function EditFacilityPage({
         facilityId={facility.id}
         facilityName={facility.name}
         isArchived={facility.isArchived || facility.status === "archived"}
+      />
+      <FacilityDeleteAction
+        facilityId={facility.id}
+        facilityName={facility.name}
       />
     </main>
   );

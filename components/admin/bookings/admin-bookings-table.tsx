@@ -184,7 +184,7 @@ export function AdminBookingsTable({
                 <th className="px-4 py-3 font-medium">Usage</th>
                 <th className="px-4 py-3 font-medium">Approval</th>
                 <th className="px-4 py-3 font-medium">Created</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="sticky right-0 border-l bg-muted/60 px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -218,7 +218,7 @@ export function AdminBookingsTable({
                     <td className="px-4 py-3 text-muted-foreground">
                       {formatBookingDateTime(booking.createdAt)}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="sticky right-0 border-l bg-background px-4 py-3 text-right">
                       <Link
                         href={`/admin/bookings/${booking.id}`}
                         className={buttonVariants({

@@ -704,6 +704,7 @@ export async function updateBookingAction(
   }
 
   const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
+  const cateringDetails = cateringValuesToDetails(parsed.data);
   const settings = await getAppSettings();
   const dateRange = getBookingDateRange(parsed.data, settings.defaultTimezone);
   const windowMessage = validateBookingTimeWithinWindow(parsed.data, settings);
@@ -764,6 +765,12 @@ export async function updateBookingAction(
     p_attendee_count: updateValues.attendeeCount,
     p_starts_at: updateValues.startsAt,
     p_ends_at: updateValues.endsAt,
+    p_catering_required: cateringDetails.required,
+    p_catering_type: cateringDetails.type,
+    p_catering_pax: cateringDetails.pax,
+    p_catering_serving_time: cateringDetails.servingTime,
+    p_catering_dietary_notes: cateringDetails.dietaryNotes,
+    p_catering_notes: cateringDetails.notes,
   });
 
   if (error || !data) {

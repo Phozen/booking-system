@@ -84,7 +84,7 @@ export function UsersTable({
             <th className="px-4 py-3 font-medium">Last login</th>
             <th className="px-4 py-3 font-medium">Created</th>
             <th className="px-4 py-3 font-medium">Updated</th>
-            <th className="px-4 py-3 text-right font-medium">Actions</th>
+            <th className="sticky right-0 border-l bg-muted/60 px-4 py-3 text-right font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -120,7 +120,7 @@ export function UsersTable({
                 <td className="px-4 py-3 text-muted-foreground">
                   {formatBookingDateTime(user.updatedAt)}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="sticky right-0 border-l bg-background px-4 py-3 text-right">
                   <Link
                     href={`/admin/users/${user.id}`}
                     className={buttonVariants({ variant: "outline", size: "sm" })}

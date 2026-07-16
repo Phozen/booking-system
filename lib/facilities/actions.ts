@@ -60,7 +60,7 @@ async function insertAuditLog({
   oldValues,
   newValues,
 }: {
-  action: "create" | "update";
+  action: "create" | "update" | "delete";
   facilityId: string;
   actorUserId: string;
   actorEmail: string | undefined;
@@ -396,6 +396,107 @@ export async function archiveFacilityFormAction(
     return {
       status: "error",
       message: getFriendlyFacilityArchiveError(),
+    };
+  }
+}
+
+export async function deleteFacilityAction(
+  facilityId: string,
+): Promise<FacilityActionResult> {
+  try {
+    const { user } = await requireAdmin();
+
+    if (!user) {
+      return {
+        status: "error",
+        message: "You must be signed in as an admin.",
+      };
+    }
+
+    const supabase = await createClient();
+    const { data: existing, error: existingError } = await supabase
+      .from("facilities")
+      .select("id,code,slug")
+      .eq("id", facilityId)
+      .maybeSingle();
+
+    if (existingError || !existing) {
+      return {
+        status: "error",
+        message: "Facility could not be found.",
+      };
+    }
+
+    const { error } = await supabase
+      .from("facilities")
+      .delete()
+      .eq("id", facilityId);
+
+    if (error) {
+      if (error.code === "23503") {
+        return {
+          status: "error",
+          message:
+            "Facility cannot be deleted because it has associated records (e.g. bookings). Please archive it instead.",
+        };
+      }
+      console.error("Facility delete failed", { facilityId, error });
+      return {
+        status: "error",
+        message: "Facility could not be deleted. Please try again.",
+      };
+    }
+
+    await insertAuditLog({
+      action: "delete",
+      facilityId,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Facility deleted: ${existing.code}.`,
+      oldValues: existing,
+    });
+
+    try {
+      revalidatePath("/facilities");
+      revalidatePath("/admin/facilities");
+    } catch (error) {
+      console.error("Revalidate failed after facility delete", error);
+    }
+
+    return {
+      status: "success",
+      message: "Facility has been permanently deleted.",
+      facilityId,
+    };
+  } catch (error) {
+    console.error("Facility delete unexpected error", error);
+    return {
+      status: "error",
+      message: "Facility could not be deleted. Please try again.",
+    };
+  }
+}
+
+export async function deleteFacilityFormAction(
+  _previousState: FacilityActionResult,
+  formData: FormData,
+): Promise<FacilityActionResult> {
+  try {
+    const facilityId = getOptionalFormValue(formData, "facilityId");
+
+    if (!facilityId) {
+      return {
+        status: "error",
+        message: "Facility could not be found.",
+      };
+    }
+
+    return deleteFacilityAction(facilityId);
+  } catch (error) {
+    console.error("Facility delete form error", error);
+    return {
+      status: "error",
+      message: "Facility could not be deleted. Please try again.",
     };
   }
 }
