@@ -94,7 +94,7 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  const profile = await getProfileSession(supabase, user.id);
+  const profile = await getProfileSession(supabase, user);
   if (!profile || profile.status !== "active") {
     if (authPaths.has(pathname)) {
       return response;

@@ -35,7 +35,8 @@ const booking = {
 
 function createSupabaseMock({
   duplicateOnInsert = false,
-}: { duplicateOnInsert?: boolean } = {}) {
+  insertError = false,
+}: { duplicateOnInsert?: boolean; insertError?: boolean } = {}) {
   const inserted: unknown[] = [];
   const from = vi.fn((table: string) => {
     if (table === "bookings") {
@@ -63,6 +64,13 @@ function createSupabaseMock({
             return Promise.resolve({
               data: null,
               error: { code: "23505", message: "duplicate idempotency key" },
+            });
+          }
+
+          if (insertError) {
+            return Promise.resolve({
+              data: null,
+              error: { code: "XX000", message: "database unavailable" },
             });
           }
 
@@ -112,6 +120,17 @@ describe("queueDueBookingReminders", () => {
     );
 
     expect(result).toEqual({ queued: 0, skipped: 1 });
+  });
+
+  it("fails loudly for non-idempotency reminder insert errors", async () => {
+    const supabase = createSupabaseMock({ insertError: true });
+
+    await expect(
+      queueDueBookingReminders(
+        supabase as never,
+        new Date("2035-01-01T09:30:00.000Z"),
+      ),
+    ).rejects.toThrow(/could not be queued/i);
   });
 
   it("creates an admin client when called without one", async () => {

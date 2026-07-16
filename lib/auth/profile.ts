@@ -1,8 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { isMicrosoftAuthUser, normalizeAccessEmail } from "@/lib/auth/access";
+
 export type AppRole = "employee" | "admin" | "super_admin";
 
 export type ProfileSession = {
+  approvedUserId: string;
   role: AppRole;
   status: "active" | "disabled" | "pending";
   full_name: string | null;
@@ -34,12 +37,44 @@ export function formatAppRole(role: string | null | undefined) {
 
 export async function getProfileSession(
   supabase: SupabaseClient,
-  userId: string,
+  user: {
+    id: string;
+    email?: string | null;
+    app_metadata?: Record<string, unknown>;
+  },
 ): Promise<ProfileSession | null> {
+  const normalizedEmail = normalizeAccessEmail(user.email);
+  if (!normalizedEmail || !isMicrosoftAuthUser(user)) {
+    return null;
+  }
+
+  const { data: hasAccess, error: accessError } = await supabase.rpc(
+    "has_active_approved_access",
+    { p_user_id: user.id },
+  );
+
+  if (accessError || hasAccess !== true) {
+    return null;
+  }
+
+  const { data: approvedUser, error: approvedUserError } = await supabase
+    .from("approved_users")
+    .select("id,role,status")
+    .eq("normalized_email", normalizedEmail)
+    .maybeSingle();
+
+  if (
+    approvedUserError ||
+    !approvedUser ||
+    approvedUser.status !== "active"
+  ) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .select("role,status,full_name,department,phone")
-    .eq("id", userId)
+    .eq("id", user.id)
     .maybeSingle();
 
   // The app may build or run before Supabase migrations are applied locally,
@@ -48,15 +83,12 @@ export async function getProfileSession(
     return null;
   }
 
-  const role = isAdminRole(data.role) ? data.role : "employee";
-  const status =
-    data.status === "disabled" || data.status === "pending"
-      ? data.status
-      : "active";
+  const role = isAdminRole(approvedUser.role) ? approvedUser.role : "employee";
 
   return {
+    approvedUserId: approvedUser.id,
     role,
-    status,
+    status: "active",
     full_name: data.full_name ?? null,
     department: data.department ?? null,
     phone: data.phone ?? null,

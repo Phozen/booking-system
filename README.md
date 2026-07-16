@@ -21,7 +21,7 @@ The app lets employees browse facilities, create bookings, manage their own book
 
 ### Employee Features
 
-- Email/password login, registration, and password reset.
+- Microsoft-only sign-in for active, exact-email pre-provisioned employees.
 - Employee dashboard with quick actions and upcoming booking preview.
 - Facility browsing and facility detail pages with photos, equipment, capacity, approval requirements, and booking CTA.
 - Booking creation with timezone-aware date/time handling, conflict prevention, blocked-period checks, maintenance checks, and approval-aware status.
@@ -262,7 +262,12 @@ See `docs/DATABASE_SCHEMA.md` for the full schema and RLS model.
 
 Booking edits, admin-created bookings, and recurring booking creation use dedicated database RPCs for authorization and validation. Finite recurring booking creation is transactional: the user previews candidate occurrences, then final creation succeeds for the full series or fails without creating orphaned occurrences if one slot becomes unavailable.
 
-Queued app notification emails are processed by `GET /api/cron/email/process` every 5 minutes, and booking reminders are queued by `GET /api/cron/email/reminders` every 15 minutes. Both routes require `Authorization: Bearer ${CRON_SECRET}` and run server-side only.
+Production uses one Vercel Cron job: `GET /api/cron/email/run` every five
+minutes (`*/5 * * * *`, UTC). It queues idempotent reminders before claiming
+and sending due email, and requires `Authorization: Bearer ${CRON_SECRET}`.
+HTTP 500 indicates an infrastructure/claim/marker failure; HTTP 503 indicates
+failed, overdue, stale, or exhausted queue rows. See
+`docs/EMAIL_OPERATIONS.md` and `/admin/system-health` for recovery and evidence.
 
 ### Storage Setup
 
@@ -286,13 +291,10 @@ See `docs/STORAGE_SETUP.md` for full bucket setup and manual verification.
 
 After the first user registers, promote that profile in Supabase SQL Editor:
 
-```sql
-update public.profiles
-set role = 'super_admin', status = 'active'
-where email = 'YOUR_ADMIN_EMAIL@example.com';
-```
-
-After that, use `/admin/users` for everyday role and status management. Use `admin` for operational staff and `super_admin` for system owners.
+Before the first sign-in, IT must configure the Microsoft tenant and add the first
+active Super Admin to `public.approved_users`; do not promote a `profiles` row.
+After that, use `/admin/users` for everyday allowlist role and status management.
+Use `admin` for operational staff and `super_admin` for system owners.
 
 ### Run Locally
 
@@ -374,9 +376,17 @@ https://your-vercel-app.vercel.app/**
 
 Add future custom-domain URLs when a domain is ready.
 
-See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for environment variables, Supabase setup, first-admin promotion, storage checks, smoke tests, and rollback notes.
+See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for Microsoft
+tenant/Auth Hook setup, allowlist bootstrap, storage checks, smoke tests, and
+rollback notes.
 
-App notification emails, Supabase Auth emails, and Microsoft 365 Calendar sync are separate systems. Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend` or `EMAIL_PROVIDER=smtp`. Signup confirmation, password reset, and email-change messages are Supabase Auth emails and must be configured in the Supabase Dashboard if custom SMTP branding is required there. Microsoft 365 Calendar sync uses Microsoft Graph environment variables and should remain disabled until Microsoft Entra app registration and either the central calendar target or booking-owner mailbox mode is ready.
+App notification emails and Microsoft 365 Calendar sync are separate systems.
+Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend`
+or `EMAIL_PROVIDER=smtp`. Disable password, signup, magic-link, and other public
+Supabase Auth providers for Qbook. Microsoft 365 Calendar sync uses Microsoft
+Graph environment variables and should remain disabled until Microsoft Entra app
+registration and either the central calendar target or booking-owner mailbox mode
+is ready.
 
 ## Integration Readiness
 
@@ -436,6 +446,10 @@ See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and 
 - `docs/MICROSOFT_365_CALENDAR_SYNC.md` - Microsoft 365 Calendar sync architecture, setup, security, and Stage 2 plan.
 - `docs/INTEGRATION_READINESS_CHECKLIST.md` - SMTP and Microsoft 365 Calendar app-side readiness and remaining external setup.
 - `docs/BACKUP_RESTORE.md` - Supabase, storage, Vercel env, secret rotation, and restore runbook.
+- `docs/EMAIL_OPERATIONS.md` - combined email cron, queue health, retry, and operator recovery runbook.
+- `docs/PRODUCTION_OWNERSHIP_RUNBOOK.md` - company ownership, protected release, backup, and rollback actions with required evidence.
+- `docs/BOOKING_CHANNEL_ENFORCEMENT.md` - repository booking boundary and required Exchange room-mailbox controls.
+- `docs/PRODUCTION_STABILIZATION_LEDGER.md` - definition-of-done status and remaining production evidence.
 - `docs/vercel-env-templates/booking-system-vercel-env.example` - safe Vercel environment variable import template.
 
 ## Deferred Or Optional Items

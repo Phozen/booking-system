@@ -1,120 +1,67 @@
 # Playwright E2E Testing
 
-This project includes a Playwright foundation for browser-level regression tests.
+Qbook production authentication is Microsoft-only. The browser suite never accepts
+an email/password credential and never automates an interactive Microsoft sign-in.
 
-The E2E suite is intentionally separate from `npm.cmd run qa` because it depends on a running app, Supabase credentials, migrations, seeded facilities, and dedicated test users.
-
-## Install Browsers
-
-After installing dependencies, install at least Chromium:
+## Install browsers
 
 ```powershell
 npx.cmd playwright install chromium
 ```
 
-To install all Playwright-supported browsers:
+## Public checks
+
+With no credentials, Playwright starts the local app unless `E2E_BASE_URL` is set.
+These checks confirm the Microsoft-only login surface, disabled legacy auth routes,
+and logged-out redirects:
 
 ```powershell
-npx.cmd playwright install
+npm.cmd run e2e -- --project=chromium tests/e2e/public-auth.spec.ts tests/e2e/mobile.spec.ts
 ```
 
-## Required App Setup
+## Authenticated role checks
 
-Before running authenticated E2E tests, confirm:
+Prepare three dedicated, active, pre-provisioned company test accounts. A test
+operator signs in through Microsoft in a trusted browser and saves a Playwright
+storage state for each role. Treat every state file as a bearer credential:
 
-- Supabase migrations are applied.
-- Default facilities exist.
-- The app has at least one active employee test user.
-- The app has at least one active admin test user.
-- The app has at least one active super admin test user.
-- Test users use safe non-production credentials.
-- Email sending can remain disabled; E2E tests do not send real email.
+- Store it outside the repository or under `playwright/.auth/` (ignored by Git).
+- Never print, upload, or commit it.
+- Use short-lived test accounts; revoke the session and delete the file after UAT.
 
-Prefer a dedicated Supabase test project. If testing against production, use read-heavy smoke tests only and dedicated test accounts.
-
-## Environment Variables
-
-Set these in `.env.local` or the shell before running E2E tests:
+Set only paths to those files, not user passwords:
 
 ```txt
-E2E_BASE_URL=http://localhost:3000
-E2E_EMPLOYEE_EMAIL=
-E2E_EMPLOYEE_PASSWORD=
-E2E_ADMIN_EMAIL=
-E2E_ADMIN_PASSWORD=
-E2E_SUPER_ADMIN_EMAIL=
-E2E_SUPER_ADMIN_PASSWORD=
-E2E_USE_PRODUCTION=false
+E2E_BASE_URL=https://your-verified-qbook-environment.example
+E2E_EMPLOYEE_STORAGE_STATE=playwright/.auth/employee.json
+E2E_ADMIN_STORAGE_STATE=playwright/.auth/admin.json
+E2E_SUPER_ADMIN_STORAGE_STATE=playwright/.auth/super-admin.json
 ```
 
-`E2E_BASE_URL` is optional. If blank, Playwright starts the local dev server at `http://localhost:3000`.
+The relevant suites skip explicitly when a valid role state is absent. A skip is
+not production verification.
 
-Credential-dependent tests are skipped when their matching email/password variables are missing. Public route and logged-out redirect tests still run.
+## Required production UAT evidence
 
-Do not commit real credentials.
+| Role / boundary | Operator action | Expected evidence |
+| --- | --- | --- |
+| Unlisted / wrong tenant | Attempt Microsoft sign-in | Rejected before application access; no profile or usable session. |
+| Employee | Use employee storage state; open employee routes and an admin route | Employee routes load; admin route redirects; direct approval/role RPC calls are denied. |
+| Admin | Use admin storage state; open operational admin routes and Super Admin routes | Operational pages load; user/settings/system-health pages are denied. |
+| Super Admin | Use Super Admin storage state; create/deactivate/change a pre-provisioned test record | Only allowlist/RPC path succeeds; final active Super Admin cannot be removed. |
+| Booking approval | Attempt direct DML/RPC bypass using employee/Admin tokens | Database rejects malformed, direct, and unauthorized state transitions. |
+
+Capture browser result, account/role used, timestamp, deployment URL/commit, and
+relevant audit-log or database response. Restore any changed test allowlist record
+through the guarded Super Admin path.
 
 ## Commands
 
-Run the suite:
-
 ```powershell
 npm.cmd run e2e
-```
-
-Run with the Playwright UI:
-
-```powershell
 npm.cmd run e2e:ui
-```
-
-Run headed:
-
-```powershell
 npm.cmd run e2e:headed
 ```
 
-## Current Test Coverage
-
-Current E2E files live in `tests/e2e/`:
-
-- `public-auth.spec.ts`: homepage/auth pages and logged-out redirects.
-- `employee.spec.ts`: employee login, employee pages, admin denial, and booking form validation.
-- `admin.spec.ts`: admin login, operational admin pages, and super-admin page denial.
-- `super-admin.spec.ts`: super admin access to users and settings.
-- `access-control.spec.ts`: focused role restriction smoke tests.
-- `mobile.spec.ts`: minimal mobile dashboard checks.
-
-## Local Versus Deployed Testing
-
-Local testing:
-
-- Leave `E2E_BASE_URL` blank or set it to `http://localhost:3000`.
-- Playwright will reuse an existing local server or start `npm.cmd run dev` on Windows.
-
-Deployed testing:
-
-- Set `E2E_BASE_URL=https://your-vercel-app.vercel.app`.
-- Set `E2E_USE_PRODUCTION=true` only when intentionally smoke testing production.
-- Use dedicated test accounts.
-- Avoid destructive tests against production.
-
-## Known Limitations
-
-- The initial suite avoids creating real bookings to prevent flaky data coupling.
-- Facility photo upload, real email sending, and destructive admin actions are not covered.
-- Full seed/reset automation is not implemented yet.
-- For production, authenticated tests should be treated as smoke tests unless a disposable test dataset exists.
-## Expanded Smoke Coverage
-
-The Playwright smoke suite includes non-destructive coverage for:
-
-- public/auth routes and logged-out redirects
-- employee dashboard, facilities, calendar, recurring booking, and profile
-  pages
-- admin bookings, approvals, facilities, reports, and access-control
-  redirects
-- super admin users, settings, system health, and Microsoft Calendar
-  integration pages
-
-Credential-dependent tests still skip clearly when the relevant `E2E_*`
-environment variables are not configured.
+Run against a disposable Supabase project whenever possible. Production testing is
+limited to approved, read-heavy smoke checks with dedicated company test accounts.

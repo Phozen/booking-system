@@ -147,7 +147,7 @@ npx.cmd supabase migration list
 npx.cmd supabase db push
 ```
 
-3. Confirm remote migrations are applied through the latest migration, currently `0024_email_queue_claiming.sql`.
+3. Confirm remote migrations are applied through the latest migration, currently `0031_preprovisioned_microsoft_access.sql`.
 4. Confirm RLS is enabled on application tables.
 5. Confirm the `bookings_no_overlapping_active` exclusion constraint exists.
 6. Confirm default facilities, equipment, and seeded system settings exist.
@@ -155,9 +155,10 @@ npx.cmd supabase db push
    - `app_name`
    - `company_name`
    - `system_contact_email`
-   - `registration_enabled`
-   - `allowed_email_domains`
    - `default_approval_required`
+8. Configure `public.microsoft_access_config` with the exact Entra tenant, enable
+   the `before_user_created` hook from migration 0031, and bootstrap at least one
+   active exact-email Super Admin allowlist row before disabling legacy access.
    - `allow_facility_approval_override`
    - `default_timezone`
    - `reminder_offsets_minutes`
@@ -234,18 +235,29 @@ Before launch, manually test upload, primary photo selection, delete, employee f
 
 ## First Super Admin Setup
 
-1. Deploy the app.
-2. Register the first user through `/register`, if registration is enabled.
-3. Promote the first super admin in Supabase SQL Editor:
+1. Apply migration `0031_preprovisioned_microsoft_access.sql` during the approved database release.
+2. In Supabase SQL Editor, bootstrap the authoritative tenant and first allowlisted Super Admin before that person signs in:
 
 ```sql
-update public.profiles
-set role = 'super_admin', status = 'active'
-where email = 'YOUR_ADMIN_EMAIL@example.com';
+insert into public.microsoft_access_config (singleton, tenant_id)
+values (true, 'YOUR_ENTRA_TENANT_ID');
+
+insert into public.approved_users (email, role, status)
+values ('YOUR_ADMIN_EMAIL@example.com', 'super_admin', 'active');
 ```
 
-4. Log in and open `/admin/dashboard`.
-5. Use `/admin/users` for everyday role/status changes after the first super admin exists.
+3. In Supabase Authentication, set the Azure provider Tenant URL to
+   `https://login.microsoftonline.com/YOUR_ENTRA_TENANT_ID`, enable
+   `public.hook_enforce_preprovisioned_microsoft_access` as the Before User
+   Created hook, and disable email/password, signup, magic-link, and all other
+   public providers.
+4. In the Entra app manifest, configure the `xms_edov` verified-email claim as
+   recommended by Supabase; retain the resulting configuration evidence.
+5. Confirm `MICROSOFT_TENANT_ID`, `microsoft_access_config.tenant_id`, the
+   Azure provider Tenant URL, and the Entra tenant all identify the same tenant.
+6. Log in through Microsoft and open `/admin/dashboard`.
+7. Use `/admin/users` for everyday allowlist role/status changes after the first
+   Super Admin exists.
 
 ## Supabase Auth URLs
 
@@ -269,7 +281,8 @@ https://your-domain.com/**
 https://www.your-domain.com/**
 ```
 
-Current project note: there is no `/auth/callback` route. Password reset currently uses `/reset-password`.
+Qbook uses `/auth/callback` for Microsoft OAuth. `/register` and
+`/reset-password` intentionally redirect to disabled Microsoft-only access.
 
 ## App Notification Email Setup
 
@@ -309,23 +322,21 @@ If email variables are missing, processing should fail safely and store a clear 
 
 ### Automated Queue Processing
 
-Queued app notification emails are processed by a protected Vercel Cron route:
+Reminders and queued delivery are handled by one protected Vercel Cron route:
 
 ```txt
-GET /api/cron/email/process
+GET /api/cron/email/run
 Authorization: Bearer ${CRON_SECRET}
 ```
 
-Booking reminder emails are queued by a separate protected Vercel Cron route:
-
-```txt
-GET /api/cron/email/reminders
-Authorization: Bearer ${CRON_SECRET}
-```
-
-`vercel.json` schedules queued email processing every 5 minutes and reminder queueing every 15 minutes. Set `CRON_SECRET` in Vercel to a long random server-only value. Do not prefix it with `NEXT_PUBLIC_`, do not commit the real value, and do not expose it in client components.
-
-The reminder route only inserts queued reminder notification records. `/api/cron/email/process` remains responsible for sending emails.
+`vercel.json` schedules this cycle every five minutes in UTC. The deployment plan
+must support sub-daily cron. Set `CRON_SECRET` in Vercel to a long random
+server-only value. Do not prefix it with `NEXT_PUBLIC_`, commit it, or expose it
+to client components. HTTP 500 is an infrastructure failure and HTTP 503 means
+operator recovery is required. Verify zero failed/overdue/stale/exhausted rows in
+the response and `/admin/system-health`; follow `docs/EMAIL_OPERATIONS.md` to
+retry safely. The legacy process/reminder routes remain protected manual
+endpoints and are not separately scheduled.
 
 ### SMTP Setup For Microsoft 365
 
@@ -385,9 +396,11 @@ Manual SMTP smoke test:
 8. If sending fails, review the safe `last_error` message.
 9. Confirm no secrets appear in the UI or log output.
 
-### Supabase Auth Email Is Separate
+### Supabase Auth Provider Controls
 
-Supabase Auth emails include signup confirmation, password reset, and email-change messages. Configure those in Supabase Dashboard > Authentication > SMTP settings if the company wants Microsoft 365 or another branded SMTP sender for auth emails. The app `EMAIL_PROVIDER` settings do not control Supabase Auth email delivery.
+Qbook does not use Supabase signup, password-reset, magic-link, or password email
+delivery. Disable those providers and confirmations in Supabase Authentication.
+The app `EMAIL_PROVIDER` settings control only Qbook booking/invitation email.
 
 ## Domain Setup Later
 
@@ -418,9 +431,10 @@ When an Exabytes domain is purchased or ready:
 ## Post-Deployment Smoke Test Checklist
 
 - [ ] Visit homepage.
-- [ ] Register a user, if registration is enabled.
-- [ ] Log in as employee.
-- [ ] Log in as admin.
+- [ ] Confirm Microsoft is the only login action and `/register`/`/reset-password` are disabled.
+- [ ] Log in as a pre-provisioned employee and confirm admin routes are denied.
+- [ ] Log in as a pre-provisioned Admin and confirm Super Admin routes are denied.
+- [ ] Log in as a pre-provisioned Super Admin and confirm only the guarded allowlist path changes roles/status.
 - [ ] Open `/facilities`.
 - [ ] Open a facility detail page.
 - [ ] Create a valid booking.

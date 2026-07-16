@@ -39,7 +39,7 @@ export async function getCurrentAuthState(): Promise<AuthState> {
     };
   }
 
-  const profile = await getProfileSession(supabase, user.id);
+  const profile = await getProfileSession(supabase, user);
 
   return {
     isConfigured: true,
@@ -52,7 +52,7 @@ export async function getPostLoginPath(
   supabase: SupabaseClient,
   user: User,
 ) {
-  const profile = await getProfileSession(supabase, user.id);
+  const profile = await getProfileSession(supabase, user);
 
   if (!profile || profile.status !== "active") {
     await supabase.auth.signOut();

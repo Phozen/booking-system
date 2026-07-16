@@ -1,27 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 import {
-  getCredentials,
-  login,
-  missingCredentialsMessage,
+  emptyStorageState,
+  getStorageState,
+  missingStorageStateMessage,
 } from "./helpers/auth";
 import { superAdminSmokeRoutes } from "./helpers/routes";
 
-const superAdminCredentials = getCredentials("superAdmin");
+const superAdminStorageState = getStorageState("superAdmin");
+
+test.use({ storageState: superAdminStorageState ?? emptyStorageState() });
 
 test.describe("super admin smoke flows", () => {
-  test.skip(!superAdminCredentials, missingCredentialsMessage("superAdmin"));
-
-  test.beforeEach(async ({ page }) => {
-    const credentials = superAdminCredentials;
-
-    if (!credentials) {
-      test.skip();
-      return;
-    }
-
-    await login(page, credentials);
-  });
+  test.skip(!superAdminStorageState, missingStorageStateMessage("superAdmin"));
 
   for (const route of superAdminSmokeRoutes) {
     test(`${route.path} loads`, async ({ page }) => {

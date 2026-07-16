@@ -1,27 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 import {
-  getCredentials,
-  login,
-  missingCredentialsMessage,
+  emptyStorageState,
+  getStorageState,
+  missingStorageStateMessage,
 } from "./helpers/auth";
 import { employeeSmokeRoutes } from "./helpers/routes";
 
-const employeeCredentials = getCredentials("employee");
+const employeeStorageState = getStorageState("employee");
+
+test.use({ storageState: employeeStorageState ?? emptyStorageState() });
 
 test.describe("employee smoke flows", () => {
-  test.skip(!employeeCredentials, missingCredentialsMessage("employee"));
-
-  test.beforeEach(async ({ page }) => {
-    const credentials = employeeCredentials;
-
-    if (!credentials) {
-      test.skip();
-      return;
-    }
-
-    await login(page, credentials);
-  });
+  test.skip(!employeeStorageState, missingStorageStateMessage("employee"));
 
   for (const route of employeeSmokeRoutes) {
     test(`${route.path} loads`, async ({ page }) => {

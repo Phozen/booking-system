@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { UserFilters } from "@/components/admin/users/user-filters";
 import { UsersTable } from "@/components/admin/users/users-table";
 import { PageHeader } from "@/components/shared/page-header";
+import { ApprovedUserCreateForm } from "@/components/admin/users/approved-user-create-form";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +28,11 @@ export default async function AdminUsersPage({
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Super admin area"
-        title="User management"
-        description="Search users, review account status, and update roles or access status without using the Supabase SQL editor."
+        title="Approved user access"
+        description="Pre-provision exact employee emails, then manage active access and roles. Authentication remains Microsoft-only."
       />
 
+      <ApprovedUserCreateForm />
       <UserFilters filters={filters} />
       <UsersTable users={users} filtersActive={filtersActive} />
     </main>

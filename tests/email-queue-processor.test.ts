@@ -192,16 +192,15 @@ describe("email queue processor", () => {
     expect(mocks.sendNotificationEmail).toHaveBeenCalledTimes(2);
   });
 
-  it("reports marker RPC failure without throwing the batch", async () => {
+  it("fails the batch loudly when the sent marker RPC fails", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     const supabase = createSupabaseMock({
       markSentError: { message: "marker failed" },
     });
 
-    const result = await processQueuedEmailNotifications(supabase as never);
-
-    expect(result.skipped).toBe(1);
-    expect(result.sent).toBe(0);
+    await expect(
+      processQueuedEmailNotifications(supabase as never),
+    ).rejects.toThrow(/delivery status could not be recorded/i);
     expect(consoleError).toHaveBeenCalledWith("Email queue sent marker failed", {
       notificationId: baseClaimedEmail.id,
       provider: "smtp",

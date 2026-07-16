@@ -28,6 +28,7 @@ import {
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import {
   adminBookingActionSchema,
   formDataToAdminBookingActionValues,
@@ -169,41 +170,15 @@ async function updateBookingUsageStatus({
     };
   }
 
-  const now = new Date().toISOString();
-  const updateValues =
-    status === "checked_in"
-      ? {
-          usage_status: status,
-          checked_in_at: now,
-          checked_in_by: actorUserId,
-          no_show_marked_at: null,
-          no_show_marked_by: null,
-        }
-      : status === "no_show"
-        ? {
-            usage_status: status,
-            checked_in_at: null,
-            checked_in_by: null,
-            no_show_marked_at: now,
-            no_show_marked_by: actorUserId,
-          }
-        : {
-            usage_status: status,
-            checked_in_at: null,
-            checked_in_by: null,
-            no_show_marked_at: null,
-            no_show_marked_by: null,
-          };
-
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(updateValues)
-    .eq("id", bookingId)
-    .select(
-      "id,facility_id,user_id,title,status,starts_at,ends_at,approval_required,cancellation_reason,cancelled_at,usage_status,checked_in_at,checked_in_by,no_show_marked_at,no_show_marked_by,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
-    )
-    .maybeSingle();
+  const mutationClient = await createClient();
+  const { data, error } = await mutationClient.rpc(
+    "update_booking_usage_as_admin",
+    {
+      p_booking_id: bookingId,
+      p_usage_status: status,
+    },
+  );
 
   if (error || !data) {
     console.error("Booking usage update failed", {
@@ -217,7 +192,11 @@ async function updateBookingUsageStatus({
     };
   }
 
-  const updated = data as unknown as AdminBookingActionRecord;
+  const updated = {
+    ...(data as unknown as AdminBookingActionRecord),
+    facilities: existing.facilities,
+    profiles: existing.profiles,
+  } satisfies AdminBookingActionRecord;
 
   await createAuditLogSafely(
     supabase,
@@ -634,21 +613,11 @@ export async function adminCancelBookingAction(
   }
 
   const cancellationReason = parsed.data.remarks || null;
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("bookings")
-    .update({
-      status: "cancelled",
-      cancelled_by: user.id,
-      cancelled_at: new Date().toISOString(),
-      cancellation_reason: cancellationReason,
-    })
-    .eq("id", bookingId)
-    .in("status", ["pending", "confirmed"])
-    .select(
-      "id,facility_id,user_id,title,status,starts_at,ends_at,approval_required,cancellation_reason,cancelled_at,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
-    )
-    .maybeSingle();
+  const mutationClient = await createClient();
+  const { data, error } = await mutationClient.rpc("cancel_booking_as_admin", {
+    p_booking_id: bookingId,
+    p_reason: cancellationReason,
+  });
 
   if (error || !data) {
     console.error("Admin booking cancellation failed", {
@@ -662,7 +631,11 @@ export async function adminCancelBookingAction(
     };
   }
 
-  const updated = data as unknown as AdminBookingActionRecord;
+  const updated = {
+    ...(data as unknown as AdminBookingActionRecord),
+    facilities: existing.facilities,
+    profiles: existing.profiles,
+  } satisfies AdminBookingActionRecord;
   const facility = getBookingFacility(updated);
   const bookingWindow = formatEmailBookingWindow(
     updated.starts_at,
@@ -794,16 +767,12 @@ export async function approveBookingAction(
     };
   }
 
-  const reviewedAt = new Date().toISOString();
-  const { data, error } = await supabase
-    .from("bookings")
-    .update({ status: "confirmed" })
-    .eq("id", bookingId)
-    .eq("status", "pending")
-    .select(
-      "id,facility_id,user_id,title,status,starts_at,ends_at,approval_required,cancellation_reason,cancelled_at,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
-    )
-    .maybeSingle();
+  const reviewClient = await createClient();
+  const { data, error } = await reviewClient.rpc("review_booking_approval", {
+    p_booking_id: bookingId,
+    p_decision: "approved",
+    p_remarks: parsed.data.remarks || null,
+  });
 
   if (error || !data) {
     console.error("Booking approval update failed", {
@@ -821,29 +790,11 @@ export async function approveBookingAction(
     };
   }
 
-  const updated = data as unknown as AdminBookingActionRecord;
-  const pendingApproval = existing.booking_approvals?.find(
-    (approval) => approval.status === "pending",
-  );
-
-  if (pendingApproval) {
-    const { error: approvalError } = await supabase
-      .from("booking_approvals")
-      .update({
-        status: "approved",
-        reviewed_by: user.id,
-        reviewed_at: reviewedAt,
-        remarks: parsed.data.remarks || null,
-      })
-      .eq("id", pendingApproval.id);
-
-    if (approvalError) {
-      console.error("Booking approval record update failed", {
-        bookingId,
-        message: approvalError.message,
-      });
-    }
-  }
+  const updated = {
+    ...(data as unknown as AdminBookingActionRecord),
+    facilities: existing.facilities,
+    profiles: existing.profiles,
+  } satisfies AdminBookingActionRecord;
 
   const facility = getBookingFacility(updated);
   const bookingWindow = formatEmailBookingWindow(
@@ -935,17 +886,12 @@ export async function rejectBookingAction(
     };
   }
 
-  const supabase = createAdminClient();
-  const reviewedAt = new Date().toISOString();
-  const { data, error } = await supabase
-    .from("bookings")
-    .update({ status: "rejected" })
-    .eq("id", bookingId)
-    .eq("status", "pending")
-    .select(
-      "id,facility_id,user_id,title,status,starts_at,ends_at,approval_required,cancellation_reason,cancelled_at,facilities(name,level),profiles!bookings_user_id_fkey(email,full_name)",
-    )
-    .maybeSingle();
+  const reviewClient = await createClient();
+  const { data, error } = await reviewClient.rpc("review_booking_approval", {
+    p_booking_id: bookingId,
+    p_decision: "rejected",
+    p_remarks: parsed.data.remarks || null,
+  });
 
   if (error || !data) {
     console.error("Booking rejection update failed", {
@@ -959,29 +905,11 @@ export async function rejectBookingAction(
     };
   }
 
-  const updated = data as unknown as AdminBookingActionRecord;
-  const pendingApproval = existing.booking_approvals?.find(
-    (approval) => approval.status === "pending",
-  );
-
-  if (pendingApproval) {
-    const { error: approvalError } = await supabase
-      .from("booking_approvals")
-      .update({
-        status: "rejected",
-        reviewed_by: user.id,
-        reviewed_at: reviewedAt,
-        remarks: parsed.data.remarks || null,
-      })
-      .eq("id", pendingApproval.id);
-
-    if (approvalError) {
-      console.error("Booking rejection approval record update failed", {
-        bookingId,
-        message: approvalError.message,
-      });
-    }
-  }
+  const updated = {
+    ...(data as unknown as AdminBookingActionRecord),
+    facilities: existing.facilities,
+    profiles: existing.profiles,
+  } satisfies AdminBookingActionRecord;
 
   const facility = getBookingFacility(updated);
   const bookingWindow = formatEmailBookingWindow(

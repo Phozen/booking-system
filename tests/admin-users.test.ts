@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  approvedUserCreateSchema,
   isSelfRoleOrStatusChange,
   parseUserFilters,
   removesActiveAdminAccess,
@@ -8,6 +9,15 @@ import {
 } from "@/lib/admin/users/validation";
 
 describe("admin user management validation", () => {
+  it("normalizes exact provisioned emails", () => {
+    expect(
+      approvedUserCreateSchema.parse({
+        email: "  Jane.Employee@Example.COM ",
+        role: "employee",
+        status: "active",
+      }).email,
+    ).toBe("jane.employee@example.com");
+  });
   it("parses search, role, and status filters", () => {
     expect(
       parseUserFilters({

@@ -1,0 +1,16 @@
+# Production stabilization evidence ledger
+
+Status meanings: **repository complete** means code/tests/runbook exist locally; **external verification required** means credentials or company-admin action is still needed; **blocked** is not used for safe local work that remains.
+
+| Definition of done | Status | Repository evidence | Remaining production evidence |
+| --- | --- | --- | --- |
+| 1. Microsoft tenant-only authentication | Repository complete; external verification required | Migration `0031`; callback/profile/action negative tests; ordinary sign-in requests identity scopes only | Set Azure Tenant URL to the exact company tenant; enable Before User Created hook; configure `xms_edov`; capture wrong-tenant rejection |
+| 2. Active pre-provisioned employees only | Repository complete; SQL execution unverified | `approved_users`, exact normalized email, active recheck, atomic Super Admin mutation RPC; focused access assertions | Apply `0031`; run Employee/Admin/Super Admin Microsoft login and deactivation UAT |
+| 3. Public/self-registration disabled | Repository complete; external verification required | Password/sign-up/reset server actions fail closed; Microsoft-only UI and public browser tests | Disable email/password, magic-link, and other public Supabase Auth providers; verify direct Auth signup rejection |
+| 4. Automated email confirmations/reminders | Repository complete; production queue verification required | Five-minute `/api/cron/email/run`, claim/marker error propagation, health thresholds, 53 focused email assertions, `EMAIL_OPERATIONS.md` | Vercel cron execution logs, CRON_SECRET, 500/503 alert, zero-overdue queue evidence |
+| 5. Approval cannot be bypassed | Repository complete; database test unexecuted | Migration `0032`; 7 behavioral action tests; pgTAP rollback test; direct DML revocation; atomic review/cancellation | Run `npx supabase test db`, apply `0032`, capture production negative tests |
+| 6. Qbook-only room-booking channel | Qbook database complete; Microsoft control external | `BOOKING_CHANNEL_ENFORCEMENT.md`; all Qbook mutations RPC-bound | Exchange room mailbox policy and negative Outlook booking tests; facility-calendar integration decision |
+| 7. Company ownership/private/release controls | Repository gates complete; external actions required | CI, manual environment-gated promotion, Dependabot, ownership/release runbook | Company GitHub/Vercel/Supabase transfer, private visibility, ruleset, CODEOWNERS, team/bot evidence |
+| 8. Employee/Admin/Super Admin production workflows | Repository contract complete; production UAT required | Microsoft-only public Playwright checks; role suites require non-committed Microsoft storage states; access/provisioning/booking negative suites | Execute the documented role/UAT matrix using approved storage states on a production-like preview and after promotion |
+| 9. Monitoring, backup recovery, rollback | Runbooks complete; drills external | Email health page/503 contract; email and ownership/release runbooks | Alert delivery test, Supabase restore drill, Vercel rollback drill, measured RPO/RTO |
+| 10. High-severity vulnerabilities resolved | Repository complete | Direct dependencies patched; CI runs `npm audit --audit-level=high` | Final release audit log; triage remaining moderate advisories without suppression |

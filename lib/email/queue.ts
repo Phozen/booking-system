@@ -233,7 +233,7 @@ async function processClaimedNotification(
         provider: result.provider,
         message: markSentError.message,
       });
-      return "skipped" as const;
+      throw new Error("Email was sent but its delivery status could not be recorded.");
     }
 
     return "sent" as const;
@@ -252,7 +252,7 @@ async function processClaimedNotification(
       provider: result.provider,
       message: markFailedError.message,
     });
-    return "skipped" as const;
+    throw new Error("Email failure status could not be recorded.");
   }
 
   return retryAt ? ("retried" as const) : ("failed" as const);
@@ -316,7 +316,7 @@ export async function processEmailNotificationNow(
     sent: outcome === "sent" ? 1 : 0,
     failed: outcome === "failed" ? 1 : 0,
     retried: outcome === "retried" ? 1 : 0,
-    skipped: outcome === "skipped" ? 1 : 0,
+    skipped: 0,
     message: "Processed booking confirmation email notification.",
   };
 }
@@ -338,15 +338,7 @@ export async function processQueuedEmailNotifications(
 
   if (error) {
     console.error("Email queue claim failed", { message: error.message });
-
-    return {
-      processed: 0,
-      sent: 0,
-      failed: 0,
-      retried: 0,
-      skipped: 0,
-      message: "Queued emails could not be loaded.",
-    };
+    throw new Error("Queued emails could not be claimed.");
   }
 
   const notifications = await attachRelatedBookings(
@@ -357,7 +349,7 @@ export async function processQueuedEmailNotifications(
   let sent = 0;
   let failed = 0;
   let retried = 0;
-  let skipped = 0;
+  const skipped = 0;
 
   for (const claimed of notifications) {
     processed += 1;
@@ -369,8 +361,6 @@ export async function processQueuedEmailNotifications(
       failed += 1;
     } else if (outcome === "retried") {
       retried += 1;
-    } else {
-      skipped += 1;
     }
   }
 

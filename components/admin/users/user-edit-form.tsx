@@ -151,7 +151,7 @@ export function UserEditForm({
   const [selectedRole, setSelectedRole] = useState<UserRole>(user.role);
   const [selectedStatus, setSelectedStatus] = useState<UserStatus>(user.status);
   const formRef = useRef<HTMLFormElement>(null);
-  const isSelf = currentUserId === user.id;
+  const isSelf = currentUserId === user.authUserId;
   const confirmCopy = getConfirmCopy({
     initialStatus: user.status,
     selectedStatus,

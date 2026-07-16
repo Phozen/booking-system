@@ -585,21 +585,10 @@ export async function cancelBookingAction(
   }
 
   const cancellationReason = parsed.data.reason || null;
-  const { data, error } = await supabase
-    .from("bookings")
-    .update({
-      status: "cancelled",
-      cancelled_by: user.id,
-      cancelled_at: new Date().toISOString(),
-      cancellation_reason: cancellationReason,
-    })
-    .eq("id", bookingId)
-    .eq("user_id", user.id)
-    .in("status", ["pending", "confirmed"])
-    .select(
-      "id,facility_id,user_id,title,status,starts_at,ends_at,cancellation_reason,cancelled_at,facilities(name)",
-    )
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("cancel_own_booking", {
+    p_booking_id: bookingId,
+    p_reason: cancellationReason,
+  });
 
   if (error || !data) {
     console.error("Booking cancellation failed", {
@@ -624,11 +613,7 @@ export async function cancelBookingAction(
     ends_at: string;
     cancellation_reason: string | null;
     cancelled_at: string | null;
-    facilities: { name: string } | { name: string }[] | null;
   };
-  const facilityRecord = Array.isArray(updated.facilities)
-    ? updated.facilities[0]
-    : updated.facilities;
 
   await insertBookingCancellationSideEffects({
     booking: {
@@ -641,7 +626,7 @@ export async function cancelBookingAction(
       endsAt: updated.ends_at,
       cancellationReason: updated.cancellation_reason,
       cancelledAt: updated.cancelled_at,
-      facilityName: facilityRecord?.name ?? "the facility",
+      facilityName: existing.facility?.name ?? "the facility",
     },
     actorEmail: user.email,
     recipientEmail: user.email,
@@ -925,44 +910,16 @@ async function cancelRecurringBookingsScope(
     };
   }
 
-  let updateQuery = supabase
-    .from("bookings")
-    .update({
-      status: "cancelled",
-      cancelled_by: user.id,
-      cancelled_at: new Date().toISOString(),
-      cancellation_reason:
-        scope === "future"
-          ? "Recurring booking future occurrences cancelled by owner."
-          : "Recurring booking series cancelled by owner.",
-    })
-    .eq("user_id", user.id)
-    .eq("recurrence_series_id", existing.recurrenceSeriesId)
-    .in("status", ["pending", "confirmed"]);
-
-  if (scope === "future") {
-    updateQuery = updateQuery.gte("starts_at", existing.startsAt);
-  }
-
-  const { error } = await updateQuery;
+  const { error } = await supabase.rpc("cancel_own_recurring_bookings", {
+    p_booking_id: bookingId,
+    p_scope: scope,
+  });
 
   if (error) {
     return {
       status: "error",
       message: "Recurring bookings could not be cancelled.",
     };
-  }
-
-  if (scope === "series") {
-    await supabase
-      .from("booking_recurrence_series")
-      .update({
-        status: "cancelled",
-        cancelled_by: user.id,
-        cancelled_at: new Date().toISOString(),
-      })
-      .eq("id", existing.recurrenceSeriesId)
-      .eq("owner_user_id", user.id);
   }
 
   await createAuditLogSafely(

@@ -12,10 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EmailLoginDisclosure } from "@/components/auth/email-login-disclosure";
 import { MicrosoftLogo } from "@/components/auth/microsoft-logo";
 import { productName } from "@/components/shared/company-logo";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export type LoginSearchParams = Record<string, string | string[] | undefined>;
 
@@ -32,7 +32,11 @@ export function getLoginMessage(
   }
 
   if (searchParams.error === "microsoft") {
-    return "Microsoft login was cancelled or denied. Try again, or use email and password.";
+    return "Microsoft login was cancelled or denied. Try again with your provisioned company account.";
+  }
+
+  if (searchParams.error === "tenant") {
+    return "That Microsoft tenant is not authorized for Qbook.";
   }
 
   if (searchParams.error === "callback") {
@@ -69,7 +73,15 @@ export function LoginPanel({
             Continue with Microsoft
           </Button>
         </form>
-        <EmailLoginDisclosure initialMessage={initialMessage} />
+        {initialMessage ? (
+          <Alert variant="destructive">
+            <AlertDescription>{initialMessage}</AlertDescription>
+          </Alert>
+        ) : null}
+        <p className="text-sm text-muted-foreground">
+          Access is limited to active employees pre-provisioned by IT. Email and
+          password registration is disabled.
+        </p>
       </CardContent>
     </Card>
   );

@@ -27,12 +27,12 @@ export function UsersTable({
 }) {
   const emptyDescription = filtersActive
     ? "No users match the selected search or filters. Clear filters and try again."
-    : "No user profiles were found. New Supabase Auth users should receive profiles automatically.";
+    : "No employees are pre-provisioned. Add an exact Microsoft email above before the employee signs in.";
 
   return (
     <AdminTableShell
       title="Users"
-      description={`${users.length} profile records`}
+      description={`${users.length} approved access records`}
       mobileCards={
         users.length > 0 ? (
           users.map((user) => (

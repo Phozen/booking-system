@@ -113,13 +113,19 @@ describe("email reminders cron route", () => {
     expect(sendNotificationEmail).not.toHaveBeenCalled();
   });
 
-  it("does not configure a Vercel cron schedule", async () => {
+  it("uses only the consolidated Vercel email cycle schedule", async () => {
     const { readFileSync } = await import("node:fs");
     const { join } = await import("node:path");
     const vercelConfig = JSON.parse(
       readFileSync(join(process.cwd(), "vercel.json"), "utf8"),
     );
 
-    expect(vercelConfig.crons).toBeUndefined();
+    expect(vercelConfig.crons).toContainEqual({
+      path: "/api/cron/email/run",
+      schedule: "*/5 * * * *",
+    });
+    expect(vercelConfig.crons).not.toContainEqual(
+      expect.objectContaining({ path: "/api/cron/email/reminders" }),
+    );
   });
 });

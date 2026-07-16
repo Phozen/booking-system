@@ -30,30 +30,31 @@ Use this checklist after migrations are applied and the app is running with real
 
 ## Authentication
 
-- [ ] Open `/login`; confirm email/password form renders.
-- [ ] Log in with valid employee credentials; expect `/dashboard`.
-- [ ] Log in with valid admin or super admin credentials; expect `/admin/dashboard`.
-- [ ] Try invalid credentials; expect a generic friendly error.
+- [ ] Open `/login`; confirm `Continue with Microsoft` is the only sign-in action and no email/password fields render.
+- [ ] Log in with a pre-provisioned active employee Microsoft account; expect `/dashboard`.
+- [ ] Log in with a pre-provisioned active Admin or Super Admin Microsoft account; expect `/admin/dashboard`.
+- [ ] Attempt an unlisted address and a wrong-tenant Microsoft account; expect rejection with no usable Qbook session.
 - [ ] Use logout; expect redirect to `/login`.
-- [ ] Open `/reset-password`; submit a valid email; expect generic reset success messaging.
+- [ ] Confirm `/register` and `/reset-password` redirect to disabled Microsoft-only access.
 - [ ] Confirm unauthenticated `/dashboard`, `/facilities`, `/bookings/new`, `/my-bookings`, and `/admin/dashboard` redirect to `/login?auth=required`.
 
 ## Playwright E2E Smoke Tests
 
 - [ ] Install browsers with `npx.cmd playwright install chromium`.
 - [ ] Set `E2E_BASE_URL`, or leave it blank to use `http://localhost:3000`.
-- [ ] Set dedicated test user credentials: `E2E_EMPLOYEE_EMAIL`, `E2E_EMPLOYEE_PASSWORD`, `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_SUPER_ADMIN_EMAIL`, `E2E_SUPER_ADMIN_PASSWORD`.
+- [ ] Set dedicated, short-lived Microsoft session-state paths: `E2E_EMPLOYEE_STORAGE_STATE`, `E2E_ADMIN_STORAGE_STATE`, and `E2E_SUPER_ADMIN_STORAGE_STATE`. Do not store passwords or commit the state files.
 - [ ] Run `npm.cmd run e2e`.
 - [ ] Confirm public/auth and logged-out redirect tests pass.
 - [ ] Confirm authenticated tests either pass or skip with clear missing-credential messages.
 - [ ] Do not run destructive E2E flows against production unless a disposable test dataset is available.
 
-## Registration Settings
+## Pre-provisioned Access Settings
 
-- [ ] Set `registration_enabled=false` in `/admin/settings`; log out; confirm `/register` shows registration disabled.
-- [ ] Set `registration_enabled=true` and `allowed_email_domains=[]`; confirm any valid email domain can register.
-- [ ] Set `allowed_email_domains=["example.com"]`; confirm `user@example.com` can register.
-- [ ] With the same domain setting, confirm `user@gmail.com` is blocked with a friendly message.
+- [ ] As Super Admin, add a unique test address to `approved_users`; confirm it cannot enter before Microsoft sign-in.
+- [ ] Sign in through the configured company tenant; confirm the exact normalized email becomes active with the allowlisted role.
+- [ ] Deactivate the allowlist record; confirm the active user loses protected access.
+- [ ] Confirm Admin and Employee cannot create, deactivate, or change allowlist roles directly or through the RPC.
+- [ ] Confirm the final active Super Admin cannot be deactivated or demoted.
 - [ ] Confirm duplicate email signup shows a friendly existing-account message.
 - [ ] Confirm signup rate limit errors show the wait-and-try-again message.
 

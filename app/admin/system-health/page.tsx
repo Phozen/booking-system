@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
+import { getEmailQueueHealth } from "@/lib/email/health";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -72,8 +73,8 @@ export default async function SystemHealthPage() {
       ? validateSmtpConfig(getSmtpConfigFromEnv(process.env))
       : null;
   const microsoftConfig = getMicrosoftCalendarSyncConfig();
-  const [failedEmails, queuedEmails, failedSyncs] = await Promise.all([
-    getCount("email_notifications", "status", "failed"),
+  const [emailHealth, queuedEmails, failedSyncs] = await Promise.all([
+    getEmailQueueHealth(),
     getCount("email_notifications", "status", "queued"),
     getCount("booking_calendar_syncs", "sync_status", "failed"),
   ]);
@@ -120,7 +121,7 @@ export default async function SystemHealthPage() {
                 ? "EMAIL_FROM is missing."
                 : smtpError
                   ? smtpError
-                  : `Provider: ${emailProvider.toUpperCase()}. Failed: ${failedEmails ?? "unknown"}. Queued: ${queuedEmails ?? "unknown"}.`
+                  : `Provider: ${emailProvider.toUpperCase()}. Failed: ${emailHealth.failed}. Overdue: ${emailHealth.overdueQueued}. Stale sending: ${emailHealth.staleSending}. Queued: ${queuedEmails ?? "unknown"}.`
           }
           icon={<Mail className="size-5" aria-hidden="true" />}
         />
@@ -147,18 +148,18 @@ export default async function SystemHealthPage() {
         <HealthCard
           title="Operational follow-up"
           status={
-            (failedEmails ?? 0) > 0 || (failedSyncs ?? 0) > 0
+            !emailHealth.healthy || (failedSyncs ?? 0) > 0
               ? "warning"
               : "ok"
           }
           description="Failed email and calendar records should be retried or investigated before production launch."
           meta={
-            (failedEmails ?? 0) > 0 || (failedSyncs ?? 0) > 0
-              ? `Review ${failedEmails ?? "unknown"} failed email records and ${failedSyncs ?? "unknown"} failed calendar sync records.`
-              : "No failed email or calendar sync records were counted."
+            !emailHealth.healthy || (failedSyncs ?? 0) > 0
+              ? `Review ${emailHealth.failed} failed, ${emailHealth.overdueQueued} overdue, ${emailHealth.staleSending} stale-sending email records and ${failedSyncs ?? "unknown"} failed calendar sync records.`
+              : "No failed, overdue, stale email, or failed calendar sync records were counted."
           }
           icon={
-            (failedEmails ?? 0) > 0 || (failedSyncs ?? 0) > 0 ? (
+            !emailHealth.healthy || (failedSyncs ?? 0) > 0 ? (
               <AlertTriangle className="size-5" aria-hidden="true" />
             ) : (
               <CheckCircle2 className="size-5" aria-hidden="true" />

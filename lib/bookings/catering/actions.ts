@@ -12,6 +12,7 @@ import {
   formDataToCateringValues,
 } from "@/lib/bookings/catering/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 type CateringBookingRecord = {
   id: string;
@@ -106,23 +107,19 @@ export async function updateBookingCateringAction(
   }
 
   const details = cateringValuesToDetails(parsed.data);
-  const updatePayload = {
-    catering_required: details.required,
-    catering_type: details.required ? details.type : null,
-    catering_pax: details.required ? details.pax : null,
-    catering_serving_time: details.required ? details.servingTime : null,
-    catering_dietary_notes: details.required ? details.dietaryNotes : null,
-    catering_notes: details.required ? details.notes : null,
-  };
-
-  const { data: updated, error: updateError } = await supabase
-    .from("bookings")
-    .update(updatePayload)
-    .eq("id", bookingId)
-    .select(
-      "id,user_id,title,status,catering_required,catering_type,catering_pax,catering_serving_time,catering_dietary_notes,catering_notes",
-    )
-    .maybeSingle();
+  const mutationClient = await createClient();
+  const { data: updated, error: updateError } = await mutationClient.rpc(
+    "update_booking_catering",
+    {
+      p_booking_id: bookingId,
+      p_catering_required: details.required,
+      p_catering_type: details.required ? details.type : null,
+      p_catering_pax: details.required ? details.pax : null,
+      p_catering_serving_time: details.required ? details.servingTime : null,
+      p_catering_dietary_notes: details.required ? details.dietaryNotes : null,
+      p_catering_notes: details.required ? details.notes : null,
+    },
+  );
 
   if (updateError || !updated) {
     console.error("Booking catering update failed", {

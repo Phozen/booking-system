@@ -60,7 +60,7 @@ Server-side app defaults:
 - [ ] `SMTP_REQUIRE_TLS` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_USER` is blank until SMTP is ready, or set to the SMTP mailbox username.
 - [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra setup and manual Graph sync QA are complete.
-- [ ] `MICROSOFT_TENANT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
+- [ ] `MICROSOFT_TENANT_ID` is set to the exact company Entra tenant ID before any Qbook sign-in is enabled.
 - [ ] `MICROSOFT_CLIENT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
 - [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID when using `central_calendar`.
 - [ ] `MICROSOFT_SYNC_MODE=disabled` until Microsoft 365 Calendar sync is ready to test; use `booking_owner_calendar` only after allowed company domains are configured.
@@ -104,10 +104,17 @@ Security reminders:
 - [ ] First super admin has been promoted through Supabase SQL Editor:
 
 ```sql
-update public.profiles
-set role = 'super_admin', status = 'active'
-where email = 'YOUR_ADMIN_EMAIL@example.com';
+insert into public.microsoft_access_config (singleton, tenant_id)
+values (true, 'YOUR_ENTRA_TENANT_ID');
+
+insert into public.approved_users (email, role, status)
+values ('YOUR_ADMIN_EMAIL@example.com', 'super_admin', 'active');
 ```
+
+Then configure the Supabase Azure provider tenant URL as
+`https://login.microsoftonline.com/YOUR_ENTRA_TENANT_ID`, enable
+`public.hook_enforce_preprovisioned_microsoft_access` as the Before User Created
+Auth Hook, and disable email/password and all other public Auth providers.
 
 - [ ] Admin can log in and open `/admin/dashboard`.
 - [ ] Super Admin can use `/admin/users` for everyday role/status changes after first promotion.

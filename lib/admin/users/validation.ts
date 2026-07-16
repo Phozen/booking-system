@@ -36,7 +36,22 @@ export const userEditSchema = z.object({
   status: z.enum(editableUserStatusOptions),
 });
 
+export const approvedUserCreateSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter an exact employee email address."),
+  role: z.enum(editableUserRoleOptions),
+  status: z.enum(editableUserStatusOptions),
+});
+
 export type UserEditInput = z.infer<typeof userEditSchema>;
+export type ApprovedUserCreateInput = z.infer<typeof approvedUserCreateSchema>;
+
+export function formDataToApprovedUserCreateInput(formData: FormData) {
+  return {
+    email: String(formData.get("email") ?? ""),
+    role: String(formData.get("role") ?? ""),
+    status: String(formData.get("status") ?? ""),
+  };
+}
 
 function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;

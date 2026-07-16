@@ -94,7 +94,8 @@ Server-only secrets include `SUPABASE_SERVICE_ROLE_KEY`, `EMAIL_API_KEY`,
 
 ## Restore Validation Checklist
 
-- Login, registration/reset-password links, and protected redirects work.
+- Microsoft-only login and protected redirects work; `/register` and
+  `/reset-password` redirect to the disabled-access login state.
 - Employee dashboard, facilities, booking creation, invitations, and calendar
   load.
 - Admin bookings, approvals, facilities, equipment, reports, audit

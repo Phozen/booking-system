@@ -1,54 +1,40 @@
 import { expect, test } from "@playwright/test";
 
 import {
-  getCredentials,
-  login,
-  missingCredentialsMessage,
+  emptyStorageState,
+  getStorageState,
+  missingStorageStateMessage,
 } from "./helpers/auth";
 
-const employeeCredentials = getCredentials("employee");
-const adminCredentials = getCredentials("admin");
-const superAdminCredentials = getCredentials("superAdmin");
+const employeeStorageState = getStorageState("employee");
+const adminStorageState = getStorageState("admin");
+const superAdminStorageState = getStorageState("superAdmin");
 
-test.describe("role access control", () => {
-  test("employee is denied admin routes when credentials are available", async ({
-    page,
-  }) => {
-    test.skip(!employeeCredentials, missingCredentialsMessage("employee"));
+test.describe("employee role access control", () => {
+  test.use({ storageState: employeeStorageState ?? emptyStorageState() });
+  test.skip(!employeeStorageState, missingStorageStateMessage("employee"));
 
-    if (!employeeCredentials) {
-      return;
-    }
-
-    await login(page, employeeCredentials);
+  test("employee is denied admin routes", async ({ page }) => {
     await page.goto("/admin/bookings");
     await expect(page).toHaveURL(/\/dashboard$/);
   });
+});
 
-  test("admin can access operational admin routes when credentials are available", async ({
-    page,
-  }) => {
-    test.skip(!adminCredentials, missingCredentialsMessage("admin"));
+test.describe("admin role access control", () => {
+  test.use({ storageState: adminStorageState ?? emptyStorageState() });
+  test.skip(!adminStorageState, missingStorageStateMessage("admin"));
 
-    if (!adminCredentials) {
-      return;
-    }
-
-    await login(page, adminCredentials);
+  test("admin can access operational admin routes", async ({ page }) => {
     await page.goto("/admin/bookings");
     await expect(page.getByRole("heading", { name: /bookings/i }).first()).toBeVisible();
   });
+});
 
-  test("super admin can access user management when credentials are available", async ({
-    page,
-  }) => {
-    test.skip(!superAdminCredentials, missingCredentialsMessage("superAdmin"));
+test.describe("super-admin role access control", () => {
+  test.use({ storageState: superAdminStorageState ?? emptyStorageState() });
+  test.skip(!superAdminStorageState, missingStorageStateMessage("superAdmin"));
 
-    if (!superAdminCredentials) {
-      return;
-    }
-
-    await login(page, superAdminCredentials);
+  test("super admin can access user management", async ({ page }) => {
     await page.goto("/admin/users");
     await expect(page.getByRole("heading", { name: /users/i }).first()).toBeVisible();
   });

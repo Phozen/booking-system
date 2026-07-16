@@ -1,8 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  getMicrosoftTenantId,
+  isMicrosoftAuthUser,
+} from "@/lib/auth/access";
 import { getPostLoginPath } from "@/lib/auth/session";
 import { saveMicrosoftDelegatedCalendarConnection } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -12,6 +17,7 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get("next");
   const calendar = requestUrl.searchParams.get("calendar");
   const origin = requestUrl.origin;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
 
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=microsoft`);
@@ -22,7 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient();
+    supabase = await createClient();
     const { data, error: exchangeError } =
       await supabase.auth.exchangeCodeForSession(code);
 
@@ -42,10 +48,44 @@ export async function GET(request: NextRequest) {
     const providerToken = session?.provider_token ?? null;
     const providerRefreshToken = session?.provider_refresh_token ?? null;
 
+    if (!isMicrosoftAuthUser(data.user)) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(`${origin}/login?error=microsoft`);
+    }
+
+    const admin = createAdminClient();
+    const { data: accessConfig, error: accessConfigError } = await admin
+      .from("microsoft_access_config")
+      .select("tenant_id")
+      .eq("singleton", true)
+      .maybeSingle();
+    const actualTenantId = getMicrosoftTenantId({
+      user: data.user,
+      providerToken,
+    });
+
+    if (
+      accessConfigError ||
+      !accessConfig?.tenant_id ||
+      !actualTenantId ||
+      actualTenantId !== String(accessConfig.tenant_id).toLowerCase()
+    ) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(`${origin}/login?error=tenant`);
+    }
+
+    const redirectTo = await getPostLoginPath(supabase, data.user);
+    if (redirectTo.startsWith("/login")) {
+      return NextResponse.redirect(`${origin}${redirectTo}`);
+    }
+
     let calendarConnectionSaved = false;
     let calendarConnectionAttempted = false;
 
-    if (providerToken || providerRefreshToken) {
+    // A normal Qbook sign-in must never persist delegated Microsoft calendar
+    // credentials. They are requested only by the explicit calendar-connect
+    // flow, which returns with this marker after the same tenant/access checks.
+    if (calendar === "connected" && (providerToken || providerRefreshToken)) {
       calendarConnectionAttempted = true;
       try {
         await saveMicrosoftDelegatedCalendarConnection({
@@ -65,7 +105,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const redirectTo = await getPostLoginPath(supabase, data.user);
     if (calendar === "connected" && next?.startsWith("/")) {
       const status =
         calendarConnectionAttempted && calendarConnectionSaved
@@ -76,6 +115,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(`${origin}${redirectTo}`);
   } catch {
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // Continue to the fail-closed redirect even if cookie cleanup fails.
+      }
+    }
+
     return NextResponse.redirect(`${origin}/login?error=callback`);
   }
 }

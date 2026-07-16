@@ -1,0 +1,77 @@
+name: Production release
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: Validated Vercel preview deployment URL to promote
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Verify and promote
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: ${{ inputs.deployment_url }}
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Require the protected main branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Production promotion is permitted only from main."
+          exit 1
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify required company-owned release credentials
+        run: |
+          test -n "$VERCEL_TOKEN"
+          test -n "$VERCEL_ORG_ID"
+          test -n "$VERCEL_PROJECT_ID"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run release gates
+        run: |
+          npm audit --audit-level=high
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@56.2.0
+
+      - name: Link company production project
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Inspect validated deployment
+        run: vercel inspect "${{ inputs.deployment_url }}" --token="$VERCEL_TOKEN"
+
+      - name: Promote the validated artifact
+        run: vercel promote "${{ inputs.deployment_url }}" --yes --token="$VERCEL_TOKEN"
+
+      - name: Record promoted deployment evidence
+        run: vercel inspect "${{ inputs.deployment_url }}" --token="$VERCEL_TOKEN"

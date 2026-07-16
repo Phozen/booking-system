@@ -125,8 +125,10 @@ export async function queueDueBookingReminders(
           }),
         });
 
-      if (insertError) {
+      if (insertError?.code === "23505") {
         skipped += 1;
+      } else if (insertError) {
+        throw new Error("A due booking reminder could not be queued.");
       } else {
         queued += 1;
       }

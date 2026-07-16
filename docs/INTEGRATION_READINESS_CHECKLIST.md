@@ -26,8 +26,8 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | Disabled mode verified | Ready | Blank/`none` provider fails safely with a clear configuration message. |
 | Provider options | Ready | Blank/`none`, `resend`, and `smtp` are supported. |
 | SMTP env names | Ready | `EMAIL_PROVIDER`, `EMAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_REQUIRE_TLS`, `SMTP_USER`, `SMTP_PASSWORD`. |
-| Queue processing automation | Ready | `/api/cron/email/process` processes queued rows every 5 minutes when called with `Authorization: Bearer ${CRON_SECRET}`. |
-| Reminder queueing automation | Ready | `/api/cron/email/reminders` queues due reminders every 15 minutes and does not send directly. |
+| Queue/reminder automation | Ready in repository | `/api/cron/email/run` queues reminders then processes due email every five minutes (UTC) with `Authorization: Bearer ${CRON_SECRET}`. Requires a Vercel plan with sub-daily cron. |
+| Queue monitoring | Ready in repository | HTTP 500 exposes claim/marker/infrastructure failures; HTTP 503 and `/admin/system-health` expose failed, overdue, stale, exhausted, or unreadable queue health. |
 | Microsoft 365 SMTP defaults | Ready | Host `smtp.office365.com`, port `587`, secure `false`, require TLS `true`. |
 | External requirement: Microsoft 365 mailbox | Pending IT | Prefer a dedicated service mailbox such as `noreply@yourcompany.com`. |
 | External requirement: SMTP AUTH | Pending IT | SMTP AUTH may need to be enabled for the mailbox. |
@@ -39,13 +39,17 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 1. Set Vercel SMTP env vars and server-only `CRON_SECRET`.
 2. Redeploy the app.
 3. Create a queued booking or invitation notification.
-4. Confirm `/api/cron/email/process` rejects missing or invalid authorization.
-5. Confirm `/api/cron/email/process` with `Authorization: Bearer ${CRON_SECRET}` processes queued rows.
+4. Confirm `/api/cron/email/run` rejects missing or invalid authorization.
+5. Confirm `/api/cron/email/run` with `Authorization: Bearer ${CRON_SECRET}` queues reminders and processes due rows.
 6. Optionally open `/admin/email-notifications` as Admin or Super Admin and click `Process queued emails` to verify the manual fallback.
 7. Confirm provider shows `SMTP`.
 8. Confirm status changes to `sent`.
 9. If failed, review `last_error`.
 10. Confirm no secrets appear in the UI, cron response, or log output.
+11. Confirm a recent Vercel production cron run returned HTTP 200 and
+    `/admin/system-health` shows zero failed, overdue, stale, and exhausted rows.
+12. Exercise the manual retry procedure in `docs/EMAIL_OPERATIONS.md` and retain
+    the cron response plus provider message ID as evidence.
 
 ## Microsoft 365 Calendar Readiness
 

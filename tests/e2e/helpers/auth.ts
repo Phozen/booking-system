@@ -1,64 +1,35 @@
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { expect, type Page } from "@playwright/test";
 
 export type E2ERole = "employee" | "admin" | "superAdmin";
 
-type Credentials = {
-  email: string;
-  password: string;
+const storageStateEnv: Record<E2ERole, string> = {
+  employee: "E2E_EMPLOYEE_STORAGE_STATE",
+  admin: "E2E_ADMIN_STORAGE_STATE",
+  superAdmin: "E2E_SUPER_ADMIN_STORAGE_STATE",
 };
 
-const credentialEnv: Record<E2ERole, { email: string; password: string }> = {
-  employee: {
-    email: "E2E_EMPLOYEE_EMAIL",
-    password: "E2E_EMPLOYEE_PASSWORD",
-  },
-  admin: {
-    email: "E2E_ADMIN_EMAIL",
-    password: "E2E_ADMIN_PASSWORD",
-  },
-  superAdmin: {
-    email: "E2E_SUPER_ADMIN_EMAIL",
-    password: "E2E_SUPER_ADMIN_PASSWORD",
-  },
-};
+export function getStorageState(role: E2ERole): string | null {
+  const configuredPath = process.env[storageStateEnv[role]]?.trim();
 
-export function getCredentials(role: E2ERole): Credentials | null {
-  const keys = credentialEnv[role];
-  const email = process.env[keys.email]?.trim();
-  const password = process.env[keys.password]?.trim();
-
-  if (!email || !password) {
+  if (!configuredPath) {
     return null;
   }
 
-  return { email, password };
+  const storageStatePath = resolve(configuredPath);
+  return existsSync(storageStatePath) && statSync(storageStatePath).isFile()
+    ? storageStatePath
+    : null;
 }
 
-export function missingCredentialsMessage(role: E2ERole) {
-  const keys = credentialEnv[role];
-  return `Set ${keys.email} and ${keys.password} to run ${role} E2E tests.`;
+export function missingStorageStateMessage(role: E2ERole) {
+  return `Set ${storageStateEnv[role]} to a valid, non-committed Playwright storage-state file created through Microsoft sign-in.`;
 }
 
-export async function login(page: Page, credentials: Credentials) {
-  await page.goto("/login");
-  const emailField = page.getByLabel("Email");
-
-  if (!(await emailField.isVisible())) {
-    await page.getByRole("button", { name: "Email login" }).click();
-  }
-
-  await emailField.fill(credentials.email);
-  await page.getByLabel("Password").fill(credentials.password);
-  await page.getByRole("button", { name: /^Log in$/i }).click();
-  await expect(page).not.toHaveURL(/\/login(?:\?|$)/);
-}
-
-export async function logout(page: Page) {
-  const logoutButton = page.getByRole("button", { name: /log out/i }).first();
-
-  if (await logoutButton.isVisible()) {
-    await logoutButton.click();
-  }
+export function emptyStorageState() {
+  return { cookies: [], origins: [] };
 }
 
 export async function expectRedirectedToLogin(page: Page, path: string) {

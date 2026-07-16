@@ -5,16 +5,18 @@ import { revalidatePath } from "next/cache";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
 import {
-  countOtherActiveSuperAdmins,
   getAdminUserById,
 } from "@/lib/admin/users/queries";
 import {
+  approvedUserCreateSchema,
+  formDataToApprovedUserCreateInput,
   formDataToUserEditInput,
   isSelfRoleOrStatusChange,
-  removesActiveAdminAccess,
   userEditSchema,
 } from "@/lib/admin/users/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { normalizeAccessEmail } from "@/lib/auth/access";
 
 export type UserActionResult = {
   status: "idle" | "error" | "success";
@@ -24,6 +26,67 @@ export type UserActionResult = {
 function normalizeOptionalText(value: string | undefined) {
   const trimmed = value?.trim() ?? "";
   return trimmed.length > 0 ? trimmed : null;
+}
+
+export async function provisionApprovedUserAction(
+  _previousState: UserActionResult,
+  formData: FormData,
+): Promise<UserActionResult> {
+  const { user } = await requireSuperAdmin();
+  const parsed = approvedUserCreateSchema.safeParse(
+    formDataToApprovedUserCreateInput(formData),
+  );
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? "Check the provisioning details.",
+    };
+  }
+
+  const supabase = createAdminClient();
+  const email = normalizeAccessEmail(parsed.data.email);
+  const { data, error } = await supabase
+    .from("approved_users")
+    .insert({
+      email,
+      role: parsed.data.role,
+      status: parsed.data.status,
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    return {
+      status: "error",
+      message:
+        error?.code === "23505"
+          ? "That exact email is already provisioned."
+          : "The employee could not be provisioned.",
+    };
+  }
+
+  await createAuditLogSafely(
+    supabase,
+    {
+      action: "create",
+      entityType: "user",
+      entityId: data.id,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Pre-provisioned Qbook access for ${email}.`,
+      newValues: { email, role: parsed.data.role, status: parsed.data.status },
+    },
+    { userId: user.id },
+  );
+
+  revalidatePath("/admin/users");
+  return {
+    status: "success",
+    message: "Employee pre-provisioned. Access starts only after Microsoft sign-in.",
+  };
 }
 
 export async function updateUserProfileAction(
@@ -61,7 +124,7 @@ export async function updateUserProfileAction(
   if (
     isSelfRoleOrStatusChange({
       actorUserId: user.id,
-      targetUserId: existing.id,
+      targetUserId: existing.authUserId ?? "",
       existingRole: existing.role,
       existingStatus: existing.status,
       nextRole: parsed.data.role,
@@ -74,36 +137,23 @@ export async function updateUserProfileAction(
     };
   }
 
-  if (
-    removesActiveAdminAccess({
-      existingRole: existing.role,
-      existingStatus: existing.status,
-      nextRole: parsed.data.role,
-      nextStatus: parsed.data.status,
-    })
-  ) {
-    const otherActiveSuperAdmins = await countOtherActiveSuperAdmins(supabase, existing.id);
-
-    if (otherActiveSuperAdmins < 1) {
-      return {
-        status: "error",
-        message: "This change would remove the final active super admin. Add or activate another super admin first.",
-      };
-    }
-  }
-
-  const payload = {
+  const profilePayload = {
     full_name: normalizeOptionalText(parsed.data.fullName),
     department: normalizeOptionalText(parsed.data.department),
     phone: normalizeOptionalText(parsed.data.phone),
+  };
+  const accessPayload = {
     role: parsed.data.role,
     status: parsed.data.status,
+    updated_by: user.id,
   };
 
-  const { error } = await supabase
-    .from("profiles")
-    .update(payload)
-    .eq("id", existing.id);
+  const sessionClient = await createClient();
+  const { error } = await sessionClient.rpc("update_approved_user_access", {
+    p_approved_user_id: existing.id,
+    p_role: accessPayload.role,
+    p_status: accessPayload.status,
+  });
 
   if (error) {
     console.error("Admin user update failed", {
@@ -114,8 +164,29 @@ export async function updateUserProfileAction(
 
     return {
       status: "error",
-      message: "User profile could not be saved. Please try again.",
+      message: error.message.includes("final active Super Admin")
+        ? "This change would remove the final active Super Admin. Add or activate another Super Admin first."
+        : "Approved access could not be saved. Please refresh and try again.",
     };
+  }
+
+  if (existing.authUserId) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({
+        ...profilePayload,
+        role: parsed.data.role,
+        status: parsed.data.status,
+      })
+      .eq("id", existing.authUserId);
+
+    if (profileError) {
+      console.error("Linked profile sync failed", {
+        approvedUserId: existing.id,
+        authUserId: existing.authUserId,
+        code: profileError.code,
+      });
+    }
   }
 
   const oldValues = {
@@ -126,11 +197,11 @@ export async function updateUserProfileAction(
     status: existing.status,
   };
   const newValues = {
-    fullName: payload.full_name,
-    department: payload.department,
-    phone: payload.phone,
-    role: payload.role,
-    status: payload.status,
+    fullName: profilePayload.full_name,
+    department: profilePayload.department,
+    phone: profilePayload.phone,
+    role: accessPayload.role,
+    status: accessPayload.status,
   };
 
   if (existing.role !== parsed.data.role) {
@@ -147,7 +218,7 @@ export async function updateUserProfileAction(
         newValues: { role: parsed.data.role },
         metadata: { targetEmail: existing.email },
       },
-      { userId: existing.id },
+      { userId: existing.authUserId ?? undefined },
     );
   }
 
@@ -164,7 +235,7 @@ export async function updateUserProfileAction(
       newValues,
       metadata: { targetEmail: existing.email },
     },
-    { userId: existing.id },
+    { userId: existing.authUserId ?? undefined },
   );
 
   revalidatePath("/admin/users");

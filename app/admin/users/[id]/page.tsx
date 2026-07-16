@@ -33,8 +33,8 @@ export default async function AdminUserDetailPage({
         title={user.fullName || user.email}
         description={
           <span className="break-all">
-            Review and update this user&apos;s application profile, role, and access
-            status. Password and auth email changes remain in Supabase Auth.
+            Review this pre-provisioned identity and update its authoritative role
+            and access status.
           </span>
         }
         breadcrumbs={[

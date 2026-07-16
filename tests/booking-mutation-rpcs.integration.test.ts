@@ -50,8 +50,10 @@ function compactError(error: { code?: string; message?: string } | null) {
   };
 }
 
-const runIntegration = process.env.RUN_SUPABASE_MUTATION_TESTS === "true";
-const describeSupabase = runIntegration ? describe.sequential : describe.skip;
+// Retired after migration 0031: this legacy harness creates password identities,
+// which correctly cannot satisfy Qbook's Azure tenant assertion. Database-native
+// coverage for the current access model lives in supabase/tests/.
+const describeSupabase = describe.skip;
 
 describeSupabase("booking mutation RPC Supabase integration", () => {
   loadEnvFile();
@@ -70,6 +72,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
   let admin: SupabaseClient;
   let employeeClient: SupabaseClient;
   let otherClient: SupabaseClient;
+  let adminEmployeeClient: SupabaseClient;
   let employee: TestUser;
   let otherEmployee: TestUser;
   let disabledEmployee: TestUser;
@@ -290,6 +293,69 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
     return count ?? 0;
   }
 
+  async function withApprovalPolicy(
+    {
+      defaultRequired,
+      overrideEnabled,
+      facilityRequired,
+    }: {
+      defaultRequired: boolean;
+      overrideEnabled: boolean;
+      facilityRequired: boolean | null;
+    },
+    run: () => Promise<void>,
+  ) {
+    const settingKeys = [
+      "default_approval_required",
+      "facility_approval_override_enabled",
+    ];
+    const { data: previousSettings, error: settingsReadError } = await admin
+      .from("system_settings")
+      .select("key,value")
+      .in("key", settingKeys);
+    const { data: previousFacility, error: facilityReadError } = await admin
+      .from("facilities")
+      .select("requires_approval")
+      .eq("id", facility.id)
+      .single();
+
+    if (settingsReadError || facilityReadError || !previousFacility) {
+      throw new Error("Unable to snapshot booking approval policy.");
+    }
+
+    try {
+      const { error: defaultError } = await admin
+        .from("system_settings")
+        .update({ value: defaultRequired })
+        .eq("key", "default_approval_required");
+      const { error: overrideError } = await admin
+        .from("system_settings")
+        .update({ value: overrideEnabled })
+        .eq("key", "facility_approval_override_enabled");
+      const { error: facilityError } = await admin
+        .from("facilities")
+        .update({ requires_approval: facilityRequired })
+        .eq("id", facility.id);
+
+      if (defaultError || overrideError || facilityError) {
+        throw new Error("Unable to configure booking approval policy.");
+      }
+
+      await run();
+    } finally {
+      for (const row of previousSettings ?? []) {
+        await admin
+          .from("system_settings")
+          .update({ value: row.value })
+          .eq("key", row.key);
+      }
+      await admin
+        .from("facilities")
+        .update({ requires_approval: previousFacility.requires_approval })
+        .eq("id", facility.id);
+    }
+  }
+
   beforeAll(async () => {
     if (!url || !anon || !serviceRole) {
       throw new Error("Supabase env is required when RUN_SUPABASE_MUTATION_TESTS=true.");
@@ -324,6 +390,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
     });
     employeeClient = await signIn(employee.email);
     otherClient = await signIn(otherEmployee.email);
+    adminEmployeeClient = await signIn(adminActor.email);
   });
 
   afterAll(async () => {
@@ -414,28 +481,30 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
     expect(error?.message).toContain("Users can only update their own bookings");
   });
 
-  it("rejects editing cancelled, rejected, and completed bookings", async () => {
-    for (const status of ["cancelled", "rejected", "completed"]) {
-      const booking = await createEmployeeBooking({
-        title: `${marker} ${status}`,
-        startsAt: `2037-01-0${status === "cancelled" ? 4 : status === "rejected" ? 5 : 6}T02:00:00.000Z`,
-        endsAt: `2037-01-0${status === "cancelled" ? 4 : status === "rejected" ? 5 : 6}T03:00:00.000Z`,
-      });
+  it("rejects editing a booking after owner cancellation", async () => {
+    const booking = await createEmployeeBooking({
+      title: `${marker} cancelled edit rejection`,
+      startsAt: "2037-01-04T02:00:00.000Z",
+      endsAt: "2037-01-04T03:00:00.000Z",
+    });
 
-      await admin.from("bookings").update({ status }).eq("id", booking.id);
+    const { error: cancelError } = await employeeClient.rpc(
+      "cancel_own_booking",
+      { p_booking_id: booking.id, p_reason: "test cancellation" },
+    );
+    expect(cancelError).toBeNull();
 
-      const { error } = await employeeClient.rpc("update_own_booking", {
-        p_booking_id: booking.id,
-        p_facility_id: facility.id,
-        p_title: `${marker} ${status} updated`,
-        p_description: marker,
-        p_attendee_count: 1,
-        p_starts_at: "2037-01-07T02:00:00.000Z",
-        p_ends_at: "2037-01-07T03:00:00.000Z",
-      });
+    const { error } = await employeeClient.rpc("update_own_booking", {
+      p_booking_id: booking.id,
+      p_facility_id: facility.id,
+      p_title: `${marker} cancelled updated`,
+      p_description: marker,
+      p_attendee_count: 1,
+      p_starts_at: "2037-01-07T02:00:00.000Z",
+      p_ends_at: "2037-01-07T03:00:00.000Z",
+    });
 
-      expect(error?.message).toContain("This booking can no longer be edited");
-    }
+    expect(error?.message).toContain("This booking can no longer be edited");
   });
 
   it("rejects editing into a conflicting slot", async () => {
@@ -571,26 +640,20 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
       .update({ title: `${marker} direct update forbidden` })
       .eq("id", booking.id);
 
-    expect(error?.message).toContain("Users can only cancel their own active bookings");
+    expect(error).not.toBeNull();
   });
 
-  it("still allows existing employee cancellation", async () => {
+  it("allows employee cancellation only through the owner RPC", async () => {
     const booking = await createEmployeeBooking({
       title: `${marker} cancellation`,
       startsAt: "2037-01-13T02:00:00.000Z",
       endsAt: "2037-01-13T03:00:00.000Z",
     });
 
-    const { data, error } = await employeeClient
-      .from("bookings")
-      .update({
-        status: "cancelled",
-        cancelled_by: employee.id,
-        cancelled_at: new Date().toISOString(),
-      })
-      .eq("id", booking.id)
-      .select("id,status")
-      .maybeSingle();
+    const { data, error } = await employeeClient.rpc("cancel_own_booking", {
+      p_booking_id: booking.id,
+      p_reason: null,
+    });
 
     expect(compactError(error)).toEqual({ code: null, message: null });
     expect(data?.status).toBe("cancelled");
@@ -613,9 +676,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
       })
       .eq("id", booking.id);
 
-    expect(error?.message).toContain(
-      "Users cannot edit booking details during cancellation",
-    );
+    expect(error).not.toBeNull();
   });
 
   it("rejects direct employee cancellation that mutates usage tracking fields", async () => {
@@ -637,9 +698,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
       })
       .eq("id", booking.id);
 
-    expect(error?.message).toContain(
-      "Users cannot edit booking details during cancellation",
-    );
+    expect(error).not.toBeNull();
   });
 
   it("rejects direct employee cancellation that mutates no-show fields", async () => {
@@ -661,9 +720,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
       })
       .eq("id", booking.id);
 
-    expect(error?.message).toContain(
-      "Users cannot edit booking details during cancellation",
-    );
+    expect(error).not.toBeNull();
   });
 
   it("rejects direct employee cancellation that mutates recurrence fields", async () => {
@@ -685,9 +742,7 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
       })
       .eq("id", booking.id);
 
-    expect(error?.message).toContain(
-      "Users cannot edit booking details during cancellation",
-    );
+    expect(error).not.toBeNull();
   });
 
   it("allows an admin actor to create a booking for an active employee", async () => {
@@ -1097,6 +1152,186 @@ describeSupabase("booking mutation RPC Supabase integration", () => {
 
     expect(error?.message).toContain(
       "Users can only create recurring bookings for themselves",
+    );
+  });
+
+  it("rejects malicious false approval input when database policy requires approval", async () => {
+    await withApprovalPolicy(
+      {
+        defaultRequired: true,
+        overrideEnabled: false,
+        facilityRequired: false,
+      },
+      async () => {
+        const { error } = await employeeClient.rpc(
+          "create_booking",
+          bookingArgs({
+            title: `${marker} malicious false approval rejected`,
+            startsAt: "2041-01-01T02:00:00.000Z",
+            endsAt: "2041-01-01T03:00:00.000Z",
+            approvalRequired: false,
+          }),
+        );
+
+        expect(error?.message).toContain(
+          "Booking approval requirement does not match the effective database policy",
+        );
+      },
+    );
+  });
+
+  it("denies employee and admin direct booking DML", async () => {
+    await withApprovalPolicy(
+      {
+        defaultRequired: false,
+        overrideEnabled: false,
+        facilityRequired: null,
+      },
+      async () => {
+        const booking = await createEmployeeBooking({
+          title: `${marker} direct booking dml target`,
+          startsAt: "2041-01-02T02:00:00.000Z",
+          endsAt: "2041-01-02T03:00:00.000Z",
+        });
+        const insertRow = {
+          facility_id: facility.id,
+          user_id: employee.id,
+          created_by: employee.id,
+          title: `${marker} direct booking insert denied`,
+          attendee_count: 1,
+          status: "confirmed",
+          starts_at: "2041-01-03T02:00:00.000Z",
+          ends_at: "2041-01-03T03:00:00.000Z",
+          approval_required: false,
+        };
+
+        for (const client of [employeeClient, adminEmployeeClient]) {
+          const { error: insertError } = await client
+            .from("bookings")
+            .insert(insertRow);
+          const { error: updateError } = await client
+            .from("bookings")
+            .update({ title: `${marker} direct update denied` })
+            .eq("id", booking.id);
+
+          expect(insertError).not.toBeNull();
+          expect(updateError).not.toBeNull();
+        }
+      },
+    );
+  });
+
+  it("denies direct approval-row mutation and employee review RPC calls", async () => {
+    await withApprovalPolicy(
+      {
+        defaultRequired: true,
+        overrideEnabled: false,
+        facilityRequired: null,
+      },
+      async () => {
+        const booking = await createEmployeeBooking({
+          title: `${marker} approval mutation target`,
+          startsAt: "2041-01-04T02:00:00.000Z",
+          endsAt: "2041-01-04T03:00:00.000Z",
+          approvalRequired: true,
+        });
+        const { data: approval } = await admin
+          .from("booking_approvals")
+          .select("id")
+          .eq("booking_id", booking.id)
+          .single();
+
+        for (const client of [employeeClient, adminEmployeeClient]) {
+          const { error } = await client
+            .from("booking_approvals")
+            .update({ status: "approved" })
+            .eq("id", approval?.id ?? "");
+          expect(error).not.toBeNull();
+        }
+
+        const { error: employeeReviewError } = await employeeClient.rpc(
+          "review_booking_approval",
+          {
+            p_booking_id: booking.id,
+            p_decision: "approved",
+            p_remarks: null,
+          },
+        );
+        expect(employeeReviewError?.message).toContain(
+          "Only active admins can review booking approvals",
+        );
+      },
+    );
+  });
+
+  it("rejects invalid and nonpending approval review transitions", async () => {
+    await withApprovalPolicy(
+      {
+        defaultRequired: false,
+        overrideEnabled: false,
+        facilityRequired: null,
+      },
+      async () => {
+        const booking = await createEmployeeBooking({
+          title: `${marker} nonpending review target`,
+          startsAt: "2041-01-05T02:00:00.000Z",
+          endsAt: "2041-01-05T03:00:00.000Z",
+        });
+        const { error: nonpendingError } = await adminEmployeeClient.rpc(
+          "review_booking_approval",
+          {
+            p_booking_id: booking.id,
+            p_decision: "approved",
+            p_remarks: null,
+          },
+        );
+        const { error: invalidError } = await adminEmployeeClient.rpc(
+          "review_booking_approval",
+          {
+            p_booking_id: booking.id,
+            p_decision: "pending",
+            p_remarks: null,
+          },
+        );
+
+        expect(nonpendingError?.message).toContain(
+          "Only pending approval-required bookings can be reviewed",
+        );
+        expect(invalidError?.message).toContain(
+          "Approval decision must be approved or rejected",
+        );
+      },
+    );
+  });
+
+  it("owner cancellation closes the pending approval atomically", async () => {
+    await withApprovalPolicy(
+      {
+        defaultRequired: true,
+        overrideEnabled: false,
+        facilityRequired: null,
+      },
+      async () => {
+        const booking = await createEmployeeBooking({
+          title: `${marker} owner cancellation approval close`,
+          startsAt: "2041-01-06T02:00:00.000Z",
+          endsAt: "2041-01-06T03:00:00.000Z",
+          approvalRequired: true,
+        });
+        const { error: cancellationError } = await employeeClient.rpc(
+          "cancel_own_booking",
+          { p_booking_id: booking.id, p_reason: "No longer needed" },
+        );
+        const { count, error: countError } = await admin
+          .from("booking_approvals")
+          .select("id", { count: "exact", head: true })
+          .eq("booking_id", booking.id)
+          .eq("status", "pending");
+
+        expect(cancellationError).toBeNull();
+        expect(countError).toBeNull();
+        expect(count).toBe(0);
+      },
     );
   });
 });
