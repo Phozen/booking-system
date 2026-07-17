@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, CalendarClock, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
@@ -51,11 +51,29 @@ import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { InitialAttendeePicker } from "@/components/bookings/initial-attendee-picker";
 import { DepartmentPicker } from "@/components/bookings/department-picker";
+import { FieldRequirementBadge } from "@/components/shared/field-requirement-badge";
 
 const initialState: BookingActionResult = {
   status: "idle",
   message: "",
 };
+
+function BookingFieldLabel({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor: string;
+  children: ReactNode;
+  required: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Label htmlFor={htmlFor}>{children}</Label>
+      <FieldRequirementBadge required={required} />
+    </div>
+  );
+}
 
 const drinkRequestItems = [
   { value: "Water", label: "Water" },
@@ -376,7 +394,9 @@ export function BookingForm({
         </div>
 
         <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="facilityId">Facility</Label>
+          <BookingFieldLabel htmlFor="facilityId" required>
+            Facility
+          </BookingFieldLabel>
           <Select
             id="facilityId"
             name="facilityId"
@@ -467,7 +487,9 @@ export function BookingForm({
         </div>
 
         <div className="grid gap-2 sm:max-w-md">
-          <Label htmlFor="date">Date</Label>
+          <BookingFieldLabel htmlFor="date" required>
+            Date
+          </BookingFieldLabel>
           <Input
             id="date"
             name="date"
@@ -522,7 +544,9 @@ export function BookingForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="title">Purpose</Label>
+            <BookingFieldLabel htmlFor="title" required>
+              Purpose
+            </BookingFieldLabel>
             <Input
               id="title"
               name="title"
@@ -541,7 +565,9 @@ export function BookingForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="attendeeCount">Attendee count</Label>
+            <BookingFieldLabel htmlFor="attendeeCount" required={false}>
+              Attendee count
+            </BookingFieldLabel>
             <Input
               id="attendeeCount"
               name="attendeeCount"
@@ -569,7 +595,9 @@ export function BookingForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="description">Description</Label>
+            <BookingFieldLabel htmlFor="description" required={false}>
+              Description
+            </BookingFieldLabel>
             <Textarea
               id="description"
               name="description"
@@ -587,10 +615,13 @@ export function BookingForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
-              <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
-              Food/drinks required?
-            </Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
+                <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+                Food/drinks required?
+              </Label>
+              <FieldRequirementBadge required={false} />
+            </div>
             <Select
               id="cateringRequired"
               name="cateringRequired"
@@ -720,7 +751,9 @@ export function BookingForm({
               ) : null}
 
               <div className="grid gap-2">
-                <Label htmlFor="cateringPax">Number of pax</Label>
+                <BookingFieldLabel htmlFor="cateringPax" required>
+                  Number of pax
+                </BookingFieldLabel>
                 <Input
                   id="cateringPax"
                   name="cateringPax"
@@ -741,7 +774,9 @@ export function BookingForm({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="cateringServingTime">Serving time</Label>
+                <BookingFieldLabel htmlFor="cateringServingTime" required>
+                  Serving time
+                </BookingFieldLabel>
                 <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
@@ -766,9 +801,9 @@ export function BookingForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="cateringDietaryNotes">
+                <BookingFieldLabel htmlFor="cateringDietaryNotes" required={false}>
                   Dietary / special notes
-                </Label>
+                </BookingFieldLabel>
                 <Textarea
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
@@ -788,9 +823,9 @@ export function BookingForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="cateringNotes">
+                <BookingFieldLabel htmlFor="cateringNotes" required={false}>
                   Additional catering notes
-                </Label>
+                </BookingFieldLabel>
                 <Textarea
                   id="cateringNotes"
                   rows={3}
