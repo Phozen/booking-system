@@ -85,16 +85,16 @@ or this document.
 | Evidence | Owner | Status / reference |
 | --- | --- | --- |
 | Microsoft sign-in verified for recovery administrator | Company Auth owner | Verified 2026-07-17: recovery administrator confirmed normal-window Microsoft sign-in succeeds. |
-| Second active Super Admin verified or exception accepted | Product owner | Pending |
-| Compromised password replaced | Supabase Auth owner | Pending |
-| Global session revocation completed | Supabase Auth owner | Pending |
+| Second active Super Admin verified or exception accepted | Product owner | Verified 2026-07-17: `jerry@qhazanahsabah.com.my` is Azure-only and active `super_admin` in both `profiles` and `approved_users`. |
+| Compromised password replaced | Supabase Auth owner | Verified 2026-07-17 01:09:47 UTC: the affected user's stored password hash was replaced with a freshly generated value that was not recorded. |
+| Global session revocation completed | Supabase Auth owner | Verified 2026-07-17 01:09:47 UTC: all two remaining `auth.sessions` rows for the affected user were deleted; post-action count was zero. |
 | Access-token lifetime elapsed or user held inactive | Supabase Auth owner | Pending |
-| Auth log review completed from the exposure start | Security owner | Pending |
+| Auth log review completed from the exposure start | Security owner | Partial evidence 2026-07-17: supplied Auth extract covers 2026-07-16 03:36:51–03:51:30 UTC and contains 98 successful `GET /user` checks plus one successful `POST /token` exchange, with no error or non-2xx event. It does not cover the later revocation time, so the complete review remains pending. |
 | Conditional project/Entra credential decision recorded | Security owner | Pending |
 | Working-tree scan passes | Engineering | Verified 2026-07-17 in a fresh bare clone (`npm run secret-scan`). |
 | Full-history scan passes after rewrite | Engineering | Verified 2026-07-17 in the rewritten mirror and fresh clone, including fetched pull-request refs (`npm run secret-scan:history`). |
 | All refs force-pushed in maintenance window | Repository owner | Verified 2026-07-17: `main` and seven Dependabot branches force-updated; two unchanged feature branches were retained. |
 | Anonymous clone contains no incident artifacts | Independent reviewer | Verified 2026-07-17: fresh bare clone passed both scanners at rewritten `main` commit `66a6bfdb88e918580925fc2b06cd8e1b821d266a`. |
-| Collaborators and automation checkouts recloned | Repository owner | Pending: a fresh engineering checkout was created and scanned; replace or retire every pre-rewrite checkout before it can push. |
+| Collaborators and automation checkouts recloned | Repository owner | Partial: the obsolete local checkout is locked by the running desktop application and has been retired from use; a clean rewritten checkout at commit `4146435f11ea8d5c206f1bb7a4b30fd2694d4cd7` is ready at the sibling `booking-system-rewritten` path. Reopen Codex there before removing the locked retired directory. |
 
 Phase 1 is complete only when every row has a dated evidence reference.
