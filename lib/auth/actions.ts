@@ -42,6 +42,11 @@ export async function loginWithMicrosoftAction(): Promise<void> {
         // Calendar access is a separate, opt-in connection below. Basic Qbook
         // access needs only the identity claims used by Supabase and the app.
         scopes: "openid email profile",
+        // Do not silently reuse whichever Microsoft account happens to be
+        // signed in to the browser. Qbook access is allowlisted per account.
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
 
