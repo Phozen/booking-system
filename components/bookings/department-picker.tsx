@@ -48,9 +48,8 @@ export function DepartmentPicker({
             <Label htmlFor="department-search">Search departments</Label>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} disabled={disabled} placeholder="Department name or email" />
+              <Input id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} disabled={disabled} placeholder="Department name or email" />
             </div>
-            <p className="text-xs text-muted-foreground">Enter at least 2 characters, then select one or more departments.</p>
           </div>
           {available.length > 0 ? (
             <ul className="divide-y rounded-lg border">
