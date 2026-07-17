@@ -137,6 +137,10 @@ export function AdminBookingsTable({
                       : "Not required",
                   },
                   {
+                    label: "Departments",
+                    value: booking.departments.length > 0 ? booking.departments.map((department) => department.name).join(", ") : "None tagged",
+                  },
+                  {
                     label: "Usage",
                     value: formatBookingUsageStatus(booking.usageStatus),
                   },
@@ -178,6 +182,7 @@ export function AdminBookingsTable({
                 <th className="px-4 py-3 font-medium">Title</th>
                 <th className="px-4 py-3 font-medium">Room</th>
                 <th className="px-4 py-3 font-medium">Requester</th>
+                <th className="px-4 py-3 font-medium">Departments</th>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Time</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -199,6 +204,9 @@ export function AdminBookingsTable({
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {booking.user?.fullName || booking.user?.email || "Unknown"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {booking.departments.length > 0 ? booking.departments.map((department) => department.name).join(", ") : "-"}
                     </td>
                     <td className="px-4 py-3">
                       {formatBookingDate(booking.startsAt)}

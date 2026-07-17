@@ -177,6 +177,10 @@ export function BookingPrintForm({
               label="Attendee count"
               value={booking.attendeeCount ?? "Not provided"}
             />
+            <PrintField
+              label="Involved departments"
+              value={booking.departments.length > 0 ? booking.departments.map((department) => department.name).join(", ") : "None tagged"}
+            />
             <div className="sm:col-span-2">
               <PrintField
                 label="Description / agenda"

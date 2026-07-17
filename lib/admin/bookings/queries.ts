@@ -53,6 +53,10 @@ type AdminBookingApprovalRecord = {
   remarks: string | null;
 };
 
+type AdminBookingDepartmentRecord = {
+  departments?: { id: string; name: string; email: string; is_active: boolean } | null;
+};
+
 type AdminBookingRecord = {
   id: string;
   facility_id: string;
@@ -84,6 +88,7 @@ type AdminBookingRecord = {
   facilities?: AdminBookingFacilityRecord;
   profiles?: AdminBookingProfileRecord;
   booking_approvals?: AdminBookingApprovalRecord[] | null;
+  booking_departments?: AdminBookingDepartmentRecord[] | null;
 };
 
 export type AdminBookingFilters = {
@@ -146,6 +151,7 @@ export type AdminBooking = {
     reviewedAt: string | null;
     remarks: string | null;
   }[];
+  departments: { id: string; name: string; email: string; isActive: boolean }[];
 };
 
 const adminBookingSelect = `
@@ -200,7 +206,8 @@ const adminBookingSelect = `
     requested_at,
     reviewed_at,
     remarks
-  )
+  ),
+  booking_departments (departments (id, name, email, is_active))
 `;
 
 function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
@@ -270,6 +277,10 @@ function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
       reviewedAt: approval.reviewed_at,
       remarks: approval.remarks,
     })),
+    departments: (record.booking_departments ?? []).flatMap((item) => item.departments ? [{
+      id: item.departments.id, name: item.departments.name, email: item.departments.email,
+      isActive: item.departments.is_active,
+    }] : []),
   };
 }
 

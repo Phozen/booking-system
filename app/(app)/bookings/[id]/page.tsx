@@ -51,6 +51,7 @@ function invitedBookingToEmployeeBooking(
         }
       : null,
     approvals: [],
+    departments: [],
   };
 }
 

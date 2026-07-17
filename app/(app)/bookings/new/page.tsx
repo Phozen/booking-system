@@ -6,6 +6,7 @@ import {
   getAppSettings,
 } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveDepartments, type Department } from "@/lib/departments/queries";
 import { BookingForm } from "@/components/bookings/booking-form";
 import { PageHeader } from "@/components/shared/page-header";
 import {
@@ -26,11 +27,15 @@ export default async function NewBookingPage({
   const settings = await getAppSettings();
 
   let facilities: Facility[] = [];
+  let departments: Department[] = [];
   let loadError = false;
 
   try {
     const supabase = await createClient();
-    facilities = await getBookableFacilities(supabase);
+    [facilities, departments] = await Promise.all([
+      getBookableFacilities(supabase),
+      getActiveDepartments(supabase),
+    ]);
   } catch (error) {
     console.error("Bookable facilities load failed", error);
     loadError = true;
@@ -74,6 +79,7 @@ export default async function NewBookingPage({
           selectedFacilityId={selectedFacilityId}
           initialDate={selectedDate}
           settings={settings}
+          departments={departments}
         />
       )}
     </main>

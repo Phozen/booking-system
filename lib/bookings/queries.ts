@@ -45,6 +45,10 @@ type BookingApprovalRecord = {
   remarks: string | null;
 };
 
+type BookingDepartmentRecord = {
+  departments?: { id: string; name: string; email: string; is_active: boolean } | null;
+};
+
 type BookingRecord = {
   id: string;
   facility_id: string;
@@ -70,6 +74,7 @@ type BookingRecord = {
   updated_at: string;
   facilities?: BookingFacilityRecord;
   booking_approvals?: BookingApprovalRecord[] | null;
+  booking_departments?: BookingDepartmentRecord[] | null;
 };
 
 export type BookingFacility = {
@@ -107,6 +112,7 @@ export type EmployeeBooking = {
     reviewedAt: string | null;
     remarks: string | null;
   }[];
+  departments: { id: string; name: string; email: string; isActive: boolean }[];
 };
 
 const employeeBookingBaseSelect = `
@@ -139,7 +145,8 @@ const employeeBookingBaseSelect = `
     level,
     type,
     capacity
-  )
+  ),
+  booking_departments (departments (id, name, email, is_active))
 `;
 
 const employeeBookingSelect = `
@@ -216,6 +223,10 @@ function mapBooking(record: BookingRecord): EmployeeBooking {
       reviewedAt: approval.reviewed_at,
       remarks: approval.remarks,
     })),
+    departments: (record.booking_departments ?? []).flatMap((item) => item.departments ? [{
+      id: item.departments.id, name: item.departments.name, email: item.departments.email,
+      isActive: item.departments.is_active,
+    }] : []),
   };
 }
 

@@ -34,6 +34,10 @@ export const bookingFormSchema = z
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
+export const bookingParticipantIdsSchema = z
+  .array(z.string().uuid())
+  .max(50, "Choose no more than 50 attendees or departments.");
+
 export const cancellationFormSchema = z.object({
   reason: z.string().trim().max(1000, "Reason must be 1000 characters or less.").optional(),
 });

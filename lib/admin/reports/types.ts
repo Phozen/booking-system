@@ -79,6 +79,7 @@ export type BookingHistoryRow = {
   approvalRemarks: string | null;
   approvalRequestedAt: string | null;
   approvalReviewedAt: string | null;
+  departments: { id: string; name: string }[];
 };
 
 export type CancelledBookingRow = BookingHistoryRow & {

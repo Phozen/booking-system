@@ -15,6 +15,7 @@ import {
 } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   bookingFormSchema,
+  bookingParticipantIdsSchema,
   cancellationFormSchema,
   formDataToBookingValues,
   formDataToCancellationValues,
@@ -35,6 +36,8 @@ import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { queueDepartmentBookingNotification } from "@/lib/departments/notifications";
+import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
 
 export type BookingActionResult = {
   status: "idle" | "error" | "success";
@@ -411,7 +414,14 @@ export async function createBookingAction(
 
   const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
 
-  if (!parsed.success) {
+  const departmentIds = bookingParticipantIdsSchema.safeParse(
+    formData.getAll("departmentId").filter((value): value is string => typeof value === "string"),
+  );
+  const invitedUserIds = bookingParticipantIdsSchema.safeParse(
+    formData.getAll("invitedUserId").filter((value): value is string => typeof value === "string"),
+  );
+
+  if (!parsed.success || !departmentIds.success || !invitedUserIds.success) {
     return {
       status: "error",
       message: "Check the booking details, then try again.",
@@ -468,7 +478,7 @@ export async function createBookingAction(
     settings,
   );
 
-  const { data, error } = await supabase.rpc("create_booking", {
+  const { data, error } = await supabase.rpc("create_booking_with_participants", {
     p_facility_id: parsed.data.facilityId,
     p_user_id: user.id,
     p_created_by: user.id,
@@ -484,6 +494,8 @@ export async function createBookingAction(
     p_catering_serving_time: cateringDetails.servingTime,
     p_catering_dietary_notes: cateringDetails.dietaryNotes,
     p_catering_notes: cateringDetails.notes,
+    p_department_ids: departmentIds.data,
+    p_invited_user_ids: invitedUserIds.data,
   });
 
   if (error || !data) {
@@ -503,6 +515,16 @@ export async function createBookingAction(
 
   const booking = data as CreatedBookingRecord;
 
+  await queueInitialInvitationNotifications({
+    bookingId: booking.id,
+    invitedUserIds: invitedUserIds.data,
+    actor: {
+      id: user.id,
+      email: user.email ?? "",
+      full_name: profile.full_name,
+    },
+  });
+
   await insertBookingAuditLog({
     booking,
     actorEmail: user.email,
@@ -518,6 +540,16 @@ export async function createBookingAction(
     requesterName: profile?.full_name,
     facilityName: availability.facility.name,
   });
+  if (booking.status === "confirmed") {
+    await queueDepartmentBookingNotification({
+      bookingId: booking.id,
+      title: booking.title,
+      facilityName: availability.facility.name,
+      startsAt: booking.starts_at,
+      endsAt: booking.ends_at,
+      kind: "confirmation",
+    });
+  }
   if (booking.status === "confirmed") {
     await runMicrosoftCalendarSyncSafely({
       bookingId: booking.id,
@@ -638,6 +670,14 @@ export async function cancelBookingAction(
     },
   });
   if (existing.status === "confirmed") {
+    await queueDepartmentBookingNotification({
+      bookingId: updated.id,
+      title: updated.title,
+      facilityName: existing.facility?.name ?? "the facility",
+      startsAt: updated.starts_at,
+      endsAt: updated.ends_at,
+      kind: "cancellation",
+    });
     await runMicrosoftCalendarSyncSafely({
       bookingId,
       action: "cancel",
@@ -678,8 +718,11 @@ export async function updateBookingAction(
   }
 
   const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
+  const departmentIds = bookingParticipantIdsSchema.safeParse(
+    formData.getAll("departmentId").filter((value): value is string => typeof value === "string"),
+  );
 
-  if (!parsed.success) {
+  if (!parsed.success || !departmentIds.success) {
     return {
       status: "error",
       message: "Check the booking details, then try again.",
@@ -791,6 +834,24 @@ export async function updateBookingAction(
   }
 
   const updated = data as CreatedBookingRecord;
+  const previousDepartmentIds = new Set(existing.departments.map((department) => department.id));
+  const newDepartmentIds = departmentIds.data.filter((id) => !previousDepartmentIds.has(id));
+  const { error: departmentError } = await supabase.rpc("set_booking_departments", {
+    p_booking_id: bookingId,
+    p_department_ids: departmentIds.data,
+  });
+  if (departmentError) {
+    console.error("Booking department update failed", { bookingId, message: departmentError.message });
+    return { status: "error", message: "Booking details saved, but department tags could not be updated. Please try again." };
+  }
+  if (updated.status === "confirmed" && newDepartmentIds.length > 0) {
+    await queueDepartmentBookingNotification({
+      bookingId: updated.id, title: updated.title,
+      facilityName: availability.facility.name,
+      startsAt: updated.starts_at, endsAt: updated.ends_at, kind: "confirmation",
+      departmentIds: newDepartmentIds,
+    });
+  }
   const adminSupabase = createAdminClient();
   await createAuditLogSafely(
     adminSupabase,
@@ -850,9 +911,13 @@ export async function cancelRecurringFutureBookingsAction(
   _previousState: CancellationActionResult,
   _formData: FormData,
 ): Promise<CancellationActionResult> {
+  void bookingId;
   void _previousState;
   void _formData;
-  return cancelRecurringBookingsScope(bookingId, "future");
+  return {
+    status: "error",
+    message: "Recurring booking operations have been retired. Contact a Super Admin for historical records.",
+  };
 }
 
 export async function cancelRecurringSeriesAction(
@@ -860,117 +925,11 @@ export async function cancelRecurringSeriesAction(
   _previousState: CancellationActionResult,
   _formData: FormData,
 ): Promise<CancellationActionResult> {
+  void bookingId;
   void _previousState;
   void _formData;
-  return cancelRecurringBookingsScope(bookingId, "series");
-}
-
-async function cancelRecurringBookingsScope(
-  bookingId: string,
-  scope: "future" | "series",
-): Promise<CancellationActionResult> {
-  const { user, profile } = await requireUser();
-
-  if (profile.status !== "active") {
-    return {
-      status: "error",
-      message: "Your account is not active for booking changes.",
-    };
-  }
-
-  const supabase = await createClient();
-  const existing = await getMyBookingById(supabase, user.id, bookingId);
-
-  if (!existing?.recurrenceSeriesId) {
-    return {
-      status: "error",
-      message: "This booking is not part of an active recurring series.",
-    };
-  }
-
-  let impactedQuery = supabase
-    .from("bookings")
-    .select("id,status")
-    .eq("user_id", user.id)
-    .eq("recurrence_series_id", existing.recurrenceSeriesId)
-    .in("status", ["pending", "confirmed"]);
-
-  if (scope === "future") {
-    impactedQuery = impactedQuery.gte("starts_at", existing.startsAt);
-  }
-
-  const { data: impactedRows, error: impactedError } = await impactedQuery;
-
-  if (impactedError) {
-    return {
-      status: "error",
-      message: "Recurring bookings could not be loaded.",
-    };
-  }
-
-  const impacted = (impactedRows as { id: string; status: BookingStatus }[] | null) ?? [];
-
-  if (impacted.length === 0) {
-    return {
-      status: "error",
-      message: "No cancellable recurring bookings were found.",
-    };
-  }
-
-  const { error } = await supabase.rpc("cancel_own_recurring_bookings", {
-    p_booking_id: bookingId,
-    p_scope: scope,
-  });
-
-  if (error) {
-    return {
-      status: "error",
-      message: "Recurring bookings could not be cancelled.",
-    };
-  }
-
-  await createAuditLogSafely(
-    createAdminClient(),
-    {
-      action: "cancel",
-      entityType: "booking",
-      entityId: existing.recurrenceSeriesId,
-      actorUserId: user.id,
-      actorEmail: user.email,
-      summary:
-        scope === "future"
-          ? "Cancelled future recurring booking occurrences."
-          : "Cancelled recurring booking series.",
-      oldValues: {
-        seriesId: existing.recurrenceSeriesId,
-        scope,
-      },
-      newValues: {
-        cancelledBookingIds: impacted.map((item) => item.id),
-      },
-    },
-    { bookingId },
-  );
-
-  for (const item of impacted) {
-    if (item.status === "confirmed") {
-      await runMicrosoftCalendarSyncSafely({
-        bookingId: item.id,
-        action: "cancel",
-      });
-    }
-  }
-
-  revalidatePath("/dashboard");
-  revalidatePath("/my-bookings");
-  revalidatePath("/calendar");
-  revalidatePath(`/bookings/${bookingId}`);
-
   return {
-    status: "success",
-    message:
-      scope === "future"
-        ? `Cancelled ${impacted.length} future recurring occurrence${impacted.length === 1 ? "" : "s"}.`
-        : `Cancelled ${impacted.length} recurring occurrence${impacted.length === 1 ? "" : "s"}.`,
+    status: "error",
+    message: "Recurring booking operations have been retired. Contact a Super Admin for historical records.",
   };
 }

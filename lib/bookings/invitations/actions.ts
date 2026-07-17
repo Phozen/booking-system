@@ -197,6 +197,51 @@ async function queueInvitationNotification({
   }
 }
 
+export async function queueInitialInvitationNotifications({
+  bookingId,
+  invitedUserIds,
+  actor,
+}: {
+  bookingId: string;
+  invitedUserIds: string[];
+  actor: { id: string; email: string; full_name: string | null };
+}) {
+  if (invitedUserIds.length === 0) return;
+
+  try {
+    const [booking, profilesResult] = await Promise.all([
+      getBookingForInvitationAction(bookingId),
+      createAdminClient()
+        .from("profiles")
+        .select("id,email,full_name,status")
+        .in("id", invitedUserIds)
+        .eq("status", "active"),
+    ]);
+
+    if (!booking || profilesResult.error) {
+      if (profilesResult.error) {
+        console.error("Initial invitation recipient lookup failed", {
+          bookingId,
+          message: profilesResult.error.message,
+        });
+      }
+      return;
+    }
+
+    for (const recipient of (profilesResult.data ?? []) as ProfileForInvitation[]) {
+      await queueInvitationNotification({
+        type: "booking_invitation",
+        booking,
+        recipient,
+        actor,
+        status: "pending",
+      });
+    }
+  } catch (error) {
+    console.error("Initial invitation notifications unavailable", { bookingId, error });
+  }
+}
+
 export async function inviteUserToBookingAction(
   _previousState: InvitationActionResult,
   formData: FormData,

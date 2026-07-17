@@ -16,7 +16,6 @@ import { CateringDetailsCard } from "@/components/bookings/catering-details-card
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
-import { RecurringCancelActions } from "@/components/bookings/recurring/recurring-cancel-actions";
 import { StaticToastEffect } from "@/components/shared/static-toast-effect";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { RouteLoadingLink } from "@/components/shared/route-loading-link";
@@ -246,6 +245,11 @@ export function BookingDetail({
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
           </DetailItem>
+          <DetailItem label="Departments">
+            {booking.departments.length > 0
+              ? booking.departments.map((department) => department.name).join(", ")
+              : "None tagged"}
+          </DetailItem>
           <DetailItem label="Approval">
             {booking.approvalRequired
               ? formatApprovalStatus(approval)
@@ -334,11 +338,6 @@ export function BookingDetail({
         </section>
       ) : null}
 
-      {isOwnerView &&
-      booking.recurrenceSeriesId &&
-      isCancellableBooking(booking.status) ? (
-        <RecurringCancelActions bookingId={booking.id} />
-      ) : null}
     </main>
   );
 }

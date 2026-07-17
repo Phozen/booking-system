@@ -11,6 +11,7 @@ import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
 import type { BookingUsageStatus } from "@/lib/bookings/usage";
 import {
   bookingFormSchema,
+  bookingParticipantIdsSchema,
   formDataToBookingValues,
   getBookingDateRange,
   getOptionalFormValue,
@@ -29,6 +30,8 @@ import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { queueDepartmentBookingNotification } from "@/lib/departments/notifications";
+import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
 import {
   adminBookingActionSchema,
   formDataToAdminBookingActionValues,
@@ -369,8 +372,10 @@ export async function adminCreateBookingAction(
   }
 
   const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
+  const departmentIds = bookingParticipantIdsSchema.safeParse(formData.getAll("departmentId").filter((value): value is string => typeof value === "string"));
+  const invitedUserIds = bookingParticipantIdsSchema.safeParse(formData.getAll("invitedUserId").filter((value): value is string => typeof value === "string"));
 
-  if (!parsed.success) {
+  if (!parsed.success || !departmentIds.success || !invitedUserIds.success) {
     return {
       status: "error",
       message: "Check the booking details, then try again.",
@@ -429,7 +434,7 @@ export async function adminCreateBookingAction(
     settings,
   );
 
-  const { data, error } = await supabase.rpc("admin_create_booking", {
+  const { data, error } = await supabase.rpc("admin_create_booking_with_participants", {
     p_actor_user_id: user.id,
     p_target_user_id: targetProfile.id,
     p_facility_id: parsed.data.facilityId,
@@ -439,12 +444,8 @@ export async function adminCreateBookingAction(
     p_starts_at: dateRange.startsAt.toISOString(),
     p_ends_at: dateRange.endsAt.toISOString(),
     p_approval_required: approvalRequired,
-    p_catering_required: false,
-    p_catering_type: null,
-    p_catering_pax: null,
-    p_catering_serving_time: null,
-    p_catering_dietary_notes: null,
-    p_catering_notes: null,
+    p_department_ids: departmentIds.data,
+    p_invited_user_ids: invitedUserIds.data,
   });
 
   if (error || !data) {
@@ -465,6 +466,16 @@ export async function adminCreateBookingAction(
   }
 
   const booking = data as AdminBookingActionRecord;
+
+  await queueInitialInvitationNotifications({
+    bookingId: booking.id,
+    invitedUserIds: invitedUserIds.data,
+    actor: {
+      id: targetProfile.id,
+      email: targetProfile.email,
+      full_name: targetProfile.full_name,
+    },
+  });
 
   await createAuditLogSafely(
     supabase,
@@ -504,6 +515,14 @@ export async function adminCreateBookingAction(
         endsAt: booking.ends_at,
         status: booking.status,
       },
+    });
+    await queueDepartmentBookingNotification({
+      bookingId: booking.id,
+      title: booking.title,
+      facilityName: availability.facility.name,
+      startsAt: booking.starts_at,
+      endsAt: booking.ends_at,
+      kind: "confirmation",
     });
 
     await runMicrosoftCalendarSyncSafely({
@@ -678,6 +697,16 @@ export async function adminCancelBookingAction(
     },
   });
   if (existing.status === "confirmed") {
+    await queueDepartmentBookingNotification({
+      bookingId: updated.id,
+      title: updated.title,
+      facilityName: facility?.name ?? "the facility",
+      startsAt: updated.starts_at,
+      endsAt: updated.ends_at,
+      kind: "cancellation",
+    });
+  }
+  if (existing.status === "confirmed") {
     await runMicrosoftCalendarSyncSafely({
       bookingId,
       action: "cancel",
@@ -828,6 +857,14 @@ export async function approveBookingAction(
       remarks: parsed.data.remarks || null,
       status: updated.status,
     },
+  });
+  await queueDepartmentBookingNotification({
+    bookingId: updated.id,
+    title: updated.title,
+    facilityName: facility?.name ?? "the facility",
+    startsAt: updated.starts_at,
+    endsAt: updated.ends_at,
+    kind: "confirmation",
   });
   await runMicrosoftCalendarSyncSafely({
     bookingId,

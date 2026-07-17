@@ -3,6 +3,7 @@ import { getActiveBookingUserOptions } from "@/lib/admin/bookings/queries";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getActiveDepartments } from "@/lib/departments/queries";
 import { AdminCreateBookingForm } from "@/components/admin/bookings/admin-create-booking-form";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -11,10 +12,11 @@ export const dynamic = "force-dynamic";
 export default async function NewAdminBookingPage() {
   await requireAdmin();
   const supabase = createAdminClient();
-  const [facilities, users, settings] = await Promise.all([
+  const [facilities, users, settings, departments] = await Promise.all([
     getBookableFacilities(supabase),
     getActiveBookingUserOptions(supabase),
     getAppSettings(),
+    getActiveDepartments(supabase),
   ]);
 
   return (
@@ -35,6 +37,7 @@ export default async function NewAdminBookingPage() {
           facilities={facilities}
           users={users}
           settings={settings}
+          departments={departments}
         />
       </section>
     </main>

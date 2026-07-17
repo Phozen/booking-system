@@ -5,6 +5,7 @@ import { getMyBookingById } from "@/lib/bookings/queries";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveDepartments } from "@/lib/departments/queries";
 import { BookingEditForm } from "@/components/bookings/booking-edit-form";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -26,10 +27,11 @@ export default async function EditBookingPage({
   }
 
   const supabase = await createClient();
-  const [booking, facilities, settings] = await Promise.all([
+  const [booking, facilities, settings, departments] = await Promise.all([
     getMyBookingById(supabase, user.id, id),
     getBookableFacilities(supabase),
     getAppSettings(),
+    getActiveDepartments(supabase),
   ]);
 
   if (!booking || !["pending", "confirmed"].includes(booking.status)) {
@@ -55,6 +57,7 @@ export default async function EditBookingPage({
           booking={booking}
           facilities={facilities}
           settings={settings}
+          departments={departments}
         />
       </section>
     </main>

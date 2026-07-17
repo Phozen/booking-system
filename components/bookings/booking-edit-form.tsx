@@ -23,6 +23,7 @@ import {
 import { getZonedBookingFormDateTime } from "@/lib/bookings/form-datetime";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
+import type { Department } from "@/lib/departments/queries";
 import {
   formatFacilityType,
 } from "@/lib/facilities/format";
@@ -101,10 +102,12 @@ export function BookingEditForm({
   booking,
   facilities,
   settings,
+  departments,
 }: {
   booking: EmployeeBooking;
   facilities: Facility[];
   settings: AppSettings;
+  departments: Department[];
 }) {
   const [state, formAction, isPending] = useActionState(
     updateBookingAction.bind(null, booking.id),
@@ -787,6 +790,11 @@ export function BookingEditForm({
             </>
           ) : null}
         </div>
+      </section>
+
+      <section className="grid gap-3 border-b-2 border-border pb-7 text-sm">
+        <div><h2 className="text-lg font-bold tracking-normal">Involved departments</h2><p className="mt-1 text-muted-foreground">Selected departments are notified if this confirmed booking is updated with their tag.</p></div>
+        {departments.map((department) => <label key={department.id} className="flex items-center gap-3 rounded-lg border p-3"><input name="departmentId" type="checkbox" value={department.id} defaultChecked={booking.departments.some((item) => item.id === department.id)} disabled={isPending} /><span><span className="block font-medium">{department.name}</span><span className="text-xs text-muted-foreground">{department.email}</span></span></label>)}
       </section>
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">

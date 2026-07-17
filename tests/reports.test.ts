@@ -108,6 +108,7 @@ describe("CSV exports", () => {
           approvalRemarks: null,
           approvalRequestedAt: null,
           approvalReviewedAt: null,
+          departments: [],
         },
       ],
     };

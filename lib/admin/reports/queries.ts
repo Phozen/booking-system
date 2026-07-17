@@ -42,6 +42,10 @@ type ReportBookingApprovalRecord = {
   reviewed_at: string | null;
 };
 
+type ReportBookingDepartmentRecord = {
+  departments?: { id: string; name: string } | null;
+};
+
 type ReportBookingRecord = {
   id: string;
   title: string;
@@ -63,6 +67,7 @@ type ReportBookingRecord = {
   facilities?: ReportBookingFacilityRecord;
   profiles?: ReportBookingUserRecord;
   booking_approvals?: ReportBookingApprovalRecord[] | null;
+  booking_departments?: ReportBookingDepartmentRecord[] | null;
 };
 
 type AuditLogRecord = {
@@ -116,7 +121,8 @@ const reportBookingSelect = `
     remarks,
     requested_at,
     reviewed_at
-  )
+  ),
+  booking_departments (departments (id, name))
 `;
 
 function durationHours(startsAt: string, endsAt: string) {
@@ -179,6 +185,7 @@ function mapBookingRecord(record: ReportBookingRecord): BookingHistoryRow {
     approvalRemarks: approvalRecord?.remarks ?? null,
     approvalRequestedAt: approvalRecord?.requested_at ?? null,
     approvalReviewedAt: approvalRecord?.reviewed_at ?? null,
+    departments: (record.booking_departments ?? []).flatMap((item) => item.departments ? [item.departments] : []),
   };
 }
 

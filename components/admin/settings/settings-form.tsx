@@ -264,22 +264,6 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             </span>
           </label>
 
-          <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-            <input
-              name="recurringBookingsEnabled"
-              type="checkbox"
-              defaultChecked={settings.recurringBookingsEnabled}
-              className="size-4 rounded border-input"
-            />
-            <span>
-              <span className="block font-medium">
-                Allow recurring bookings
-              </span>
-              <span className="text-muted-foreground">
-                Enables the employee recurring booking creation route.
-              </span>
-            </span>
-          </label>
         </div>
 
         <div className="grid gap-2">

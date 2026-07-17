@@ -198,7 +198,7 @@ describe("adminCreateBookingAction", () => {
     vi.clearAllMocks();
   });
 
-  it("allows an admin to create a booking for an active employee through admin_create_booking", async () => {
+  it("allows an admin to create a booking for an active employee through the participant-aware RPC", async () => {
     const { rpc } = setupAction();
 
     const result = await adminCreateBookingAction(
@@ -207,7 +207,7 @@ describe("adminCreateBookingAction", () => {
     );
 
     expect(result.status).toBe("success");
-    expect(rpc).toHaveBeenCalledWith("admin_create_booking", {
+    expect(rpc).toHaveBeenCalledWith("admin_create_booking_with_participants", {
       p_actor_user_id: adminUser.id,
       p_target_user_id: targetProfile.id,
       p_facility_id: facility.id,
@@ -217,12 +217,8 @@ describe("adminCreateBookingAction", () => {
       p_starts_at: "2037-01-01T10:00:00.000Z",
       p_ends_at: "2037-01-01T11:00:00.000Z",
       p_approval_required: false,
-      p_catering_required: false,
-      p_catering_type: null,
-      p_catering_pax: null,
-      p_catering_serving_time: null,
-      p_catering_dietary_notes: null,
-      p_catering_notes: null,
+      p_department_ids: [],
+      p_invited_user_ids: [],
     });
   });
 
@@ -236,7 +232,7 @@ describe("adminCreateBookingAction", () => {
 
     expect(result.status).toBe("success");
     expect(rpc).toHaveBeenCalledWith(
-      "admin_create_booking",
+      "admin_create_booking_with_participants",
       expect.objectContaining({ p_actor_user_id: superAdminUser.id }),
     );
   });
@@ -319,11 +315,11 @@ describe("adminCreateBookingAction", () => {
     );
 
     expect(rpc).toHaveBeenCalledWith(
-      "admin_create_booking",
+      "admin_create_booking_with_participants",
       expect.objectContaining({ p_actor_user_id: adminUser.id }),
     );
     expect(rpc).not.toHaveBeenCalledWith(
-      "admin_create_booking",
+      "admin_create_booking_with_participants",
       expect.objectContaining({
         p_actor_user_id: "99999999-9999-4999-8999-999999999999",
       }),

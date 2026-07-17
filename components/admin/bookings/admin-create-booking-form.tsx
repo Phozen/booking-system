@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   adminCreateBookingAction,
@@ -11,6 +11,7 @@ import {
   formatBookingWindowLabel,
 } from "@/lib/settings/app-settings";
 import type { Facility } from "@/lib/facilities/queries";
+import type { Department } from "@/lib/departments/queries";
 import type { AppSettings } from "@/lib/settings/app-settings";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,6 +22,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { InitialAttendeePicker } from "@/components/bookings/initial-attendee-picker";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -31,15 +33,18 @@ export function AdminCreateBookingForm({
   facilities,
   users,
   settings,
+  departments,
 }: {
   facilities: Facility[];
   users: AdminBookingUserOption[];
   settings: AppSettings;
+  departments: Department[];
 }) {
   const [state, formAction, isPending] = useActionState(
     adminCreateBookingAction,
     initialState,
   );
+  const [targetUserId, setTargetUserId] = useState("");
 
   return (
     <form action={formAction} className="grid gap-5">
@@ -55,6 +60,8 @@ export function AdminCreateBookingForm({
           <Select
             id="targetUserId"
             name="targetUserId"
+            value={targetUserId}
+            onChange={(event) => setTargetUserId(event.target.value)}
             disabled={isPending}
             required
             className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
@@ -174,6 +181,14 @@ export function AdminCreateBookingForm({
       </div>
 
       <input type="hidden" name="cateringRequired" value="no" />
+
+      <InitialAttendeePicker disabled={isPending || !targetUserId} excludeUserId={targetUserId} />
+
+      <fieldset className="grid gap-2">
+        <legend className="text-sm font-medium">Involved departments</legend>
+        <p className="text-sm text-muted-foreground">Optional. Confirmed bookings notify each selected mailbox.</p>
+        {departments.map((department) => <label key={department.id} className="flex items-center gap-3 rounded-lg border p-3"><input type="checkbox" name="departmentId" value={department.id} disabled={isPending} /><span><span className="block font-medium">{department.name}</span><span className="text-xs text-muted-foreground">{department.email}</span></span></label>)}
+      </fieldset>
 
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>

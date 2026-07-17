@@ -227,6 +227,38 @@ function normalizeCandidateSearch(value: string) {
     .slice(0, 80);
 }
 
+export async function searchActiveInviteCandidates(
+  supabase: SupabaseClient,
+  ownerUserId: string,
+  searchValue: string,
+  limit = 20,
+): Promise<InviteCandidate[]> {
+  const search = normalizeCandidateSearch(searchValue);
+  if (search.length < 2) return [];
+
+  const pattern = `%${search}%`;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,email,full_name,department")
+    .eq("status", "active")
+    .neq("id", ownerUserId)
+    .or(`full_name.ilike.${pattern},email.ilike.${pattern},department.ilike.${pattern}`)
+    .order("full_name", { ascending: true })
+    .order("email", { ascending: true })
+    .limit(Math.max(1, Math.min(limit, 20)));
+
+  if (error) throw new Error("Unable to search active users.");
+
+  return ((data ?? []) as {
+    id: string; email: string; full_name: string | null; department: string | null;
+  }[]).map((profile) => ({
+    id: profile.id,
+    email: profile.email,
+    fullName: profile.full_name,
+    department: profile.department,
+  }));
+}
+
 export async function searchInviteCandidatesForBooking(
   supabase: SupabaseClient,
   bookingId: string,
