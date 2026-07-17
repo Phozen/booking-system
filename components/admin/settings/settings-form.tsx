@@ -176,9 +176,9 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
       <section className="grid gap-5 rounded-lg border bg-card p-5">
         <div>
-          <h2 className="font-semibold tracking-normal">Registration</h2>
+          <h2 className="font-semibold tracking-normal">Company Microsoft access</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Control employee self-registration and approved email domains.
+            Control which Microsoft email domains can access Qbook.
           </p>
         </div>
 
@@ -190,15 +190,16 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             className="size-4 rounded border-input"
           />
           <span>
-            <span className="block font-medium">Allow employee registration</span>
+            <span className="block font-medium">Allow legacy employee registration</span>
             <span className="text-muted-foreground">
-              Disabled registration blocks the register page and register action.
+              Password registration remains disabled. Company Microsoft sign-in is
+              controlled by the allowed domains below.
             </span>
           </span>
         </label>
 
         <div className="grid gap-2">
-          <Label htmlFor="allowedEmailDomains">Allowed email domains</Label>
+          <Label htmlFor="allowedEmailDomains">Allowed Microsoft email domains</Label>
           <Textarea
             id="allowedEmailDomains"
             name="allowedEmailDomains"
@@ -212,7 +213,8 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
             aria-invalid={Boolean(fieldErrors.allowedEmailDomains)}
           />
           <FormFieldHelper id="allowedEmailDomains-helper" className="text-xs">
-            Leave empty to allow any valid email domain.
+            Only these exact domains can sign in with Microsoft. Leave empty to
+            block all new Microsoft sign-ins.
           </FormFieldHelper>
           <FormFieldError id="allowedEmailDomains-error">
             {fieldErrors.allowedEmailDomains}

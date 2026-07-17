@@ -23,6 +23,7 @@ import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { FieldRequirementBadge } from "@/components/shared/field-requirement-badge";
 
 type ProfileFieldId = "fullName" | "department" | "phone";
 type ProfileFieldErrors = Partial<Record<ProfileFieldId, string>>;
@@ -63,7 +64,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   return (
     <form
       action={formAction}
-      className="grid gap-5 border-t border-border/80 pt-5"
+      className="grid gap-5 rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6"
       noValidate
       onSubmit={validateBeforeSubmit}
     >
@@ -89,7 +90,10 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="fullName">Full name</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="fullName">Full name</Label>
+            <FieldRequirementBadge required />
+          </div>
           <Input
             id="fullName"
             name="fullName"
@@ -101,16 +105,17 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             aria-invalid={Boolean(fieldErrors.fullName)}
             required
           />
-          <FormFieldHelper id="fullName-helper">
-            Required display name.
-          </FormFieldHelper>
+          <FormFieldHelper id="fullName-helper">Used in booking details and reports.</FormFieldHelper>
           <FormFieldError id="fullName-error">
             {fieldErrors.fullName}
           </FormFieldError>
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="department">Department</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="department">Department</Label>
+            <FieldRequirementBadge required={false} />
+          </div>
           <Input
             id="department"
             name="department"
@@ -121,16 +126,17 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             )}
             aria-invalid={Boolean(fieldErrors.department)}
           />
-          <FormFieldHelper id="department-helper">
-            Optional department.
-          </FormFieldHelper>
+          <FormFieldHelper id="department-helper">Shown on your profile and in booking reports.</FormFieldHelper>
           <FormFieldError id="department-error">
             {fieldErrors.department}
           </FormFieldError>
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="phone">Phone</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="phone">Phone</Label>
+            <FieldRequirementBadge required={false} />
+          </div>
           <Input
             id="phone"
             name="phone"
@@ -141,9 +147,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             )}
             aria-invalid={Boolean(fieldErrors.phone)}
           />
-          <FormFieldHelper id="phone-helper">
-            Optional phone number.
-          </FormFieldHelper>
+          <FormFieldHelper id="phone-helper">Used only when booking staff need to contact you.</FormFieldHelper>
           <FormFieldError id="phone-error">{fieldErrors.phone}</FormFieldError>
         </div>
       </div>

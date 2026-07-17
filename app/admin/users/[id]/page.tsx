@@ -33,7 +33,7 @@ export default async function AdminUserDetailPage({
         title={user.fullName || user.email}
         description={
           <span className="break-all">
-            Review this pre-provisioned identity and update its authoritative role
+            Review this individual access record and update its authoritative role
             and access status.
           </span>
         }

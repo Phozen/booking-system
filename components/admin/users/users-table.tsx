@@ -27,12 +27,12 @@ export function UsersTable({
 }) {
   const emptyDescription = filtersActive
     ? "No users match the selected search or filters. Clear filters and try again."
-    : "No employees are pre-provisioned. Add an exact Microsoft email above before the employee signs in.";
+    : "No individual access records yet. Employees from the authorized company Microsoft domain can still sign in.";
 
   return (
     <AdminTableShell
       title="Users"
-      description={`${users.length} approved access records`}
+      description={`${users.length} individual role and access records`}
       mobileCards={
         users.length > 0 ? (
           users.map((user) => (

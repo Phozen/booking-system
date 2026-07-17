@@ -12,7 +12,7 @@ export type AuthActionResult = {
 };
 
 const microsoftOnlyMessage =
-  "Password access and self-registration are disabled. Sign in with your pre-provisioned company Microsoft account.";
+  "Password access is disabled. Sign in with your authorized company Microsoft account.";
 
 export async function loginAction(
   _formData: FormData,
@@ -43,7 +43,8 @@ export async function loginWithMicrosoftAction(): Promise<void> {
         // access needs only the identity claims used by Supabase and the app.
         scopes: "openid email profile",
         // Do not silently reuse whichever Microsoft account happens to be
-        // signed in to the browser. Qbook access is allowlisted per account.
+        // signed in to the browser. Qbook checks the company Microsoft tenant
+        // and authorized email domain after sign-in.
         queryParams: {
           prompt: "select_account",
         },

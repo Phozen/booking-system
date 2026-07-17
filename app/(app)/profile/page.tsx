@@ -45,11 +45,11 @@ export default async function ProfilePage() {
         description="View your account details and update contact fields."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] lg:items-start">
         <ProfileDetail profile={profile} />
         <div className="grid gap-6">
           <ProfileForm profile={profile} />
-          <section className="border-t border-border/80 pt-5">
+          <section className="rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-normal">
                 Notification preferences

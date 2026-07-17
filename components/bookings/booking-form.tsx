@@ -50,6 +50,7 @@ import { BookingAvailabilityTimeline } from "@/components/bookings/booking-avail
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { InitialAttendeePicker } from "@/components/bookings/initial-attendee-picker";
+import { DepartmentPicker } from "@/components/bookings/department-picker";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -818,34 +819,7 @@ export function BookingForm({
 
       <InitialAttendeePicker disabled={!hasFacilities || isPending} />
 
-      <section className="grid gap-4 border-b-2 border-border pb-7 text-sm">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
-            Departments
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">Involved departments</h2>
-          <p className="mt-1 text-muted-foreground">
-            Optional. Selected departments are notified when this booking is confirmed.
-          </p>
-        </div>
-        {departments.length > 0 ? (
-          <div className="grid gap-2 sm:grid-cols-2">
-            {departments.map((department) => (
-              <label key={department.id} className="flex items-start gap-3 rounded-lg border border-border/75 p-3">
-                <input name="departmentId" type="checkbox" value={department.id} disabled={isPending} className="mt-1" />
-                <span className="grid gap-1">
-                  <span className="font-medium">{department.name}</span>
-                  <span className="text-xs text-muted-foreground">{department.email}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-lg border border-dashed p-4 text-muted-foreground">
-            No active departments are available. A Super Admin can add one when ready.
-          </p>
-        )}
-      </section>
+      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} description="Selected departments are notified when this booking is confirmed." />
 
       {hasPreviewDetails ? (
         <section className="grid gap-3 rounded-lg border-2 border-primary/55 bg-primary/10 p-4 shadow-md shadow-primary/10 ring-2 ring-primary/15">

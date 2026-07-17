@@ -52,6 +52,7 @@ import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { BookingAvailabilityTimeline } from "@/components/bookings/booking-availability-timeline";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
+import { DepartmentPicker } from "@/components/bookings/department-picker";
 
 const initialState: BookingActionResult = {
   status: "idle",
@@ -792,10 +793,7 @@ export function BookingEditForm({
         </div>
       </section>
 
-      <section className="grid gap-3 border-b-2 border-border pb-7 text-sm">
-        <div><h2 className="text-lg font-bold tracking-normal">Involved departments</h2><p className="mt-1 text-muted-foreground">Selected departments are notified if this confirmed booking is updated with their tag.</p></div>
-        {departments.map((department) => <label key={department.id} className="flex items-center gap-3 rounded-lg border p-3"><input name="departmentId" type="checkbox" value={department.id} defaultChecked={booking.departments.some((item) => item.id === department.id)} disabled={isPending} /><span><span className="block font-medium">{department.name}</span><span className="text-xs text-muted-foreground">{department.email}</span></span></label>)}
-      </section>
+      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} description="Selected departments are notified if this confirmed booking is updated with their tag." />
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Link

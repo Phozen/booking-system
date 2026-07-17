@@ -33,10 +33,11 @@ export function ApprovedUserCreateForm() {
       className="grid gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm"
     >
       <div>
-        <h2 className="font-semibold tracking-normal">Pre-provision employee</h2>
+        <h2 className="font-semibold tracking-normal">Add individual access record</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add the exact Microsoft email before first sign-in. A company domain by
-          itself never grants access.
+          Employees from the authorized company Microsoft domain can sign in
+          automatically. Add an exact email here to assign a role or suspend one
+          person’s access.
         </p>
       </div>
 
@@ -79,7 +80,7 @@ export function ApprovedUserCreateForm() {
         </div>
         <Button type="submit" disabled={pending}>
           <PendingButtonContent pending={pending} pendingLabel="Adding...">
-            Add employee
+            Add access record
           </PendingButtonContent>
         </Button>
       </div>

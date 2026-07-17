@@ -11,7 +11,7 @@ test.describe("public and logged-out access", () => {
     });
   }
 
-  test("login page exposes Microsoft-only pre-provisioned access", async ({ page }) => {
+  test("login page exposes Microsoft-only company access", async ({ page }) => {
     await page.goto("/login");
     await expect(
       page.getByRole("button", { name: "Continue with Microsoft" }),

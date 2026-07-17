@@ -32,7 +32,7 @@ export function getLoginMessage(
   }
 
   if (searchParams.error === "microsoft") {
-    return "Microsoft login was cancelled or denied. Try again with your provisioned company account.";
+    return "Microsoft login was cancelled or denied. Try again with your authorized company account.";
   }
 
   if (searchParams.error === "tenant") {
@@ -79,8 +79,8 @@ export function LoginPanel({
           </Alert>
         ) : null}
         <p className="text-sm text-muted-foreground">
-          Access is limited to active employees pre-provisioned by IT. Email and
-          password registration is disabled.
+          Access is limited to active employees with an authorized company
+          Microsoft email. Email and password registration is disabled.
         </p>
       </CardContent>
     </Card>

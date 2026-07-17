@@ -63,8 +63,8 @@ export async function provisionApprovedUserAction(
       status: "error",
       message:
         error?.code === "23505"
-          ? "That exact email is already provisioned."
-          : "The employee could not be provisioned.",
+          ? "That exact email already has an access record."
+          : "The individual access record could not be created.",
     };
   }
 
@@ -76,7 +76,7 @@ export async function provisionApprovedUserAction(
       entityId: data.id,
       actorUserId: user.id,
       actorEmail: user.email,
-      summary: `Pre-provisioned Qbook access for ${email}.`,
+      summary: `Created an individual Qbook access record for ${email}.`,
       newValues: { email, role: parsed.data.role, status: parsed.data.status },
     },
     { userId: user.id },
@@ -85,7 +85,7 @@ export async function provisionApprovedUserAction(
   revalidatePath("/admin/users");
   return {
     status: "success",
-    message: "Employee pre-provisioned. Access starts only after Microsoft sign-in.",
+    message: "Individual access record created. The employee can sign in with Microsoft.",
   };
 }
 

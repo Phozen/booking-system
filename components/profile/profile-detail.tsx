@@ -30,7 +30,7 @@ function DetailItem({
 
 export function ProfileDetail({ profile }: { profile: UserProfile }) {
   return (
-    <section className="grid content-start gap-5 pt-5">
+    <section className="grid content-start gap-5 rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">

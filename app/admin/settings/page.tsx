@@ -23,7 +23,7 @@ export default async function AdminSettingsPage() {
       <PageHeader
         eyebrow="Super admin area"
         title="System settings"
-        description="Configure registration, approval behavior, app identity, timezone, and reminder defaults. Secrets and provider API keys stay in environment variables, not system settings."
+        description="Configure Microsoft access domains, approval behavior, app identity, timezone, and reminder defaults. Secrets and provider API keys stay in environment variables, not system settings."
       />
 
       <SettingsForm settings={settings} />

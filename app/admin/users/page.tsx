@@ -28,8 +28,8 @@ export default async function AdminUsersPage({
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Super admin area"
-        title="Approved user access"
-        description="Pre-provision exact employee emails, then manage active access and roles. Authentication remains Microsoft-only."
+        title="Elevated user access"
+        description="All authorized company Microsoft accounts can sign in as employees. Add exact emails here to assign elevated roles or suspend individual access."
       />
 
       <ApprovedUserCreateForm />

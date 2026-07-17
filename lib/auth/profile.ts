@@ -5,7 +5,7 @@ import { isMicrosoftAuthUser, normalizeAccessEmail } from "@/lib/auth/access";
 export type AppRole = "employee" | "admin" | "super_admin";
 
 export type ProfileSession = {
-  approvedUserId: string;
+  approvedUserId: string | null;
   role: AppRole;
   status: "active" | "disabled" | "pending";
   full_name: string | null;
@@ -65,8 +65,7 @@ export async function getProfileSession(
 
   if (
     approvedUserError ||
-    !approvedUser ||
-    approvedUser.status !== "active"
+    (approvedUser !== null && approvedUser.status !== "active")
   ) {
     return null;
   }
@@ -83,10 +82,13 @@ export async function getProfileSession(
     return null;
   }
 
-  const role = isAdminRole(approvedUser.role) ? approvedUser.role : "employee";
+  const role =
+    approvedUser && isAdminRole(approvedUser.role)
+      ? approvedUser.role
+      : "employee";
 
   return {
-    approvedUserId: approvedUser.id,
+    approvedUserId: approvedUser?.id ?? null,
     role,
     status: "active",
     full_name: data.full_name ?? null,
