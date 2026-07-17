@@ -694,7 +694,6 @@ export async function cancelBookingAction(
       "Booking cancelled. It will remain visible in your cancelled bookings for reference.",
   };
 }
-
 export async function updateBookingAction(
   bookingId: string,
   _previousState: BookingActionResult,
@@ -903,33 +902,5 @@ export async function updateBookingAction(
       "Booking updated. Availability was checked again before saving your changes.",
     bookingId,
     bookingStatus: updated.status === "pending" ? "pending" : "confirmed",
-  };
-}
-
-export async function cancelRecurringFutureBookingsAction(
-  bookingId: string,
-  _previousState: CancellationActionResult,
-  _formData: FormData,
-): Promise<CancellationActionResult> {
-  void bookingId;
-  void _previousState;
-  void _formData;
-  return {
-    status: "error",
-    message: "Recurring booking operations have been retired. Contact a Super Admin for historical records.",
-  };
-}
-
-export async function cancelRecurringSeriesAction(
-  bookingId: string,
-  _previousState: CancellationActionResult,
-  _formData: FormData,
-): Promise<CancellationActionResult> {
-  void bookingId;
-  void _previousState;
-  void _formData;
-  return {
-    status: "error",
-    message: "Recurring booking operations have been retired. Contact a Super Admin for historical records.",
   };
 }

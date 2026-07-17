@@ -32,9 +32,4 @@ test.describe("employee smoke flows", () => {
     await expect(page.locator("[aria-invalid='true']").first()).toBeVisible();
   });
 
-  test("recurring booking preview validates required fields", async ({ page }) => {
-    await page.goto("/bookings/recurring/new");
-    await page.getByRole("button", { name: /preview dates/i }).click();
-    await expect(page.getByText(/check the recurring booking details/i)).toBeVisible();
-  });
 });

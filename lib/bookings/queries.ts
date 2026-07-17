@@ -68,8 +68,6 @@ type BookingRecord = {
   approval_required: boolean;
   cancellation_reason: string | null;
   cancelled_at: string | null;
-  recurrence_series_id: string | null;
-  recurrence_sequence: number | null;
   created_at: string;
   updated_at: string;
   facilities?: BookingFacilityRecord;
@@ -100,8 +98,6 @@ export type EmployeeBooking = {
   approvalRequired: boolean;
   cancellationReason: string | null;
   cancelledAt: string | null;
-  recurrenceSeriesId: string | null;
-  recurrenceSequence: number | null;
   createdAt: string;
   updatedAt: string;
   facility: BookingFacility | null;
@@ -134,8 +130,6 @@ const employeeBookingBaseSelect = `
   approval_required,
   cancellation_reason,
   cancelled_at,
-  recurrence_series_id,
-  recurrence_sequence,
   created_at,
   updated_at,
   facilities (
@@ -202,8 +196,6 @@ function mapBooking(record: BookingRecord): EmployeeBooking {
     approvalRequired: record.approval_required,
     cancellationReason: record.cancellation_reason,
     cancelledAt: record.cancelled_at,
-    recurrenceSeriesId: record.recurrence_series_id,
-    recurrenceSequence: record.recurrence_sequence,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
     facility: facilityRecord

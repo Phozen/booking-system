@@ -4,7 +4,6 @@ export const employeeSmokeRoutes = [
   { path: "/dashboard", heading: /dashboard/i },
   { path: "/facilities", heading: /facilities/i },
   { path: "/calendar", heading: /calendar/i },
-  { path: "/bookings/recurring/new", heading: /recurring booking/i },
   { path: "/profile", heading: /profile/i },
 ];
 

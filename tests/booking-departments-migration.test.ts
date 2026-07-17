@@ -10,6 +10,13 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const recurringCleanupMigration = readFileSync(
+  join(
+    process.cwd(),
+    "supabase/migrations/20260717071023_remove_recurring_booking_operations.sql",
+  ),
+  "utf8",
+);
 const bookingActions = readFileSync(
   join(process.cwd(), "lib/bookings/actions.ts"),
   "utf8",
@@ -22,18 +29,11 @@ const departmentNotifications = readFileSync(
   join(process.cwd(), "lib/departments/notifications.ts"),
   "utf8",
 );
-const bookingDetail = readFileSync(
-  join(process.cwd(), "components/bookings/booking-detail.tsx"),
-  "utf8",
-);
-const settingsForm = readFileSync(
-  join(process.cwd(), "components/admin/settings/settings-form.tsx"),
-  "utf8",
-);
 
 const sql = migration.replace(/\s+/g, " ").toLowerCase();
 const employeeActions = bookingActions.replace(/\s+/g, " ").toLowerCase();
 const adminActions = adminBookingActions.replace(/\s+/g, " ").toLowerCase();
+const recurringCleanupSql = recurringCleanupMigration.replace(/\s+/g, " ").toLowerCase();
 
 describe("booking departments and recurring retirement migration", () => {
   it("creates an RLS-protected department directory with the inactive safe seed", () => {
@@ -69,14 +69,12 @@ describe("booking departments and recurring retirement migration", () => {
     expect(sql).toContain("to service_role");
   });
 
-  it("retires future recurring operations without deleting historical records", () => {
-    expect(sql).toContain("revoke execute on function public.create_recurring_booking_series");
-    expect(sql).toContain("revoke execute on function public.cancel_own_recurring_bookings");
-    expect(sql).toContain("create or replace function public.retire_future_recurring_bookings");
-    expect(sql).toContain("if not public.is_super_admin() then");
-    expect(sql).toContain("and b.starts_at > now()");
-    expect(sql).toContain("status in ('pending', 'confirmed')");
-    expect(sql).toContain("update public.booking_recurrence_series");
+  it("removes recurring operations while preserving historical series data", () => {
+    expect(recurringCleanupSql).toContain("drop function if exists public.retire_future_recurring_bookings()");
+    expect(recurringCleanupSql).toContain("drop function if exists public.create_recurring_booking_series");
+    expect(recurringCleanupSql).toContain("drop function if exists public.cancel_own_recurring_bookings");
+    expect(recurringCleanupSql).toContain("delete from public.system_settings where key = 'recurring_bookings_enabled'");
+    expect(recurringCleanupSql).not.toContain("drop table public.booking_recurrence_series");
   });
 });
 
@@ -95,11 +93,11 @@ describe("initial attendee creation actions", () => {
     expect(departmentNotifications).toContain('query = query.in("department_id", departmentIds)');
   });
 
-  it("removes the employee recurring management controls", () => {
-    expect(bookingDetail).not.toContain("RecurringCancelActions");
-    expect(settingsForm).not.toContain("recurringBookingsEnabled");
+  it("removes all recurring routes and UI modules", () => {
     expect(
       existsSync(join(process.cwd(), "app/(app)/bookings/recurring/new/page.tsx")),
     ).toBe(false);
+    expect(existsSync(join(process.cwd(), "app/admin/recurring-retirement/page.tsx"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "components/bookings/recurring/recurring-booking-form.tsx"))).toBe(false);
   });
 });

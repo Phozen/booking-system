@@ -9,10 +9,6 @@ const migration = readFileSync(
   join(process.cwd(), "supabase/migrations/0022_booking_mutation_rpcs.sql"),
   "utf8",
 );
-const recurringAction = readFileSync(
-  join(process.cwd(), "lib/bookings/recurring/actions.ts"),
-  "utf8",
-);
 const hardeningMigration = readFileSync(
   join(process.cwd(), "supabase/migrations/0023_harden_employee_cancellation_updates.sql"),
   "utf8",
@@ -67,19 +63,6 @@ describe("booking mutation RPC migration contract", () => {
     ).toBe(false);
   });
 
-  it("defines transactional recurring series creation with linked occurrence inserts", () => {
-    expect(sql).toContain(
-      "create or replace function public.create_recurring_booking_series",
-    );
-    expect(sql).toContain("if p_owner_user_id <> auth.uid()");
-    expect(sql).toContain("insert into public.booking_recurrence_series");
-    expect(sql).toContain("recurrence_series_id");
-    expect(sql).toContain("recurrence_sequence");
-    expect(sql).toContain(
-      "on public.bookings(recurrence_series_id, recurrence_sequence)",
-    );
-    expect(sql).toContain("where recurrence_series_id is not null");
-  });
 
   it("validates conflict-adjacent booking invariants in the shared mutation validator", () => {
     expect(sql).toContain("create or replace function public.validate_booking_mutation_input");
@@ -92,7 +75,6 @@ describe("booking mutation RPC migration contract", () => {
     expect(sql).toContain("facility is under maintenance for the selected time");
   });
 });
-
 describe("employee cancellation trigger hardening migration", () => {
   const hardeningSql = compactSql(hardeningMigration);
 
@@ -170,21 +152,5 @@ describe("booking mutation friendly errors", () => {
         message: "Attendee count exceeds facility capacity.",
       }),
     ).toBe("Attendee count exceeds the facility capacity.");
-  });
-});
-
-describe("recurring booking action RPC contract", () => {
-  const actionSql = compactSql(recurringAction);
-
-  it("creates recurring bookings through the transactional RPC only", () => {
-    expect(actionSql).toContain('rpc("create_recurring_booking_series"');
-    expect(actionSql).not.toContain('rpc("create_booking"');
-    expect(actionSql).not.toContain('.from("booking_recurrence_series") .insert');
-    expect(actionSql).not.toContain("recurrence_series_id: occurrence.sequence");
-  });
-
-  it("does not post-update recurrence linkage from TypeScript", () => {
-    expect(actionSql).not.toContain(".update({ recurrence_series_id");
-    expect(actionSql).not.toContain(".update({ recurrence_sequence");
   });
 });
