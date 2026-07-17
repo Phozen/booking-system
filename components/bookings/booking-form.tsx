@@ -844,7 +844,7 @@ export function BookingForm({
 
       <InitialAttendeePicker disabled={!hasFacilities || isPending} />
 
-      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} description="Selected departments are notified when this booking is confirmed." />
+      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} />
 
       {hasPreviewDetails ? (
         <section className="grid gap-3 rounded-lg border-2 border-primary/55 bg-primary/10 p-4 shadow-md shadow-primary/10 ring-2 ring-primary/15">

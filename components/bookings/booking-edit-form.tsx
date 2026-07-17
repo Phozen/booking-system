@@ -793,7 +793,7 @@ export function BookingEditForm({
         </div>
       </section>
 
-      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} description="Selected departments are notified if this confirmed booking is updated with their tag." />
+      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} />
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Link

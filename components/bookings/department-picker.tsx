@@ -13,12 +13,10 @@ export function DepartmentPicker({
   departments,
   initialDepartmentIds = [],
   disabled,
-  description,
 }: {
   departments: Department[];
   initialDepartmentIds?: string[];
   disabled?: boolean;
-  description: string;
 }) {
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(() =>
@@ -43,7 +41,6 @@ export function DepartmentPicker({
           <FieldRequirementBadge required={false} />
         </div>
         <h2 className="mt-1 text-lg font-bold tracking-normal">Involved departments</h2>
-        <p className="mt-1 text-muted-foreground">{description}</p>
       </div>
       {departments.length > 0 ? (
         <>
