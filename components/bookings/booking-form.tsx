@@ -385,11 +385,8 @@ export function BookingForm({
 
       <section className="grid gap-4 border-b-2 border-border pb-7">
         <div className="sm:col-span-2">
-          <p className="text-sm font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
-            Step 1
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Venue
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-blue-700 dark:text-blue-300 sm:text-3xl">
+            Step 1: Venue
           </h2>
         </div>
 
@@ -478,11 +475,8 @@ export function BookingForm({
 
       <section className="grid gap-4 border-b-2 border-border pb-7">
         <div className="grid gap-4">
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-            Step 2
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Availability and Time
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 sm:text-3xl">
+            Step 2: Availability and Time
           </h2>
           <div className="grid gap-2 sm:max-w-md">
             <BookingFieldLabel htmlFor="date" required>
@@ -533,11 +527,8 @@ export function BookingForm({
 
       <section className="grid gap-5 border-b-2 border-border pb-7 text-sm">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-            Step 3
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Details
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-300 sm:text-3xl">
+            Step 3: Details
           </h2>
         </div>
 
