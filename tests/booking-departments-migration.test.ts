@@ -29,6 +29,10 @@ const departmentNotifications = readFileSync(
   join(process.cwd(), "lib/departments/notifications.ts"),
   "utf8",
 );
+const departmentManager = readFileSync(
+  join(process.cwd(), "components/admin/departments/department-manager.tsx"),
+  "utf8",
+);
 
 const sql = migration.replace(/\s+/g, " ").toLowerCase();
 const employeeActions = bookingActions.replace(/\s+/g, " ").toLowerCase();
@@ -99,5 +103,9 @@ describe("initial attendee creation actions", () => {
     ).toBe(false);
     expect(existsSync(join(process.cwd(), "app/admin/recurring-retirement/page.tsx"))).toBe(false);
     expect(existsSync(join(process.cwd(), "components/bookings/recurring/recurring-booking-form.tsx"))).toBe(false);
+  });
+
+  it("uses a submit button for department add and edit forms", () => {
+    expect(departmentManager).toContain('<Button type="submit"');
   });
 });

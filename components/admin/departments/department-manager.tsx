@@ -20,7 +20,7 @@ function DepartmentForm({ department }: { department?: Department }) {
     <div className="grid gap-2"><Label htmlFor={department ? `department-name-${department.id}` : "department-name"}>Department</Label><Input id={department ? `department-name-${department.id}` : "department-name"} name="name" defaultValue={department?.name} required disabled={pending} /></div>
     <div className="grid gap-2"><Label htmlFor={department ? `department-email-${department.id}` : "department-email"}>Mailbox</Label><Input id={department ? `department-email-${department.id}` : "department-email"} name="email" type="email" defaultValue={department?.email} required disabled={pending} /></div>
     <label className="flex items-center gap-2 pb-2 text-sm"><input name="isActive" type="checkbox" defaultChecked={department?.isActive ?? true} disabled={pending} /> Active</label>
-    <Button variant={editing ? "outline" : "default"} disabled={pending}>{pending ? "Saving..." : editing ? "Save" : "Add department"}</Button>
+    <Button type="submit" variant={editing ? "outline" : "default"} disabled={pending}>{pending ? "Saving..." : editing ? "Save" : "Add department"}</Button>
     {state.status !== "idle" ? <Alert className="sm:col-span-4" variant={state.status === "error" ? "destructive" : "success"}><AlertDescription>{state.message}</AlertDescription></Alert> : null}
   </form>;
 }
