@@ -12,12 +12,14 @@ function formatOptionalDate(value: string | null) {
 function DetailItem({
   label,
   value,
+  className,
 }: {
   label: string;
   value: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-1 border-b border-border/70 py-3 last:border-b-0">
+    <div className={`grid min-w-0 gap-1 border-b border-border/70 py-3 last:border-b-0 ${className ?? ""}`}>
       <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
@@ -80,7 +82,11 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
         />
         <DetailItem label="Created" value={formatBookingDateTime(profile.createdAt)} />
         <DetailItem label="Updated" value={formatBookingDateTime(profile.updatedAt)} />
-        <DetailItem label="User ID" value={profile.id} />
+        <DetailItem
+          label="User ID"
+          value={<span className="block break-all">{profile.id}</span>}
+          className="sm:col-span-2"
+        />
       </dl>
     </section>
   );
