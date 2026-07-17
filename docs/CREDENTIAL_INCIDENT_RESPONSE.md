@@ -84,17 +84,17 @@ or this document.
 
 | Evidence | Owner | Status / reference |
 | --- | --- | --- |
-| Microsoft sign-in verified for recovery administrator | Company Auth owner | Pending |
+| Microsoft sign-in verified for recovery administrator | Company Auth owner | Verified 2026-07-17: recovery administrator confirmed normal-window Microsoft sign-in succeeds. |
 | Second active Super Admin verified or exception accepted | Product owner | Pending |
 | Compromised password replaced | Supabase Auth owner | Pending |
 | Global session revocation completed | Supabase Auth owner | Pending |
 | Access-token lifetime elapsed or user held inactive | Supabase Auth owner | Pending |
 | Auth log review completed from the exposure start | Security owner | Pending |
 | Conditional project/Entra credential decision recorded | Security owner | Pending |
-| Working-tree scan passes | Engineering | Pending remediation verification |
-| Full-history scan passes after rewrite | Engineering | Pending history rewrite |
-| All refs force-pushed in maintenance window | Repository owner | Pending |
-| Anonymous clone contains no incident artifacts | Independent reviewer | Pending |
-| Collaborators and automation checkouts recloned | Repository owner | Pending |
+| Working-tree scan passes | Engineering | Verified 2026-07-17 in a fresh bare clone (`npm run secret-scan`). |
+| Full-history scan passes after rewrite | Engineering | Verified 2026-07-17 in the rewritten mirror and fresh clone, including fetched pull-request refs (`npm run secret-scan:history`). |
+| All refs force-pushed in maintenance window | Repository owner | Verified 2026-07-17: `main` and seven Dependabot branches force-updated; two unchanged feature branches were retained. |
+| Anonymous clone contains no incident artifacts | Independent reviewer | Verified 2026-07-17: fresh bare clone passed both scanners at rewritten `main` commit `66a6bfdb88e918580925fc2b06cd8e1b821d266a`. |
+| Collaborators and automation checkouts recloned | Repository owner | Pending: a fresh engineering checkout was created and scanned; replace or retire every pre-rewrite checkout before it can push. |
 
 Phase 1 is complete only when every row has a dated evidence reference.
