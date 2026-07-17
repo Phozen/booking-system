@@ -57,7 +57,7 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
         </div>
       </div>
 
-      <dl className="grid gap-0 sm:grid-cols-2 sm:gap-x-6">
+      <dl className="grid gap-0">
         <DetailItem label="Department" value={profile.department || "Not set"} />
         <DetailItem
           label="Phone"
@@ -85,7 +85,6 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
         <DetailItem
           label="User ID"
           value={<span className="block break-all">{profile.id}</span>}
-          className="sm:col-span-2"
         />
       </dl>
     </section>

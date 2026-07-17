@@ -477,33 +477,32 @@ export function BookingForm({
       </section>
 
       <section className="grid gap-4 border-b-2 border-border pb-7">
-        <div>
+        <div className="grid gap-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
             Step 2
           </p>
           <h2 className="mt-1 text-lg font-bold tracking-normal">
             Availability and Time
           </h2>
-        </div>
-
-        <div className="grid gap-2 sm:max-w-md">
-          <BookingFieldLabel htmlFor="date" required>
-            Date
-          </BookingFieldLabel>
-          <Input
-            id="date"
-            name="date"
-            type="date"
-            value={previewValues.date}
-            onChange={(event) => setPreviewField("date", event.target.value)}
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              fieldErrors.date && "date-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.date)}
-            required
-          />
-          <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
+          <div className="grid gap-2 sm:max-w-md">
+            <BookingFieldLabel htmlFor="date" required>
+              Date
+            </BookingFieldLabel>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              value={previewValues.date}
+              onChange={(event) => setPreviewField("date", event.target.value)}
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                fieldErrors.date && "date-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.date)}
+              required
+            />
+            <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
+          </div>
         </div>
 
         <BookingAvailabilityTimeline
