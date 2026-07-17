@@ -84,7 +84,7 @@ or this document.
 
 | Evidence | Owner | Status / reference |
 | --- | --- | --- |
-| Microsoft sign-in verified for recovery administrator | Company Auth owner | Pending final recovery verification: Microsoft sign-in was verified for the former recovery administrator before that affected account was disabled for containment. `jerry@qhazanahsabah.com.my`, now the active recovery Super Admin, must complete one normal Microsoft sign-in. |
+| Microsoft sign-in verified for recovery administrator | Company Auth owner | Verified 2026-07-17 01:52:09 UTC: `jerry@qhazanahsabah.com.my` completed a normal Azure sign-in after promotion and has an active Super Admin session. |
 | Second active Super Admin verified or exception accepted | Product owner | Verified 2026-07-17: `jerry@qhazanahsabah.com.my` is Azure-only and active `super_admin` in both `profiles` and `approved_users`. |
 | Compromised password replaced | Supabase Auth owner | Verified 2026-07-17 01:09:47 UTC: the affected user's stored password hash was replaced with a freshly generated value that was not recorded. |
 | Global session revocation completed | Supabase Auth owner | Verified 2026-07-17 01:09:47 UTC: all two remaining `auth.sessions` rows for the affected user were deleted; post-action count was zero. |
