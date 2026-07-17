@@ -23,6 +23,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject committed secrets and local browser artifacts
+        run: |
+          node scripts/scan-secrets.mjs
+          node scripts/scan-secrets.mjs --history
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4

@@ -15,6 +15,19 @@
 /test-results/
 /playwright-report/
 /playwright/.auth/
+*.har
+*.trace.zip
+
+# local browser and QA artifacts
+/state.json
+/cookie.json
+/*-dom.html
+/screenshots/
+/reports/
+/artifacts/
+/tmp/qa-automation/
+storage-state*.json
+auth-state*.json
 
 # next.js
 /.next/

@@ -1,34 +1,36 @@
-import { test, expect } from '@playwright/test';
-import * as fs from 'fs';
+import { expect, test } from "@playwright/test";
 
-test('QA Audit: initial exploration', async ({ page }) => {
-  await page.goto('https://booking-system-self-five.vercel.app/');
-  
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
+test.describe("preview hygiene", () => {
+  test("login shell loads without client errors or failed first-party assets", async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    const failedFirstPartyResponses: string[] = [];
 
-  // Let's dump the DOM to a file so we can inspect it
-  const html = await page.content();
-  fs.writeFileSync('initial-dom.html', html);
-  
-  // Try to find the login form
-  // Assuming there's an email and password input
-  await page.fill('input[type="email"]', 'angelo_superadmin@email.com');
-  await page.fill('input[type="password"]', '[REDACTED]');
-  
-  // Assuming there's a button to submit
-  await page.click('button[type="submit"]');
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("response", (response) => {
+      const responseUrl = new URL(response.url());
+      const configuredBaseUrl = new URL(
+        process.env.E2E_BASE_URL ?? "http://localhost:3000",
+      );
 
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
+      if (
+        responseUrl.origin === configuredBaseUrl.origin &&
+        response.status() >= 500
+      ) {
+        failedFirstPartyResponses.push(
+          `${response.status()} ${responseUrl.pathname}`,
+        );
+      }
+    });
 
-  const loggedInHtml = await page.content();
-  fs.writeFileSync('loggedin-dom.html', loggedInHtml);
+    await page.goto("/login");
 
-  // Print all visible links and buttons
-  const links = await page.$$eval('a', els => els.map(el => el.textContent));
-  const buttons = await page.$$eval('button', els => els.map(el => el.textContent));
-  
-  console.log("LINKS: ", links);
-  console.log("BUTTONS: ", buttons);
+    await expect(
+      page.getByRole("button", { name: "Continue with Microsoft" }),
+    ).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/stack trace|debug mode/i);
+    expect(pageErrors).toEqual([]);
+    expect(failedFirstPartyResponses).toEqual([]);
+  });
 });
