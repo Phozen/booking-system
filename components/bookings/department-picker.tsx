@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import type { Department } from "@/lib/departments/queries";
@@ -22,6 +22,7 @@ export function DepartmentPicker({
   const [selectedIds, setSelectedIds] = useState(() =>
     initialDepartmentIds.filter((id) => departments.some((item) => item.id === id)),
   );
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const selected = departments.filter((department) => selectedIds.includes(department.id));
   const available = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -48,7 +49,7 @@ export function DepartmentPicker({
             <Label htmlFor="department-search">Search departments</Label>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} disabled={disabled} placeholder="Department name or email" />
+              <Input ref={searchInputRef} id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} disabled={disabled} placeholder="Department name or email" />
             </div>
             <p className="text-xs text-muted-foreground">Enter at least 2 characters, then select one or more departments.</p>
           </div>
@@ -58,7 +59,7 @@ export function DepartmentPicker({
               <ul className="grid gap-1">
                 {available.map((department) => (
                   <li key={department.id}>
-                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); }}>
+                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); requestAnimationFrame(() => searchInputRef.current?.focus()); }}>
                       <span className="block font-medium">{department.name}</span>
                       <span className="text-xs text-muted-foreground">{department.email}</span>
                     </button>
