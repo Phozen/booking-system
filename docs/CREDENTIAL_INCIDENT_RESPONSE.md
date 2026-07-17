@@ -95,6 +95,6 @@ or this document.
 | Full-history scan passes after rewrite | Engineering | Verified 2026-07-17 in the rewritten mirror and fresh clone, including fetched pull-request refs (`npm run secret-scan:history`). |
 | All refs force-pushed in maintenance window | Repository owner | Verified 2026-07-17: `main` and seven Dependabot branches force-updated; two unchanged feature branches were retained. |
 | Anonymous clone contains no incident artifacts | Independent reviewer | Verified 2026-07-17: fresh bare clone passed both scanners at rewritten `main` commit `66a6bfdb88e918580925fc2b06cd8e1b821d266a`. |
-| Collaborators and automation checkouts recloned | Repository owner | Partial: the obsolete local checkout is locked by the running desktop application and has been retired from use; a clean rewritten checkout at commit `4146435f11ea8d5c206f1bb7a4b30fd2694d4cd7` is ready at the sibling `booking-system-rewritten` path. Reopen Codex there before removing the locked retired directory. |
+| Collaborators and automation checkouts recloned | Repository owner | Partial: this machine now uses a clean rewritten checkout at commit `272041139a43e243684065af2302aed7862ed596`; the locked retired directory has had its empty `.git` remnant removed and cannot push history. Reopen Codex at `booking-system-rewritten`, then remove the retired directory; separately require every collaborator and automation checkout to reclone. |
 
 Phase 1 is complete only when every row has a dated evidence reference.
