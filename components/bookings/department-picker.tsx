@@ -50,18 +50,22 @@ export function DepartmentPicker({
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} disabled={disabled} placeholder="Department name or email" />
             </div>
+            <p className="text-xs text-muted-foreground">Enter at least 2 characters, then select one or more departments.</p>
           </div>
           {available.length > 0 ? (
-            <ul className="divide-y rounded-lg border">
-              {available.map((department) => (
-                <li key={department.id}>
-                  <button type="button" className="w-full px-3 py-2 text-left hover:bg-accent" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); }}>
-                    <span className="block font-medium">{department.name}</span>
-                    <span className="text-xs text-muted-foreground">{department.email}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="rounded-md border border-dashed bg-muted/40 p-1">
+              <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Search results</p>
+              <ul className="grid gap-1">
+                {available.map((department) => (
+                  <li key={department.id}>
+                    <button type="button" className="w-full rounded-sm px-3 py-2 text-left hover:bg-background" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); }}>
+                      <span className="block font-medium">{department.name}</span>
+                      <span className="text-xs text-muted-foreground">{department.email}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
           {selected.length > 0 ? (
             <ul className="grid gap-2">
