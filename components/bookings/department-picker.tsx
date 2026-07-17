@@ -58,7 +58,7 @@ export function DepartmentPicker({
               <ul className="grid gap-1">
                 {available.map((department) => (
                   <li key={department.id}>
-                    <button type="button" className="w-full rounded-sm px-3 py-2 text-left hover:bg-background" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); }}>
+                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); }}>
                       <span className="block font-medium">{department.name}</span>
                       <span className="text-xs text-muted-foreground">{department.email}</span>
                     </button>
