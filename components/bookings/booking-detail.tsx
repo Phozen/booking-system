@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Edit3, Printer, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Edit3, Mail, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -171,8 +171,7 @@ export function BookingDetail({
               {booking.status === "pending"
                 ? "Booking request submitted and pending approval."
                 : "Booking created."}{" "}
-              Invite attendees now if other internal users should join this
-              meeting.
+              You can add more attendees from this page whenever needed.
             </span>
             <span className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link
@@ -245,11 +244,6 @@ export function BookingDetail({
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
           </DetailItem>
-          <DetailItem label="Departments">
-            {booking.departments.length > 0
-              ? booking.departments.map((department) => department.name).join(", ")
-              : "None tagged"}
-          </DetailItem>
           <DetailItem label="Approval">
             {booking.approvalRequired
               ? formatApprovalStatus(approval)
@@ -258,15 +252,29 @@ export function BookingDetail({
           <DetailItem label="Created">
             {formatBookingDateTime(booking.createdAt)}
           </DetailItem>
-          <DetailItem label="Updated">
-            {formatBookingDateTime(booking.updatedAt)}
-          </DetailItem>
-          <DetailItem label="Cancellation status">
-            {booking.cancelledAt
-              ? `Cancelled ${formatBookingDateTime(booking.cancelledAt)}`
-              : "Not cancelled"}
-          </DetailItem>
         </dl>
+      </section>
+
+      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+        <h2 className="text-lg font-semibold tracking-normal">Involved departments</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          These departments are included in the booking record and receive booking notifications.
+        </p>
+        {booking.departments.length > 0 ? (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {booking.departments.map((department) => (
+              <li key={department.id} className="rounded-lg border bg-muted/30 p-3">
+                <p className="font-medium">{department.name}</p>
+                <p className="mt-1 flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground">
+                  <Mail className="size-4 shrink-0" aria-hidden="true" />
+                  {department.email}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No departments were tagged for this booking.</p>
+        )}
       </section>
 
       <CateringDetailsCard catering={booking.catering} />

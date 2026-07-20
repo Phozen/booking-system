@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Mail, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -99,19 +99,32 @@ export function AdminBookingDetail({
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
           </DetailItem>
-          <DetailItem label="Created">
-            {formatBookingDateTime(booking.createdAt)}
-          </DetailItem>
-          <DetailItem label="Updated">
-            {formatBookingDateTime(booking.updatedAt)}
-          </DetailItem>
-          <DetailItem label="Approval required">
-            {booking.approvalRequired ? "Yes" : "No"}
-          </DetailItem>
           <DetailItem label="Usage status">
             {formatBookingUsageStatus(booking.usageStatus)}
           </DetailItem>
         </dl>
+      </section>
+
+      <section className="rounded-lg border bg-card p-5">
+        <h2 className="text-lg font-semibold tracking-normal">Involved departments</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Department mailboxes receive booking confirmation and cancellation updates.
+        </p>
+        {booking.departments.length > 0 ? (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {booking.departments.map((department) => (
+              <li key={department.id} className="rounded-lg border bg-muted/30 p-3">
+                <p className="font-medium">{department.name}</p>
+                <p className="mt-1 flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground">
+                  <Mail className="size-4 shrink-0" aria-hidden="true" />
+                  {department.email}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No departments were tagged for this booking.</p>
+        )}
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">

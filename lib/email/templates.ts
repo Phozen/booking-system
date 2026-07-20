@@ -28,6 +28,32 @@ function getDisplayValue(data: Record<string, unknown>, key: string) {
   return getStringValue(data, key);
 }
 
+function getDepartmentDisplayValue(data: Record<string, unknown>) {
+  const departments = data.departments;
+
+  if (!Array.isArray(departments)) {
+    return null;
+  }
+
+  const labels = departments.flatMap((department) => {
+    if (!department || typeof department !== "object") {
+      return [];
+    }
+
+    const values = department as Record<string, unknown>;
+    const name = getStringValue(values, "name");
+    const email = getStringValue(values, "email");
+
+    if (!name && !email) {
+      return [];
+    }
+
+    return [name && email ? `${name} (${email})` : name ?? email!];
+  });
+
+  return labels.length > 0 ? labels.join(", ") : null;
+}
+
 function getBookingLink(appUrl: string, bookingId: string | null) {
   const baseUrl = appUrl.replace(/\/$/, "");
   return bookingId ? `${baseUrl}/bookings/${bookingId}` : baseUrl;
@@ -167,6 +193,7 @@ export function renderEmailTemplate(
     "cateringDietaryNotes",
   );
   const cateringNotes = getStringValue(input.templateData, "cateringNotes");
+  const departments = getDepartmentDisplayValue(input.templateData);
   const link = getBookingLink(input.appUrl, bookingId);
   const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
   const startTime = startsAt ? formatBookingTime(startsAt) : null;
@@ -188,6 +215,10 @@ export function renderEmailTemplate(
         { label: "Status", value: status },
         { label: "Attendee count", value: attendeeCount },
       ],
+    },
+    {
+      title: "Involved departments",
+      rows: [{ label: "Departments", value: departments }],
     },
     {
       title: "Requester / invitation details",

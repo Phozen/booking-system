@@ -26,6 +26,14 @@ type RelatedBookingRecord =
             level: string;
           }[]
         | null;
+      booking_departments:
+        | {
+            departments:
+              | { name: string; email: string }
+              | { name: string; email: string }[]
+              | null;
+          }[]
+        | null;
     }
   | {
       id: string;
@@ -41,6 +49,14 @@ type RelatedBookingRecord =
         | {
             name: string;
             level: string;
+          }[]
+        | null;
+      booking_departments:
+        | {
+            departments:
+              | { name: string; email: string }
+              | { name: string; email: string }[]
+              | null;
           }[]
         | null;
     }[]
@@ -88,6 +104,12 @@ const relatedBookingSelect = `
   facilities (
     name,
     level
+  ),
+  booking_departments (
+    departments (
+      name,
+      email
+    )
   )
 `;
 
@@ -165,6 +187,19 @@ function getRelatedFacility(record: QueueNotificationRecord) {
     : booking?.facilities;
 }
 
+function getRelatedDepartments(record: QueueNotificationRecord) {
+  const booking = getRelatedBooking(record);
+
+  return (booking?.booking_departments ?? []).flatMap((row) => {
+    const department = row.departments;
+    return Array.isArray(department)
+      ? department
+      : department
+        ? [department]
+        : [];
+  });
+}
+
 function enrichTemplateData(record: QueueNotificationRecord): EmailTemplateData {
   const booking = getRelatedBooking(record);
   const facility = getRelatedFacility(record);
@@ -179,6 +214,7 @@ function enrichTemplateData(record: QueueNotificationRecord): EmailTemplateData 
     startsAt: record.template_data?.startsAt ?? booking?.starts_at,
     endsAt: record.template_data?.endsAt ?? booking?.ends_at,
     status: record.template_data?.status ?? booking?.status,
+    departments: record.template_data?.departments ?? getRelatedDepartments(record),
   };
 }
 

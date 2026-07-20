@@ -8,7 +8,6 @@ import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import {
   formatBookingDate,
   formatBookingDateTime,
-  formatBookingStatus,
   formatBookingWindow,
 } from "@/lib/bookings/format";
 import {
@@ -168,18 +167,9 @@ export function BookingPrintForm({
               label="Time"
               value={formatBookingWindow(booking.startsAt, booking.endsAt)}
             />
-            <PrintField label="Status" value={formatBookingStatus(booking.status)} />
-            <PrintField
-              label="Approval required"
-              value={booking.approvalRequired ? "Yes" : "No"}
-            />
             <PrintField
               label="Attendee count"
               value={booking.attendeeCount ?? "Not provided"}
-            />
-            <PrintField
-              label="Involved departments"
-              value={booking.departments.length > 0 ? booking.departments.map((department) => department.name).join(", ") : "None tagged"}
             />
             <div className="sm:col-span-2">
               <PrintField
@@ -188,6 +178,29 @@ export function BookingPrintForm({
               />
             </div>
           </dl>
+        </Section>
+
+        <Section title="Involved departments">
+          {booking.departments.length > 0 ? (
+            <table className="w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-300">
+                  <th className="py-2 pr-3 font-semibold">Department</th>
+                  <th className="py-2 pr-3 font-semibold">Notification mailbox</th>
+                </tr>
+              </thead>
+              <tbody>
+                {booking.departments.map((department) => (
+                  <tr key={department.id} className="border-b border-zinc-200">
+                    <td className="py-2 pr-3">{department.name}</td>
+                    <td className="break-all py-2 pr-3">{department.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-sm text-zinc-600">No departments were tagged for this booking.</p>
+          )}
         </Section>
 
         <Section title="Invited attendees">

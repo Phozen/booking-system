@@ -75,6 +75,13 @@ export function PendingApprovalsTable({
                   label: "Catering",
                   value: formatCateringSummary(booking),
                 },
+                {
+                  label: "Departments",
+                  value:
+                    booking.departments.length > 0
+                      ? booking.departments.map((department) => department.name).join(", ")
+                      : "None tagged",
+                },
               ]}
               actions={
                 <Link
@@ -99,7 +106,7 @@ export function PendingApprovalsTable({
         )
       }
     >
-      <table className="w-full min-w-[960px] border-collapse text-left text-sm">
+      <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
@@ -109,6 +116,7 @@ export function PendingApprovalsTable({
               <th className="px-4 py-3 font-medium">Time</th>
               <th className="px-4 py-3 font-medium">Requested</th>
               <th className="px-4 py-3 font-medium">Catering</th>
+              <th className="px-4 py-3 font-medium">Departments</th>
               <th className="px-4 py-3 text-right font-medium">Review</th>
             </tr>
           </thead>
@@ -137,6 +145,11 @@ export function PendingApprovalsTable({
                   <td className="px-4 py-3">
                     {formatCateringSummary(booking)}
                   </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {booking.departments.length > 0
+                      ? booking.departments.map((department) => department.name).join(", ")
+                      : "-"}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/bookings/${booking.id}`}
@@ -155,7 +168,7 @@ export function PendingApprovalsTable({
               <tr>
                 <td
                   className="px-4 py-8"
-                  colSpan={8}
+                  colSpan={9}
                 >
                   <EmptyState
                     className="border-0 bg-transparent py-4"
