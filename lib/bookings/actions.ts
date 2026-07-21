@@ -36,7 +36,10 @@ import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { queueDepartmentBookingNotification } from "@/lib/departments/notifications";
+import {
+  getBookingDepartmentSnapshot,
+  queueDepartmentBookingNotification,
+} from "@/lib/departments/notifications";
 import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
 
 export type BookingActionResult = {
@@ -87,6 +90,13 @@ function formatEmailBookingWindow(startsAt: string, endsAt: string) {
   return `${formatBookingDateTime(startsAt)} to ${formatBookingDateTime(endsAt)}`;
 }
 
+async function getDepartmentSnapshotSafely(bookingId: string) {
+  return getBookingDepartmentSnapshot(bookingId).catch((error) => {
+    console.error("Booking department snapshot unavailable", { bookingId, error });
+    return [];
+  });
+}
+
 async function insertBookingAuditLog({
   booking,
   actorEmail,
@@ -133,6 +143,7 @@ async function insertBookingConfirmationNotification({
       booking.starts_at,
       booking.ends_at,
     );
+    const departments = await getDepartmentSnapshotSafely(booking.id);
     await createAppNotification({
       userId: booking.user_id,
       type: "booking_confirmation",
@@ -159,6 +170,7 @@ async function insertBookingConfirmationNotification({
           startsAt: booking.starts_at,
           endsAt: booking.ends_at,
           status: booking.status,
+          departments,
         },
         related_booking_id: booking.id,
         idempotency_key: `booking-confirmation:${booking.id}:${recipientEmail}`,
@@ -234,6 +246,7 @@ async function insertCateringRequestNotifications({
       booking.starts_at,
       booking.ends_at,
     );
+    const departments = await getDepartmentSnapshotSafely(booking.id);
     const { data, error } = await supabase
       .from("email_notifications")
       .insert(
@@ -253,6 +266,7 @@ async function insertCateringRequestNotifications({
             startsAt: booking.starts_at,
             endsAt: booking.ends_at,
             status: booking.status,
+            departments,
             requesterName,
             requesterEmail,
             cateringType: booking.catering_type,
@@ -330,6 +344,7 @@ async function insertBookingCancellationSideEffects({
       booking.startsAt,
       booking.endsAt,
     );
+    const departments = await getDepartmentSnapshotSafely(booking.id);
     const { error: notificationError } = await supabase
       .from("email_notifications")
       .insert({
@@ -348,6 +363,7 @@ async function insertBookingCancellationSideEffects({
           endsAt: booking.endsAt,
           cancellationReason: booking.cancellationReason,
           status: booking.status,
+          departments,
         },
         related_booking_id: booking.id,
       });

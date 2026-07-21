@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, Mail } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
 import {
@@ -15,6 +18,8 @@ import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 function formatCateringSummary(booking: AdminBooking) {
   if (!booking.catering.required) {
@@ -37,13 +42,32 @@ export function PendingApprovalsTable({
 }: {
   bookings: AdminBooking[];
 }) {
+  const [departmentId, setDepartmentId] = useState("all");
+  const departments = useMemo(
+    () => {
+      const byId = new Map<string, AdminBooking["departments"][number]>();
+      bookings.forEach((booking) => {
+        booking.departments.forEach((department) => byId.set(department.id, department));
+      });
+      return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+    },
+    [bookings],
+  );
+  const visibleBookings = useMemo(
+    () =>
+      departmentId === "all"
+        ? bookings
+        : bookings.filter((booking) => booking.departments.some((department) => department.id === departmentId)),
+    [bookings, departmentId],
+  );
+
   return (
     <AdminTableShell
       title="Approval queue"
-      description={`${bookings.length} requests waiting for review`}
+      description={`${visibleBookings.length} request${visibleBookings.length === 1 ? "" : "s"} waiting for review`}
       mobileCards={
-        bookings.length > 0 ? (
-          bookings.map((booking) => (
+        visibleBookings.length > 0 ? (
+          visibleBookings.map((booking) => (
             <MobileRecordCard
               key={booking.id}
               eyebrow="Pending room request"
@@ -106,6 +130,25 @@ export function PendingApprovalsTable({
         )
       }
     >
+      {departments.length > 0 ? (
+        <div className="border-b bg-muted/20 px-4 py-3">
+          <div className="grid max-w-sm gap-2">
+            <Label htmlFor="approval-department-filter">Department</Label>
+            <Select
+              id="approval-department-filter"
+              value={departmentId}
+              onChange={(event) => setDepartmentId(event.target.value)}
+            >
+              <option value="all">All departments</option>
+              {departments.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      ) : null}
       <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
@@ -121,8 +164,8 @@ export function PendingApprovalsTable({
             </tr>
           </thead>
           <tbody>
-            {bookings.length > 0 ? (
-              bookings.map((booking) => (
+            {visibleBookings.length > 0 ? (
+              visibleBookings.map((booking) => (
                 <tr key={booking.id} className="border-t">
                   <td className="px-4 py-3 font-medium">{booking.title}</td>
                   <td className="px-4 py-3">
@@ -147,7 +190,16 @@ export function PendingApprovalsTable({
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {booking.departments.length > 0
-                      ? booking.departments.map((department) => department.name).join(", ")
+                      ? booking.departments.map((department) => (
+                        <a
+                          key={department.id}
+                          href={`mailto:${department.email}`}
+                          className="mr-2 inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                        >
+                          <Mail className="size-3" aria-hidden="true" />
+                          {department.name}
+                        </a>
+                      ))
                       : "-"}
                   </td>
                   <td className="px-4 py-3 text-right">

@@ -197,6 +197,17 @@ export function EmailNotificationsTable({
                     label: "Last error",
                     value: notification.lastError || "None",
                   },
+                  {
+                    label: "Email preview",
+                    value: (
+                      <details className="max-w-xl">
+                        <summary className="cursor-pointer font-medium text-primary">View rendered email</summary>
+                        <pre className="mt-2 whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-xs text-foreground">
+                          {notification.previewText}
+                        </pre>
+                      </details>
+                    ),
+                  },
                 ]}
               />
             ))
@@ -209,7 +220,7 @@ export function EmailNotificationsTable({
           )
         }
       >
-          <table className="w-full min-w-[1400px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1560px] border-collapse text-left text-sm">
             <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Type</th>
@@ -222,6 +233,7 @@ export function EmailNotificationsTable({
                 <th className="px-4 py-3 font-medium">Scheduled</th>
                 <th className="px-4 py-3 font-medium">Sent</th>
                 <th className="px-4 py-3 font-medium">Last error</th>
+                <th className="px-4 py-3 font-medium">Preview</th>
                 <th className="px-4 py-3 font-medium">Created</th>
               </tr>
             </thead>
@@ -273,6 +285,14 @@ export function EmailNotificationsTable({
                     <td className="max-w-[300px] truncate px-4 py-3 text-muted-foreground">
                       {notification.lastError || "None"}
                     </td>
+                    <td className="px-4 py-3">
+                      <details className="min-w-72">
+                        <summary className="cursor-pointer font-medium text-primary">View email</summary>
+                        <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-xs text-foreground">
+                          {notification.previewText}
+                        </pre>
+                      </details>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {formatBookingDateTime(notification.createdAt)}
                     </td>
@@ -282,7 +302,7 @@ export function EmailNotificationsTable({
                 <tr>
                   <td
                     className="px-4 py-8"
-                    colSpan={11}
+                    colSpan={12}
                   >
                     <EmptyState
                       className="border-0 bg-transparent py-4"

@@ -23,6 +23,7 @@ import {
   inviteUsersSchema,
 } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getBookingDepartmentSnapshot } from "@/lib/departments/notifications";
 
 type BookingForInvitation = {
   id: string;
@@ -144,6 +145,15 @@ async function queueInvitationNotification({
   try {
     const supabase = createAdminClient();
     const facility = firstRecord(booking.facilities);
+    const departments = await getBookingDepartmentSnapshot(booking.id).catch(
+      (error) => {
+        console.error("Booking department snapshot unavailable", {
+          bookingId: booking.id,
+          error,
+        });
+        return [];
+      },
+    );
     const actorLabel = formatProfileLabel(actor);
     const subjectByType: Record<typeof type, string> = {
       booking_invitation: `Invitation: ${booking.title}`,
@@ -181,6 +191,7 @@ async function queueInvitationNotification({
         invitationStatus: status,
         actorName: actor.full_name,
         actorEmail: actor.email,
+        departments,
       },
       related_booking_id: booking.id,
     });

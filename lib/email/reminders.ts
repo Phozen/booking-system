@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getBookingDepartmentSnapshot } from "@/lib/departments/notifications";
 
 export type QueueDueBookingRemindersResult = {
   queued: number;
@@ -71,6 +72,15 @@ export async function queueDueBookingReminders(
   for (const booking of ((bookings as unknown as ReminderBooking[] | null) ?? [])) {
     const profile = firstRecord(booking.profiles);
     const facility = firstRecord(booking.facilities);
+    const departments = await getBookingDepartmentSnapshot(booking.id).catch(
+      (error) => {
+        console.error("Booking department snapshot unavailable", {
+          bookingId: booking.id,
+          error,
+        });
+        return [];
+      },
+    );
 
     if (!profile?.email) {
       skipped += 1;
@@ -115,6 +125,7 @@ export async function queueDueBookingReminders(
             startsAt: booking.starts_at,
             endsAt: booking.ends_at,
             reminderOffsetMinutes: offset,
+            departments,
           },
           related_booking_id: booking.id,
           scheduled_for: now.toISOString(),

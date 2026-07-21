@@ -372,6 +372,7 @@ describe("adminCreateBookingAction", () => {
         startsAt: createdBooking.starts_at,
         endsAt: createdBooking.ends_at,
         status: createdBooking.status,
+        departments: [],
       },
       related_booking_id: createdBooking.id,
       idempotency_key: `booking-confirmation:${createdBooking.id}:${targetProfile.email}`,

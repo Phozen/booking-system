@@ -8,6 +8,7 @@ import {
   rejectBookingAction,
 } from "@/lib/admin/bookings/actions";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
+import type { BookingActivity } from "@/lib/admin/bookings/activity-queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import { canTrackBookingUsage, formatBookingUsageStatus } from "@/lib/bookings/usage";
 import {
@@ -43,11 +44,18 @@ function DetailItem({
 export function AdminBookingDetail({
   booking,
   invitations = [],
+  activity = [],
 }: {
   booking: AdminBooking;
   invitations?: BookingInvitation[];
+  activity?: BookingActivity[];
 }) {
   const approval = booking.approvals[0];
+  const invitationResponses = {
+    accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
+    pending: invitations.filter((invitation) => invitation.status === "pending").length,
+    declined: invitations.filter((invitation) => invitation.status === "declined").length,
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -99,6 +107,11 @@ export function AdminBookingDetail({
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
           </DetailItem>
+          <DetailItem label="Internal invitations">
+            {invitations.length > 0
+              ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`
+              : "No internal attendees invited"}
+          </DetailItem>
           <DetailItem label="Usage status">
             {formatBookingUsageStatus(booking.usageStatus)}
           </DetailItem>
@@ -124,6 +137,30 @@ export function AdminBookingDetail({
           </ul>
         ) : (
           <p className="mt-4 text-sm text-muted-foreground">No departments were tagged for this booking.</p>
+        )}
+      </section>
+
+      <section className="rounded-lg border bg-card p-5">
+        <h2 className="text-lg font-semibold tracking-normal">Booking activity</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Read-only history of booking actions and decisions.
+        </p>
+        {activity.length > 0 ? (
+          <ol className="mt-4 grid gap-3">
+            {activity.map((item) => (
+              <li key={item.id} className="rounded-lg border bg-muted/30 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium">{item.summary || `${item.action} booking`}</p>
+                  <time className="text-xs text-muted-foreground">{formatBookingDateTime(item.createdAt)}</time>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {item.actorEmail || "System action"}
+                </p>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No recorded activity is available for this booking.</p>
         )}
       </section>
 

@@ -5,6 +5,7 @@ import type {
   EmailNotificationType,
   EmailTemplateData,
 } from "@/lib/email/types";
+import { renderEmailTemplate } from "@/lib/email/templates";
 
 type RelatedBookingRecord =
   | {
@@ -84,6 +85,7 @@ export type AdminEmailNotification = {
   sentAt: string | null;
   createdAt: string;
   updatedAt: string;
+  previewText: string;
   booking: {
     id: string;
     title: string;
@@ -135,6 +137,15 @@ function mapEmailNotification(
   const facility = Array.isArray(booking?.facilities)
     ? booking.facilities[0]
     : booking?.facilities;
+  const templateData = record.template_data ?? {};
+  const preview = renderEmailTemplate({
+    type: record.type,
+    recipientEmail: record.recipient_email,
+    subject: record.subject,
+    body: record.body,
+    templateData,
+    appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  });
 
   return {
     id: record.id,
@@ -145,7 +156,7 @@ function mapEmailNotification(
     subject: record.subject,
     body: record.body,
     templateName: record.template_name,
-    templateData: record.template_data ?? {},
+    templateData,
     relatedBookingId: record.related_booking_id,
     provider: record.provider,
     providerMessageId: record.provider_message_id,
@@ -156,6 +167,7 @@ function mapEmailNotification(
     sentAt: record.sent_at,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
+    previewText: preview.text,
     booking: booking
       ? {
           id: booking.id,

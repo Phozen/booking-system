@@ -161,6 +161,11 @@ function createActionMocks({
   };
   profilesQuery.select.mockReturnValue(profilesQuery);
   profilesQuery.in.mockReturnValue(profilesQuery);
+  const departmentsQuery = {
+    select: vi.fn(),
+    eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+  };
+  departmentsQuery.select.mockReturnValue(departmentsQuery);
   const adminSupabase = {
     from: vi.fn((table: string) => {
       if (table === "email_notifications") {
@@ -169,6 +174,10 @@ function createActionMocks({
 
       if (table === "profiles") {
         return profilesQuery;
+      }
+
+      if (table === "booking_departments") {
+        return departmentsQuery;
       }
 
       return {
@@ -230,6 +239,7 @@ describe("booking confirmation email queueing", () => {
         startsAt: confirmedBooking.starts_at,
         endsAt: confirmedBooking.ends_at,
         status: "confirmed",
+        departments: [],
       },
       related_booking_id: confirmedBooking.id,
       idempotency_key: `booking-confirmation:${confirmedBooking.id}:${user.email}`,
@@ -372,6 +382,28 @@ describe("booking confirmation email template", () => {
     );
     expect(rendered.html).toContain("Attendee count");
     expect(rendered.html).toContain("4");
+  });
+
+  it("renders an immutable department snapshot when it was queued with the booking email", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_confirmation",
+      recipientEmail: user.email,
+      subject: "Booking confirmed: Planning Session",
+      body: "Your booking has been confirmed.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+        departments: [
+          { name: "Human Resources", email: "hr@example.com" },
+          { name: "Information Technology", email: "it@example.com" },
+        ],
+      },
+    });
+
+    expect(rendered.text).toContain("Involved departments");
+    expect(rendered.text).toContain("Human Resources (hr@example.com)");
+    expect(rendered.text).toContain("Information Technology (it@example.com)");
   });
 
   it("renders catering request details for admins", () => {

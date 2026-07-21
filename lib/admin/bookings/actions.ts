@@ -30,7 +30,10 @@ import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { queueDepartmentBookingNotification } from "@/lib/departments/notifications";
+import {
+  getBookingDepartmentSnapshot,
+  queueDepartmentBookingNotification,
+} from "@/lib/departments/notifications";
 import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
 import {
   adminBookingActionSchema,
@@ -309,6 +312,16 @@ async function insertBookingEmail({
     type === "booking_confirmation"
       ? `booking-confirmation:${booking.id}:${owner.email}`
       : null;
+  const departments = await getBookingDepartmentSnapshot(booking.id).catch(
+    (error) => {
+      console.error("Booking department snapshot unavailable", {
+        bookingId: booking.id,
+        type,
+        error,
+      });
+      return [];
+    },
+  );
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("email_notifications")
@@ -320,7 +333,10 @@ async function insertBookingEmail({
       subject,
       body,
       template_name: templateName,
-      template_data: templateData,
+      template_data: {
+        ...templateData,
+        departments,
+      },
       related_booking_id: booking.id,
       ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
     })
@@ -864,7 +880,7 @@ export async function approveBookingAction(
     facilityName: facility?.name ?? "the facility",
     startsAt: updated.starts_at,
     endsAt: updated.ends_at,
-    kind: "confirmation",
+    kind: "approval",
   });
   await runMicrosoftCalendarSyncSafely({
     bookingId,
@@ -980,6 +996,14 @@ export async function rejectBookingAction(
       remarks: parsed.data.remarks || null,
       status: updated.status,
     },
+  });
+  await queueDepartmentBookingNotification({
+    bookingId: updated.id,
+    title: updated.title,
+    facilityName: facility?.name ?? "the facility",
+    startsAt: updated.starts_at,
+    endsAt: updated.ends_at,
+    kind: "rejection",
   });
 
   revalidateAdminBookingPaths(bookingId);

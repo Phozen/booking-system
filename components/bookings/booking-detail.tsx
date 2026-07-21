@@ -73,6 +73,11 @@ export function BookingDetail({
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
+  const invitationResponses = {
+    accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
+    pending: invitations.filter((invitation) => invitation.status === "pending").length,
+    declined: invitations.filter((invitation) => invitation.status === "declined").length,
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -243,6 +248,11 @@ export function BookingDetail({
           </DetailItem>
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
+          </DetailItem>
+          <DetailItem label="Internal invitations">
+            {invitations.length > 0
+              ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`
+              : "No internal attendees invited"}
           </DetailItem>
           <DetailItem label="Approval">
             {booking.approvalRequired
