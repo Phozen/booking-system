@@ -31,6 +31,8 @@ export type MicrosoftGraphEventPayload = {
     displayName: string;
   };
   showAs: "busy";
+  isOnlineMeeting?: true;
+  onlineMeetingProvider?: "teamsForBusiness";
   attendees?: {
     emailAddress: {
       address: string;

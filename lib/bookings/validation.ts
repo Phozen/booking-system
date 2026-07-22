@@ -29,6 +29,7 @@ export const bookingFormSchema = z
           .max(100000, "Attendee count is too large."),
       ])
       .optional(),
+    teamsMeeting: z.boolean().default(false),
   })
   .and(cateringFormSchema);
 
@@ -59,6 +60,7 @@ export function formDataToBookingValues(formData: FormData) {
     title: getOptionalFormValue(formData, "title"),
     description: getOptionalFormValue(formData, "description"),
     attendeeCount: getOptionalFormValue(formData, "attendeeCount"),
+    teamsMeeting: getOptionalFormValue(formData, "teamsMeeting") === "yes",
     cateringRequired:
       getOptionalFormValue(formData, "cateringRequired") === "yes"
         ? "yes"

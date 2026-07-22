@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import { getMyBookingById } from "@/lib/bookings/queries";
+import { getTeamsInvitationStatus } from "@/lib/bookings/teams-meeting-status";
 import {
   getInvitationsForBooking,
   getInvitedBookingById,
@@ -29,6 +30,7 @@ function invitedBookingToEmployeeBooking(
     title: booking.title,
     description: booking.description,
     attendeeCount: booking.attendeeCount,
+    teamsMeeting: booking.teamsMeeting,
     catering: booking.catering,
     status: booking.status,
     startsAt: booking.startsAt,
@@ -73,12 +75,18 @@ export default async function BookingDetailPage({
 
   if (booking) {
     const adminSupabase = createAdminClient();
-    const invitations = await getInvitationsForBooking(adminSupabase, booking.id);
+    const [invitations, teamsInvitationStatus] = await Promise.all([
+      getInvitationsForBooking(adminSupabase, booking.id),
+      booking.teamsMeeting
+        ? getTeamsInvitationStatus(booking.id)
+        : Promise.resolve(undefined),
+    ]);
 
     return (
       <BookingDetail
         booking={booking}
         invitations={invitations}
+        teamsInvitationStatus={teamsInvitationStatus}
         viewerMode="owner"
         justCreated={query.created === "1"}
         highlightInvitations={query.invite === "1"}

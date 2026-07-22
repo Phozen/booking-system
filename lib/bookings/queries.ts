@@ -56,6 +56,7 @@ type BookingRecord = {
   title: string;
   description: string | null;
   attendee_count: number | null;
+  teams_meeting: boolean | null;
   catering_required: boolean | null;
   catering_type: BookingCateringDetails["type"] | null;
   catering_pax: number | null;
@@ -91,6 +92,7 @@ export type EmployeeBooking = {
   title: string;
   description: string | null;
   attendeeCount: number | null;
+  teamsMeeting: boolean;
   catering: BookingCateringDetails;
   status: BookingStatus;
   startsAt: string;
@@ -118,6 +120,7 @@ const employeeBookingBaseSelect = `
   title,
   description,
   attendee_count,
+  teams_meeting,
   catering_required,
   catering_type,
   catering_pax,
@@ -182,6 +185,7 @@ function mapBooking(record: BookingRecord): EmployeeBooking {
     title: record.title,
     description: record.description,
     attendeeCount: record.attendee_count,
+    teamsMeeting: Boolean(record.teams_meeting),
     catering: {
       required: Boolean(record.catering_required),
       type: record.catering_type,

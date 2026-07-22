@@ -41,6 +41,7 @@ export type InvitedBooking = {
     title: string;
     description: string | null;
     attendeeCount: number | null;
+    teamsMeeting: boolean;
     catering: BookingCateringDetails;
     status: BookingStatus;
     startsAt: string;

@@ -63,6 +63,7 @@ export function BookingDetail({
   viewerInvitation,
   justCreated,
   highlightInvitations,
+  teamsInvitationStatus,
 }: {
   booking: EmployeeBooking;
   viewerMode?: "owner" | "invitee";
@@ -70,6 +71,7 @@ export function BookingDetail({
   viewerInvitation?: BookingInvitation | null;
   justCreated?: boolean;
   highlightInvitations?: boolean;
+  teamsInvitationStatus?: "pending" | "sent" | "failed" | "cancelled";
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
@@ -248,6 +250,19 @@ export function BookingDetail({
           </DetailItem>
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
+          </DetailItem>
+          <DetailItem label="Meeting type">
+            {booking.teamsMeeting
+              ? booking.status !== "confirmed"
+                ? "Teams invitation pending room confirmation"
+                : teamsInvitationStatus === "sent"
+                  ? "Teams invitation sent through Outlook"
+                  : teamsInvitationStatus === "failed"
+                    ? "Room confirmed; Teams invitation pending"
+                    : teamsInvitationStatus === "cancelled"
+                      ? "Teams invitation cancelled"
+                      : "Room confirmed; Teams invitation pending"
+              : "Room only"}
           </DetailItem>
           <DetailItem label="Internal invitations">
             {invitations.length > 0

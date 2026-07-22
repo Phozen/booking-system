@@ -286,6 +286,15 @@ describe("Microsoft 365 calendar sync helpers", () => {
     ]);
   });
 
+  it("adds Teams settings only for a hybrid booking while retaining internal invitees", () => {
+    const payload = buildMicrosoftCalendarEventPayload({
+      timezone: "Asia/Kuala_Lumpur",
+      booking: { id: "booking-1", title: "Hybrid planning", description: null, status: "confirmed", startsAt: "2026-05-14T02:00:00.000Z", endsAt: "2026-05-14T03:00:00.000Z", facility: { name: "Meeting Room 1", level: "Level 5" }, owner: { email: "owner@example.com", fullName: "Owner" }, teamsMeeting: true, attendees: [{ email: "remote@example.com", name: "Remote" }] },
+    });
+    expect(payload).toMatchObject({ isOnlineMeeting: true, onlineMeetingProvider: "teamsForBusiness" });
+    expect(payload.attendees?.[0]?.emailAddress.address).toBe("remote@example.com");
+  });
+
   it("sanitizes token and secret-like Microsoft errors", () => {
     const sanitized = sanitizeMicrosoftCalendarError(
       "Authorization: Bearer abc.def.ghi client_secret=very-secret access_token: token-value",

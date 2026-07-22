@@ -19,6 +19,7 @@ export type MicrosoftCalendarBookingForEvent = {
     email: string;
     name: string | null;
   }[];
+  teamsMeeting?: boolean;
 };
 
 function escapeHtml(value: string) {
@@ -137,6 +138,9 @@ export function buildMicrosoftCalendarEventPayload({
       displayName: `${facilityName}, ${facilityLevel}`,
     },
     showAs: "busy",
+    ...(booking.teamsMeeting
+      ? { isOnlineMeeting: true as const, onlineMeetingProvider: "teamsForBusiness" as const }
+      : {}),
     ...(attendees.length > 0 ? { attendees } : {}),
   };
 }

@@ -795,6 +795,21 @@ export function BookingEditForm({
 
       <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} />
 
+      <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
+        {booking.status === "pending" ? (
+          <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
+            <Input id="teamsMeeting" name="teamsMeeting" type="checkbox" value="yes" defaultChecked={booking.teamsMeeting} className="mt-0.5 size-4" disabled={isPending} />
+            <span>Make this a Teams meeting</span>
+          </Label>
+        ) : (
+          <>
+            <input type="hidden" name="teamsMeeting" value={booking.teamsMeeting ? "yes" : "no"} />
+            <p className="font-medium">{booking.teamsMeeting ? "Teams meeting" : "Room-only meeting"}</p>
+            <p className="text-muted-foreground">The meeting type is fixed after confirmation. Cancel and recreate the booking to change it.</p>
+          </>
+        )}
+      </section>
+
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Link
           href={`/bookings/${booking.id}`}

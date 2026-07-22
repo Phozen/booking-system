@@ -68,6 +68,7 @@ type InvitedBookingRecord = InvitationRecord & {
         title: string;
         description: string | null;
         attendee_count: number | null;
+        teams_meeting: boolean | null;
         catering_required: boolean | null;
         catering_type: BookingCateringDetails["type"] | null;
         catering_pax: number | null;
@@ -90,6 +91,7 @@ type InvitedBookingRecord = InvitationRecord & {
         title: string;
         description: string | null;
         attendee_count: number | null;
+        teams_meeting: boolean | null;
         catering_required: boolean | null;
         catering_type: BookingCateringDetails["type"] | null;
         catering_pax: number | null;
@@ -139,6 +141,7 @@ const invitedBookingSelect = `
     title,
     description,
     attendee_count,
+    teams_meeting,
     catering_required,
     catering_type,
     catering_pax,
@@ -365,6 +368,7 @@ function mapInvitedBooking(record: InvitedBookingRecord): InvitedBooking | null 
       title: bookingRecord.title,
       description: bookingRecord.description,
       attendeeCount: bookingRecord.attendee_count,
+      teamsMeeting: Boolean(bookingRecord.teams_meeting),
       catering: {
         required: Boolean(bookingRecord.catering_required),
         type: bookingRecord.catering_type,

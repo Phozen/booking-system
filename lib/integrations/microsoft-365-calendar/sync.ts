@@ -73,6 +73,7 @@ type BookingRecord = {
   catering_serving_time: string | null;
   catering_dietary_notes: string | null;
   catering_notes: string | null;
+  teams_meeting: boolean | null;
   facilities:
     | {
         name: string;
@@ -166,6 +167,7 @@ function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForE
         }
       : null,
     attendees,
+    teamsMeeting: Boolean(record.teams_meeting),
   };
 }
 
@@ -228,6 +230,23 @@ type MicrosoftDelegatedCalendarTargetResult =
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export async function validateHybridTeamsBookingRequest({ userId, ownerEmail }: {
+  userId: string;
+  ownerEmail: string | null | undefined;
+}) {
+  const config = getMicrosoftCalendarSyncConfig();
+  if (config.provider !== "microsoft_graph" || !config.enabled || !config.isConfigured || config.mode !== "booking_owner_calendar" || config.graphAuthMode !== "delegated") {
+    return "Teams meetings require enabled direct Microsoft Graph booking-owner calendar sync with a connected Microsoft Calendar account.";
+  }
+  const email = ownerEmail?.trim().toLowerCase() ?? "";
+  const settings = await getAppSettings();
+  if (!isValidEmail(email) || settings.allowedEmailDomains.length === 0 || !isEmailAllowedByDomain(email, settings.allowedEmailDomains)) {
+    return "Your company Microsoft email must be eligible for booking-owner calendar sync before you can create a Teams meeting.";
+  }
+  const token = await getMicrosoftDelegatedAccessToken(userId);
+  return token.ok ? null : token.error;
 }
 
 export function resolveMicrosoftCalendarTarget({
@@ -399,6 +418,7 @@ async function getBookingForSync(bookingId: string) {
       catering_serving_time,
       catering_dietary_notes,
       catering_notes,
+      teams_meeting,
       facilities (
         name,
         level,
@@ -754,6 +774,24 @@ async function syncConfirmedBookingToN8nCalendar(
   }
 }
 
+async function syncHybridMeetingFailure(bookingId: string, actor: SyncActor | undefined, message: string): Promise<MicrosoftCalendarSyncResult> {
+  const existing = await getSyncRecord(bookingId).catch(() => null);
+  const record = await tryMarkFailed({
+    bookingId,
+    calendarId: existing?.external_calendar_id ?? null,
+    eventId: existing?.external_event_id ?? null,
+    error: message,
+  });
+  await auditCalendarSync({
+    bookingId,
+    status: "failed",
+    actor,
+    summary: "Teams invitation sync is pending because Microsoft 365 is unavailable.",
+    metadata: { syncId: record?.id ?? null, hybridMeeting: true },
+  });
+  return { status: "failed", message: record?.last_error ?? message, bookingId, syncId: record?.id, externalEventId: record?.external_event_id };
+}
+
 async function deleteN8nCalendarEventForBooking(
   bookingId: string,
   actor?: SyncActor,
@@ -885,13 +923,34 @@ export async function syncConfirmedBookingToMicrosoftCalendar(
   bookingId: string,
   actor?: SyncActor,
 ): Promise<MicrosoftCalendarSyncResult> {
+  const bookingForModeCheck = await getBookingForSync(bookingId);
+  const isTeamsMeeting = Boolean(bookingForModeCheck?.teams_meeting);
   const n8nConfig = getN8nCalendarSyncConfig();
+
+  if (isTeamsMeeting && n8nConfig.provider === "n8n_webhook") {
+    return syncHybridMeetingFailure(
+      bookingId,
+      actor,
+      "Teams meetings require direct Microsoft Graph booking-owner calendar sync; n8n calendar sync is not supported.",
+    );
+  }
 
   if (n8nConfig.provider === "n8n_webhook") {
     return syncConfirmedBookingToN8nCalendar(bookingId, actor);
   }
 
   const config = getMicrosoftCalendarSyncConfig();
+
+  if (isTeamsMeeting && (
+    config.provider !== "microsoft_graph" || !config.enabled ||
+    config.mode !== "booking_owner_calendar" || config.graphAuthMode !== "delegated"
+  )) {
+    return syncHybridMeetingFailure(
+      bookingId,
+      actor,
+      "Teams meetings require enabled direct Microsoft Graph booking-owner calendar sync with a connected Microsoft Calendar account.",
+    );
+  }
 
   if (
     config.provider !== "microsoft_graph" ||

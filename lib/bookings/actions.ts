@@ -12,6 +12,7 @@ import { getMyBookingById, type BookingStatus } from "@/lib/bookings/queries";
 import {
   cancelMicrosoftCalendarEventForBooking,
   syncConfirmedBookingToMicrosoftCalendar,
+  validateHybridTeamsBookingRequest,
 } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   bookingFormSchema,
@@ -444,6 +445,11 @@ export async function createBookingAction(
     };
   }
 
+  if (parsed.data.teamsMeeting) {
+    const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: profile?.email ?? user.email });
+    if (teamsError) return { status: "error", message: teamsError };
+  }
+
   const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
   const cateringDetails = cateringValuesToDetails(parsed.data);
   const settings = await getAppSettings();
@@ -512,6 +518,7 @@ export async function createBookingAction(
     p_catering_notes: cateringDetails.notes,
     p_department_ids: departmentIds.data,
     p_invited_user_ids: invitedUserIds.data,
+    p_teams_meeting: parsed.data.teamsMeeting,
   });
 
   if (error || !data) {
@@ -761,6 +768,16 @@ export async function updateBookingAction(
     };
   }
 
+  if (parsed.data.teamsMeeting !== existing.teamsMeeting) {
+    if (existing.status === "confirmed") {
+      return { status: "error", message: "The Teams meeting choice cannot be changed after confirmation. Cancel and recreate the booking if you need a different meeting type." };
+    }
+    if (parsed.data.teamsMeeting) {
+      const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: profile?.email ?? user.email });
+      if (teamsError) return { status: "error", message: teamsError };
+    }
+  }
+
   const attendeeCount = normalizeAttendeeCount(parsed.data.attendeeCount);
   const cateringDetails = cateringValuesToDetails(parsed.data);
   const settings = await getAppSettings();
@@ -829,6 +846,7 @@ export async function updateBookingAction(
     p_catering_serving_time: cateringDetails.servingTime,
     p_catering_dietary_notes: cateringDetails.dietaryNotes,
     p_catering_notes: cateringDetails.notes,
+    p_teams_meeting: parsed.data.teamsMeeting,
   });
 
   if (error || !data) {
