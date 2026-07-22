@@ -844,15 +844,15 @@ export function BookingForm({
 
       <InitialAttendeePicker disabled={!hasFacilities || isPending} />
 
+      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} />
+
       <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
         <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
           <Input id="teamsMeeting" name="teamsMeeting" type="checkbox" value="yes" className="mt-0.5 size-4" disabled={!hasFacilities || isPending} />
           <span>Make this a Teams meeting</span>
         </Label>
-        <p className="pl-7 text-muted-foreground">After confirmation, QBook sends one Outlook invitation to the internal attendees selected above. Join through Outlook; no Teams link is shown in QBook.</p>
+        <p className="pl-7 text-muted-foreground">After confirmation, QBook sends one Outlook invitation to the internal attendees selected above. The join link is available only to the organiser and invited staff.</p>
       </section>
-
-      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} />
 
       {hasPreviewDetails ? (
         <section className="grid gap-3 rounded-lg border-2 border-primary/55 bg-primary/10 p-4 shadow-md shadow-primary/10 ring-2 ring-primary/15">

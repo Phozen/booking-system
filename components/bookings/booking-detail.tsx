@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Edit3, Mail, Printer, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Edit3, ExternalLink, Mail, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -64,6 +64,7 @@ export function BookingDetail({
   justCreated,
   highlightInvitations,
   teamsInvitationStatus,
+  teamsJoinUrl,
 }: {
   booking: EmployeeBooking;
   viewerMode?: "owner" | "invitee";
@@ -72,6 +73,7 @@ export function BookingDetail({
   justCreated?: boolean;
   highlightInvitations?: boolean;
   teamsInvitationStatus?: "pending" | "sent" | "failed" | "cancelled";
+  teamsJoinUrl?: string | null;
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
@@ -264,6 +266,18 @@ export function BookingDetail({
                       : "Room confirmed; Teams invitation pending"
               : "Room only"}
           </DetailItem>
+          {teamsJoinUrl ? (
+            <DetailItem label="Teams meeting">
+              <a
+                href={teamsJoinUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
+              >
+                Join Teams meeting <ExternalLink className="size-3.5" aria-hidden="true" />
+              </a>
+            </DetailItem>
+          ) : null}
           <DetailItem label="Internal invitations">
             {invitations.length > 0
               ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`

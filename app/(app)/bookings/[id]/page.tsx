@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import { getMyBookingById } from "@/lib/bookings/queries";
-import { getTeamsInvitationStatus } from "@/lib/bookings/teams-meeting-status";
+import {
+  getAuthorizedTeamsJoinUrl,
+  getTeamsInvitationStatus,
+} from "@/lib/bookings/teams-meeting-status";
 import {
   getInvitationsForBooking,
   getInvitedBookingById,
@@ -75,11 +78,14 @@ export default async function BookingDetailPage({
 
   if (booking) {
     const adminSupabase = createAdminClient();
-    const [invitations, teamsInvitationStatus] = await Promise.all([
+    const [invitations, teamsInvitationStatus, teamsJoinUrl] = await Promise.all([
       getInvitationsForBooking(adminSupabase, booking.id),
       booking.teamsMeeting
         ? getTeamsInvitationStatus(booking.id)
         : Promise.resolve(undefined),
+      booking.teamsMeeting
+        ? getAuthorizedTeamsJoinUrl({ bookingId: booking.id, viewerUserId: user.id })
+        : Promise.resolve(null),
     ]);
 
     return (
@@ -87,6 +93,7 @@ export default async function BookingDetailPage({
         booking={booking}
         invitations={invitations}
         teamsInvitationStatus={teamsInvitationStatus}
+        teamsJoinUrl={teamsJoinUrl}
         viewerMode="owner"
         justCreated={query.created === "1"}
         highlightInvitations={query.invite === "1"}
@@ -104,11 +111,16 @@ export default async function BookingDetailPage({
     notFound();
   }
 
+  const teamsJoinUrl = invitedBooking.booking.teamsMeeting
+    ? await getAuthorizedTeamsJoinUrl({ bookingId: id, viewerUserId: user.id })
+    : null;
+
   return (
     <BookingDetail
       booking={invitedBookingToEmployeeBooking(invitedBooking)}
       viewerMode="invitee"
       viewerInvitation={invitedBooking.invitation}
+      teamsJoinUrl={teamsJoinUrl}
     />
   );
 }
