@@ -1,4 +1,5 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { cache } from "react";
 
 import {
   getDashboardPathForRole,
@@ -13,7 +14,7 @@ export type AuthState = {
   profile: ProfileSession | null;
 };
 
-export async function getCurrentAuthState(): Promise<AuthState> {
+export const getCurrentAuthState = cache(async function getCurrentAuthState(): Promise<AuthState> {
   let supabase: SupabaseClient;
 
   try {
@@ -46,7 +47,7 @@ export async function getCurrentAuthState(): Promise<AuthState> {
     user,
     profile,
   };
-}
+});
 
 export async function getPostLoginPath(
   supabase: SupabaseClient,

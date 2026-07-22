@@ -74,6 +74,7 @@ export function MonthCalendarGrid({
               {getDayHref ? (
                 <Link
                   href={getDayHref(day.key)}
+                  prefetch={false}
                   scroll={false}
                   className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/45"
                   aria-label={`Select ${day.weekdayLabel}, ${day.shortLabel}`}

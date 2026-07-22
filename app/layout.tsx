@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono, Quicksand } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
           <ThemeProvider>
             {children}
             <ToastProvider />
+            <SpeedInsights />
           </ThemeProvider>
         </body>
       </html>

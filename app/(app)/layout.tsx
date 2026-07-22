@@ -19,10 +19,11 @@ export default async function EmployeeLayout({
 }: {
   children: ReactNode;
 }) {
+  const settingsPromise = getAppSettings();
   const { user, profile } = await requireUser();
-  const settings = await getAppSettings();
   const supabase = await createClient();
-  const [notifications, unseenNotificationCount] = await Promise.all([
+  const [settings, notifications, unseenNotificationCount] = await Promise.all([
+    settingsPromise,
     getUserAppNotifications(supabase, user.id),
     getUnseenAppNotificationCount(supabase, user.id),
   ]);
