@@ -446,7 +446,7 @@ export async function createBookingAction(
   }
 
   if (parsed.data.teamsMeeting) {
-    const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: profile?.email ?? user.email });
+    const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: user.email });
     if (teamsError) return { status: "error", message: teamsError };
   }
 
@@ -773,7 +773,7 @@ export async function updateBookingAction(
       return { status: "error", message: "The Teams meeting choice cannot be changed after confirmation. Cancel and recreate the booking if you need a different meeting type." };
     }
     if (parsed.data.teamsMeeting) {
-      const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: profile?.email ?? user.email });
+      const teamsError = await validateHybridTeamsBookingRequest({ userId: user.id, ownerEmail: user.email });
       if (teamsError) return { status: "error", message: teamsError };
     }
   }

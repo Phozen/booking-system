@@ -73,7 +73,7 @@ type BookingRecord = {
   catering_serving_time: string | null;
   catering_dietary_notes: string | null;
   catering_notes: string | null;
-  teams_meeting: boolean | null;
+  teams_meeting?: boolean | null;
   facilities:
     | {
         name: string;
