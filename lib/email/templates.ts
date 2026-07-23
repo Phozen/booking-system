@@ -81,8 +81,8 @@ function renderSectionRows(rows: EmailDetailRow[]) {
     .map(
       (row) => `
         <tr>
-          <td style="width: 38%; padding: 8px 14px 8px 0; color: #475569; font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; vertical-align: top;">${escapeHtml(row.label)}</td>
-          <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 600; vertical-align: top;">${escapeHtml(row.value ?? "")}</td>
+          <th scope="row" style="width: 38%; padding: 9px 16px 9px 0; color: #475569; font-size: 13px; font-weight: 600; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
+          <td style="padding: 9px 0; color: #0f172a; font-size: 14px; font-weight: 600; line-height: 1.45; vertical-align: top;">${escapeHtml(row.value ?? "")}</td>
         </tr>
       `,
     )
@@ -104,9 +104,9 @@ function renderHtml({
     .filter(hasRows)
     .map(
       (section) => `
-        <section style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px; margin: 0 0 14px; background: #ffffff;">
-          <h2 style="font-size: 16px; margin: 0 0 12px; color: #0f172a;">${escapeHtml(section.title)}</h2>
-          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <section style="margin: 0 0 16px; padding: 20px; border: 1px solid #dbe3ef; border-radius: 12px; background: #ffffff;">
+          <h2 style="margin: 0 0 10px; color: #1e293b; font-size: 16px; line-height: 1.35;">${escapeHtml(section.title)}</h2>
+          <table style="width: 100%; border-collapse: collapse;" aria-label="${escapeHtml(section.title)}">
             <tbody>${renderSectionRows(section.rows)}</tbody>
           </table>
         </section>
@@ -115,18 +115,24 @@ function renderHtml({
     .join("");
 
   return `
-    <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.5; background: #f8fafc; padding: 24px;">
-      <div style="max-width: 720px; margin: 0 auto;">
-        <header style="border-bottom: 1px solid #cbd5e1; padding: 0 0 18px; margin: 0 0 18px;">
-          <div style="font-size: 28px; font-weight: 800; color: #047857; letter-spacing: -0.02em;">QBook</div>
-          <div style="font-size: 12px; color: #64748b; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">Qhazanah Sabah Berhad</div>
-          <h1 style="font-size: 22px; margin: 16px 0 8px; color: #0f172a;">${escapeHtml(title)}</h1>
-          <p style="margin: 0; color: #475569;">${escapeHtml(intro)}</p>
+    <div role="article" aria-roledescription="email" aria-label="QBook booking update" style="margin: 0; padding: 32px 16px; background: #f1f5f9; color: #0f172a; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
+      <div style="max-width: 640px; margin: 0 auto;">
+        <header style="overflow: hidden; margin: 0 0 16px; border-radius: 14px; background: #064e3b; color: #ffffff;">
+          <div style="padding: 24px 24px 22px;">
+            <p style="margin: 0 0 10px; color: #d1fae5; font-size: 13px; font-weight: 700; letter-spacing: .04em;">QBOOK</p>
+            <h1 style="margin: 0 0 8px; color: #ffffff; font-size: 24px; line-height: 1.25;">${escapeHtml(title)}</h1>
+            <p style="margin: 0; color: #ecfdf5; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p>
+          </div>
         </header>
-        ${detailSections}
-        <p style="margin: 18px 0 0;">
-          <a href="${escapeHtml(link)}" style="display: inline-block; border-radius: 8px; background: #2563eb; color: #ffffff; font-weight: 700; padding: 10px 14px; text-decoration: none;">View booking details</a>
-        </p>
+        <main>
+          ${detailSections}
+          <p style="margin: 24px 0 12px;">
+            <a href="${escapeHtml(link)}" style="display: inline-block; padding: 12px 18px; border-radius: 8px; background: #1d4ed8; color: #ffffff; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View booking</a>
+          </p>
+        </main>
+        <footer style="padding: 4px 4px 0; color: #64748b; font-size: 12px; line-height: 1.5;">
+          QBook &middot; Qhazanah Sabah Berhad
+        </footer>
       </div>
     </div>
   `;
@@ -163,8 +169,7 @@ export function renderEmailTemplate(
 ): RenderedEmailTemplate {
   const bookingId = getStringValue(input.templateData, "bookingId");
   const title = getStringValue(input.templateData, "title") ?? "Booking";
-  const facilityName =
-    getStringValue(input.templateData, "facilityName") ?? "Facility";
+  const facilityName = getStringValue(input.templateData, "facilityName");
   const facilityLevel = getStringValue(input.templateData, "facilityLevel");
   const startsAt = getStringValue(input.templateData, "startsAt");
   const endsAt = getStringValue(input.templateData, "endsAt");
@@ -200,28 +205,28 @@ export function renderEmailTemplate(
   const endTime = endsAt ? formatBookingTime(endsAt) : null;
   const bookingTime =
     startsAt && endsAt ? formatBookingWindow(startsAt, endsAt) : null;
+  const facility = [facilityName, facilityLevel].filter(Boolean).join(" · ") || null;
 
   const sections: EmailDetailSection[] = [
     {
       title: "Meeting details",
       rows: [
-        { label: "Booking title", value: title },
-        { label: "Facility", value: facilityName },
-        { label: "Level", value: facilityLevel },
+        { label: "Facility", value: facility },
         { label: "Date", value: bookingDate },
-        { label: "Time", value: bookingTime ?? [startTime, endTime].filter(Boolean).join(" - ") },
-        { label: "Start time", value: startTime },
-        { label: "End time", value: endTime },
+        {
+          label: "Time",
+          value: bookingTime ?? [startTime, endTime].filter(Boolean).join(" - "),
+        },
         { label: "Status", value: status },
-        { label: "Attendee count", value: attendeeCount },
+        { label: "Attendees", value: attendeeCount },
       ],
     },
     {
-      title: "Involved departments",
-      rows: [{ label: "Departments", value: departments }],
+      title: "Departments",
+      rows: [{ label: "Included", value: departments }],
     },
     {
-      title: "Requester / invitation details",
+      title: "People",
       rows: [
         { label: "Requester", value: requesterName ?? requesterEmail },
         { label: "Invitation status", value: invitationStatus },
@@ -229,7 +234,7 @@ export function renderEmailTemplate(
       ],
     },
     {
-      title: "Food & drinks / catering",
+      title: "Catering",
       rows: [
         {
           label: "Catering type",
@@ -247,10 +252,9 @@ export function renderEmailTemplate(
       ],
     },
     {
-      title: "Outcome notes",
+      title: "Notes",
       rows: [
-        { label: "Rejection reason", value: rejectionReason },
-        { label: "Cancellation reason", value: cancellationReason },
+        { label: "Reason", value: rejectionReason ?? cancellationReason },
       ],
     },
   ];

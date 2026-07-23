@@ -370,17 +370,19 @@ describe("booking confirmation email template", () => {
     });
 
     expect(rendered.subject).toBe("Booking confirmed: Planning Session");
-    expect(rendered.text).toContain("Booking title: Planning Session");
     expect(rendered.text).toContain("Facility: Board Room");
     expect(rendered.text).toContain("Date:");
-    expect(rendered.text).toContain("Start time:");
-    expect(rendered.text).toContain("End time:");
-    expect(rendered.text).toContain("Attendee count: 4");
+    expect(rendered.text).toContain("Time:");
+    expect(rendered.text).not.toContain("Start time:");
+    expect(rendered.text).not.toContain("End time:");
+    expect(rendered.text).toContain("Attendees: 4");
     expect(rendered.text).toContain("Status: confirmed");
     expect(rendered.text).toContain(
       `https://booking.example.com/bookings/${confirmedBooking.id}`,
     );
-    expect(rendered.html).toContain("Attendee count");
+    expect(rendered.html).toContain('role="article"');
+    expect(rendered.html).toContain("View booking");
+    expect(rendered.html).toContain("Attendees");
     expect(rendered.html).toContain("4");
   });
 
@@ -401,7 +403,7 @@ describe("booking confirmation email template", () => {
       },
     });
 
-    expect(rendered.text).toContain("Involved departments");
+    expect(rendered.text).toContain("Departments");
     expect(rendered.text).toContain("Human Resources (hr@example.com)");
     expect(rendered.text).toContain("Information Technology (it@example.com)");
   });
