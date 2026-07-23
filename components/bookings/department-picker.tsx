@@ -12,36 +12,18 @@ import { Label } from "@/components/ui/label";
 export function DepartmentPicker({
   departments,
   initialDepartmentIds = [],
-  selectedDepartmentIds,
-  onSelectedDepartmentIdsChange,
   disabled,
 }: {
   departments: Department[];
   initialDepartmentIds?: string[];
-  selectedDepartmentIds?: string[];
-  onSelectedDepartmentIdsChange?: (departmentIds: string[]) => void;
   disabled?: boolean;
 }) {
   const [query, setQuery] = useState("");
-  const [uncontrolledSelectedIds, setUncontrolledSelectedIds] = useState(() =>
+  const [selectedIds, setSelectedIds] = useState(() =>
     initialDepartmentIds.filter((id) => departments.some((item) => item.id === id)),
   );
-  const selectedIds = selectedDepartmentIds ?? uncontrolledSelectedIds;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selected = departments.filter((department) => selectedIds.includes(department.id));
-
-  function updateSelectedIds(update: (current: string[]) => string[]) {
-    if (selectedDepartmentIds) {
-      onSelectedDepartmentIdsChange?.(update(selectedDepartmentIds));
-      return;
-    }
-
-    setUncontrolledSelectedIds((current) => {
-      const next = update(current);
-      onSelectedDepartmentIdsChange?.(next);
-      return next;
-    });
-  }
   const available = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     if (normalizedQuery.length < 2) return [];
@@ -77,7 +59,7 @@ export function DepartmentPicker({
               <ul className="grid gap-1">
                 {available.map((department) => (
                   <li key={department.id}>
-                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled} onClick={() => { updateSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); requestAnimationFrame(() => searchInputRef.current?.focus()); }}>
+                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled} onClick={() => { setSelectedIds((current) => current.length < 50 ? [...current, department.id] : current); setQuery(""); requestAnimationFrame(() => searchInputRef.current?.focus()); }}>
                       <span className="block font-medium">{department.name}</span>
                       <span className="text-xs text-muted-foreground">{department.email}</span>
                     </button>
@@ -92,7 +74,7 @@ export function DepartmentPicker({
                 <li key={department.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
                   <input type="hidden" name="departmentId" value={department.id} />
                   <span className="min-w-0"><span className="block font-medium">{department.name}</span><span className="block truncate text-xs text-muted-foreground">{department.email}</span></span>
-                  <Button type="button" variant="ghost" size="icon" disabled={disabled} aria-label={`Remove ${department.name}`} onClick={() => updateSelectedIds((current) => current.filter((id) => id !== department.id))}><X /></Button>
+                  <Button type="button" variant="ghost" size="icon" disabled={disabled} aria-label={`Remove ${department.name}`} onClick={() => setSelectedIds((current) => current.filter((id) => id !== department.id))}><X /></Button>
                 </li>
               ))}
             </ul>
