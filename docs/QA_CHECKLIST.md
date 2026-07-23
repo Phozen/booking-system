@@ -20,7 +20,7 @@ Use this checklist after migrations are applied and the app is running with real
 ## Preflight
 
 - [ ] Confirm `.env.local` contains the correct Supabase URL, anon key, service role key, app URL, and timezone.
-- [ ] Confirm `npx.cmd supabase migration list` shows local and remote migrations through `0024`.
+- [ ] Confirm `npx.cmd supabase migration list` shows the target project has every migration present in `supabase/migrations`.
 - [ ] Run `npm.cmd run lint`.
 - [ ] Run `npm.cmd test`.
 - [ ] Run `npm.cmd run build`.
@@ -466,7 +466,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Admin user management UI is implemented; complete the admin users manual tests before production launch.
 - [ ] Advanced facility photo UX such as bulk upload, cropping, compression, and drag-and-drop is deferred.
 - [ ] PDF and Excel exports are deferred.
-- [ ] Advanced recurring features such as infinite recurrence and external calendar import are deferred.
+- [ ] New recurring booking operations and external calendar import are out of scope.
 - [ ] Production deployment remains pending; keep deployment documentation aligned with the chosen host before launch.
 - [ ] Vercel protection, Cloudflare Access, or another network-layer internal restriction is a deployment hardening option.
 ## Roadmap Feature QA
@@ -477,16 +477,17 @@ Use this checklist after migrations are applied and the app is running with real
   blocked by server-side validation.
 - Toast notifications: confirm short success/error toasts appear for profile
   save, catering update, booking cancellation, invitation response, photo
-  upload, recurring booking actions, and email queue actions
+  upload and email queue actions
   while inline validation errors remain visible.
 - Facility timeline: verify employee and admin facility detail pages show
   available, booked, pending, blocked, and maintenance periods for a selected
   date without exposing employee-private details.
-- Recurring bookings: preview daily, weekly, and monthly recurrence rules;
-  confirm conflicts are displayed before creation; create available occurrences
-  and verify normal booking conflict rules remain enforced.
+- Recurrence retirement: confirm no employee/admin flow exposes new recurring booking creation or management, while historical records remain auditable where authorised.
 - Reports: verify no-show, catering demand, approval turnaround, status volume,
   top facility, and utilization summaries render in light/dark mode.
 - Audit logs: verify old/new values are readable and sensitive fields such as
   tokens, secrets, passwords, API keys, and SMTP/Microsoft secrets are masked.
 - Backup/restore: review `docs/BACKUP_RESTORE.md` before launch handoff.
+- Hybrid Teams: with direct delegated owner sync configured, create a room-only booking and confirm its Graph payload has no online-meeting fields; create a hybrid booking with internal invitees and confirm the owner-calendar Outlook event has Teams enabled, the physical room location, and exactly those invitees.
+- Hybrid Teams: submit a hybrid booking requiring approval and confirm no Outlook event exists until approval; then reschedule, edit invitees, and cancel it to confirm the tracked event is updated/deleted rather than duplicated.
+- Hybrid Teams: verify central mode, n8n, disabled sync, missing owner connection, and failed Graph sync produce a clear safe error or pending status without losing the room booking; verify QBook does not expose a join URL.

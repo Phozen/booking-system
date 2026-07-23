@@ -12,6 +12,7 @@ import {
   settingsFormSchema,
 } from "@/lib/admin/settings/validation";
 import { getCalendarVisibilityLabel } from "@/lib/calendar/visibility";
+import { emailRecipientRoles } from "@/lib/settings/app-settings";
 import type { AppSettings } from "@/lib/settings/queries";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,33 @@ type SettingsFieldId =
   | "reminderOffsetsMinutes";
 
 type SettingsFieldErrors = Partial<Record<SettingsFieldId, string>>;
+
+const recipientGroups = [
+  {
+    name: "bookingOwnerConfirmations",
+    title: "Booking owner confirmations",
+    description:
+      "Send a direct email when a user in the selected role owns a confirmed booking.",
+  },
+  {
+    name: "companyBookingConfirmations",
+    title: "Company booking confirmations",
+    description:
+      "Send active users in the selected roles a copy whenever any booking is confirmed. This is off by default to avoid unnecessary email.",
+  },
+  {
+    name: "cateringRequests",
+    title: "Catering requests",
+    description:
+      "Send active users in the selected roles a request whenever catering is added to a booking.",
+  },
+] as const;
+
+const recipientRoleLabels = {
+  employee: "Employee",
+  admin: "Admin",
+  super_admin: "Super Admin",
+} as const;
 
 function getFirstError(error?: string[]) {
   return error?.[0];
@@ -400,6 +428,52 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
               {fieldErrors.bookingWindowEnd}
             </FormFieldError>
           </div>
+        </div>
+      </section>
+
+      <section className="grid gap-5 rounded-lg border bg-card p-5">
+        <div>
+          <h2 className="font-semibold tracking-normal">Email recipients</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Choose which active roles receive each operational email. These
+            controls do not change in-app notifications or department mailbox
+            alerts.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {recipientGroups.map((group) => (
+            <fieldset
+              key={group.name}
+              className="grid gap-3 rounded-lg border border-border/80 p-4"
+              aria-describedby={`${group.name}-helper`}
+            >
+              <legend className="font-medium">{group.title}</legend>
+              <p
+                id={`${group.name}-helper`}
+                className="text-sm leading-5 text-muted-foreground"
+              >
+                {group.description}
+              </p>
+              <div className="grid gap-2">
+                {emailRecipientRoles.map((role) => (
+                  <label
+                    key={role}
+                    className="flex items-center gap-2 rounded-md px-1 py-1 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      name={group.name}
+                      value={role}
+                      defaultChecked={settings.emailRecipients[group.name].includes(role)}
+                      className="size-4 rounded border-input"
+                    />
+                    {recipientRoleLabels[role]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
         </div>
       </section>
 

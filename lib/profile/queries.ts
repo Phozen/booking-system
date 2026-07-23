@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ProfileRole = "employee" | "admin" | "super_admin";
-export type ProfileStatus = "active" | "disabled" | "pending";
+export type ProfileStatus = "active" | "disabled";
 
 type ProfileRecord = {
   id: string;

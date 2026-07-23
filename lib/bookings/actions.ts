@@ -33,9 +33,14 @@ import {
 import {
   getAppSettings,
   getEffectiveApprovalRequired,
+  type AppSettings,
 } from "@/lib/settings/queries";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
+import {
+  getActiveEmailRecipients,
+  shouldSendEmailToRole,
+} from "@/lib/email/recipients";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -134,23 +139,25 @@ async function insertBookingAuditLog({
 async function insertBookingConfirmationNotification({
   booking,
   recipientEmail,
+  recipientRole,
   facilityName,
+  settings,
 }: {
   booking: CreatedBookingRecord;
   recipientEmail: string | undefined;
+  recipientRole: string | null | undefined;
   facilityName: string;
+  settings: Pick<AppSettings, "emailRecipients">;
 }) {
-  if (!recipientEmail || booking.status !== "confirmed") {
+  if (booking.status !== "confirmed") {
     return;
   }
 
   try {
-    const supabase = createAdminClient();
     const bookingWindow = formatEmailBookingWindow(
       booking.starts_at,
       booking.ends_at,
     );
-    const departments = await getDepartmentSnapshotSafely(booking.id);
     await createAppNotification({
       userId: booking.user_id,
       type: "booking_confirmation",
@@ -159,6 +166,20 @@ async function insertBookingConfirmationNotification({
       href: `/bookings/${booking.id}`,
       relatedBookingId: booking.id,
     });
+
+    if (
+      !recipientEmail ||
+      !shouldSendEmailToRole(
+        settings,
+        "bookingOwnerConfirmations",
+        recipientRole,
+      )
+    ) {
+      return;
+    }
+
+    const supabase = createAdminClient();
+    const departments = await getDepartmentSnapshotSafely(booking.id);
     const { data, error } = await supabase
       .from("email_notifications")
       .insert({
@@ -213,11 +234,13 @@ async function insertCateringRequestNotifications({
   requesterEmail,
   requesterName,
   facilityName,
+  settings,
 }: {
   booking: CreatedBookingRecord;
   requesterEmail: string | undefined;
   requesterName: string | null | undefined;
   facilityName: string;
+  settings: Pick<AppSettings, "emailRecipients">;
 }) {
   if (!booking.catering_required) {
     return;
@@ -225,25 +248,11 @@ async function insertCateringRequestNotifications({
 
   try {
     const supabase = createAdminClient();
-    const { data: admins, error: adminsError } = await supabase
-      .from("profiles")
-      .select("id,email,full_name")
-      .in("role", ["admin", "super_admin"])
-      .eq("status", "active");
-
-    if (adminsError) {
-      console.error("Catering notification admin lookup failed", {
-        bookingId: booking.id,
-        message: adminsError.message,
-      });
-      return;
-    }
-
-    const recipients = ((admins as {
-      id: string;
-      email: string | null;
-      full_name: string | null;
-    }[] | null) ?? []).filter((admin) => admin.email);
+    const recipients = await getActiveEmailRecipients(
+      supabase,
+      settings,
+      "cateringRequests",
+    );
 
     if (recipients.length === 0) {
       return;
@@ -257,11 +266,11 @@ async function insertCateringRequestNotifications({
     const { data, error } = await supabase
       .from("email_notifications")
       .insert(
-        recipients.map((admin) => ({
+        recipients.map((recipient) => ({
           type: "booking_catering_request",
           status: "queued",
-          recipient_email: admin.email,
-          recipient_user_id: admin.id,
+          recipient_email: recipient.email,
+          recipient_user_id: recipient.id,
           subject: `Catering requested: ${booking.title}`,
           body: `${requesterName || requesterEmail || "A user"} requested ${formatCateringType(booking.catering_type)} for ${facilityName} on ${bookingWindow}.`,
           template_name: "booking_catering_request",
@@ -286,7 +295,7 @@ async function insertCateringRequestNotifications({
             cateringNotes: booking.catering_notes,
           },
           related_booking_id: booking.id,
-          idempotency_key: `booking-catering-request:${booking.id}:${admin.email}`,
+          idempotency_key: `booking-catering-request:${booking.id}:${recipient.email}`,
         })),
       )
       .select("id");
@@ -312,6 +321,76 @@ async function insertCateringRequestNotifications({
     }
   } catch (error) {
     console.error("Catering notification unavailable", error);
+  }
+}
+
+async function insertCompanyBookingConfirmationNotifications({
+  booking,
+  requesterEmail,
+  requesterName,
+  facilityName,
+  settings,
+}: {
+  booking: CreatedBookingRecord;
+  requesterEmail: string | undefined;
+  requesterName: string | null | undefined;
+  facilityName: string;
+  settings: Pick<AppSettings, "emailRecipients">;
+}) {
+  if (booking.status !== "confirmed") {
+    return;
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const recipients = (await getActiveEmailRecipients(
+      supabase,
+      settings,
+      "companyBookingConfirmations",
+    )).filter((recipient) => recipient.id !== booking.user_id);
+
+    if (recipients.length === 0) {
+      return;
+    }
+
+    const departments = await getDepartmentSnapshotSafely(booking.id);
+    const { error } = await supabase.from("email_notifications").insert(
+      recipients.map((recipient) => ({
+        type: "booking_confirmation",
+        status: "queued",
+        recipient_email: recipient.email,
+        recipient_user_id: recipient.id,
+        subject: `Booking confirmed: ${booking.title}`,
+        body: "A booking has been confirmed for company scheduling awareness.",
+        template_name: "company_booking_confirmation",
+        template_data: {
+          bookingId: booking.id,
+          title: booking.title,
+          facilityName,
+          attendeeCount: booking.attendee_count,
+          startsAt: booking.starts_at,
+          endsAt: booking.ends_at,
+          status: booking.status,
+          departments,
+          requesterName,
+          requesterEmail,
+        },
+        related_booking_id: booking.id,
+        idempotency_key: `company-booking-confirmation:${booking.id}:${recipient.email}`,
+      })),
+    );
+
+    if (error && error.code !== "23505") {
+      console.error("Company booking confirmation notification insert failed", {
+        bookingId: booking.id,
+        message: error.message,
+      });
+    }
+  } catch (error) {
+    console.error("Company booking confirmation notification unavailable", {
+      bookingId: booking.id,
+      error,
+    });
   }
 }
 
@@ -561,15 +640,25 @@ export async function createBookingAction(
   await insertBookingConfirmationNotification({
     booking,
     recipientEmail: user.email,
+    recipientRole: profile.role,
     facilityName: availability.facility.name,
+    settings,
   });
   await insertCateringRequestNotifications({
     booking,
     requesterEmail: user.email,
     requesterName: profile?.full_name,
     facilityName: availability.facility.name,
+    settings,
   });
   if (booking.status === "confirmed") {
+    await insertCompanyBookingConfirmationNotifications({
+      booking,
+      requesterEmail: user.email,
+      requesterName: profile?.full_name,
+      facilityName: availability.facility.name,
+      settings,
+    });
     await queueDepartmentBookingNotification({
       bookingId: booking.id,
       title: booking.title,

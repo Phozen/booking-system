@@ -63,6 +63,7 @@ const targetProfile = {
   id: "33333333-3333-4333-8333-333333333333",
   email: "employee@example.com",
   full_name: "Employee User",
+  role: "employee",
   status: "active",
 };
 const facility = {

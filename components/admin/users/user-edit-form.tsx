@@ -92,18 +92,6 @@ function getConfirmCopy({
     };
   }
 
-  if (selectedStatus === "pending" && initialStatus !== "pending") {
-    return {
-      title: "Set this user to pending?",
-      triggerLabel: "Set user pending",
-      confirmLabel: "Set pending",
-      cancelLabel: "Keep current status",
-      destructive: true,
-      description:
-        "Pending users cannot access protected employee or admin pages until an admin activates them.",
-    };
-  }
-
   if (selectedRole !== initialRole) {
     const grantsSuperAdmin = selectedRole === "super_admin";
     const grantsAdmin = selectedRole === "admin";
@@ -350,7 +338,7 @@ export function UserEditForm({
               ))}
             </Select>
             <FormFieldHelper id="status-helper">
-              Disabled and pending users are blocked from protected app pages.
+              Disabled users are blocked from protected app pages and email delivery.
             </FormFieldHelper>
             <FormFieldError id="status-error">{fieldErrors.status}</FormFieldError>
           </div>

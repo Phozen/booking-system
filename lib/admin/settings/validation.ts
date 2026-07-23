@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { calendarVisibilityModes } from "@/lib/calendar/visibility";
 import {
+  emailRecipientRoles,
   isBookingWindowTime,
   timeStringToMinutes,
 } from "@/lib/settings/app-settings";
@@ -69,6 +70,9 @@ export const settingsFormSchema = z.object({
     .refine((values) => values.length > 0, {
       message: "Enter at least one positive integer reminder offset.",
     }),
+  bookingOwnerConfirmations: z.array(z.enum(emailRecipientRoles)),
+  companyBookingConfirmations: z.array(z.enum(emailRecipientRoles)),
+  cateringRequests: z.array(z.enum(emailRecipientRoles)),
 }).refine(
   (values) =>
     timeStringToMinutes(values.bookingWindowStart) <
@@ -88,6 +92,12 @@ export function getCheckboxValue(formData: FormData, key: string) {
 export function getTextValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function getRoleValues(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is string => typeof value === "string");
 }
 
 export function formDataToSettingsValues(formData: FormData) {
@@ -110,5 +120,14 @@ export function formDataToSettingsValues(formData: FormData) {
       formData,
       "reminderOffsetsMinutes",
     ),
+    bookingOwnerConfirmations: getRoleValues(
+      formData,
+      "bookingOwnerConfirmations",
+    ),
+    companyBookingConfirmations: getRoleValues(
+      formData,
+      "companyBookingConfirmations",
+    ),
+    cateringRequests: getRoleValues(formData, "cateringRequests"),
   };
 }

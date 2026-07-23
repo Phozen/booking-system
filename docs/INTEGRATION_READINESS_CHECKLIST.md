@@ -60,7 +60,7 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 | Disabled mode safe | Ready | `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` and `MICROSOFT_SYNC_MODE=disabled` avoid Graph calls. |
 | Config validation | Ready | Required vars are checked only when sync is enabled. |
 | Super Admin page exists | Ready | `/admin/integrations/microsoft-calendar`. |
-| Calendar migrations exist | Ready locally | Apply migrations through `0025_microsoft_delegated_calendar_connections.sql`. |
+| Calendar migrations exist | Ready locally | Apply every migration in `supabase/migrations` to the intended environment. |
 | Secret handling | Ready | Client secret and tokens are server-only and sanitized from errors. |
 | External requirement: Entra app | Pending IT | Create Microsoft Entra app registration. |
 | External requirement: Graph permission | Pending IT | Grant `Calendars.ReadWrite` application permission or IT-approved equivalent. |
@@ -76,7 +76,7 @@ Blank `EMAIL_PROVIDER` is also supported and behaves like `none`.
 
 ### Microsoft 365 Calendar Verification Steps
 
-1. Apply migrations through `0025` before enabling real sync.
+1. Apply every repository migration before enabling real sync.
 2. Set Microsoft Entra env vars in Vercel, plus `MICROSOFT_DEFAULT_CALENDAR_ID` for central mode.
 3. Redeploy the app.
 4. Enable sync with `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` and either `MICROSOFT_SYNC_MODE=central_calendar` or `MICROSOFT_SYNC_MODE=booking_owner_calendar`.
@@ -117,7 +117,7 @@ Microsoft 365 Calendar:
 - Tenant admin consent.
 - Central booking calendar mailbox or calendar target.
 - Tenant ID, client ID, client secret, and calendar mailbox/user principal name.
-- Migrations through `0025` applied to the target Supabase project.
+- Every repository migration applied to the target Supabase project.
 - Manual Graph sync QA before production enablement.
 
 n8n calendar mode:

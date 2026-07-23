@@ -4,7 +4,7 @@
 
 - All authenticated Qbook access requires the configured Microsoft tenant, an exact active pre-provisioned email, and an active approved role.
 - Authenticated users cannot insert or update booking or approval tables directly after migration `0032`.
-- Booking creation, edit, catering, cancellation, usage, recurrence, and review operations use guarded database functions that recheck ownership, role, facility, capacity, block, maintenance, conflict, approval, and state invariants.
+- Booking creation, edit, catering, cancellation, usage, participant, and review operations use guarded database functions that recheck ownership, role, facility, capacity, block, maintenance, conflict, approval, and state invariants. Recurring booking operations are retired.
 - Approval-required bookings cannot begin as confirmed, and approval/rejection updates the booking and approval record in one database transaction.
 
 These controls make Qbook the only supported mutation channel for the Qbook database. They cannot stop an employee from sending an Outlook invitation to an Exchange room mailbox.

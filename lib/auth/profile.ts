@@ -7,7 +7,7 @@ export type AppRole = "employee" | "admin" | "super_admin";
 export type ProfileSession = {
   approvedUserId: string | null;
   role: AppRole;
-  status: "active" | "disabled" | "pending";
+  status: "active" | "disabled";
   full_name: string | null;
   department: string | null;
   phone: string | null;

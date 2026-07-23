@@ -1,463 +1,129 @@
-# Booking System
+# QBook
 
-Internal company facility booking system built with Next.js, Supabase, and Resend/SMTP-ready email notifications.
+QBook is an internal facility-booking system for organisations that need controlled booking of meeting rooms and event spaces. It is built with Next.js, Supabase, and optional email and calendar integrations.
 
-The app lets employees browse facilities, create bookings, manage their own bookings, respond to invitations, and view calendars. Admins manage daily booking operations, facilities, approvals, availability blocks, maintenance closures, reports, audit logs, email notifications, and facility photos. Super Admins have full system-owner access, including user/role management and system settings.
+The application enforces the booking and access rules at the server and database layers. It is intended for a Microsoft-managed internal workforce, not public self-service registration.
 
-## Stack
+## What it does
 
-- Next.js 16 App Router
-- React 19
-- Supabase Auth, Postgres, RLS, and Storage
-- Tailwind CSS and shadcn/ui-style components
-- Resend or SMTP-ready email notification queue
-- Microsoft 365 Calendar one-way outbound sync support
-- Facility availability timeline and finite recurring bookings
-- Reporting enhancements, audit diff review, and backup/restore handoff docs
-- Vitest for unit tests
-- Vercel for deployment
+### Employees
 
-## Main Features
+- Sign in through the approved Microsoft/Supabase access flow.
+- Browse active facilities, their photos, capacity, equipment, and availability.
+- Create, edit, reschedule, and cancel eligible bookings.
+- Include attendee count, catering details, involved departments, and initial internal invitees.
+- View personal bookings, invitations, notifications, notification preferences, profile details, and calendar entries.
+- Accept or decline booking invitations.
 
-### Employee Features
+### Administrators
 
-- Microsoft-only sign-in for active, exact-email pre-provisioned employees.
-- Employee dashboard with quick actions and upcoming booking preview.
-- Facility browsing and facility detail pages with photos, equipment, capacity, approval requirements, and booking CTA.
-- Booking creation with timezone-aware date/time handling, conflict prevention, blocked-period checks, maintenance checks, and approval-aware status.
-- Booking edit/reschedule for pending and confirmed bookings.
-- Food and drinks / catering request details during booking creation.
-- My Bookings grouped by pending, upcoming, history, and cancelled.
-- Booking detail with cancellation flow, attendee invitations, catering edits, and printable approval form.
-- Invitations page for accepting or declining internal booking invitations.
-- Calendar page for owned and invited bookings, with optional all-user visibility controlled by Super Admin settings.
-- Profile page for editing safe self-service fields: full name, department, and phone.
-- Notification preferences for non-critical reminders and invitation updates.
-- Light/dark theme toggle.
+- Run operational dashboards, bookings, approvals, facilities, equipment, blocked periods, maintenance, email queues, reports, audit logs, and availability controls.
+- Create bookings on behalf of active users and manage initial participants.
+- Export booking, utilisation, cancellation, user, and audit-log reports as CSV.
 
-### Admin Features
+### Super Administrators
 
-- Admin dashboard for operational overview.
-- Facility CRUD-style management:
-  - Create facilities.
-  - Update facility details, status, approval behavior, equipment metadata, and photos.
-  - Archive facilities instead of hard-deleting them, preserving historical bookings and reports.
-  - Upload, set primary, and delete facility photos through Supabase Storage.
-- Booking management:
-  - Create bookings on behalf of active internal users.
-  - View all bookings.
-  - Filter by status/facility.
-  - Approve, reject, or cancel bookings where allowed.
-  - Mark confirmed/historical bookings as checked in or no-show.
-  - View attendee invitations.
-  - Review and update catering / food and drinks details.
-  - Print booking approval forms with signature sections.
-- Equipment management:
-  - Add equipment to the shared equipment library.
-  - Archive/reactivate equipment.
-  - Assign active equipment and quantities to facilities.
-- Availability management:
-  - Create, update, and deactivate blocked dates.
-  - Create, update, complete, and cancel maintenance closures.
-- Email notification queue:
-  - Queue due booking reminders.
-  - View queued/sent/failed notifications.
-  - Process queued notifications.
-  - Retry failed notifications.
-- Reports and CSV exports:
-  - Booking history.
-  - Facility utilization.
-  - User booking summary.
-  - Cancelled bookings.
-  - Audit logs.
-- Audit log search and detail views.
-### Super Admin Features
+- Manage active allowlisted users, roles, system settings, departments, and integration status/retries.
+- Configure the application’s operational settings without exposing provider credentials.
 
-- All admin operational features.
-- User management:
-  - Search and filter users.
-  - Update role, status, and safe profile fields.
-  - Promote users to Admin or Super Admin.
-  - Prevent unsafe self-disable and final-super-admin removal flows.
-- System settings:
-  - App name, company name, contact email.
-  - Registration and allowed email domains.
-  - Approval defaults and facility override setting.
-  - Timezone and reminder offsets.
-  - Calendar visibility scope: My bookings only, Admins only, or All users.
-- Integration groundwork:
-  - Microsoft 365 Calendar sync status and retry page.
-  - Server-side Microsoft Graph configuration through environment variables.
-- System health:
-  - Sanitized readiness view for email, Microsoft Calendar, and operational queue follow-up.
+## Current feature highlights
 
-Migrations through `0024` must be applied before deploying the latest operational features:
+- Database-backed prevention of overlapping active bookings, with back-to-back slots permitted.
+- Approval-aware booking lifecycle, audit logging, check-in/no-show tracking, and catering records.
+- Normalised department tags that remain visible on historical bookings and can receive booking notifications.
+- Internal attendee invitations created atomically with a booking.
+- Private facility-photo storage with signed URL display and admin-only upload management.
+- Notification queue with protected reminder/processing routes and health reporting.
+- Optional one-way outbound Microsoft Graph or n8n calendar sync. It is disabled until its external configuration is verified.
+- Microsoft-only, pre-provisioned access controls backed by Supabase Auth, RLS, policies, and server-side checks.
 
-```powershell
-npx.cmd supabase db push
-```
+Recurring booking operations are intentionally retired. Historical recurrence data remains for audit purposes, but the application no longer offers recurring-booking creation or management.
 
-## CRUD And Operations Summary
+## Technology
 
-| Area | Employee | Admin |
-| --- | --- | --- |
-| Facilities | Read active non-archived facilities | Create, read, update, archive, manage photos |
-| Facility photos | Read through facility pages | Upload, set primary, delete |
-| Bookings | Create own, read own/invited, cancel own eligible bookings | Read all, approve, reject, cancel |
-| Catering details | Add during booking creation; owner can update pending/confirmed bookings | View/update for operational purposes |
-| Invitations | Invite users to own bookings, accept/decline own invitations | View attendee status on booking detail |
-| Calendar | View own/invited bookings; optionally view limited all-user bookings when enabled | View all bookings or own bookings |
-| Users/profiles | Read/update own safe profile fields | Super Admin only: read/search/update users, roles, statuses, safe profile fields |
-| Blocked dates | Read active availability impact indirectly through booking validation | Create, read, update, deactivate |
-| Maintenance closures | Read active availability impact indirectly through booking validation | Create, read, update, complete, cancel |
-| Email notifications | No direct access | Read, process queued, retry failed |
-| Reports/exports | No direct access | Read reports, export CSV |
-| Audit logs | No direct access | Read and filter |
-| Settings | No direct access | Super Admin only: read/update non-secret system settings |
-| Microsoft 365 calendar sync | No direct access | Super Admin only: view sync status and retry |
+- Next.js 16 App Router and React 19
+- TypeScript, Tailwind CSS, and component primitives
+- Supabase Auth, PostgreSQL, Row Level Security, and Storage
+- Zod and React Hook Form
+- Resend or SMTP for app notification delivery
+- Microsoft Graph or n8n webhook calendar providers (optional)
+- Vitest and Playwright
+- Vercel deployment configuration and GitHub Actions CI
 
-## Key Routes
+## Repository guides
 
-### Public And Auth
+Start here when evaluating or operating the system:
 
-- `/`
-- `/login`
-- `/register`
-- `/reset-password`
+| Guide | Purpose |
+| --- | --- |
+| [Architecture](docs/ARCHITECTURE.md) | Application boundaries, roles, data flow, and integrations |
+| [Getting started](docs/GETTING-STARTED.md) | Local setup and first safe run |
+| [Development](docs/DEVELOPMENT.md) | Development conventions and change workflow |
+| [Testing](docs/TESTING.md) | Unit, integration, browser, and release checks |
+| [Configuration](docs/CONFIGURATION.md) | Environment variables and secret-handling rules |
+| [API reference](docs/API.md) | HTTP endpoints exposed by the application |
+| [Deployment](docs/DEPLOYMENT.md) | Release, migration, rollback, and evidence checklist |
+| [Database schema](docs/DATABASE_SCHEMA.md) | Current data model and access-control overview |
+| [User flows](docs/USER_FLOWS.md) | Role-based behaviour and booking lifecycle |
+| [Security](SECURITY.md) | Vulnerability reporting and security policy |
 
-### Employee
+Operational runbooks such as [email operations](docs/EMAIL_OPERATIONS.md), [Microsoft 365 calendar sync](docs/MICROSOFT_365_CALENDAR_SYNC.md), [backup and restore](docs/BACKUP_RESTORE.md), and the [production ownership runbook](docs/PRODUCTION_OWNERSHIP_RUNBOOK.md) remain the authoritative procedures for those areas.
 
-- `/dashboard`
-- `/facilities`
-- `/facilities/[slug]`
-- `/bookings/new`
-- `/bookings/[id]`
-- `/bookings/[id]/print`
-- `/my-bookings`
-- `/calendar`
-- `/invitations`
-- `/profile`
-
-### Admin
-
-- `/admin/dashboard`
-- `/admin/users`
-- `/admin/facilities`
-- `/admin/bookings`
-- `/admin/bookings/[id]/print`
-- `/admin/approvals`
-- `/admin/calendar`
-- `/admin/blocked-dates`
-- `/admin/maintenance`
-- `/admin/email-notifications`
-- `/admin/reports`
-- `/admin/audit-logs`
-- `/admin/integrations/microsoft-calendar`
-- `/admin/settings`
-
-## Local Development
-
-### Prerequisites
+## Prerequisites
 
 - Node.js 22.x
 - npm
-- Supabase CLI, if applying or inspecting migrations locally
-- A Supabase project for auth, database, and storage
+- A Supabase project for Auth, database, and Storage
+- Supabase CLI for migration work
 
-### Install
+Optional integrations require their own provider credentials and administrator approval; they are not required for a safe local development run.
 
-```bash
-npm install
-```
-
-### Environment Variables
-
-Create `.env.local` from `.env.example`:
-
-```bash
-cp .env.example .env.local
-```
-
-On Windows PowerShell, copy the file manually or run:
+## Quick start
 
 ```powershell
+npm.cmd ci
 Copy-Item .env.example .env.local
+npm.cmd run dev
 ```
 
-Required local variables:
+Set at least these values in `.env.local` before opening the app:
 
 ```txt
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-CRON_SECRET=
-APP_TIMEZONE=Asia/Kuala_Lumpur
-APP_NAME=Booking System
-COMPANY_NAME=
-SYSTEM_CONTACT_EMAIL=
-EMAIL_PROVIDER=
-EMAIL_API_KEY=
-EMAIL_FROM=
-SMTP_HOST=
-SMTP_PORT=
-SMTP_SECURE=
-SMTP_REQUIRE_TLS=
-SMTP_USER=
-SMTP_PASSWORD=
-MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
-MICROSOFT_TENANT_ID=
-MICROSOFT_CLIENT_ID=
-MICROSOFT_CLIENT_SECRET=
-MICROSOFT_DEFAULT_CALENDAR_ID=
-MICROSOFT_SYNC_MODE=disabled
-MICROSOFT_GRAPH_AUTH_MODE=app_only
-MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY=
-MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0
 ```
 
-Security notes:
-
-- `NEXT_PUBLIC_*` values are browser-exposed.
-- `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be used in client components.
-- `CRON_SECRET` is server-only and protects the email cron routes. Do not prefix it with `NEXT_PUBLIC_`.
-- `EMAIL_API_KEY` is server-only and used by Resend.
-- `SMTP_PASSWORD` is server-only and used by the SMTP provider.
-- `MICROSOFT_CLIENT_SECRET` is server-only and used by Microsoft Graph Calendar sync.
-- `MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY` is server-only and required only when delegated booking-owner sync is enabled.
-- Real secrets belong in `.env.local` locally and the Vercel dashboard in production. Do not commit them.
-- `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`.
-- Email variables can stay blank until a provider is configured. Email processing will fail safely with a configuration message.
-- Microsoft 365 SMTP commonly uses `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, and a dedicated service mailbox.
-- Microsoft 365 Calendar sync uses Microsoft Graph, not SMTP. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra values are configured and the integration is ready to test.
-
-### Vercel Environment Template
-
-A safe Vercel import template is available at:
-
-```txt
-docs/vercel-env-templates/booking-system-vercel-env.example
-```
-
-The template contains placeholders only. Copy it locally to `.env.vercel.local`, replace placeholders with real values, then paste or import those values into Vercel Project Settings > Environment Variables.
-
-Do not commit `.env.local`, `.env.vercel.local`, Supabase service role keys, SMTP passwords, Microsoft client secrets, or access tokens.
-
-### Database Setup
-
-Apply Supabase migrations through the latest migration in `supabase/migrations`.
-
-Migration history is append-only. Apply every numbered SQL file in that
-directory in order; do not edit or skip older migrations on an existing
-environment.
-
-Typical commands:
+Apply the repository’s Supabase migrations to a development project before exercising data-dependent flows:
 
 ```powershell
-npx.cmd supabase migration list
-npx.cmd supabase db push
+npm.cmd exec supabase -- migration list
+npm.cmd exec supabase db push
 ```
 
-See `docs/DATABASE_SCHEMA.md` for the full schema and RLS model.
+Follow [Getting started](docs/GETTING-STARTED.md) for the full safe setup order and initial Super Admin bootstrap requirements.
 
-Booking edits, admin-created bookings, and recurring booking creation use dedicated database RPCs for authorization and validation. Finite recurring booking creation is transactional: the user previews candidate occurrences, then final creation succeeds for the full series or fails without creating orphaned occurrences if one slot becomes unavailable.
+## Common commands
 
-Production uses one Vercel Cron job placeholder: `GET /api/cron/email/run` once
-daily (`0 0 * * *`, UTC) to comply with Hobby limitations. The actual production
-execution runs every 5 minutes and is triggered via an external scheduler (like
-cron-job.org) passing `Authorization: Bearer ${CRON_SECRET}` to queue idempotent
-reminders and process due emails. HTTP 500 indicates an infrastructure/claim/marker
-failure; HTTP 503 indicates failed, overdue, stale, or exhausted queue rows. See
-`docs/EMAIL_OPERATIONS.md` and `/admin/system-health` for recovery and evidence.
-
-### Storage Setup
-
-The app expects a private Supabase Storage bucket:
-
-```txt
-facility-photos
+```powershell
+npm.cmd run dev          # Development server
+npm.cmd run lint         # ESLint
+npm.cmd run typecheck    # TypeScript check
+npm.cmd test             # Vitest suite
+npm.cmd run build        # Production build
+npm.cmd run e2e          # Playwright suite
+npm.cmd run secret-scan  # Working-tree secret scan
 ```
 
-Expected behavior:
+`npm run qa` runs lint, tests, and a production build. It is useful before a release but is not a substitute for authenticated browser UAT or production integration checks.
 
-- Active users can read facility photos.
-- Active admins can upload, update, and delete facility photos.
-- Uploads allow JPEG, PNG, and WebP.
-- App-side upload limit is 5 MB.
-- Signed URLs are generated server-side for private photo display.
+## Security and deployment posture
 
-See `docs/STORAGE_SETUP.md` for full bucket setup and manual verification.
+- Never commit `.env.local`, browser storage state, access tokens, service-role keys, SMTP passwords, or provider client secrets.
+- `NEXT_PUBLIC_*` variables are intentionally browser-visible. All other secrets must remain server-only.
+- Production migrations are append-only. Apply new SQL through an approved release; do not alter applied migrations.
+- External configuration—Microsoft tenant policy, Vercel secrets, Supabase Auth settings, email sender verification, and calendar permissions—must be validated by the owning administrator before the corresponding capability is enabled.
 
-### First Super Admin Setup
-
-After the first user registers, promote that profile in Supabase SQL Editor:
-
-Before the first sign-in, IT must configure the Microsoft tenant and add the first
-active Super Admin to `public.approved_users`; do not promote a `profiles` row.
-After that, use `/admin/users` for everyday allowlist role and status management.
-Use `admin` for operational staff and `super_admin` for system owners.
-
-### Run Locally
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:3000`.
-
-## Quality Checks
-
-Run the full verification stack before handoff or deployment:
-
-```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npm run qa
-```
-
-The `qa` script runs lint, tests, and production build. Run `typecheck` separately.
-
-Playwright browser smoke tests are available separately:
-
-```bash
-npm run e2e
-npm run e2e:ui
-npm run e2e:headed
-```
-
-Install browsers first with `npx playwright install chromium`. Authenticated E2E tests require dedicated test users and `E2E_*` environment variables. See `docs/E2E_TESTING.md`.
-
-## Deployment
-
-Current deployment target is Vercel.
-
-- Framework preset: Next.js
-- Build command: `npm run build`
-- Output directory: Vercel default
-- Node.js: 22.x
-- Static export: do not enable
-
-Required Vercel environment variables:
-
-```txt
-NEXT_PUBLIC_APP_URL
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
-APP_TIMEZONE
-APP_NAME
-COMPANY_NAME
-SYSTEM_CONTACT_EMAIL
-EMAIL_PROVIDER
-EMAIL_API_KEY
-EMAIL_FROM
-SMTP_HOST
-SMTP_PORT
-SMTP_SECURE
-SMTP_REQUIRE_TLS
-SMTP_USER
-SMTP_PASSWORD
-MICROSOFT_365_CALENDAR_SYNC_ENABLED
-MICROSOFT_TENANT_ID
-MICROSOFT_CLIENT_ID
-MICROSOFT_CLIENT_SECRET
-MICROSOFT_DEFAULT_CALENDAR_ID
-MICROSOFT_SYNC_MODE
-MICROSOFT_GRAPH_BASE_URL
-```
-
-Supabase Auth should include redirect URLs for:
-
-```txt
-http://localhost:3000/**
-https://your-vercel-app.vercel.app/**
-```
-
-Add future custom-domain URLs when a domain is ready.
-
-See `docs/DEPLOYMENT_NOTES.md` and `docs/PRODUCTION_CHECKLIST.md` for Microsoft
-tenant/Auth Hook setup, allowlist bootstrap, storage checks, smoke tests, and
-rollback notes.
-
-App notification emails and Microsoft 365 Calendar sync are separate systems.
-Booking and invitation notifications use the app queue with `EMAIL_PROVIDER=resend`
-or `EMAIL_PROVIDER=smtp`. Disable password, signup, magic-link, and other public
-Supabase Auth providers for Qbook. Microsoft 365 Calendar sync uses Microsoft
-Graph environment variables and should remain disabled until Microsoft Entra app
-registration and either the central calendar target or booking-owner mailbox mode
-is ready.
-
-## Integration Readiness
-
-App-side support is complete for SMTP email and Microsoft 365 Calendar one-way sync. Both integrations can remain safely disabled while external credentials and IT setup are pending.
-
-Recommended safe values while waiting for credentials:
-
-```txt
-EMAIL_PROVIDER=none
-MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
-MICROSOFT_SYNC_MODE=disabled
-```
-
-SMTP email is ready for Microsoft 365 once a service mailbox, SMTP AUTH, sender identity, and mailbox credentials are available. The app reads:
-
-```txt
-EMAIL_PROVIDER
-EMAIL_FROM
-SMTP_HOST
-SMTP_PORT
-SMTP_SECURE
-SMTP_REQUIRE_TLS
-SMTP_USER
-SMTP_PASSWORD
-```
-
-Microsoft 365 Calendar sync is ready for live testing once migrations through `0025` are applied, Microsoft Entra app registration is complete, and either the central booking calendar mailbox or booking-owner mailbox mode is configured. For app-only `MICROSOFT_SYNC_MODE=booking_owner_calendar`, grant Graph application permissions and ask IT to constrain access to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group. For delegated booking-owner sync, set `MICROSOFT_GRAPH_AUTH_MODE=delegated`, grant delegated `Calendars.ReadWrite` consent, configure the delegated token encryption key, and have each user connect Microsoft Calendar from their profile.
-
-See `docs/INTEGRATION_READINESS_CHECKLIST.md` for the full readiness matrix and external IT checklist.
-
-## Security Model
-
-- Supabase Auth handles identity.
-- `public.profiles` stores app role and status.
-- Active employee/admin/super-admin status is required for protected areas.
-- Employees cannot access `/admin/*`.
-- Employees can manage only their own bookings and invitations.
-- Employee all-user calendar visibility is settings-gated and shows limited details for unrelated bookings.
-- Operational admin pages require active `admin` or `super_admin` authorization.
-- `/admin/users` and `/admin/settings` require active `super_admin` authorization.
-- Supabase RLS remains enabled on application tables.
-- Critical actions create audit logs where applicable.
-- Booking creation uses database-backed conflict prevention to protect against race conditions.
-
-## Documentation Map
-
-- `docs/REQUIREMENTS.md` - product requirements and accepted scope.
-- `docs/USER_FLOWS.md` - user journeys and role flows.
-- `docs/DATABASE_SCHEMA.md` - schema, constraints, functions, RLS, and storage notes.
-- `docs/FRONTEND_UX_SPEC.md` - UI/UX behavior, accessibility, responsive, and theme guidance.
-- `docs/SECURITY_CHECKLIST.md` - security and access-control checklist.
-- `docs/QA_CHECKLIST.md` - manual and automated QA checklist.
-- `docs/DEPLOYMENT_NOTES.md` - Vercel, Supabase, email, domain, and production notes.
-- `docs/PRODUCTION_CHECKLIST.md` - pre-launch checklist.
-- `docs/STORAGE_SETUP.md` - facility photo storage setup.
-- `docs/E2E_TESTING.md` - Playwright setup, credentials, and browser smoke-test strategy.
-- `docs/MICROSOFT_365_CALENDAR_SYNC.md` - Microsoft 365 Calendar sync architecture, setup, security, and Stage 2 plan.
-- `docs/INTEGRATION_READINESS_CHECKLIST.md` - SMTP and Microsoft 365 Calendar app-side readiness and remaining external setup.
-- `docs/BACKUP_RESTORE.md` - Supabase, storage, Vercel env, secret rotation, and restore runbook.
-- `docs/EMAIL_OPERATIONS.md` - combined email cron, queue health, retry, and operator recovery runbook.
-- `docs/PRODUCTION_OWNERSHIP_RUNBOOK.md` - company ownership, protected release, backup, and rollback actions with required evidence.
-- `docs/BOOKING_CHANNEL_ENFORCEMENT.md` - repository booking boundary and required Exchange room-mailbox controls.
-- `docs/PRODUCTION_STABILIZATION_LEDGER.md` - definition-of-done status and remaining production evidence.
-- `docs/vercel-env-templates/booking-system-vercel-env.example` - safe Vercel environment variable import template.
-
-## Deferred Or Optional Items
-
-- Real email sending requires Resend or SMTP configuration and a verified sender/mailbox.
-- Advanced facility photo UX such as cropping, compression, drag-and-drop, and bulk upload is deferred.
-- Advanced recurring features such as infinite recurrence and external calendar import are deferred.
-- External guest invitations are deferred.
-- Inbound, two-way, facility-calendar mapping, Teams meeting creation, and arbitrary personal-calendar Microsoft 365 sync are deferred.
-- Network-layer internal access protection, such as Vercel protection or Cloudflare Access, is an optional deployment hardening step.
+<!-- VERIFY: Confirm the target Supabase project has every migration in supabase/migrations applied before a production release. -->
+<!-- VERIFY: Confirm Vercel, Supabase Auth, Microsoft tenant, email, and calendar settings against the environment being proposed. -->

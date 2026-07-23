@@ -4,7 +4,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 
 ## Post-MVP Roadmap Checks
 
-- [ ] Apply migrations through `0024` before deploying code paths that read current tables, columns, or RPCs.
+- [ ] Apply every migration present in `supabase/migrations` before deploying code paths that read current tables, columns, or RPCs.
 - [ ] Confirm only Admin/Super Admin can create bookings on behalf of another user.
 - [ ] Confirm admin-created bookings can target active users only.
 - [ ] Confirm employees cannot update booking usage tracking fields.
@@ -147,11 +147,9 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - Automated browser/security E2E tests are not implemented yet; continue using the manual QA checklist until those tests exist.
 - Facility photo upload is implemented, but storage upload/delete behavior still needs browser-level verification with real Supabase credentials before production launch.
 - Microsoft 365 Calendar sync is outbound-only; delegated OAuth is limited to booking-owner Outlook sync, while inbound import, arbitrary personal calendars, and two-way sync are not implemented.
-## Recurrence and Audit Security
+## Recurrence Retirement and Audit Security
 
-- Recurring booking creation must generate normal bookings and run existing
-  availability checks for every occurrence.
-- Employees must not manage another user's recurrence series.
+- Recurring booking creation and management are retired. Historical recurrence data must not regain an operational mutation path without a new product/security review.
 - Audit diff views must mask secret-like fields including passwords, tokens,
   API keys, service-role keys, SMTP passwords, Microsoft client secrets, and
   authorization headers.

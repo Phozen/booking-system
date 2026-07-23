@@ -390,7 +390,7 @@ The page does not show client secrets, access tokens, or raw Microsoft responses
 - [ ] For booking-owner mode, constrain application access to company staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
 - [ ] Provide tenant ID, client ID, client secret, and central calendar ID if using central mode to the deployment owner.
 - [ ] Add Microsoft env vars in Vercel as server-side variables.
-- [ ] Apply database migrations through `0025_microsoft_delegated_calendar_connections.sql`.
+- [ ] Apply every migration in `supabase/migrations` to the target Supabase project.
 - [ ] Keep sync disabled until Stage 2 code is deployed and verified.
 - [ ] To test Microsoft login, enable the Azure provider in Supabase Auth, add `{NEXT_PUBLIC_APP_URL}/auth/callback` as an allowed Supabase redirect URL, and add the Supabase provider callback URL shown by Supabase as the Microsoft Entra redirect URI.
 
@@ -450,4 +450,11 @@ https://graph.microsoft.com/.default
 - Facility-to-calendar mapping is deferred.
 - Inbound Microsoft 365 availability import is out of scope.
 - Two-way sync is out of scope.
-- Microsoft Teams meeting creation is out of scope.
+- Hybrid Teams meetings are supported only for direct Microsoft Graph delegated booking-owner calendar sync. A confirmed hybrid booking creates or updates one Outlook event with `isOnlineMeeting: true` and `onlineMeetingProvider: teamsForBusiness`; its existing internal QBook invitees are the Outlook attendees and the room remains the location. Pending requests do not create an event. The Teams join URL is not stored or displayed by QBook.
+- Central-calendar mode, n8n-only mode, disabled sync, app-only owner sync, external guests, two-way sync, and turning Teams off after confirmation are out of scope. To change a confirmed meeting type, cancel and recreate it.
+
+## Hybrid meeting prerequisites
+
+- IT must grant delegated `Calendars.ReadWrite` consent for the Entra app and permit Teams meetings for the tenant/users.
+- Set `CALENDAR_SYNC_PROVIDER=microsoft_graph`, `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true`, `MICROSOFT_SYNC_MODE=booking_owner_calendar`, and `MICROSOFT_GRAPH_AUTH_MODE=delegated` with the server-only delegated-token encryption key.
+- Each organiser must connect the same eligible company Microsoft account from their QBook profile. QBook records sanitized failures in `booking_calendar_syncs`; it never rolls back the valid room booking or claims an invitation was sent after a failure.

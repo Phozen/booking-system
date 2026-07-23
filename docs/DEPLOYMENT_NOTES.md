@@ -1,5 +1,7 @@
 # Deployment Notes
 
+> Current release guidance is in [DEPLOYMENT.md](DEPLOYMENT.md). This runbook retains detailed provider/setup procedures. Where older wording describes calendar integration as “future”, read it as optional outbound functionality that remains disabled until its external configuration and UAT are verified.
+
 The Booking System is deployed as a full-stack Next.js App Router application on Vercel, with Supabase for auth, database, and storage.
 
 Use these notes for the current MVP deployment and handoff. Do not commit real secrets; configure production values in the Vercel dashboard.
@@ -107,7 +109,7 @@ Security rules:
 - `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
 - `EMAIL_API_KEY` must remain server-only and is used by Resend.
 - `SMTP_PASSWORD` must remain server-only and is used by the SMTP provider.
-- `MICROSOFT_CLIENT_SECRET` must remain server-only and is used by the future Microsoft Graph Calendar sync.
+- `MICROSOFT_CLIENT_SECRET` must remain server-only and is used by the optional Microsoft Graph Calendar sync.
 - Real secrets must be entered in Vercel, never committed to the repository.
 - Do not store provider API keys in `system_settings`.
 
@@ -167,9 +169,9 @@ npx.cmd supabase db push
 10. Confirm `0023_harden_employee_cancellation_updates.sql` is applied so direct employee cancellation cannot mutate unrelated booking fields.
 11. Confirm the email queue claiming RPCs and indexes from `0024_email_queue_claiming.sql` exist.
 
-## Microsoft 365 Calendar Sync Groundwork
+## Microsoft 365 Calendar Sync
 
-The Booking System has groundwork for future one-way Microsoft 365 Calendar sync:
+The Booking System supports optional one-way outbound Microsoft 365 Calendar sync:
 
 ```txt
 Booking System -> Microsoft 365 Calendar
@@ -183,7 +185,7 @@ Supported v1 architectures are a central booking calendar mailbox, such as:
 booking-calendar@company.com
 ```
 
-Required future Microsoft Graph values:
+Required Microsoft Graph values when the provider is enabled:
 
 ```txt
 MICROSOFT_365_CALENDAR_SYNC_ENABLED=false
@@ -199,7 +201,7 @@ The app uses Microsoft Graph client credentials when sync is enabled. In `centra
 
 Keep sync disabled until:
 
-- migrations through `0025` have been applied,
+- all relevant repository migrations have been applied,
 - Microsoft Entra app registration is complete,
 - the app has the required Microsoft Graph calendar permissions and admin consent,
 - the central booking calendar mailbox is ready, or booking-owner mode has allowed company domains configured,
@@ -470,9 +472,8 @@ When an Exabytes domain is purchased or ready:
 - Authenticated mobile QA still needs manual execution with real employee/admin accounts.
 - Facility photo storage needs real Supabase upload/delete verification before launch.
 - PDF and Excel exports are deferred.
-- Advanced recurring features such as infinite recurrence and external calendar import are deferred.
-- Dark mode is deferred.
-- Collaboration/invitations are deferred.
+- New recurring booking operations, external calendar import, and two-way calendar synchronisation are out of scope.
+- Dark mode and internal booking invitations are implemented; include them in normal UI/UAT checks.
 - Vercel protection, Cloudflare Access, or another network-layer internal access gate is a future hardening option.
 
 ## Reference Links

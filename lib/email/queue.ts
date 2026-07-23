@@ -243,10 +243,34 @@ async function markNotificationFailed(
   });
 }
 
+async function cancelForInactiveRecipient(
+  supabase: SupabaseClient,
+  notificationId: string,
+) {
+  const { data, error } = await supabase.rpc(
+    "cancel_email_notification_for_inactive_recipient",
+    { p_email_id: notificationId },
+  );
+
+  if (error) {
+    console.error("Email recipient status check failed", {
+      notificationId,
+      message: error.message,
+    });
+    throw new Error("Email recipient status could not be verified.");
+  }
+
+  return data === true;
+}
+
 async function processClaimedNotification(
   supabase: SupabaseClient,
   claimed: QueueNotificationRecord,
 ) {
+  if (await cancelForInactiveRecipient(supabase, claimed.id)) {
+    return "skipped" as const;
+  }
+
   const result = await sendNotificationEmail({
     type: claimed.type,
     recipientEmail: claimed.recipient_email,
@@ -352,7 +376,7 @@ export async function processEmailNotificationNow(
     sent: outcome === "sent" ? 1 : 0,
     failed: outcome === "failed" ? 1 : 0,
     retried: outcome === "retried" ? 1 : 0,
-    skipped: 0,
+    skipped: outcome === "skipped" ? 1 : 0,
     message: "Processed booking confirmation email notification.",
   };
 }
@@ -385,7 +409,7 @@ export async function processQueuedEmailNotifications(
   let sent = 0;
   let failed = 0;
   let retried = 0;
-  const skipped = 0;
+  let skipped = 0;
 
   for (const claimed of notifications) {
     processed += 1;
@@ -397,6 +421,8 @@ export async function processQueuedEmailNotifications(
       failed += 1;
     } else if (outcome === "retried") {
       retried += 1;
+    } else if (outcome === "skipped") {
+      skipped += 1;
     }
   }
 

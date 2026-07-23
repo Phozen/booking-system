@@ -1,5 +1,7 @@
 # Frontend UX/UI Specification
 
+> **Status (2026-07-22):** This document contains the original UX specification and historical improvement backlog. The implemented feature overview is maintained in [README](../README.md), [USER_FLOWS.md](USER_FLOWS.md), and [ARCHITECTURE.md](ARCHITECTURE.md). In particular, profile/user management, internal invitations, dark mode, notifications, department selection, and the current booking flows are implemented; recurring booking operations are retired. Do not treat older “missing”, “planned”, or recurrence-backlog entries below as current product commitments.
+
 This document is the source of truth for future frontend polish and UI implementation for the internal Booking System.
 
 It is based on:

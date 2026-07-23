@@ -242,12 +242,6 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
       className: statusClasses.rose,
       dotClassName: statusDots.rose,
     },
-    pending: {
-      label: "Pending",
-      description: "User is waiting for admin activation.",
-      className: statusClasses.amber,
-      dotClassName: statusDots.amber,
-    },
   },
   "user-role": {
     employee: {

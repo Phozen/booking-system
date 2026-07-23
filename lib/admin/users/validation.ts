@@ -3,8 +3,8 @@ import { z } from "zod";
 export const userRoleOptions = ["all", "employee", "admin", "super_admin"] as const;
 export const editableUserRoleOptions = ["employee", "admin", "super_admin"] as const;
 
-export const userStatusOptions = ["all", "active", "disabled", "pending"] as const;
-export const editableUserStatusOptions = ["active", "disabled", "pending"] as const;
+export const userStatusOptions = ["all", "active", "disabled"] as const;
+export const editableUserStatusOptions = ["active", "disabled"] as const;
 
 export type UserRole = (typeof editableUserRoleOptions)[number];
 export type UserStatus = (typeof editableUserStatusOptions)[number];
@@ -163,7 +163,6 @@ export function formatUserStatus(status: UserStatus) {
   const labels: Record<UserStatus, string> = {
     active: "Active",
     disabled: "Disabled",
-    pending: "Pending",
   };
 
   return labels[status];

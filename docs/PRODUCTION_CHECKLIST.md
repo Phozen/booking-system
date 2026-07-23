@@ -80,10 +80,10 @@ Security reminders:
 ## Supabase
 
 - [ ] Production Supabase project is selected.
-- [ ] `npx.cmd supabase migration list` shows migrations through `0024`.
+- [ ] `npx.cmd supabase migration list` shows every migration in `supabase/migrations` is applied to the target project.
 - [ ] `npx.cmd supabase db push` has been run successfully.
 - [ ] RLS is enabled on application tables.
-- [ ] `booking_calendar_syncs` and `microsoft_calendar_connections` exist after migrations through `0025`.
+- [ ] `booking_calendar_syncs` and `microsoft_calendar_connections` exist after all relevant repository migrations are applied.
 - [ ] Booking mutation RPCs from `0022_booking_mutation_rpcs.sql` exist and have expected grants.
 - [ ] Direct employee cancellation hardening from `0023_harden_employee_cancellation_updates.sql` is applied.
 - [ ] Email queue claiming RPCs and indexes from `0024_email_queue_claiming.sql` exist and have expected grants.

@@ -25,9 +25,14 @@ import {
 import {
   getAppSettings,
   getEffectiveApprovalRequired,
+  type AppSettings,
 } from "@/lib/settings/queries";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
+import {
+  getActiveEmailRecipients,
+  shouldSendEmailToRole,
+} from "@/lib/email/recipients";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -76,10 +81,12 @@ type AdminBookingActionRecord = {
     | {
         email: string;
         full_name: string | null;
+        role?: string;
       }
     | {
         email: string;
         full_name: string | null;
+        role?: string;
       }[]
     | null;
   booking_approvals?: {
@@ -130,7 +137,8 @@ async function getAdminActionBooking(bookingId: string) {
       ),
       profiles!bookings_user_id_fkey (
         email,
-        full_name
+        full_name,
+        role
       ),
       booking_approvals (
         id,
@@ -281,6 +289,7 @@ async function insertBookingEmail({
   body,
   templateName,
   templateData,
+  sendEmail = true,
 }: {
   type:
     | "booking_confirmation"
@@ -292,6 +301,7 @@ async function insertBookingEmail({
   body: string;
   templateName: string;
   templateData: Record<string, unknown>;
+  sendEmail?: boolean;
 }) {
   const owner = getBookingOwner(booking);
 
@@ -307,6 +317,10 @@ async function insertBookingEmail({
     href: `/bookings/${booking.id}`,
     relatedBookingId: booking.id,
   });
+
+  if (!sendEmail) {
+    return;
+  }
 
   const idempotencyKey =
     type === "booking_confirmation"
@@ -361,6 +375,81 @@ async function insertBookingEmail({
         result,
       });
     }
+  }
+}
+
+async function insertCompanyBookingConfirmationNotifications({
+  booking,
+  facilityName,
+  requesterEmail,
+  requesterName,
+  settings,
+}: {
+  booking: AdminBookingActionRecord;
+  facilityName: string;
+  requesterEmail: string;
+  requesterName: string | null;
+  settings: Pick<AppSettings, "emailRecipients">;
+}) {
+  const supabase = createAdminClient();
+
+  try {
+    const recipients = (await getActiveEmailRecipients(
+      supabase,
+      settings,
+      "companyBookingConfirmations",
+    )).filter((recipient) => recipient.id !== booking.user_id);
+
+    if (recipients.length === 0) {
+      return;
+    }
+
+    const departments = await getBookingDepartmentSnapshot(booking.id).catch(
+      (error) => {
+        console.error("Booking department snapshot unavailable", {
+          bookingId: booking.id,
+          error,
+        });
+        return [];
+      },
+    );
+    const { error } = await supabase.from("email_notifications").insert(
+      recipients.map((recipient) => ({
+        type: "booking_confirmation",
+        status: "queued",
+        recipient_email: recipient.email,
+        recipient_user_id: recipient.id,
+        subject: `Booking confirmed: ${booking.title}`,
+        body: "A booking has been confirmed for company scheduling awareness.",
+        template_name: "company_booking_confirmation",
+        template_data: {
+          bookingId: booking.id,
+          title: booking.title,
+          facilityName,
+          attendeeCount: booking.attendee_count ?? null,
+          startsAt: booking.starts_at,
+          endsAt: booking.ends_at,
+          status: booking.status,
+          departments,
+          requesterName,
+          requesterEmail,
+        },
+        related_booking_id: booking.id,
+        idempotency_key: `company-booking-confirmation:${booking.id}:${recipient.email}`,
+      })),
+    );
+
+    if (error && error.code !== "23505") {
+      console.error("Company booking confirmation notification insert failed", {
+        bookingId: booking.id,
+        message: error.message,
+      });
+    }
+  } catch (error) {
+    console.error("Company booking confirmation notification unavailable", {
+      bookingId: booking.id,
+      error,
+    });
   }
 }
 
@@ -419,7 +508,7 @@ export async function adminCreateBookingAction(
   const supabase = createAdminClient();
   const { data: targetProfile, error: targetError } = await supabase
     .from("profiles")
-    .select("id,email,full_name,status")
+    .select("id,email,full_name,role,status")
     .eq("id", targetUserId)
     .maybeSingle();
 
@@ -513,6 +602,7 @@ export async function adminCreateBookingAction(
       profiles: {
         email: targetProfile.email,
         full_name: targetProfile.full_name,
+        role: targetProfile.role,
       },
     };
 
@@ -531,6 +621,18 @@ export async function adminCreateBookingAction(
         endsAt: booking.ends_at,
         status: booking.status,
       },
+      sendEmail: shouldSendEmailToRole(
+        settings,
+        "bookingOwnerConfirmations",
+        targetProfile.role,
+      ),
+    });
+    await insertCompanyBookingConfirmationNotifications({
+      booking,
+      facilityName: availability.facility.name,
+      requesterEmail: targetProfile.email,
+      requesterName: targetProfile.full_name,
+      settings,
     });
     await queueDepartmentBookingNotification({
       bookingId: booking.id,

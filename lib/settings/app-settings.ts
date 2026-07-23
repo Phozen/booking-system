@@ -3,6 +3,16 @@ import {
   type CalendarVisibilityMode,
 } from "@/lib/calendar/visibility";
 
+export const emailRecipientRoles = ["employee", "admin", "super_admin"] as const;
+
+export type EmailRecipientRole = (typeof emailRecipientRoles)[number];
+
+export type EmailRecipientSettings = {
+  bookingOwnerConfirmations: EmailRecipientRole[];
+  companyBookingConfirmations: EmailRecipientRole[];
+  cateringRequests: EmailRecipientRole[];
+};
+
 export type AppSettings = {
   appName: string;
   companyName: string;
@@ -16,6 +26,7 @@ export type AppSettings = {
   bookingWindowStart: string;
   bookingWindowEnd: string;
   reminderOffsetsMinutes: number[];
+  emailRecipients: EmailRecipientSettings;
 };
 
 export type SystemSettingRow = {
@@ -36,6 +47,11 @@ export const baseDefaultAppSettings: AppSettings = {
   bookingWindowStart: "08:00",
   bookingWindowEnd: "19:00",
   reminderOffsetsMinutes: [1440, 60],
+  emailRecipients: {
+    bookingOwnerConfirmations: ["employee", "admin", "super_admin"],
+    companyBookingConfirmations: [],
+    cateringRequests: ["admin", "super_admin"],
+  },
 };
 
 export const settingKeyMap = {
@@ -51,6 +67,7 @@ export const settingKeyMap = {
   bookingWindowStart: "booking_window_start",
   bookingWindowEnd: "booking_window_end",
   reminderOffsetsMinutes: "reminder_offsets_minutes",
+  emailRecipients: "email_recipient_settings",
 } as const;
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -64,6 +81,43 @@ function isPositiveIntegerArray(value: unknown): value is number[] {
     Array.isArray(value) &&
     value.every((item) => Number.isInteger(item) && item > 0)
   );
+}
+
+function isEmailRecipientRole(value: unknown): value is EmailRecipientRole {
+  return typeof value === "string" && emailRecipientRoles.includes(value as EmailRecipientRole);
+}
+
+function getRecipientRoles(value: unknown, fallback: EmailRecipientRole[]) {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+
+  return [...new Set(value.filter(isEmailRecipientRole))];
+}
+
+export function parseEmailRecipientSettings(
+  value: unknown,
+  fallback: EmailRecipientSettings = baseDefaultAppSettings.emailRecipients,
+): EmailRecipientSettings {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return fallback;
+  }
+
+  const settings = value as Record<string, unknown>;
+  return {
+    bookingOwnerConfirmations: getRecipientRoles(
+      settings.bookingOwnerConfirmations,
+      fallback.bookingOwnerConfirmations,
+    ),
+    companyBookingConfirmations: getRecipientRoles(
+      settings.companyBookingConfirmations,
+      fallback.companyBookingConfirmations,
+    ),
+    cateringRequests: getRecipientRoles(
+      settings.cateringRequests,
+      fallback.cateringRequests,
+    ),
+  };
 }
 
 export function isBookingWindowTime(value: unknown): value is string {
@@ -108,6 +162,10 @@ export function mapSettingsRowsToAppSettings(
   const reminderOffsets = values.get(settingKeyMap.reminderOffsetsMinutes);
   const rawBookingWindowStart = values.get(settingKeyMap.bookingWindowStart);
   const rawBookingWindowEnd = values.get(settingKeyMap.bookingWindowEnd);
+  const emailRecipients = parseEmailRecipientSettings(
+    values.get(settingKeyMap.emailRecipients),
+    fallback.emailRecipients,
+  );
   const hasValidBookingWindow =
     isBookingWindowTime(rawBookingWindowStart) &&
     isBookingWindowTime(rawBookingWindowEnd) &&
@@ -163,6 +221,7 @@ export function mapSettingsRowsToAppSettings(
     reminderOffsetsMinutes: isPositiveIntegerArray(reminderOffsets)
       ? [...new Set(reminderOffsets)].sort((a, b) => b - a)
       : fallback.reminderOffsetsMinutes,
+    emailRecipients,
   };
 }
 
@@ -240,6 +299,13 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.reminderOffsetsMinutes,
       value: settings.reminderOffsetsMinutes,
       description: "Reminder offsets before a confirmed booking starts.",
+      is_public: false,
+    },
+    {
+      key: settingKeyMap.emailRecipients,
+      value: settings.emailRecipients,
+      description:
+        "Role-based recipients for booking owner confirmations, company booking confirmations, and catering requests.",
       is_public: false,
     },
   ];

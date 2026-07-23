@@ -57,6 +57,11 @@ export async function updateSystemSettingsAction(
     bookingWindowStart: parsed.data.bookingWindowStart,
     bookingWindowEnd: parsed.data.bookingWindowEnd,
     reminderOffsetsMinutes: parsed.data.reminderOffsetsMinutesText,
+    emailRecipients: {
+      bookingOwnerConfirmations: parsed.data.bookingOwnerConfirmations,
+      companyBookingConfirmations: parsed.data.companyBookingConfirmations,
+      cateringRequests: parsed.data.cateringRequests,
+    },
   };
   const rows = appSettingsToRows(newSettings).map((row) => ({
     key: row.key,
@@ -100,6 +105,7 @@ export async function updateSystemSettingsAction(
   revalidatePath("/bookings/new");
   revalidatePath("/calendar");
   revalidatePath("/admin/calendar");
+  revalidatePath("/admin/bookings");
 
   return {
     status: "success",

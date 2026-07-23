@@ -45,12 +45,14 @@ function createSupabaseMock({
   claimed = [baseClaimedEmail],
   markSentError = null,
   markFailedError = null,
+  inactiveRecipientIds = [],
 }: {
   claimed?: unknown[];
   markSentError?: { message: string } | null;
   markFailedError?: { message: string } | null;
+  inactiveRecipientIds?: string[];
 } = {}) {
-  const rpc = vi.fn(async (name: string) => {
+  const rpc = vi.fn(async (name: string, args?: { p_email_id?: string }) => {
     if (name === "claim_email_notifications") {
       return { data: claimed, error: null };
     }
@@ -61,6 +63,13 @@ function createSupabaseMock({
 
     if (name === "mark_email_notification_failed") {
       return { data: { status: "queued" }, error: markFailedError };
+    }
+
+    if (name === "cancel_email_notification_for_inactive_recipient") {
+      return {
+        data: inactiveRecipientIds.includes(args?.p_email_id ?? ""),
+        error: null,
+      };
     }
 
     return { data: null, error: { message: `Unexpected RPC ${name}` } };
@@ -169,6 +178,22 @@ describe("email queue processor", () => {
       p_error: "permanent failure",
       p_retry_at: null,
     });
+  });
+
+  it("cancels a claimed email before delivery when its recipient is disabled", async () => {
+    const supabase = createSupabaseMock({
+      inactiveRecipientIds: [baseClaimedEmail.id],
+    });
+
+    const result = await processQueuedEmailNotifications(supabase as never);
+
+    expect(result.skipped).toBe(1);
+    expect(result.sent).toBe(0);
+    expect(mocks.sendNotificationEmail).not.toHaveBeenCalled();
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      "cancel_email_notification_for_inactive_recipient",
+      { p_email_id: baseClaimedEmail.id },
+    );
   });
 
   it("continues processing a batch after one email fails", async () => {
