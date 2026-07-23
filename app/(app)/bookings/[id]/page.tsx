@@ -14,6 +14,7 @@ import {
 import type { InvitedBooking } from "@/lib/bookings/invitations/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveDepartments } from "@/lib/departments/queries";
 import { BookingDetail } from "@/components/bookings/booking-detail";
 
 export const dynamic = "force-dynamic";
@@ -78,7 +79,7 @@ export default async function BookingDetailPage({
 
   if (booking) {
     const adminSupabase = createAdminClient();
-    const [invitations, teamsInvitationStatus, teamsJoinUrl] = await Promise.all([
+    const [invitations, teamsInvitationStatus, teamsJoinUrl, departments] = await Promise.all([
       getInvitationsForBooking(adminSupabase, booking.id),
       booking.teamsMeeting
         ? getTeamsInvitationStatus(booking.id)
@@ -86,6 +87,7 @@ export default async function BookingDetailPage({
       booking.teamsMeeting
         ? getAuthorizedTeamsJoinUrl({ bookingId: booking.id, viewerUserId: user.id })
         : Promise.resolve(null),
+      getActiveDepartments(supabase),
     ]);
 
     return (
@@ -94,6 +96,7 @@ export default async function BookingDetailPage({
         invitations={invitations}
         teamsInvitationStatus={teamsInvitationStatus}
         teamsJoinUrl={teamsJoinUrl}
+        departments={departments}
         viewerMode="owner"
         justCreated={query.created === "1"}
         highlightInvitations={query.invite === "1"}

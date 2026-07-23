@@ -65,7 +65,7 @@ export function AdminBookingDetail({
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
-          Bookings
+          Back to bookings
         </Link>
       </div>
 

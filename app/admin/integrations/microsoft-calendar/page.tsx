@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
@@ -58,6 +59,15 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
         eyebrow="Super admin area"
         title="Microsoft 365 Calendar"
         description="Monitor one-way QBook calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
+        secondaryAction={
+          <Link
+            href="/admin/dashboard"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to dashboard
+          </Link>
+        }
       />
 
       <section className="grid gap-4 rounded-lg border bg-card p-4 shadow-sm shadow-primary/5 md:grid-cols-6">

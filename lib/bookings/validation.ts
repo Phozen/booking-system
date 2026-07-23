@@ -35,6 +35,8 @@ export const bookingFormSchema = z
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
+export const bookingIdSchema = z.string().uuid();
+
 export const bookingParticipantIdsSchema = z
   .array(z.string().uuid())
   .max(50, "Choose no more than 50 attendees or departments.");

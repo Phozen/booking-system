@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 import { requireAdmin } from "@/lib/auth/guards";
 import { getActiveBookingUserOptions } from "@/lib/admin/bookings/queries";
 import { getBookableFacilities } from "@/lib/bookings/queries";
@@ -6,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getActiveDepartments } from "@/lib/departments/queries";
 import { AdminCreateBookingForm } from "@/components/admin/bookings/admin-create-booking-form";
 import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +34,15 @@ export default async function NewAdminBookingPage() {
           { label: "Bookings", href: "/admin/bookings" },
           { label: "New" },
         ]}
+        secondaryAction={
+          <Link
+            href="/admin/bookings"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to bookings
+          </Link>
+        }
       />
 
       <section className="rounded-lg border bg-card p-5">

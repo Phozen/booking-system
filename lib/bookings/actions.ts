@@ -16,6 +16,7 @@ import {
 } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   bookingFormSchema,
+  bookingIdSchema,
   bookingParticipantIdsSchema,
   cancellationFormSchema,
   formDataToBookingValues,
@@ -48,6 +49,11 @@ export type BookingActionResult = {
   message: string;
   bookingId?: string;
   bookingStatus?: "pending" | "confirmed";
+};
+
+export type BookingDepartmentActionResult = {
+  status: "idle" | "error" | "success";
+  message: string;
 };
 
 type CreatedBookingRecord = {
@@ -937,4 +943,108 @@ export async function updateBookingAction(
     bookingId,
     bookingStatus: updated.status === "pending" ? "pending" : "confirmed",
   };
+}
+
+export async function updateBookingDepartmentsAction(
+  bookingId: string,
+  departmentIds: string[],
+): Promise<BookingDepartmentActionResult> {
+  const { user, profile } = await requireUser();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in to update departments.",
+    };
+  }
+
+  if (profile?.status !== "active") {
+    return {
+      status: "error",
+      message: "Your account is not active for booking changes.",
+    };
+  }
+
+  const parsedBookingId = bookingIdSchema.safeParse(bookingId);
+  const parsedDepartmentIds = bookingParticipantIdsSchema.safeParse(departmentIds);
+  if (!parsedBookingId.success || !parsedDepartmentIds.success) {
+    return {
+      status: "error",
+      message: "Choose up to 50 valid departments, then try again.",
+    };
+  }
+
+  const supabase = await createClient();
+  const existing = await getMyBookingById(supabase, user.id, parsedBookingId.data);
+  if (!existing) {
+    return { status: "error", message: "Booking could not be found." };
+  }
+
+  if (existing.status !== "pending" && existing.status !== "confirmed") {
+    return {
+      status: "error",
+      message: "This booking can no longer be edited.",
+    };
+  }
+
+  const previousDepartmentIds = existing.departments.map(
+    (department) => department.id,
+  );
+  const previousDepartmentIdSet = new Set(previousDepartmentIds);
+  const newDepartmentIds = parsedDepartmentIds.data.filter(
+    (departmentId) => !previousDepartmentIdSet.has(departmentId),
+  );
+  const { error } = await supabase.rpc("set_booking_departments", {
+    p_booking_id: parsedBookingId.data,
+    p_department_ids: parsedDepartmentIds.data,
+  });
+
+  if (error) {
+    console.error("Booking department update failed", {
+      bookingId: parsedBookingId.data,
+      code: error.code,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message: "Departments could not be updated. Please try again.",
+    };
+  }
+
+  if (existing.status === "confirmed" && newDepartmentIds.length > 0) {
+    await queueDepartmentBookingNotification({
+      bookingId: parsedBookingId.data,
+      title: existing.title,
+      facilityName: existing.facility?.name ?? "the facility",
+      startsAt: existing.startsAt,
+      endsAt: existing.endsAt,
+      kind: "confirmation",
+      departmentIds: newDepartmentIds,
+    });
+  }
+
+  await createAuditLogSafely(
+    createAdminClient(),
+    {
+      action: "update",
+      entityType: "booking",
+      entityId: parsedBookingId.data,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Updated departments for booking ${existing.title}.`,
+      oldValues: { departmentIds: previousDepartmentIds },
+      newValues: { departmentIds: parsedDepartmentIds.data },
+    },
+    { bookingId: parsedBookingId.data },
+  );
+
+  revalidatePath("/dashboard");
+  revalidatePath("/my-bookings");
+  revalidatePath(`/bookings/${parsedBookingId.data}`);
+  revalidatePath(`/bookings/${parsedBookingId.data}/edit`);
+  revalidatePath("/calendar");
+  revalidatePath("/admin/bookings");
+  revalidatePath(`/admin/bookings/${parsedBookingId.data}`);
+
+  return { status: "success", message: "Departments updated." };
 }

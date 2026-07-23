@@ -18,7 +18,7 @@ export default async function NewFacilityPage() {
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
-          Facilities
+          Back to facilities
         </Link>
       </div>
 

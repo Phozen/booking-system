@@ -33,6 +33,18 @@ const departmentManager = readFileSync(
   join(process.cwd(), "components/admin/departments/department-manager.tsx"),
   "utf8",
 );
+const bookingDetail = readFileSync(
+  join(process.cwd(), "components/bookings/booking-detail.tsx"),
+  "utf8",
+);
+const invitationList = readFileSync(
+  join(process.cwd(), "components/bookings/invitations/invitation-list.tsx"),
+  "utf8",
+);
+const bookingDepartmentManager = readFileSync(
+  join(process.cwd(), "components/bookings/booking-department-manager.tsx"),
+  "utf8",
+);
 
 const sql = migration.replace(/\s+/g, " ").toLowerCase();
 const employeeActions = bookingActions.replace(/\s+/g, " ").toLowerCase();
@@ -107,5 +119,15 @@ describe("initial attendee creation actions", () => {
 
   it("uses a submit button for department add and edit forms", () => {
     expect(departmentManager).toContain('<Button type="submit"');
+  });
+
+  it("lets booking owners manage departments alongside attendee invitations", () => {
+    expect(bookingDetail).toContain('departments={departments}');
+    expect(bookingDetail).toContain('href="#booking-participants"');
+    expect(invitationList).toContain("<InviteUserForm bookingId={bookingId} />");
+    expect(invitationList).toContain("<BookingDepartmentManager");
+    expect(bookingDepartmentManager).toContain("updateBookingDepartmentsAction");
+    expect(employeeActions).toContain("updatebookingdepartmentsaction");
+    expect(employeeActions).toContain('rpc("set_booking_departments"');
   });
 });

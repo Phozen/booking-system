@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Edit3, ExternalLink, Mail, Printer, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Edit3, ExternalLink, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -65,6 +65,7 @@ export function BookingDetail({
   highlightInvitations,
   teamsInvitationStatus,
   teamsJoinUrl,
+  departments = [],
 }: {
   booking: EmployeeBooking;
   viewerMode?: "owner" | "invitee";
@@ -74,6 +75,7 @@ export function BookingDetail({
   highlightInvitations?: boolean;
   teamsInvitationStatus?: "pending" | "sent" | "failed" | "cancelled";
   teamsJoinUrl?: string | null;
+  departments?: import("@/lib/departments/queries").Department[];
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
@@ -180,18 +182,18 @@ export function BookingDetail({
               {booking.status === "pending"
                 ? "Booking request submitted and pending approval."
                 : "Booking created."}{" "}
-              You can add more attendees from this page whenever needed.
+              You can add attendees and departments from this page whenever needed.
             </span>
             <span className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link
-                href="#invite-attendees"
+                href="#booking-participants"
                 className={buttonVariants({
                   size: "sm",
                   className: "w-full sm:w-auto",
                 })}
               >
                 <UserPlus data-icon="inline-start" />
-                Invite users
+                Manage participants
               </Link>
               <Link
                 href={`/bookings/${booking.id}`}
@@ -294,28 +296,6 @@ export function BookingDetail({
         </dl>
       </section>
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
-        <h2 className="text-lg font-semibold tracking-normal">Involved departments</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          These departments are included in the booking record and receive booking notifications.
-        </p>
-        {booking.departments.length > 0 ? (
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {booking.departments.map((department) => (
-              <li key={department.id} className="rounded-lg border bg-muted/30 p-3">
-                <p className="font-medium">{department.name}</p>
-                <p className="mt-1 flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground">
-                  <Mail className="size-4 shrink-0" aria-hidden="true" />
-                  {department.email}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">No departments were tagged for this booking.</p>
-        )}
-      </section>
-
       <CateringDetailsCard catering={booking.catering} />
 
       <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
@@ -367,6 +347,8 @@ export function BookingDetail({
           invitations={invitations}
           canManage
           highlight={highlightInvitations}
+          departments={departments}
+          selectedDepartmentIds={booking.departments.map((department) => department.id)}
         />
       ) : null}
 

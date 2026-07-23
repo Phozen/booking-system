@@ -7,7 +7,9 @@ import type {
   BookingInvitation,
   BookingInvitationStatus,
 } from "@/lib/bookings/invitations/types";
+import type { Department } from "@/lib/departments/queries";
 import { cn } from "@/lib/utils";
+import { BookingDepartmentManager } from "@/components/bookings/booking-department-manager";
 import { InviteUserForm } from "@/components/bookings/invitations/invite-user-form";
 import { RemoveInvitationButton } from "@/components/bookings/invitations/remove-invitation-button";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -32,11 +34,15 @@ export function InvitationList({
   invitations,
   canManage,
   highlight,
+  departments = [],
+  selectedDepartmentIds = [],
 }: {
   bookingId: string;
   invitations: BookingInvitation[];
   canManage?: boolean;
   highlight?: boolean;
+  departments?: Department[];
+  selectedDepartmentIds?: string[];
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | BookingInvitationStatus>("all");
@@ -71,7 +77,7 @@ export function InvitationList({
 
   return (
     <section
-      id="invite-attendees"
+      id="booking-participants"
       className={cn(
         "scroll-mt-24 grid gap-5 rounded-lg border bg-card p-5",
         highlight &&
@@ -80,16 +86,25 @@ export function InvitationList({
     >
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
-          {highlight ? "Invite attendees to this meeting?" : "Invited attendees"}
+          {highlight ? "Invite participants to this meeting?" : "Participants"}
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {canManage
-            ? "Search the staff directory, invite several people together, and track their responses."
+            ? "Invite attendees and manage the departments included in this booking."
             : "Review attendee invitations and response status for this booking."}
         </p>
       </div>
 
-      {canManage ? <InviteUserForm bookingId={bookingId} /> : null}
+      {canManage ? (
+        <div className="grid gap-5">
+          <InviteUserForm bookingId={bookingId} />
+          <BookingDepartmentManager
+            bookingId={bookingId}
+            departments={departments}
+            initialDepartmentIds={selectedDepartmentIds}
+          />
+        </div>
+      ) : null}
 
       {invitations.length > 0 ? (
         <div className="grid gap-4">
