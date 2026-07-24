@@ -79,6 +79,7 @@ export function RegisterForm({
         <Input
           id="fullName"
           autoComplete="name"
+          required
           aria-describedby={getFieldDescribedBy(
             fullNameError && "register-full-name-error",
           )}
@@ -96,6 +97,7 @@ export function RegisterForm({
           id="email"
           type="email"
           autoComplete="email"
+          required
           aria-describedby={getFieldDescribedBy(
             allowedEmailDomains.length > 0 && "register-email-helper",
             emailError && "register-email-error",
@@ -117,6 +119,7 @@ export function RegisterForm({
           id="password"
           type="password"
           autoComplete="new-password"
+          required
           aria-describedby={getFieldDescribedBy(
             "register-password-helper",
             passwordError && "register-password-error",
@@ -138,6 +141,7 @@ export function RegisterForm({
           id="confirmPassword"
           type="password"
           autoComplete="new-password"
+          required
           aria-describedby={getFieldDescribedBy(
             confirmPasswordError && "register-confirm-password-error",
           )}

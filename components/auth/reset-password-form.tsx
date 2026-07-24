@@ -58,6 +58,7 @@ export function ResetPasswordForm() {
           id="email"
           type="email"
           autoComplete="email"
+          required
           aria-describedby={getFieldDescribedBy(
             emailError && "reset-email-error",
           )}

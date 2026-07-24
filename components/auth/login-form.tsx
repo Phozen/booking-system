@@ -61,6 +61,7 @@ export function LoginForm({ initialMessage }: LoginFormProps) {
           id="email"
           type="email"
           autoComplete="email"
+          required
           aria-describedby={getFieldDescribedBy(
             emailError && "login-email-error",
           )}
@@ -76,6 +77,7 @@ export function LoginForm({ initialMessage }: LoginFormProps) {
           id="password"
           type="password"
           autoComplete="current-password"
+          required
           aria-describedby={getFieldDescribedBy(
             passwordError && "login-password-error",
           )}

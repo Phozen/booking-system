@@ -15,7 +15,7 @@ export default function ErrorPage({
     <main className="mx-auto flex min-h-[60svh] w-full max-w-3xl items-center px-4 py-10 sm:px-6">
       <ErrorState
         className="w-full"
-        title="We couldn’t load this page"
+        title="We couldn't load this page"
         description="Your changes were not submitted. Check your connection, then try loading the page again."
         action={
           <Button type="button" onClick={unstable_retry}>

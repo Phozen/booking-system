@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 
 export function LoadingState({
-  label = "Loading room booking data",
+  label = "Loading",
   className,
 }: {
   label?: string;

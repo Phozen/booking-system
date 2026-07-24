@@ -15,6 +15,8 @@ export function RouteLoading({
         "animate-in fade-in zoom-in-95 duration-500 ease-out fill-mode-both",
         className,
       )}
+      role="status"
+      aria-live="polite"
     >
       <div className="flex flex-col items-center gap-4 text-primary">
         <Loader2 className="size-10 animate-spin" aria-hidden="true" />

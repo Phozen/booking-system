@@ -16,7 +16,11 @@ export function FormFieldError({
   }
 
   return (
-    <p id={id} className={cn("text-sm font-medium text-destructive", className)}>
+    <p
+      id={id}
+      aria-live="polite"
+      className={cn("text-sm font-medium text-destructive", className)}
+    >
       {children}
     </p>
   );

@@ -140,7 +140,14 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         </Alert>
       ) : null}
       <OverlayLoader show={isPending} label="Saving facility..." />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <fieldset
+        disabled={isPending}
+        className="m-0 grid gap-5 border-0 p-0"
+      >
+        <legend className="sr-only">
+          {facility ? "Edit facility" : "Create facility"}
+        </legend>
+        <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="code">Code</Label>
           <Input
@@ -310,7 +317,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
 
       </div>
 
-      <div className="grid gap-2">
+        <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
@@ -332,7 +339,7 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         </FormFieldError>
       </div>
 
-      <div className="grid gap-3 border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+        <div className="grid gap-3 border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button
           type="button"
           variant="outline"
@@ -345,7 +352,8 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
             {facility ? "Save facility" : "Create facility"}
           </PendingButtonContent>
         </Button>
-      </div>
+        </div>
+      </fieldset>
     </form>
   );
 }
