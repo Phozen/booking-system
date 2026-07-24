@@ -54,13 +54,14 @@ export function ApprovedUserCreateForm() {
             id="approved-email"
             name="email"
             type="email"
-            autoComplete="off"
-            required
+          autoComplete="off"
+          required
+          disabled={pending}
           />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="approved-role">Role</Label>
-          <Select id="approved-role" name="role" defaultValue="employee">
+          <Select id="approved-role" name="role" defaultValue="employee" disabled={pending}>
             {editableUserRoleOptions.map((role) => (
               <option key={role} value={role}>
                 {formatUserRole(role)}
@@ -70,7 +71,7 @@ export function ApprovedUserCreateForm() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="approved-status">Status</Label>
-          <Select id="approved-status" name="status" defaultValue="active">
+          <Select id="approved-status" name="status" defaultValue="active" disabled={pending}>
             {editableUserStatusOptions.map((status) => (
               <option key={status} value={status}>
                 {formatUserStatus(status)}

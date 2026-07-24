@@ -3,9 +3,10 @@ import { cn } from "@/lib/utils";
 
 export function RouteLoading({
   className,
+  label = "Loading...",
 }: {
   className?: string;
-  label?: string; // Kept for compatibility but unused
+  label?: string;
   variant?: string; // Kept for compatibility but unused
 }) {
   return (
@@ -20,7 +21,9 @@ export function RouteLoading({
     >
       <div className="flex flex-col items-center gap-4 text-primary">
         <Loader2 className="size-10 animate-spin" aria-hidden="true" />
-        <p className="text-lg font-semibold animate-pulse text-foreground">Please wait...</p>
+        <p className="text-lg font-semibold animate-pulse text-foreground">
+          {label}
+        </p>
       </div>
     </div>
   );

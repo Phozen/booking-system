@@ -16,7 +16,7 @@ export default function ErrorPage({
       <ErrorState
         className="w-full"
         title="We couldn't load this page"
-        description="Your changes were not submitted. Check your connection, then try loading the page again."
+        description="Check your connection, then try again."
         action={
           <Button type="button" onClick={unstable_retry}>
             <RotateCcw data-icon="inline-start" aria-hidden="true" />

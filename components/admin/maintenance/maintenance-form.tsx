@@ -130,6 +130,8 @@ export function MaintenanceForm({
         </Alert>
       ) : null}
 
+      <fieldset disabled={isBusy} className="m-0 grid gap-6 border-0 p-0">
+        <legend className="sr-only">Maintenance closure details</legend>
       <section className="grid gap-4 rounded-lg border bg-background p-4">
         <div>
           <h2 className="font-semibold tracking-normal">Basic details</h2>
@@ -267,6 +269,8 @@ export function MaintenanceForm({
         />
       </div>
       </section>
+
+      </fieldset>
 
       <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         {canChangeStatus ? (

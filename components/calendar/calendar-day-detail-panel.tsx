@@ -5,6 +5,10 @@ import type { CalendarDay } from "@/lib/calendar/date-range";
 import type { CalendarBooking } from "@/lib/calendar/group-bookings";
 import { formatBookingWindow } from "@/lib/bookings/format";
 import { StatusBadge } from "@/components/shared/status-badge";
+import {
+  getBookingStatusSurfaceClassName,
+  getBookingStatusToken,
+} from "@/components/shared/booking-status-tokens";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -116,9 +120,7 @@ function TimelineBlock({
     <div
       className={cn(
         "absolute overflow-hidden rounded-md border px-2 py-1.5 text-xs leading-tight shadow-sm",
-        block.booking.status === "confirmed"
-          ? "border-sky-300 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100"
-          : "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100",
+        getBookingStatusSurfaceClassName(block.booking.status),
       )}
       style={{
         top: `${top}%`,
@@ -131,6 +133,9 @@ function TimelineBlock({
       <p className="truncate opacity-80">
         {formatBookingWindow(block.booking.startsAt, block.booking.endsAt)}
       </p>
+      <span className="sr-only">
+        {getBookingStatusToken(block.booking.status).label}
+      </span>
     </div>
   );
 }

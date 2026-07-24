@@ -135,6 +135,8 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </Alert>
       ) : null}
 
+      <fieldset disabled={isPending} className="m-0 grid gap-6 border-0 p-0">
+        <legend className="sr-only">System settings</legend>
       <section className="grid gap-5 rounded-lg border bg-card p-5">
         <div>
           <h2 className="font-semibold tracking-normal">Identity</h2>
@@ -476,6 +478,8 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
           ))}
         </div>
       </section>
+
+      </fieldset>
 
       <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button type="submit" disabled={isPending}>

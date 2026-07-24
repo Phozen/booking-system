@@ -60,6 +60,7 @@ export function FacilityPhotoUploadForm({
             )}
             aria-invalid={hasError}
             required
+            disabled={isPending}
           />
           <FormFieldHelper id="facility-photo-upload-helper">
             Upload JPEG, PNG, or WebP images up to {maxSizeMb} MB.
@@ -77,6 +78,7 @@ export function FacilityPhotoUploadForm({
             maxLength={160}
             placeholder="Example: Boardroom with screen and table"
             aria-describedby="facility-photo-alt-text-helper"
+            disabled={isPending}
           />
           <FormFieldHelper id="facility-photo-alt-text-helper">
             Optional but recommended. Describe what the image shows.

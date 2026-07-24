@@ -4,6 +4,7 @@ import {
   formatBookingWindow,
 } from "@/lib/bookings/format";
 import type { CancelledBookingRow } from "@/lib/admin/reports/types";
+import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 
 export function CancelledBookingsTable({
   rows,
@@ -11,18 +12,11 @@ export function CancelledBookingsTable({
   rows: CancelledBookingRow[];
 }) {
   return (
-    <section className="overflow-hidden rounded-lg border bg-card">
-      <div className="border-b p-4">
-        <h2 className="font-semibold tracking-normal">Cancelled bookings</h2>
-        <p className="text-sm text-muted-foreground">
-          Cancellation reasons are included when users or admins provided them.
-        </p>
-      </div>
-      <p className="px-4 pt-3 text-xs text-muted-foreground md:hidden">
-        Scroll horizontally to see all columns.
-      </p>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+    <AdminTableShell
+      title="Cancelled bookings"
+      description="Cancellation reasons are included when users or admins provided them."
+    >
+      <table className="w-full min-w-[900px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
@@ -67,8 +61,7 @@ export function CancelledBookingsTable({
               </tr>
             )}
           </tbody>
-        </table>
-      </div>
-    </section>
+      </table>
+    </AdminTableShell>
   );
 }

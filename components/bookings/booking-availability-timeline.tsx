@@ -7,6 +7,7 @@ import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-tim
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getBookingStatusSurfaceClassName } from "@/components/shared/booking-status-tokens";
 import {
   timeStringToMinutes,
 } from "@/lib/settings/app-settings";
@@ -79,11 +80,11 @@ function overlaps(start: number, end: number, blocks: BusyBlock[]) {
 function blockColor(type: BusyBlock["type"]) {
   switch (type) {
     case "confirmed":
-      return "border-red-600 bg-red-200 text-red-950 shadow-red-900/20 dark:border-red-500 dark:bg-red-950/80 dark:text-red-50";
+      return getBookingStatusSurfaceClassName("confirmed");
     case "pending":
-      return "border-amber-600 bg-amber-200 text-amber-950 shadow-amber-900/20 dark:border-amber-500 dark:bg-amber-950/80 dark:text-amber-50";
+      return getBookingStatusSurfaceClassName("pending");
     case "blocked":
-      return "border-slate-600 bg-slate-300 text-slate-950 shadow-slate-900/20 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-50";
+      return "border-rose-600 bg-rose-200 text-rose-950 shadow-rose-900/20 dark:border-rose-500 dark:bg-rose-950/80 dark:text-rose-50";
     case "maintenance":
       return "border-purple-600 bg-purple-200 text-purple-950 shadow-purple-900/20 dark:border-purple-500 dark:bg-purple-950/80 dark:text-purple-50";
   }

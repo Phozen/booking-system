@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { bookingStatusTokens } from "@/components/shared/booking-status-tokens";
 
 export type StatusBadgeKind =
   | "booking"
@@ -46,45 +47,20 @@ const statusDots = {
   zinc: "bg-zinc-500",
 } as const;
 
+const bookingStatusDefinitions = Object.fromEntries(
+  Object.entries(bookingStatusTokens).map(([status, definition]) => [
+    status,
+    {
+      label: definition.label,
+      description: definition.description,
+      className: statusClasses[definition.tone],
+      dotClassName: statusDots[definition.tone],
+    },
+  ]),
+) as Record<string, StatusDefinition>;
+
 const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
-  booking: {
-    pending: {
-      label: "Pending Approval",
-      description: "Waiting for admin review.",
-      className: statusClasses.amber,
-      dotClassName: statusDots.amber,
-    },
-    confirmed: {
-      label: "Confirmed",
-      description: "Booking is confirmed.",
-      className: statusClasses.emerald,
-      dotClassName: statusDots.emerald,
-    },
-    rejected: {
-      label: "Rejected",
-      description: "Booking request was rejected.",
-      className: statusClasses.rose,
-      dotClassName: statusDots.rose,
-    },
-    cancelled: {
-      label: "Cancelled",
-      description: "Booking was cancelled.",
-      className: statusClasses.slate,
-      dotClassName: statusDots.slate,
-    },
-    completed: {
-      label: "Completed",
-      description: "Booking has finished.",
-      className: statusClasses.emerald,
-      dotClassName: statusDots.emerald,
-    },
-    expired: {
-      label: "Expired",
-      description: "Booking request expired.",
-      className: statusClasses.zinc,
-      dotClassName: statusDots.zinc,
-    },
-  },
+  booking: bookingStatusDefinitions,
   facility: {
     active: {
       label: "Active",

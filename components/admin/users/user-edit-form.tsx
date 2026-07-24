@@ -214,6 +214,8 @@ export function UserEditForm({
         </Alert>
       ) : null}
 
+      <fieldset disabled={isPending} className="m-0 grid gap-6 border-0 p-0">
+        <legend className="sr-only">User profile and access controls</legend>
       <section className="grid gap-4">
         <div>
           <h3 className="text-sm font-semibold tracking-normal">Profile fields</h3>
@@ -344,6 +346,8 @@ export function UserEditForm({
           </div>
         </div>
       </section>
+
+      </fieldset>
 
       <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <ConfirmDialog

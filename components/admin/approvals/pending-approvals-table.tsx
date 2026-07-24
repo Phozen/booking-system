@@ -15,6 +15,7 @@ import {
   formatCateringType,
 } from "@/lib/bookings/catering/format";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
+import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
@@ -62,7 +63,27 @@ export function PendingApprovalsTable({
   );
 
   return (
-    <AdminTableShell
+    <div className="grid gap-5">
+      {departments.length > 0 ? (
+        <AdminFilterBar>
+          <div className="grid max-w-sm gap-2">
+            <Label htmlFor="approval-department-filter">Department</Label>
+            <Select
+              id="approval-department-filter"
+              value={departmentId}
+              onChange={(event) => setDepartmentId(event.target.value)}
+            >
+              <option value="all">All departments</option>
+              {departments.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </AdminFilterBar>
+      ) : null}
+      <AdminTableShell
       title="Approval queue"
       description={`${visibleBookings.length} request${visibleBookings.length === 1 ? "" : "s"} waiting for review`}
       mobileCards={
@@ -129,26 +150,7 @@ export function PendingApprovalsTable({
           />
         )
       }
-    >
-      {departments.length > 0 ? (
-        <div className="border-b bg-muted/20 px-4 py-3">
-          <div className="grid max-w-sm gap-2">
-            <Label htmlFor="approval-department-filter">Department</Label>
-            <Select
-              id="approval-department-filter"
-              value={departmentId}
-              onChange={(event) => setDepartmentId(event.target.value)}
-            >
-              <option value="all">All departments</option>
-              {departments.map((department) => (
-                <option key={department.id} value={department.id}>
-                  {department.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </div>
-      ) : null}
+      >
       <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
@@ -232,6 +234,7 @@ export function PendingApprovalsTable({
             )}
           </tbody>
       </table>
-    </AdminTableShell>
+      </AdminTableShell>
+    </div>
   );
 }

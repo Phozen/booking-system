@@ -11,10 +11,11 @@ export default function NotFound() {
           Page not found
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-normal sm:text-4xl">
-          This page isn’t available
+          This page isn&apos;t available
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-          The link may be outdated, or you may not have access to this record. No changes were made.
+          The link may be outdated, or you may not have access to this record.
+          No changes were made.
         </p>
         <div className="mt-6 flex flex-col-reverse justify-center gap-2 sm:flex-row">
           <Link href="/" className={buttonVariants({ variant: "outline" })}>
