@@ -43,7 +43,6 @@ export default async function AdminProfilePage() {
       <PageHeader
         eyebrow="Admin account"
         title="Your profile"
-        description="View your admin account details and update safe contact fields used across the booking system."
         breadcrumbs={[
           { label: "Admin dashboard", href: "/admin/dashboard" },
           { label: "Profile" },

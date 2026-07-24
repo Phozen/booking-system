@@ -24,7 +24,6 @@ export default async function AdminUnavailabilityPage() {
       <PageHeader
         eyebrow="Admin area"
         title="Facility unavailability"
-        description="Manage every period that prevents bookings in one place. Use a general closure for events or restrictions, and maintenance when work needs a trackable status."
         primaryAction={
           <Link href="/admin/unavailability/new" className={buttonVariants({ size: "sm" })}>
             <PlusCircle data-icon="inline-start" />

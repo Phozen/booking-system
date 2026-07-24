@@ -58,7 +58,6 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
       <PageHeader
         eyebrow="Super admin area"
         title="Microsoft 365 Calendar"
-        description="Monitor one-way QBook calendar sync through Microsoft Graph or the temporary n8n webhook provider. Secrets stay in environment variables and are never shown here."
         secondaryAction={
           <Link
             href="/admin/dashboard"
@@ -177,7 +176,6 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
 
       <AdminTableShell
         title="Sync records"
-        description="Latest calendar sync attempts and outcomes"
         mobileCards={
           records.length > 0 ? (
             records.map((record) => (
@@ -251,7 +249,6 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
             <EmptyState
               className="bg-transparent"
               title="No calendar sync records yet"
-              description="Confirmed and cancelled bookings will create sync records when calendar sync is enabled or attempted."
             />
           )
         }
@@ -328,7 +325,6 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No calendar sync records yet"
-                    description="Confirmed and cancelled bookings will create sync records when calendar sync is enabled or attempted."
                   />
                 </td>
               </tr>

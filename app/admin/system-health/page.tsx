@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 type HealthCardProps = {
   title: string;
   status: "ok" | "warning";
-  description: string;
+  description?: string;
   meta?: string;
   icon: ReactNode;
 };
@@ -33,7 +33,9 @@ function HealthCard({ title, status, description, meta, icon }: HealthCardProps)
         </div>
         <div className="min-w-0">
           <h2 className="font-semibold tracking-normal">{title}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          {description ? (
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          ) : null}
           {meta ? (
             <p className="mt-3 break-words rounded-md bg-muted/60 px-3 py-2 text-xs font-medium text-muted-foreground">
               {meta}
@@ -84,7 +86,6 @@ export default async function SystemHealthPage() {
       <PageHeader
         eyebrow="Super Admin"
         title="System health"
-        description="Review operational readiness without exposing provider secrets, tokens, or private keys."
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
           { label: "System health" },
@@ -95,7 +96,6 @@ export default async function SystemHealthPage() {
         <HealthCard
           title="Application configuration"
           status={process.env.NEXT_PUBLIC_SUPABASE_URL ? "ok" : "warning"}
-          description="Core public Supabase configuration is checked by key presence only."
           meta={
             process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Supabase URL is present. Secrets are intentionally hidden."
@@ -113,7 +113,6 @@ export default async function SystemHealthPage() {
               ? "warning"
               : "ok"
           }
-          description="SMTP and Resend are environment-driven. Secret values are never displayed here."
           meta={
             emailProvider === "none"
               ? "EMAIL_PROVIDER is none or blank."

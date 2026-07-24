@@ -16,7 +16,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
   return (
     <AdminTableShell
       title="Facilities"
-      description={`${facilities.length} configured facility records`}
       actions={
         <Link
           href="/admin/facilities/new"
@@ -61,7 +60,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
           <EmptyState
             className="bg-transparent"
             title="No facilities found"
-            description="Create the first facility record to make it available for employees when active."
           />
         )
       }
@@ -118,7 +116,6 @@ export function FacilitiesTable({ facilities }: { facilities: Facility[] }) {
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No facilities found"
-                    description="Create the first facility record to make it available for employees when active."
                   />
                 </td>
               </tr>

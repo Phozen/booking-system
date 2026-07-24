@@ -145,7 +145,6 @@ export function EmailNotificationsTable({
 
       <AdminTableShell
         title="Notification records"
-        description="Latest queued, sent, and failed email notifications"
         mobileCards={
           notifications.length > 0 ? (
             notifications.map((notification) => (
@@ -215,7 +214,6 @@ export function EmailNotificationsTable({
             <EmptyState
               className="bg-transparent"
               title="No email notifications found"
-              description="Booking actions will create queued notification records when email events are needed."
             />
           )
         }
@@ -307,7 +305,6 @@ export function EmailNotificationsTable({
                     <EmptyState
                       className="border-0 bg-transparent py-4"
                       title="No email notifications found"
-                      description="Booking actions will create queued notification records when email events are needed."
                     />
                   </td>
                 </tr>

@@ -55,7 +55,6 @@ export default async function AdminBookingsPage({
       <PageHeader
         eyebrow="Admin bookings"
         title="Booking management"
-        description="Filter room bookings by status or facility, then open a record to approve, cancel, or inspect usage."
         primaryAction={
           <Link
             href="/admin/bookings/new"

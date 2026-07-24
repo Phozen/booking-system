@@ -9,7 +9,6 @@ export function UserBookingSummaryTable({
   return (
     <AdminTableShell
       title="User booking summary"
-      description="Most active users for the selected period."
     >
       <table className="w-full min-w-[760px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">

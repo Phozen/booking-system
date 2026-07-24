@@ -95,14 +95,12 @@ export function UnavailabilityTable({
   ) : (
     <EmptyState
       title="No unavailable time"
-      description="Add a closure or maintenance window when facilities should not be bookable."
     />
   );
 
   return (
     <AdminTableShell
       title="Unavailable time"
-      description={`${records.length} records across closures and maintenance`}
       mobileCards={mobileCards}
     >
       <table className="w-full min-w-[1080px] border-collapse text-left text-sm">

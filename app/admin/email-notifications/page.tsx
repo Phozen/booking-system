@@ -16,7 +16,6 @@ export default async function AdminEmailNotificationsPage() {
       <PageHeader
         eyebrow="Admin area"
         title="Email notifications"
-        description="Review queued booking emails, manually process due notifications, and retry failed sends after provider configuration is fixed."
       />
 
       <EmailNotificationsTable notifications={notifications} />

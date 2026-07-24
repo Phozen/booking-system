@@ -38,7 +38,6 @@ export function ReportFilters({
   return (
     <AdminFilterBar
       title="Report filters"
-      description="Apply filters before reviewing previews or exporting CSV files."
     >
       <form className="grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto_auto] lg:items-end [&>*]:min-w-0">
         <div className="grid gap-2">

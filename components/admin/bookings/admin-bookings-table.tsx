@@ -100,7 +100,6 @@ export function AdminBookingsTable({
 
       <AdminTableShell
         title="Bookings"
-        description={`${bookings.length} room booking records`}
         mobileCards={
           bookings.length > 0 ? (
             bookings.map((booking) => (
@@ -167,11 +166,6 @@ export function AdminBookingsTable({
             <EmptyState
               className="bg-transparent"
               title="No bookings found"
-              description={
-                hasActiveFilters
-                  ? "No bookings match these filters. Clear filters or adjust the selection."
-                  : "No booking records are available yet."
-              }
             />
           )
         }
@@ -246,11 +240,6 @@ export function AdminBookingsTable({
                       <EmptyState
                         className="border-0 bg-transparent py-4"
                         title="No bookings found"
-                        description={
-                          hasActiveFilters
-                            ? "No bookings match these filters. Clear filters or adjust the selection."
-                            : "No booking records are available yet."
-                        }
                       />
                     </td>
                 </tr>

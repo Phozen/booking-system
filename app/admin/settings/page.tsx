@@ -23,7 +23,6 @@ export default async function AdminSettingsPage() {
       <PageHeader
         eyebrow="Super admin area"
         title="System settings"
-        description="Configure Microsoft access domains, booking behavior, email recipients, app identity, timezone, and reminder defaults. Secrets and provider API keys stay in environment variables, not system settings."
       />
 
       <SettingsForm settings={settings} />
@@ -31,9 +30,6 @@ export default async function AdminSettingsPage() {
       <section className="overflow-hidden rounded-lg border bg-card">
         <div className="border-b p-4">
           <h2 className="font-semibold tracking-normal">Stored setting rows</h2>
-          <p className="text-sm text-muted-foreground">
-            Read-only reference for current database-backed settings.
-          </p>
         </div>
         <div className="grid gap-3 p-3 md:hidden">
           {rows.map((row) => (

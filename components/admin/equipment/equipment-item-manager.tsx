@@ -44,9 +44,6 @@ function EquipmentEditForm({ item }: { item: EquipmentItem }) {
       />
       <div>
         <h4 className="font-medium">Edit details</h4>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Changes appear anywhere this equipment is assigned to a facility.
-        </p>
       </div>
       {state.status !== "idle" ? (
         <Alert variant={state.status === "error" ? "destructive" : "success"}>

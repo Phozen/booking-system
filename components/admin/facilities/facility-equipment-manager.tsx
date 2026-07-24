@@ -39,10 +39,6 @@ export function FacilityEquipmentManager({
         <h2 className="text-lg font-semibold tracking-normal">
           Facility equipment
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Select equipment available in this facility and set quantities shown to
-          employees.
-        </p>
       </div>
 
       <form action={formAction} className="mt-5 grid gap-4">

@@ -14,7 +14,6 @@ export function BookingHistoryTable({ rows }: { rows: BookingHistoryRow[] }) {
   return (
     <AdminTableShell
       title="Booking history"
-      description={`${rows.length} matching bookings`}
     >
       <table className="w-full min-w-[960px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">

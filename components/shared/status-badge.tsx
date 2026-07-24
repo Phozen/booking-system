@@ -9,6 +9,7 @@ export type StatusBadgeKind =
   | "email"
   | "calendar-sync"
   | "blocked-period"
+  | "department"
   | "user"
   | "user-role"
   | "invitation";
@@ -205,6 +206,20 @@ const statusMaps: Record<StatusBadgeKind, Record<string, StatusDefinition>> = {
       dotClassName: statusDots.slate,
     },
   },
+  department: {
+    active: {
+      label: "Active",
+      description: "Department can be selected for new bookings.",
+      className: statusClasses.emerald,
+      dotClassName: statusDots.emerald,
+    },
+    inactive: {
+      label: "Inactive",
+      description: "Department remains on historical bookings but cannot be selected for new ones.",
+      className: statusClasses.slate,
+      dotClassName: statusDots.slate,
+    },
+  },
   user: {
     active: {
       label: "Active",
@@ -275,6 +290,7 @@ const kindLabels: Record<StatusBadgeKind, string> = {
   email: "Email",
   "calendar-sync": "Calendar sync",
   "blocked-period": "Blocked period",
+  department: "Department",
   user: "User",
   "user-role": "User role",
   invitation: "Invitation",

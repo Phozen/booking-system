@@ -9,6 +9,8 @@ import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
+import { UserFilters } from "@/components/admin/users/user-filters";
+import type { UserFilters as UserFilterValues } from "@/lib/admin/users/validation";
 
 function formatDateTime(value: string | null) {
   return value ? formatBookingDateTime(value) : "Not recorded";
@@ -20,19 +22,15 @@ function displayName(user: AdminUserProfile) {
 
 export function UsersTable({
   users,
-  filtersActive,
+  filters,
 }: {
   users: AdminUserProfile[];
-  filtersActive: boolean;
+  filters: UserFilterValues;
 }) {
-  const emptyDescription = filtersActive
-    ? "No users match the selected search or filters. Clear filters and try again."
-    : "No individual access records yet. Employees from the authorized company Microsoft domain can still sign in.";
-
   return (
     <AdminTableShell
       title="Users"
-      description={`${users.length} individual role and access records`}
+      filters={<UserFilters filters={filters} />}
       mobileCards={
         users.length > 0 ? (
           users.map((user) => (
@@ -65,11 +63,7 @@ export function UsersTable({
             />
           ))
         ) : (
-          <EmptyState
-            className="bg-transparent"
-            title="No users found"
-            description={emptyDescription}
-          />
+          <EmptyState className="bg-transparent" title="No users found" />
         )
       }
     >
@@ -134,11 +128,7 @@ export function UsersTable({
           ) : (
             <tr>
               <td className="px-4 py-8" colSpan={9}>
-                <EmptyState
-                  className="border-0 bg-transparent py-4"
-                  title="No users found"
-                  description={emptyDescription}
-                />
+                <EmptyState className="border-0 bg-transparent py-4" title="No users found" />
               </td>
             </tr>
           )}

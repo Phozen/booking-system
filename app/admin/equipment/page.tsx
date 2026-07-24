@@ -15,7 +15,6 @@ export default async function AdminEquipmentPage() {
       <PageHeader
         eyebrow="Admin area"
         title="Equipment management"
-        description="Maintain the equipment library used by facility pages and facility assignment controls."
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
           { label: "Equipment" },

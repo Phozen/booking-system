@@ -16,11 +16,6 @@ export function FacilityPhotoManager({ facility }: { facility: Facility }) {
           <h2 className="mt-1 text-lg font-semibold tracking-normal">
             Manage employee-facing photos
           </h2>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Photos are stored in the private Supabase Storage bucket and shown
-            to active users with signed URLs. The primary photo appears first on
-            employee facility pages.
-          </p>
         </div>
         <div className="rounded-lg border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
           {facility.photos.length} {facility.photos.length === 1 ? "photo" : "photos"}

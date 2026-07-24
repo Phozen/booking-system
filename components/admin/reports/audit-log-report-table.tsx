@@ -6,7 +6,6 @@ export function AuditLogReportTable({ rows }: { rows: AuditLogReportRow[] }) {
   return (
     <AdminTableShell
       title="Audit logs"
-      description="Recent audit activity for the selected period."
     >
       <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">

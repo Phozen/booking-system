@@ -6,6 +6,7 @@ export function AdminTableShell({
   title,
   description,
   actions,
+  filters,
   children,
   mobileCards,
   className,
@@ -13,6 +14,7 @@ export function AdminTableShell({
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
+  filters?: ReactNode;
   children: ReactNode;
   mobileCards?: ReactNode;
   className?: string;
@@ -37,6 +39,8 @@ export function AdminTableShell({
           </div>
         ) : null}
       </div>
+
+      {filters ? <div className="border-b border-border/75 p-4">{filters}</div> : null}
 
       {mobileCards ? (
         <div className="grid gap-3 p-3 md:hidden">{mobileCards}</div>

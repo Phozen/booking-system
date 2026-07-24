@@ -103,9 +103,6 @@ function JsonPanel({
     <section className="rounded-lg border bg-card">
       <div className="border-b p-4">
         <h2 className="font-semibold tracking-normal">{title}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Read-only JSON snapshot captured with this audit event.
-        </p>
       </div>
       <div className="max-w-full overflow-x-auto">
         <pre className="max-h-[420px] min-w-0 whitespace-pre-wrap break-words p-4 text-xs leading-5 text-muted-foreground">
@@ -191,11 +188,6 @@ function DetailItem({
 export function AuditLogDetail({ auditLog }: { auditLog: AuditLog }) {
   return (
     <div className="grid gap-6">
-      <section className="rounded-lg border bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">
-        This page is for review only. Audit logs cannot be edited or deleted
-        from the application.
-      </section>
-
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <DetailItem
           label="Created"

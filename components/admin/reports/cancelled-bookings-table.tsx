@@ -14,7 +14,6 @@ export function CancelledBookingsTable({
   return (
     <AdminTableShell
       title="Cancelled bookings"
-      description="Cancellation reasons are included when users or admins provided them."
     >
       <table className="w-full min-w-[900px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">

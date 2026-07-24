@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 
-import type { AdminDepartment } from "@/lib/admin/departments/queries";
 import { saveDepartmentAction, type DepartmentActionState } from "@/lib/departments/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -12,14 +11,13 @@ import { PendingButtonContent } from "@/components/shared/pending-button-content
 
 const initialState: DepartmentActionState = { status: "idle", message: "" };
 
-export function DepartmentManager({ department }: { department: AdminDepartment }) {
+export function DepartmentCreateForm() {
   const [state, action, pending] = useActionState(saveDepartmentAction, initialState);
 
   return (
-    <form action={action} className="grid gap-6 rounded-lg border border-border/70 bg-card p-5 shadow-sm">
-      <input type="hidden" name="id" value={department.id} />
+    <form action={action} className="grid gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm">
       <div>
-        <h2 className="font-semibold tracking-normal">Edit department</h2>
+        <h2 className="font-semibold tracking-normal">Add department</h2>
       </div>
 
       {state.status !== "idle" ? (
@@ -28,25 +26,22 @@ export function DepartmentManager({ department }: { department: AdminDepartment 
         </Alert>
       ) : null}
 
-      <fieldset disabled={pending} className="m-0 grid gap-4 border-0 p-0 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.7fr)_auto] md:items-end">
         <div className="grid gap-2">
           <Label htmlFor="department-name">Department</Label>
-          <Input id="department-name" name="name" defaultValue={department.name} required />
+          <Input id="department-name" name="name" required disabled={pending} />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="department-email">Mailbox</Label>
-          <Input id="department-email" name="email" type="email" defaultValue={department.email} required />
+          <Input id="department-email" name="email" type="email" required disabled={pending} />
         </div>
-        <label className="flex items-center gap-2 text-sm md:col-span-2">
-          <input name="isActive" type="checkbox" defaultChecked={department.isActive} />
-          Active for new bookings
+        <label className="flex h-10 items-center gap-2 text-sm">
+          <input name="isActive" type="checkbox" defaultChecked disabled={pending} />
+          Active
         </label>
-      </fieldset>
-
-      <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
         <Button type="submit" disabled={pending}>
-          <PendingButtonContent pending={pending} pendingLabel="Saving...">
-            Save department
+          <PendingButtonContent pending={pending} pendingLabel="Adding...">
+            Add department
           </PendingButtonContent>
         </Button>
       </div>

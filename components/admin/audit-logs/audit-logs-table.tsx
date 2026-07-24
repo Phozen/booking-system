@@ -49,7 +49,6 @@ export function AuditLogsTable({
   return (
     <AdminTableShell
       title="Audit activity"
-      description={`${result.totalCount} log records, page ${result.page} of ${result.pageCount}`}
       actions={
         <>
           <Link
@@ -121,7 +120,6 @@ export function AuditLogsTable({
           <EmptyState
             className="bg-transparent"
             title="No audit logs found"
-            description="No audit activity matches the selected filters."
           />
         )
       }
@@ -210,7 +208,6 @@ export function AuditLogsTable({
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No audit logs found"
-                    description="No audit activity matches the selected filters."
                   />
                 </td>
               </tr>

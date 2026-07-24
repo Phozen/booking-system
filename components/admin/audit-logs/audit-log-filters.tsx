@@ -141,10 +141,6 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
           <Download data-icon="inline-start" />
           Export audit CSV
         </Link>
-        <p className="text-xs text-muted-foreground">
-          CSV export reuses the report export route and applies the selected
-          date range.
-        </p>
       </div>
     </AdminFilterBar>
   );

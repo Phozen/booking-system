@@ -85,7 +85,6 @@ export function PendingApprovalsTable({
       ) : null}
       <AdminTableShell
       title="Approval queue"
-      description={`${visibleBookings.length} request${visibleBookings.length === 1 ? "" : "s"} waiting for review`}
       mobileCards={
         visibleBookings.length > 0 ? (
           visibleBookings.map((booking) => (
@@ -146,7 +145,6 @@ export function PendingApprovalsTable({
           <EmptyState
             className="bg-transparent"
             title="No pending approvals"
-            description="New room requests that need approval will appear here."
           />
         )
       }
@@ -227,7 +225,6 @@ export function PendingApprovalsTable({
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No pending approvals"
-                    description="New room requests that need approval will appear here."
                   />
                 </td>
               </tr>

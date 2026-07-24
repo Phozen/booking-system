@@ -45,7 +45,6 @@ export default async function AdminDashboardPage() {
       <PageHeader
         eyebrow="Admin operations"
         title="Room booking control"
-        description={`Manage booking requests, room availability, approvals, and queue follow-up for ${user.email}.`}
       />
 
       <section className="grid gap-3 md:grid-cols-3">

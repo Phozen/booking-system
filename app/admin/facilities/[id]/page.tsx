@@ -61,7 +61,6 @@ export default async function EditFacilityPage({
       <PageHeader
         eyebrow="Admin area"
         title={`Edit ${facility.name}`}
-        description={`${facility.code} - Manage facility details, booking behavior, and employee-facing photos.`}
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
           { label: "Facilities", href: "/admin/facilities" },

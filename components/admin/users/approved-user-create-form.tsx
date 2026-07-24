@@ -34,11 +34,6 @@ export function ApprovedUserCreateForm() {
     >
       <div>
         <h2 className="font-semibold tracking-normal">Add individual access record</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Employees from the authorized company Microsoft domain can sign in
-          automatically. Add an exact email here to assign a role or suspend one
-          person’s access.
-        </p>
       </div>
 
       {state.status !== "idle" ? (

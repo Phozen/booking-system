@@ -157,7 +157,6 @@ export function FacilityPhotoGrid({ facility }: { facility: Facility }) {
     return (
       <EmptyState
         title="No facility photos yet"
-        description="Upload a photo to make this facility easier for employees to recognize."
         icon={<ImageIcon className="size-5" aria-hidden="true" />}
       />
     );

@@ -1,5 +1,3 @@
-import { BarChart3, FileDown } from "lucide-react";
-
 import { requireActiveReportAdmin } from "@/lib/admin/reports/actions";
 import { getAdminReportsData } from "@/lib/admin/reports/queries";
 import { parseReportFilters } from "@/lib/admin/reports/validation";
@@ -39,7 +37,6 @@ export default async function AdminReportsPage({
       <PageHeader
         eyebrow="Admin area"
         title="Reports and exports"
-        description="Review booking activity, utilization, cancellation, user activity, and audit reports. CSV exports use the same filters and record export and audit logs."
       />
 
       <ReportFilters facilities={facilities} filters={filters} />
@@ -48,33 +45,8 @@ export default async function AdminReportsPage({
           <h2 id="report-summary-heading" className="font-semibold tracking-normal">
             Summary
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Key metrics for the selected reporting period.
-          </p>
         </div>
         <SummaryCards summary={reports.summary} />
-      </section>
-
-      <section className="grid gap-4 rounded-lg border bg-card p-4">
-        <div className="flex items-start gap-3">
-          <BarChart3 className="mt-0.5 size-4 text-muted-foreground" />
-          <div>
-            <h2 className="font-semibold tracking-normal">MVP report set</h2>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Booking history, facility utilization, user booking summary,
-              cancelled bookings, and audit logs are implemented with CSV
-              exports. Approval, maintenance closure, and blocked date reports
-              are reserved for the next reporting expansion.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <FileDown className="mt-0.5 size-4 text-muted-foreground" />
-          <p className="text-sm leading-6 text-muted-foreground">
-            Page tables show practical previews while CSV exports include the
-            filtered rows loaded for each report type.
-          </p>
-        </div>
       </section>
 
       <BookingHistoryTable rows={reports.bookingHistory} />

@@ -59,14 +59,12 @@ export function MaintenanceTable({
     ) : (
       <EmptyState
         title="No maintenance closures"
-        description="Create a closure when a facility should be unavailable for maintenance."
       />
     );
 
   return (
     <AdminTableShell
       title="Maintenance records"
-      description={`${maintenanceClosures.length} maintenance records`}
       mobileCards={mobileCards}
     >
         <table className="w-full min-w-[1000px] border-collapse text-left text-sm">

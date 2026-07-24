@@ -16,7 +16,6 @@ export default async function AdminApprovalsPage() {
       <PageHeader
         eyebrow="Approval queue"
         title="Pending room requests"
-        description="Review requested room, time slot, requester, and catering needs before confirming or rejecting."
       />
 
       <PendingApprovalsTable bookings={bookings} />

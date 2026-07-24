@@ -71,14 +71,12 @@ export function BlockedPeriodsTable({
     ) : (
       <EmptyState
         title="No blocked periods"
-        description="Create a blocked period when facilities should be unavailable for bookings."
       />
     );
 
   return (
     <AdminTableShell
       title="Blocked date records"
-      description={`${blockedPeriods.length} blocked period records`}
       mobileCards={mobileCards}
     >
         <table className="w-full min-w-[1080px] border-collapse text-left text-sm">

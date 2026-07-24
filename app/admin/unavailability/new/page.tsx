@@ -34,7 +34,6 @@ export default async function NewUnavailabilityPage({
       <PageHeader
         eyebrow="Admin area"
         title="Add unavailable time"
-        description="Start with why bookings need to be prevented. Both options make the selected facilities unavailable for the scheduled window."
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
           { label: "Unavailability", href: "/admin/unavailability" },

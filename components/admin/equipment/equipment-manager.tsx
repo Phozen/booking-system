@@ -39,9 +39,6 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
         />
         <div>
           <h2 className="font-semibold tracking-normal">Add equipment</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Equipment can be assigned to facilities after it is created.
-          </p>
         </div>
         {state.status !== "idle" ? (
           <Alert variant={state.status === "error" ? "destructive" : "success"}>
@@ -114,10 +111,6 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
           <h2 id="equipment-library-heading" className="font-semibold tracking-normal">
             Equipment library
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Open an item to edit its details or availability. Archived equipment
-            remains in historical facility records but is not offered for new assignment.
-          </p>
         </div>
         {equipment.length > 0 ? (
           <div className="grid gap-3">
@@ -128,7 +121,6 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
         ) : (
           <EmptyState
             title="No equipment yet"
-            description="Create the first equipment item to make it available for facility assignment."
           />
         )}
       </section>

@@ -30,7 +30,6 @@ export default async function AdminAuditLogDetailPage({
       <PageHeader
         eyebrow="Admin area"
         title="Audit log detail"
-        description="Full immutable audit record with captured metadata and before/after values. Audit records are read-only."
         breadcrumbs={[
           { label: "Admin", href: "/admin/dashboard" },
           { label: "Audit Logs", href: "/admin/audit-logs" },

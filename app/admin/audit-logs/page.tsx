@@ -30,7 +30,6 @@ export default async function AdminAuditLogsPage({
       <PageHeader
         eyebrow="Admin area"
         title="Audit logs"
-        description="Review read-only activity records for booking, facility, approval, maintenance, notification, and report export actions."
       />
 
       <AuditLogFilters filters={filters} />
