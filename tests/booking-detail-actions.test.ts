@@ -14,12 +14,12 @@ describe("booking detail header actions", () => {
     expect(source).not.toContain("gap-4 border-b pb-6");
   });
 
-  it("uses matching outlined new-tab actions for meeting and calendar access", () => {
+  it("uses matching coloured new-tab actions for meeting and calendar access", () => {
     expect(source).toMatch(
-      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "outline"[\s\S]*?Join Meeting/,
+      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "default"[\s\S]*?Join Meeting/,
     );
     expect(source).toMatch(
-      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "outline"[\s\S]*?View on Calendar/,
+      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "default"[\s\S]*?View on Calendar/,
     );
   });
 });

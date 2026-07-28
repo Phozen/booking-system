@@ -127,7 +127,7 @@ export function BookingDetail({
               target="_blank"
               rel="noreferrer"
               className={buttonVariants({
-                variant: "outline",
+                variant: "default",
                 className: "w-full sm:w-auto",
               })}
             >
@@ -141,7 +141,7 @@ export function BookingDetail({
               target="_blank"
               rel="noreferrer"
               className={buttonVariants({
-                variant: "outline",
+                variant: "default",
                 className: "w-full sm:w-auto",
               })}
             >
