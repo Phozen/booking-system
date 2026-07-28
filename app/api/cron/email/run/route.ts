@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { processQueuedEmailNotifications } from "@/lib/email";
+import { recordEmailCronRun } from "@/lib/email/cron-health";
 import { getEmailQueueHealth } from "@/lib/email/health";
 import { queueDueBookingReminders } from "@/lib/email/reminders";
 
@@ -36,6 +37,8 @@ export async function GET(request: Request) {
       console.warn("Email queue requires operator attention", health);
     }
 
+    await recordEmailCronRun(health.healthy);
+
     return NextResponse.json(
       {
         ok: health.healthy,
@@ -50,6 +53,9 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     console.error("Automated email cycle failed", error);
+    await recordEmailCronRun(false).catch((heartbeatError) => {
+      console.error("Email automation heartbeat failed", heartbeatError);
+    });
     return NextResponse.json(
       { ok: false, errors: ["Automated email cycle failed."] },
       { status: 500 },

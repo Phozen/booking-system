@@ -32,6 +32,7 @@ The example file is the canonical list of supported variables. Empty optional va
 | Variable | Purpose |
 | --- | --- |
 | `CRON_SECRET` | Bearer secret for protected email cron endpoints |
+| `EMAIL_CRON_MAX_AGE_MINUTES` | Maximum age for a completed email automation cycle before System Health warns; defaults to `15` | Server |
 | `EMAIL_PROVIDER` | Blank, `none`, `microsoft_graph`, `resend`, or `smtp` |
 | `EMAIL_API_KEY` | Resend API key when using Resend |
 | `EMAIL_FROM` | Verified sender identity |

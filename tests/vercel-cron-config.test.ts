@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("production email schedule", () => {
-  it("runs the combined reminder and delivery cycle every five minutes", () => {
+  it("retains the daily Vercel fallback for the consolidated email cycle", () => {
     const config = JSON.parse(
       readFileSync(join(process.cwd(), "vercel.json"), "utf8"),
     ) as { crons?: Array<{ path: string; schedule: string }> };

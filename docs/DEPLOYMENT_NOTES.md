@@ -337,14 +337,16 @@ GET /api/cron/email/run
 Authorization: Bearer ${CRON_SECRET}
 ```
 
-`vercel.json` schedules this cycle every five minutes in UTC. The deployment plan
-must support sub-daily cron. Set `CRON_SECRET` in Vercel to a long random
-server-only value. Do not prefix it with `NEXT_PUBLIC_`, commit it, or expose it
-to client components. HTTP 500 is an infrastructure failure and HTTP 503 means
-operator recovery is required. Verify zero failed/overdue/stale/exhausted rows in
-the response and `/admin/system-health`; follow `docs/EMAIL_OPERATIONS.md` to
-retry safely. The legacy process/reminder routes remain protected manual
-endpoints and are not separately scheduled.
+`vercel.json` supplies a daily fallback cycle. For a final-like pilot, configure
+an approved external scheduler to call this route every five minutes with the
+server-only `CRON_SECRET`; do not assume a Vercel sub-daily plan is available.
+Set `CRON_SECRET` in Vercel to a long random server-only value. Do not prefix it
+with `NEXT_PUBLIC_`, commit it, or expose it to client components. HTTP 500 is an
+infrastructure failure and HTTP 503 means operator recovery is required. Verify
+zero failed/overdue/stale/exhausted rows and a recent healthy **Email automation**
+heartbeat in `/admin/system-health`; follow `docs/EMAIL_OPERATIONS.md` to retry
+safely. The legacy process/reminder routes remain protected manual endpoints and
+are not separately scheduled.
 
 ### Microsoft Graph Email Setup
 

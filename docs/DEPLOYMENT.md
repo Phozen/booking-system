@@ -2,7 +2,7 @@
 
 ## Release model
 
-QBook is configured for Vercel. The repository includes CI and a controlled production-release workflow; the actual target environment, provider credentials, and organisation controls remain external responsibilities.
+QBook uses protected Git-based Vercel deployment: a green pull request merged to `main` is the production-release action. The repository includes CI and a manual rollback workflow; the actual target environment, provider credentials, and organisation controls remain external responsibilities.
 
 The safe release order is:
 
@@ -10,7 +10,7 @@ The safe release order is:
 2. Run the proportionate repository checks.
 3. Apply approved Supabase migrations to the exact target project.
 4. Confirm target environment variables and Auth/provider configuration.
-5. Deploy and promote through the protected release workflow.
+5. Record the current READY deployment, merge the green pull request to protected `main`, and let Vercel deploy it automatically.
 6. Run smoke/UAT checks with approved test identities.
 7. Record evidence and retain rollback information.
 
