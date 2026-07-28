@@ -32,8 +32,9 @@ export async function loginWithMicrosoftAction(formData?: FormData): Promise<voi
   const requestHeaders = await headers();
   const origin = requestHeaders.get("origin") ?? appConfig.appUrl;
   const configuredTenantId = process.env.MICROSOFT_TENANT_ID?.trim();
+  const submittedNext = formData?.get("next");
   const next = getSafeInternalPath(
-    typeof formData?.get("next") === "string" ? formData.get("next") : null,
+    typeof submittedNext === "string" ? submittedNext : null,
   );
 
   if (!configuredTenantId) {
