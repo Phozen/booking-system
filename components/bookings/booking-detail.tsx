@@ -100,7 +100,7 @@ export function BookingDetail({
         ]}
       />
 
-      <header className="pb-6">
+      <header>
         <div>
           <BookingStatusBadge status={booking.status} />
           {!isOwnerView && viewerInvitation ? (

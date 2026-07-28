@@ -9,8 +9,8 @@ const source = readFileSync(
 ).replace(/\s+/g, " ");
 
 describe("booking detail header actions", () => {
-  it("removes the header divider while retaining spacing", () => {
-    expect(source).toContain('className="pb-6"');
+  it("removes the header divider and extra bottom spacing", () => {
+    expect(source).toContain("<header>");
     expect(source).not.toMatch(/<header className="[^"]*border-b/);
   });
 
