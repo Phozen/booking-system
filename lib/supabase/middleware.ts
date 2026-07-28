@@ -33,8 +33,10 @@ function isProtectedPath(pathname: string) {
 
 function redirectToLogin(request: NextRequest) {
   const redirectUrl = request.nextUrl.clone();
+  const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   redirectUrl.pathname = "/login";
   redirectUrl.searchParams.set("auth", "required");
+  redirectUrl.searchParams.set("next", nextPath);
 
   return NextResponse.redirect(redirectUrl);
 }

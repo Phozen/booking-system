@@ -12,6 +12,7 @@ import type {
 type RelatedBookingRecord =
   | {
       id: string;
+      user_id: string;
       title: string;
       status: string;
       starts_at: string;
@@ -37,6 +38,7 @@ type RelatedBookingRecord =
     }
   | {
       id: string;
+      user_id: string;
       title: string;
       status: string;
       starts_at: string;
@@ -68,6 +70,7 @@ type QueueNotificationRecord = {
   id: string;
   type: EmailNotificationType;
   recipient_email: string;
+  recipient_user_id?: string | null;
   recipient_name: string | null;
   subject: string;
   body: string | null;
@@ -77,6 +80,7 @@ type QueueNotificationRecord = {
   attempts: number;
   max_attempts: number;
   bookings?: RelatedBookingRecord;
+  calendarEventEligible?: boolean;
 };
 
 export type EmailQueueProcessResult = {
@@ -97,6 +101,7 @@ export type SingleEmailProcessResult = Pick<
 
 const relatedBookingSelect = `
   id,
+  user_id,
   title,
   status,
   starts_at,
@@ -167,13 +172,51 @@ async function attachRelatedBookings(
       Boolean(booking && !Array.isArray(booking)),
   );
   const bookingsById = new Map(bookingRows.map((booking) => [booking.id, booking]));
+  const recipientUserIds = [
+    ...new Set(
+      records
+        .map((record) => record.recipient_user_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const invitationKeys = new Set<string>();
 
-  return records.map((record) => ({
-    ...record,
-    bookings: record.related_booking_id
+  if (recipientUserIds.length > 0) {
+    const { data: invitations, error: invitationsError } = await supabase
+      .from("booking_invitations")
+      .select("booking_id, invited_user_id")
+      .in("booking_id", bookingIds)
+      .in("invited_user_id", recipientUserIds)
+      .in("status", ["pending", "accepted"]);
+
+    if (invitationsError) {
+      console.error("Email queue invitation lookup failed", {
+        message: invitationsError.message,
+      });
+    } else {
+      for (const invitation of invitations ?? []) {
+        invitationKeys.add(`${invitation.booking_id}:${invitation.invited_user_id}`);
+      }
+    }
+  }
+
+  return records.map((record) => {
+    const booking = record.related_booking_id
       ? bookingsById.get(record.related_booking_id) ?? null
-      : null,
-  }));
+      : null;
+    const isOwner = Boolean(booking && record.recipient_user_id === booking.user_id);
+    const isEligibleInvitee = Boolean(
+      record.related_booking_id &&
+        record.recipient_user_id &&
+        invitationKeys.has(`${record.related_booking_id}:${record.recipient_user_id}`),
+    );
+
+    return {
+      ...record,
+      bookings: booking,
+      calendarEventEligible: isOwner || isEligibleInvitee,
+    };
+  });
 }
 
 function getRelatedBooking(record: QueueNotificationRecord) {
@@ -215,6 +258,12 @@ function enrichTemplateData(record: QueueNotificationRecord): EmailTemplateData 
     endsAt: record.template_data?.endsAt ?? booking?.ends_at,
     status: record.template_data?.status ?? booking?.status,
     departments: record.template_data?.departments ?? getRelatedDepartments(record),
+    calendarEventPath:
+      record.calendarEventEligible &&
+      (record.template_data?.status ?? booking?.status) === "confirmed" &&
+      (record.template_data?.bookingId ?? record.related_booking_id ?? booking?.id)
+        ? `/bookings/${record.template_data?.bookingId ?? record.related_booking_id ?? booking?.id}/calendar`
+        : undefined,
   };
 }
 
@@ -335,7 +384,7 @@ export async function processEmailNotificationNow(
     .eq("status", "queued")
     .lt("attempts", 1)
     .select(
-      "id,type,recipient_email,subject,body,template_data,related_booking_id,provider,attempts,max_attempts",
+      "id,type,recipient_email,recipient_user_id,subject,body,template_data,related_booking_id,provider,attempts,max_attempts",
     )
     .maybeSingle();
 

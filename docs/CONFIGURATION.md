@@ -27,6 +27,8 @@ The example file is the canonical list of supported variables. Empty optional va
 
 ## Email and cron
 
+`NEXT_PUBLIC_APP_URL` is required before Qbook sends booking email. In production it must be the public HTTPS Qbook URL, not `localhost`; this keeps booking and Outlook-calendar actions in email usable after Microsoft sign-in. System Health reports a missing or unsafe value, and email delivery fails safely until it is corrected.
+
 | Variable | Purpose |
 | --- | --- |
 | `CRON_SECRET` | Bearer secret for protected email cron endpoints |

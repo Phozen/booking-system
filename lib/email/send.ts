@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getEmailAppUrlConfig } from "@/lib/email/app-url";
 import { getEmailFromAddress, getEmailProvider } from "@/lib/email/provider";
 import { renderEmailTemplate } from "@/lib/email/templates";
 import type {
@@ -44,14 +45,23 @@ export async function sendNotificationEmail({
       };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrlConfig = getEmailAppUrlConfig();
+
+  if (!appUrlConfig.appUrl) {
+    return {
+      ok: false,
+      provider: provider.name,
+      error: appUrlConfig.validationError ?? "Qbook application URL is unavailable.",
+    };
+  }
+
   const rendered = renderEmailTemplate({
     type,
     recipientEmail,
     subject,
     body,
     templateData,
-    appUrl,
+    appUrl: appUrlConfig.appUrl,
   });
 
   return provider.send({

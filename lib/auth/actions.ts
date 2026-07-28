@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { appConfig } from "@/config/app";
+import { getSafeInternalPath } from "@/lib/auth/session";
 import {
   getMicrosoftCalendarSyncConfig,
   isDelegatedBookingOwnerCalendarSyncReady,
@@ -25,12 +26,15 @@ export async function loginAction(
   return { status: "error", message: microsoftOnlyMessage };
 }
 
-export async function loginWithMicrosoftAction(): Promise<void> {
+export async function loginWithMicrosoftAction(formData?: FormData): Promise<void> {
   let microsoftLoginUrl = "";
   let errorRedirect = "";
   const requestHeaders = await headers();
   const origin = requestHeaders.get("origin") ?? appConfig.appUrl;
   const configuredTenantId = process.env.MICROSOFT_TENANT_ID?.trim();
+  const next = getSafeInternalPath(
+    typeof formData?.get("next") === "string" ? formData.get("next") : null,
+  );
 
   if (!configuredTenantId) {
     redirect(`${origin}/login?error=tenant`);
@@ -38,11 +42,14 @@ export async function loginWithMicrosoftAction(): Promise<void> {
 
   try {
     const supabase = await createClient();
-    const redirectTo = `${origin}/auth/callback`;
+    const callbackUrl = new URL("/auth/callback", origin);
+    if (next) {
+      callbackUrl.searchParams.set("next", next);
+    }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
       options: {
-        redirectTo,
+        redirectTo: callbackUrl.toString(),
         // Calendar access is a separate, opt-in connection below. Basic Qbook
         // access needs only the identity claims used by Supabase and the app.
         scopes: "openid email profile",

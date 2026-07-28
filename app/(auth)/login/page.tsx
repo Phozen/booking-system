@@ -1,3 +1,4 @@
+import { getSafeInternalPath } from "@/lib/auth/session";
 import { getAppSettings } from "@/lib/settings/queries";
 import {
   getLoginMessage,
@@ -13,5 +14,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const settings = await getAppSettings();
 
-  return <LoginPanel initialMessage={getLoginMessage(params, settings)} />;
+  const next = getSafeInternalPath(
+    typeof params.next === "string" ? params.next : null,
+  );
+
+  return <LoginPanel initialMessage={getLoginMessage(params, settings)} next={next ?? undefined} />;
 }

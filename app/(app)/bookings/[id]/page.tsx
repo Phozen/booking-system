@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/guards";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import { getMyBookingById } from "@/lib/bookings/queries";
 import {
+  getAuthorizedCalendarEventUrl,
   getAuthorizedTeamsJoinUrl,
   getTeamsInvitationStatus,
 } from "@/lib/bookings/teams-meeting-status";
@@ -64,7 +65,7 @@ export default async function BookingDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string; invite?: string }>;
+  searchParams: Promise<{ created?: string; invite?: string; calendar?: string }>;
 }) {
   const { user } = await requireUser();
   const { id } = await params;
@@ -79,7 +80,7 @@ export default async function BookingDetailPage({
 
   if (booking) {
     const adminSupabase = createAdminClient();
-    const [invitations, teamsInvitationStatus, teamsJoinUrl, departments] = await Promise.all([
+    const [invitations, teamsInvitationStatus, teamsJoinUrl, calendarEventUrl, departments] = await Promise.all([
       getInvitationsForBooking(adminSupabase, booking.id),
       booking.teamsMeeting
         ? getTeamsInvitationStatus(booking.id)
@@ -87,6 +88,7 @@ export default async function BookingDetailPage({
       booking.teamsMeeting
         ? getAuthorizedTeamsJoinUrl({ bookingId: booking.id, viewerUserId: user.id })
         : Promise.resolve(null),
+      getAuthorizedCalendarEventUrl({ bookingId: booking.id, viewerUserId: user.id }),
       getActiveDepartments(supabase),
     ]);
 
@@ -96,6 +98,8 @@ export default async function BookingDetailPage({
         invitations={invitations}
         teamsInvitationStatus={teamsInvitationStatus}
         teamsJoinUrl={teamsJoinUrl}
+        calendarEventAvailable={Boolean(calendarEventUrl)}
+        calendarUnavailable={query.calendar === "unavailable"}
         departments={departments}
         viewerMode="owner"
         justCreated={query.created === "1"}
@@ -114,9 +118,12 @@ export default async function BookingDetailPage({
     notFound();
   }
 
-  const teamsJoinUrl = invitedBooking.booking.teamsMeeting
-    ? await getAuthorizedTeamsJoinUrl({ bookingId: id, viewerUserId: user.id })
-    : null;
+  const [teamsJoinUrl, calendarEventUrl] = await Promise.all([
+    invitedBooking.booking.teamsMeeting
+      ? getAuthorizedTeamsJoinUrl({ bookingId: id, viewerUserId: user.id })
+      : Promise.resolve(null),
+    getAuthorizedCalendarEventUrl({ bookingId: id, viewerUserId: user.id }),
+  ]);
 
   return (
     <BookingDetail
@@ -124,6 +131,8 @@ export default async function BookingDetailPage({
       viewerMode="invitee"
       viewerInvitation={invitedBooking.invitation}
       teamsJoinUrl={teamsJoinUrl}
+      calendarEventAvailable={Boolean(calendarEventUrl)}
+      calendarUnavailable={query.calendar === "unavailable"}
     />
   );
 }

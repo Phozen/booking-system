@@ -6,6 +6,55 @@ import { getMicrosoftDelegatedAccessToken } from "@/lib/integrations/microsoft-3
 
 export type TeamsInvitationStatus = "pending" | "sent" | "failed" | "cancelled";
 
+async function getAuthorizedSyncedCalendarEvent({
+  bookingId,
+  viewerUserId,
+}: {
+  bookingId: string;
+  viewerUserId: string;
+}) {
+  const supabase = createAdminClient();
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("user_id,teams_meeting")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  if (!booking) return null;
+
+  const isOwner = booking.user_id === viewerUserId;
+  const { data: invitation } = isOwner
+    ? { data: null }
+    : await supabase
+        .from("booking_invitations")
+        .select("id")
+        .eq("booking_id", bookingId)
+        .eq("invited_user_id", viewerUserId)
+        .in("status", ["pending", "accepted"])
+        .maybeSingle();
+  if (!isOwner && !invitation) return null;
+
+  const { data: sync } = await supabase
+    .from("booking_calendar_syncs")
+    .select("external_event_id,sync_status")
+    .eq("booking_id", bookingId)
+    .eq("provider", "microsoft_365")
+    .maybeSingle();
+  if (sync?.sync_status !== "synced" || !sync.external_event_id) return null;
+
+  return { booking, externalEventId: sync.external_event_id };
+}
+
+function getHttpsUrl(value: string | null | undefined) {
+  const url = value?.trim() ?? "";
+
+  try {
+    return url && new URL(url).protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getTeamsInvitationStatus(bookingId: string): Promise<TeamsInvitationStatus> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -28,47 +77,38 @@ export async function getAuthorizedTeamsJoinUrl({
   bookingId: string;
   viewerUserId: string;
 }) {
-  const supabase = createAdminClient();
-  const { data: booking } = await supabase
-    .from("bookings")
-    .select("user_id,teams_meeting")
-    .eq("id", bookingId)
-    .maybeSingle();
+  const event = await getAuthorizedSyncedCalendarEvent({ bookingId, viewerUserId });
+  if (!event?.booking.teams_meeting) return null;
 
-  if (!booking?.teams_meeting) return null;
-
-  const isOwner = booking.user_id === viewerUserId;
-  const { data: invitation } = isOwner
-    ? { data: null }
-    : await supabase
-        .from("booking_invitations")
-        .select("id")
-        .eq("booking_id", bookingId)
-        .eq("invited_user_id", viewerUserId)
-        .in("status", ["pending", "accepted"])
-        .maybeSingle();
-  if (!isOwner && !invitation) return null;
-
-  const { data: sync } = await supabase
-    .from("booking_calendar_syncs")
-    .select("external_event_id,sync_status")
-    .eq("booking_id", bookingId)
-    .eq("provider", "microsoft_365")
-    .maybeSingle();
-  if (sync?.sync_status !== "synced" || !sync.external_event_id) return null;
-
-  const token = await getMicrosoftDelegatedAccessToken(booking.user_id);
+  const token = await getMicrosoftDelegatedAccessToken(event.booking.user_id);
   if (!token.ok) return null;
-  const event = await microsoftGraphFetchWithAccessToken<{
+  const graphEvent = await microsoftGraphFetchWithAccessToken<{
     onlineMeeting?: { joinUrl?: string | null } | null;
   }>(
-    `${buildMicrosoftGraphPath("me", "events", sync.external_event_id)}?$select=onlineMeeting`,
+    `${buildMicrosoftGraphPath("me", "events", event.externalEventId)}?$select=onlineMeeting`,
     token.accessToken,
   );
-  const joinUrl = event.ok ? event.data?.onlineMeeting?.joinUrl?.trim() : "";
-  try {
-    return joinUrl && new URL(joinUrl).protocol === "https:" ? joinUrl : null;
-  } catch {
-    return null;
-  }
+  return getHttpsUrl(graphEvent.ok ? graphEvent.data?.onlineMeeting?.joinUrl : null);
+}
+
+export async function getAuthorizedCalendarEventUrl({
+  bookingId,
+  viewerUserId,
+}: {
+  bookingId: string;
+  viewerUserId: string;
+}) {
+  const event = await getAuthorizedSyncedCalendarEvent({ bookingId, viewerUserId });
+  if (!event) return null;
+
+  const token = await getMicrosoftDelegatedAccessToken(event.booking.user_id);
+  if (!token.ok) return null;
+  const graphEvent = await microsoftGraphFetchWithAccessToken<{
+    webLink?: string | null;
+  }>(
+    `${buildMicrosoftGraphPath("me", "events", event.externalEventId)}?$select=webLink`,
+    token.accessToken,
+  );
+
+  return getHttpsUrl(graphEvent.ok ? graphEvent.data?.webLink : null);
 }

@@ -16,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   syncConfirmedBookingToMicrosoftCalendar: vi.fn(),
 }));
 
+vi.mock("server-only", () => ({}));
+
 vi.mock("next/cache", () => ({
   revalidatePath: mocks.revalidatePath,
 }));
@@ -384,6 +386,41 @@ describe("booking confirmation email template", () => {
     expect(rendered.html).toContain("View booking");
     expect(rendered.html).toContain("Attendees");
     expect(rendered.html).toContain("4");
+    expect(rendered.html).toContain('role="presentation"');
+    expect(rendered.html).toContain('bgcolor="#f1f5f9"');
+    expect(rendered.html).not.toContain("; color: #ffffff;");
+  });
+
+  it("adds the protected Outlook calendar action only when the queue provides it", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_confirmation",
+      recipientEmail: user.email,
+      subject: "Booking confirmed: Planning Session",
+      body: "Your booking has been confirmed.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        calendarEventPath: `/bookings/${confirmedBooking.id}/calendar`,
+      },
+    });
+
+    expect(rendered.html).toContain("View on Calendar");
+    expect(rendered.text).toContain(
+      `https://booking.example.com/bookings/${confirmedBooking.id}/calendar`,
+    );
+  });
+
+  it("does not add a calendar action without an authorised resolver path", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_confirmation",
+      recipientEmail: user.email,
+      subject: "Booking confirmed: Planning Session",
+      body: "Your booking has been confirmed.",
+      appUrl: "https://booking.example.com",
+      templateData: { bookingId: confirmedBooking.id },
+    });
+
+    expect(rendered.html).not.toContain("View on Calendar");
   });
 
   it("renders an immutable department snapshot when it was queued with the booking email", () => {

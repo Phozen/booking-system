@@ -50,6 +50,7 @@ vi.mock("@/lib/integrations/microsoft-365-calendar/delegated", () => ({
 }));
 
 import {
+  getAuthorizedCalendarEventUrl,
   getAuthorizedTeamsJoinUrl,
   type TeamsInvitationStatus,
 } from "@/lib/bookings/teams-meeting-status";
@@ -102,5 +103,28 @@ describe("Teams invitation status contract", () => {
     await expect(
       getAuthorizedTeamsJoinUrl({ bookingId: "booking-1", viewerUserId: "owner-1" }),
     ).resolves.toBeNull();
+  });
+
+  it("returns the live Outlook event URL only for an authorised participant", async () => {
+    state.graphResult = {
+      ok: true,
+      data: { webLink: "https://outlook.office.com/calendar/item/example" },
+    };
+    graphFetch.mockResolvedValue(state.graphResult);
+
+    await expect(
+      getAuthorizedCalendarEventUrl({ bookingId: "booking-1", viewerUserId: "owner-1" }),
+    ).resolves.toBe("https://outlook.office.com/calendar/item/example");
+    expect(graphFetch).toHaveBeenCalledWith(
+      "me/events/event-1?$select=webLink",
+      "delegated-access-token",
+    );
+
+    state.invitation = null;
+    graphFetch.mockClear();
+    await expect(
+      getAuthorizedCalendarEventUrl({ bookingId: "booking-1", viewerUserId: "other-user" }),
+    ).resolves.toBeNull();
+    expect(graphFetch).not.toHaveBeenCalled();
   });
 });

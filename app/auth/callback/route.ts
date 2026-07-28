@@ -4,7 +4,7 @@ import {
   getMicrosoftTenantId,
   isMicrosoftAuthUser,
 } from "@/lib/auth/access";
-import { getPostLoginPath } from "@/lib/auth/session";
+import { getPostLoginPath, getSafeInternalPath } from "@/lib/auth/session";
 import { saveMicrosoftDelegatedCalendarConnection } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const error = requestUrl.searchParams.get("error");
   const next = requestUrl.searchParams.get("next");
+  const safeNext = getSafeInternalPath(next);
   const calendar = requestUrl.searchParams.get("calendar");
   const origin = requestUrl.origin;
   let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
@@ -105,15 +106,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (calendar === "connected" && next?.startsWith("/")) {
+    if (calendar === "connected" && safeNext) {
       const status =
         calendarConnectionAttempted && calendarConnectionSaved
           ? "connected"
           : "error";
-      return NextResponse.redirect(`${origin}${next}?calendar=${status}`);
+      const calendarRedirect = new URL(safeNext, origin);
+      calendarRedirect.searchParams.set("calendar", status);
+      return NextResponse.redirect(calendarRedirect);
     }
 
-    return NextResponse.redirect(`${origin}${redirectTo}`);
+    return NextResponse.redirect(`${origin}${safeNext ?? redirectTo}`);
   } catch {
     if (supabase) {
       try {

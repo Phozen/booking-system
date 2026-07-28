@@ -59,6 +59,14 @@ function getBookingLink(appUrl: string, bookingId: string | null) {
   return bookingId ? `${baseUrl}/bookings/${bookingId}` : baseUrl;
 }
 
+function getCalendarEventLink(appUrl: string, calendarEventPath: string | null) {
+  if (!calendarEventPath || !calendarEventPath.startsWith("/") || calendarEventPath.startsWith("//")) {
+    return null;
+  }
+
+  return `${appUrl.replace(/\/$/, "")}${calendarEventPath}`;
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -94,47 +102,51 @@ function renderHtml({
   intro,
   sections,
   link,
+  calendarLink,
 }: {
   title: string;
   intro: string;
   sections: EmailDetailSection[];
   link: string;
+  calendarLink: string | null;
 }) {
   const detailSections = sections
     .filter(hasRows)
     .map(
       (section) => `
-        <section style="margin: 0 0 16px; padding: 20px; border: 1px solid #dbe3ef; border-radius: 12px; background: #ffffff;">
-          <h2 style="margin: 0 0 10px; color: #1e293b; font-size: 16px; line-height: 1.35;">${escapeHtml(section.title)}</h2>
-          <table style="width: 100%; border-collapse: collapse;" aria-label="${escapeHtml(section.title)}">
-            <tbody>${renderSectionRows(section.rows)}</tbody>
-          </table>
-        </section>
+        <tr>
+          <td style="padding: 0 0 16px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="border: 1px solid #dbe3ef; border-collapse: separate; border-radius: 12px; background-color: #ffffff;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h2 style="margin: 0 0 10px; color: #1e293b; font-size: 16px; line-height: 1.35;">${escapeHtml(section.title)}</h2>
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;" aria-label="${escapeHtml(section.title)}">
+                    <tbody>${renderSectionRows(section.rows)}</tbody>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
       `,
     )
     .join("");
 
+  const calendarCta = calendarLink
+    ? `<td style="padding: 0 12px 12px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" bgcolor="#dcfce7" style="border-collapse: separate; border-radius: 8px; background-color: #dcfce7;"><tr><td style="padding: 12px 18px;"><a href="${escapeHtml(calendarLink)}" style="color: #14532d; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View on Calendar</a></td></tr></table></td>`
+    : "";
+
   return `
-    <div role="article" aria-roledescription="email" aria-label="QBook booking update" style="margin: 0; padding: 32px 16px; background: #f1f5f9; color: #0f172a; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
-      <div style="max-width: 640px; margin: 0 auto;">
-        <header style="overflow: hidden; margin: 0 0 16px; border-radius: 14px; background: #064e3b; color: #ffffff;">
-          <div style="padding: 24px 24px 22px;">
-            <p style="margin: 0 0 10px; color: #d1fae5; font-size: 13px; font-weight: 700; letter-spacing: .04em;">QBOOK</p>
-            <h1 style="margin: 0 0 8px; color: #ffffff; font-size: 24px; line-height: 1.25;">${escapeHtml(title)}</h1>
-            <p style="margin: 0; color: #ecfdf5; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p>
-          </div>
-        </header>
-        <main>
-          ${detailSections}
-          <p style="margin: 24px 0 12px;">
-            <a href="${escapeHtml(link)}" style="display: inline-block; padding: 12px 18px; border-radius: 8px; background: #1d4ed8; color: #ffffff; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View booking</a>
-          </p>
-        </main>
-        <footer style="padding: 4px 4px 0; color: #64748b; font-size: 12px; line-height: 1.5;">
-          QBook &middot; Qhazanah Sabah Berhad
-        </footer>
-      </div>
-    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f1f5f9" style="width: 100%; border-collapse: collapse; background-color: #f1f5f9; color: #0f172a; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
+      <tr><td align="center" style="padding: 32px 16px;">
+        <table role="article" aria-roledescription="email" aria-label="QBook booking update" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 640px; border-collapse: collapse;">
+          <tr><td bgcolor="#ecfdf5" style="padding: 24px; border: 1px solid #bbf7d0; border-radius: 14px; background-color: #ecfdf5;"><p style="margin: 0 0 10px; color: #166534; font-size: 13px; font-weight: 700; letter-spacing: .04em;">QBOOK</p><h1 style="margin: 0 0 8px; color: #0f172a; font-size: 24px; line-height: 1.25;">${escapeHtml(title)}</h1><p style="margin: 0; color: #334155; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p></td></tr>
+          <tr><td style="padding: 16px 0 0;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">${detailSections}</table></td></tr>
+          <tr><td style="padding: 8px 0 4px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;"><tr><td style="padding: 0 12px 12px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" bgcolor="#dbeafe" style="border-collapse: separate; border-radius: 8px; background-color: #dbeafe;"><tr><td style="padding: 12px 18px;"><a href="${escapeHtml(link)}" style="color: #0f172a; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View booking</a></td></tr></table></td>${calendarCta}</tr></table></td></tr>
+          <tr><td style="padding: 8px 4px 0; color: #475569; font-size: 12px; line-height: 1.5;">QBook &middot; Qhazanah Sabah Berhad</td></tr>
+        </table>
+      </td></tr>
+    </table>
   `;
 }
 
@@ -143,11 +155,13 @@ function renderText({
   intro,
   sections,
   link,
+  calendarLink,
 }: {
   title: string;
   intro: string;
   sections: EmailDetailSection[];
   link: string;
+  calendarLink: string | null;
 }) {
   const details = sections
     .filter(hasRows)
@@ -161,7 +175,9 @@ function renderText({
     })
     .join("\n\n");
 
-  return `${title}\n\n${intro}\n\n${details}\n\nView booking details: ${link}`;
+  const calendarText = calendarLink ? `\nView on Calendar: ${calendarLink}` : "";
+
+  return `${title}\n\n${intro}\n\n${details}\n\nView booking details: ${link}${calendarText}`;
 }
 
 export function renderEmailTemplate(
@@ -200,6 +216,10 @@ export function renderEmailTemplate(
   const cateringNotes = getStringValue(input.templateData, "cateringNotes");
   const departments = getDepartmentDisplayValue(input.templateData);
   const link = getBookingLink(input.appUrl, bookingId);
+  const calendarLink = getCalendarEventLink(
+    input.appUrl,
+    getStringValue(input.templateData, "calendarEventPath"),
+  );
   const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
   const startTime = startsAt ? formatBookingTime(startsAt) : null;
   const endTime = endsAt ? formatBookingTime(endsAt) : null;
@@ -287,7 +307,7 @@ export function renderEmailTemplate(
 
   return {
     subject: input.subject || heading,
-    html: renderHtml({ title: heading, intro, sections, link }),
-    text: renderText({ title: heading, intro, sections, link }),
+    html: renderHtml({ title: heading, intro, sections, link, calendarLink }),
+    text: renderText({ title: heading, intro, sections, link, calendarLink }),
   };
 }

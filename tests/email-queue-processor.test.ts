@@ -46,11 +46,15 @@ function createSupabaseMock({
   markSentError = null,
   markFailedError = null,
   inactiveRecipientIds = [],
+  relatedBookings = [],
+  invitationRows = [],
 }: {
   claimed?: unknown[];
   markSentError?: { message: string } | null;
   markFailedError?: { message: string } | null;
   inactiveRecipientIds?: string[];
+  relatedBookings?: unknown[];
+  invitationRows?: unknown[];
 } = {}) {
   const rpc = vi.fn(async (name: string, args?: { p_email_id?: string }) => {
     if (name === "claim_email_notifications") {
@@ -75,10 +79,29 @@ function createSupabaseMock({
     return { data: null, error: { message: `Unexpected RPC ${name}` } };
   });
 
-  const from = vi.fn(() => ({
-    select: vi.fn().mockReturnThis(),
-    in: vi.fn().mockResolvedValue({ data: [], error: null }),
-  }));
+  const bookingQuery = {
+    select: vi.fn(),
+    in: vi.fn(),
+  };
+  bookingQuery.select.mockReturnValue(bookingQuery);
+  bookingQuery.in.mockResolvedValue({ data: relatedBookings, error: null });
+
+  let invitationFilters = 0;
+  const invitationQuery = {
+    select: vi.fn(),
+    in: vi.fn(),
+  };
+  invitationQuery.select.mockReturnValue(invitationQuery);
+  invitationQuery.in.mockImplementation(() => {
+    invitationFilters += 1;
+    return invitationFilters === 3
+      ? Promise.resolve({ data: invitationRows, error: null })
+      : invitationQuery;
+  });
+
+  const from = vi.fn((table: string) =>
+    table === "bookings" ? bookingQuery : invitationQuery,
+  );
 
   return { rpc, from };
 }
@@ -215,6 +238,51 @@ describe("email queue processor", () => {
     expect(result.retried).toBe(1);
     expect(result.sent).toBe(1);
     expect(mocks.sendNotificationEmail).toHaveBeenCalledTimes(2);
+  });
+
+  it("adds the protected calendar resolver only for the booking owner or an active invitee", async () => {
+    const ownerEmail = {
+      ...baseClaimedEmail,
+      related_booking_id: "booking-1",
+      recipient_user_id: "owner-1",
+      template_data: { bookingId: "booking-1", status: "confirmed" },
+    };
+    const unrelatedEmail = {
+      ...ownerEmail,
+      id: "22222222-2222-4222-8222-222222222222",
+      recipient_user_id: "other-user",
+    };
+    const relatedBooking = {
+      id: "booking-1",
+      user_id: "owner-1",
+      title: "Planning Session",
+      status: "confirmed",
+      starts_at: "2037-01-01T01:00:00.000Z",
+      ends_at: "2037-01-01T02:00:00.000Z",
+      facilities: null,
+      booking_departments: [],
+    };
+    const supabase = createSupabaseMock({
+      claimed: [ownerEmail, unrelatedEmail],
+      relatedBookings: [relatedBooking],
+    });
+
+    await processQueuedEmailNotifications(supabase as never);
+
+    expect(mocks.sendNotificationEmail).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        templateData: expect.objectContaining({
+          calendarEventPath: "/bookings/booking-1/calendar",
+        }),
+      }),
+    );
+    expect(mocks.sendNotificationEmail).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        templateData: expect.objectContaining({ calendarEventPath: undefined }),
+      }),
+    );
   });
 
   it("fails the batch loudly when the sent marker RPC fails", async () => {

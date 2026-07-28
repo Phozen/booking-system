@@ -2,6 +2,7 @@ import { Activity, AlertTriangle, CheckCircle2, Mail, PlugZap } from "lucide-rea
 import type { ReactNode } from "react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
+import { getEmailAppUrlConfig } from "@/lib/email/app-url";
 import { getMicrosoftGraphEmailConfig } from "@/lib/email/microsoft-graph-config";
 import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
@@ -81,6 +82,7 @@ export default async function SystemHealthPage() {
       ? microsoftGraphEmailConfig.validationError
       : null;
   const microsoftConfig = getMicrosoftCalendarSyncConfig();
+  const appUrlConfig = getEmailAppUrlConfig();
   const [emailHealth, queuedEmails, failedSyncs] = await Promise.all([
     getEmailQueueHealth(),
     getCount("email_notifications", "status", "queued"),
@@ -101,11 +103,16 @@ export default async function SystemHealthPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <HealthCard
           title="Application configuration"
-          status={process.env.NEXT_PUBLIC_SUPABASE_URL ? "ok" : "warning"}
+          status={
+            process.env.NEXT_PUBLIC_SUPABASE_URL && appUrlConfig.appUrl
+              ? "ok"
+              : "warning"
+          }
           meta={
-            process.env.NEXT_PUBLIC_SUPABASE_URL
-              ? "Supabase URL is present. Secrets are intentionally hidden."
-              : "NEXT_PUBLIC_SUPABASE_URL is missing."
+            !process.env.NEXT_PUBLIC_SUPABASE_URL
+              ? "NEXT_PUBLIC_SUPABASE_URL is missing."
+              : appUrlConfig.validationError ??
+                "Supabase and canonical Qbook app URLs are present. Secrets are intentionally hidden."
           }
           icon={<Activity className="size-5" aria-hidden="true" />}
         />

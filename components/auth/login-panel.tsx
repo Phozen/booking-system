@@ -48,8 +48,10 @@ export function getLoginMessage(
 
 export function LoginPanel({
   initialMessage,
+  next,
 }: {
   initialMessage?: string;
+  next?: string;
 }) {
   return (
     <Card className="border-border/70 bg-card/95 shadow-xl shadow-primary/10 backdrop-blur">
@@ -68,6 +70,7 @@ export function LoginPanel({
       </CardHeader>
       <CardContent className="grid gap-4 px-5 pb-5 sm:px-6 sm:pb-6">
         <form action={loginWithMicrosoftAction}>
+          {next ? <input type="hidden" name="next" value={next} /> : null}
           <Button type="submit" size="lg" className="h-12 w-full text-base">
             <MicrosoftLogo className="size-5" />
             Continue with Microsoft

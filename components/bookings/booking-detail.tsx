@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Edit3, ExternalLink, Printer, UserPlus } from "lucide-react";
+import { CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -65,6 +65,8 @@ export function BookingDetail({
   highlightInvitations,
   teamsInvitationStatus,
   teamsJoinUrl,
+  calendarEventAvailable,
+  calendarUnavailable,
   departments = [],
 }: {
   booking: EmployeeBooking;
@@ -75,6 +77,8 @@ export function BookingDetail({
   highlightInvitations?: boolean;
   teamsInvitationStatus?: "pending" | "sent" | "failed" | "cancelled";
   teamsJoinUrl?: string | null;
+  calendarEventAvailable?: boolean;
+  calendarUnavailable?: boolean;
   departments?: import("@/lib/departments/queries").Department[];
 }) {
   const approval = booking.approvals[0];
@@ -87,23 +91,14 @@ export function BookingDetail({
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <div className="grid gap-3">
-        <Breadcrumbs
-          items={[
-            isOwnerView
-              ? { label: "My Bookings", href: "/my-bookings" }
-              : { label: "Invitations", href: "/invitations" },
-            { label: booking.title },
-          ]}
-        />
-        <Link
-          href={isOwnerView ? "/my-bookings" : "/invitations"}
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-        >
-          <ArrowLeft data-icon="inline-start" />
-          {isOwnerView ? "My Bookings" : "Invitations"}
-        </Link>
-      </div>
+      <Breadcrumbs
+        items={[
+          isOwnerView
+            ? { label: "My Bookings", href: "/my-bookings" }
+            : { label: "Invitations", href: "/invitations" },
+          { label: booking.title },
+        ]}
+      />
 
       <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -125,9 +120,29 @@ export function BookingDetail({
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:items-end">
+          {teamsJoinUrl ? (
+            <a
+              href={teamsJoinUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({ size: "lg", className: "h-12 w-full sm:w-auto" })}
+            >
+              <ExternalLink data-icon="inline-start" />
+              Join Meeting
+            </a>
+          ) : null}
+          {calendarEventAvailable ? (
+            <Link
+              href={`/bookings/${booking.id}/calendar`}
+              className={buttonVariants({ variant: "secondary", size: "lg", className: "h-12 w-full sm:w-auto" })}
+            >
+              <CalendarDays data-icon="inline-start" />
+              View on Calendar
+            </Link>
+          ) : null}
           {isOwnerView ? (
-            <>
+            <div className="flex flex-col gap-2 sm:flex-row">
               {booking.status === "pending" || booking.status === "confirmed" ? (
                 <RouteLoadingLink
                   href={`/bookings/${booking.id}/edit`}
@@ -152,10 +167,19 @@ export function BookingDetail({
                 <Printer data-icon="inline-start" />
                 Print approval form
               </Link>
-            </>
+            </div>
           ) : null}
         </div>
       </header>
+
+      {calendarUnavailable ? (
+        <Alert variant="warning">
+          <AlertTitle>Outlook event unavailable</AlertTitle>
+          <AlertDescription>
+            The Outlook event is not ready or is no longer available. Your room booking is unchanged.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       {isOwnerView && justCreated ? (
         <Alert variant="success">
@@ -194,36 +218,6 @@ export function BookingDetail({
               >
                 <UserPlus data-icon="inline-start" />
                 Manage participants
-              </Link>
-              <Link
-                href={`/bookings/${booking.id}`}
-                className={buttonVariants({
-                  variant: "outline",
-                  size: "sm",
-                  className: "w-full sm:w-auto",
-                })}
-              >
-                Skip for now
-              </Link>
-              <Link
-                href="/my-bookings"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                  className: "w-full sm:w-auto",
-                })}
-              >
-                Back to My Bookings
-              </Link>
-              <Link
-                href="/calendar"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                  className: "w-full sm:w-auto",
-                })}
-              >
-                View Calendar
               </Link>
             </span>
           </AlertDescription>
@@ -268,18 +262,6 @@ export function BookingDetail({
                       : "Room confirmed; Teams invitation pending"
               : "Room only"}
           </DetailItem>
-          {teamsJoinUrl ? (
-            <DetailItem label="Teams meeting">
-              <a
-                href={teamsJoinUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
-              >
-                Join Teams meeting <ExternalLink className="size-3.5" aria-hidden="true" />
-              </a>
-            </DetailItem>
-          ) : null}
           <DetailItem label="Internal invitations">
             {invitations.length > 0
               ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`

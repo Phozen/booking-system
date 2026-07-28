@@ -4,6 +4,13 @@ const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
   createAdminClient: vi.fn(),
   getPostLoginPath: vi.fn(),
+  getSafeInternalPath: vi.fn((value: string | null) => {
+    if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+      return null;
+    }
+
+    return value;
+  }),
   saveCalendarConnection: vi.fn(),
 }));
 
@@ -17,6 +24,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 vi.mock("@/lib/auth/session", () => ({
   getPostLoginPath: mocks.getPostLoginPath,
+  getSafeInternalPath: mocks.getSafeInternalPath,
 }));
 
 vi.mock("@/lib/integrations/microsoft-365-calendar/delegated", () => ({
@@ -98,6 +106,38 @@ describe("Microsoft auth callback security", () => {
       "https://qbook.example.com/dashboard",
     );
     expect(mocks.saveCalendarConnection).not.toHaveBeenCalled();
+  });
+
+  it("returns a signed-in recipient to a safe booking destination", async () => {
+    const supabase = createSupabase();
+    mocks.createClient.mockResolvedValue(supabase);
+    mocks.getPostLoginPath.mockResolvedValue("/dashboard");
+
+    const response = await GET(
+      new Request(
+        "https://qbook.example.com/auth/callback?code=abc&next=/bookings/11111111-1111-4111-8111-111111111111",
+      ) as never,
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://qbook.example.com/bookings/11111111-1111-4111-8111-111111111111",
+    );
+  });
+
+  it("rejects external and protocol-relative post-login destinations", async () => {
+    const supabase = createSupabase();
+    mocks.createClient.mockResolvedValue(supabase);
+    mocks.getPostLoginPath.mockResolvedValue("/dashboard");
+
+    const external = await GET(
+      new Request("https://qbook.example.com/auth/callback?code=abc&next=https://evil.example") as never,
+    );
+    const protocolRelative = await GET(
+      new Request("https://qbook.example.com/auth/callback?code=abc&next=//evil.example") as never,
+    );
+
+    expect(external.headers.get("location")).toBe("https://qbook.example.com/dashboard");
+    expect(protocolRelative.headers.get("location")).toBe("https://qbook.example.com/dashboard");
   });
 
   it("persists delegated calendar tokens only for the explicit calendar connection", async () => {

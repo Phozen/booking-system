@@ -72,6 +72,23 @@ describe("Microsoft sign-in actions", () => {
     });
   });
 
+  it("preserves a safe booking destination through Microsoft sign-in", async () => {
+    const formData = new FormData();
+    formData.set("next", "/bookings/11111111-1111-4111-8111-111111111111/calendar");
+
+    await expect(loginWithMicrosoftAction(formData)).rejects.toThrow(
+      "redirect:https://login.microsoftonline.com/authorize",
+    );
+
+    expect(mocks.signInWithOAuth).toHaveBeenCalledWith({
+      provider: "azure",
+      options: expect.objectContaining({
+        redirectTo:
+          "https://qbook.example.com/auth/callback?next=%2Fbookings%2F11111111-1111-4111-8111-111111111111%2Fcalendar",
+      }),
+    });
+  });
+
   it("does not request calendar consent before delegated owner sync is ready", async () => {
     process.env.MICROSOFT_365_CALENDAR_SYNC_ENABLED = "false";
 
