@@ -100,7 +100,7 @@ export function BookingDetail({
         ]}
       />
 
-      <header className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-start sm:justify-between">
+      <header className="pb-6">
         <div>
           <BookingStatusBadge status={booking.status} />
           {!isOwnerView && viewerInvitation ? (
@@ -118,65 +118,66 @@ export function BookingDetail({
               ? `${booking.facility.name}, ${booking.facility.level}`
               : "Facility unavailable"}
           </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 sm:justify-end">
-          {teamsJoinUrl ? (
-            <a
-              href={teamsJoinUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({
-                variant: "default",
-                className: "w-full sm:w-auto",
-              })}
-            >
-              <ExternalLink data-icon="inline-start" />
-              Join Meeting
-            </a>
-          ) : null}
-          {calendarEventAvailable ? (
-            <Link
-              href={`/bookings/${booking.id}/calendar`}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({
-                variant: "default",
-                className: "w-full sm:w-auto",
-              })}
-            >
-              <CalendarDays data-icon="inline-start" />
-              View on Calendar
-            </Link>
-          ) : null}
-          {isOwnerView ? (
-            <>
-              {booking.status === "pending" || booking.status === "confirmed" ? (
-                <RouteLoadingLink
-                  href={`/bookings/${booking.id}/edit`}
-                  loadingLabel="Loading edit form..."
-                  loadingVariant="form"
-                  className={buttonVariants({
-                    variant: "default",
-                    className: "w-full sm:w-auto",
-                  })}
-                >
-                  <Edit3 data-icon="inline-start" />
-                  Edit / reschedule
-                </RouteLoadingLink>
-              ) : null}
-              <Link
-                href={`/bookings/${booking.id}/print`}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {teamsJoinUrl ? (
+              <a
+                href={teamsJoinUrl}
+                target="_blank"
+                rel="noreferrer"
                 className={buttonVariants({
-                  variant: "default",
+                  variant: "success",
                   className: "w-full sm:w-auto",
                 })}
               >
-                <Printer data-icon="inline-start" />
-                Print approval form
+                <ExternalLink data-icon="inline-start" />
+                Join Meeting
+              </a>
+            ) : null}
+            {calendarEventAvailable ? (
+              <Link
+                href={`/bookings/${booking.id}/calendar`}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({
+                  variant: "default",
+                  className:
+                    "w-full border-sky-700/70 bg-sky-600 text-white shadow-sky-700/20 hover:bg-sky-700 focus-visible:border-sky-500 focus-visible:ring-sky-500/25 dark:bg-sky-500 dark:text-sky-950 dark:hover:bg-sky-400 sm:w-auto",
+                })}
+              >
+                <CalendarDays data-icon="inline-start" />
+                View on Calendar
               </Link>
-            </>
-          ) : null}
+            ) : null}
+            {isOwnerView ? (
+              <>
+                {booking.status === "pending" || booking.status === "confirmed" ? (
+                  <RouteLoadingLink
+                    href={`/bookings/${booking.id}/edit`}
+                    loadingLabel="Loading edit form..."
+                    loadingVariant="form"
+                    className={buttonVariants({
+                      variant: "warning",
+                      className: "w-full sm:w-auto",
+                    })}
+                  >
+                    <Edit3 data-icon="inline-start" />
+                    Edit / reschedule
+                  </RouteLoadingLink>
+                ) : null}
+                <Link
+                  href={`/bookings/${booking.id}/print`}
+                  className={buttonVariants({
+                    variant: "default",
+                    className:
+                      "w-full border-violet-700/70 bg-violet-600 text-white shadow-violet-700/20 hover:bg-violet-700 focus-visible:border-violet-500 focus-visible:ring-violet-500/25 dark:bg-violet-500 dark:text-violet-950 dark:hover:bg-violet-400 sm:w-auto",
+                  })}
+                >
+                  <Printer data-icon="inline-start" />
+                  Print approval form
+                </Link>
+              </>
+            ) : null}
+          </div>
         </div>
       </header>
 

@@ -10,24 +10,24 @@ const source = readFileSync(
 
 describe("booking detail header actions", () => {
   it("removes the header divider while retaining spacing", () => {
-    expect(source).toContain('className="flex flex-col gap-4 pb-6');
-    expect(source).not.toContain("gap-4 border-b pb-6");
+    expect(source).toContain('className="pb-6"');
+    expect(source).not.toMatch(/<header className="[^"]*border-b/);
   });
 
-  it("keeps all header actions in one coloured, wrapping row", () => {
-    expect(source).toContain('className="flex flex-wrap gap-2 sm:justify-end"');
+  it("places distinct coloured actions below the booking title in one wrapping row", () => {
+    expect(source).toContain('className="mt-5 flex flex-wrap gap-2"');
     expect(source).not.toContain('className="flex flex-col gap-2 sm:flex-row"');
     expect(source).toMatch(
-      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "default"[\s\S]*?Join Meeting/,
+      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "success"[\s\S]*?Join Meeting/,
     );
     expect(source).toMatch(
-      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "default"[\s\S]*?View on Calendar/,
+      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?bg-sky-600[\s\S]*?View on Calendar/,
     );
     expect(source).toMatch(
-      /loadingVariant="form"[\s\S]*?variant: "default"[\s\S]*?Edit \/ reschedule/,
+      /loadingVariant="form"[\s\S]*?variant: "warning"[\s\S]*?Edit \/ reschedule/,
     );
     expect(source).toMatch(
-      /href=\{`\/bookings\/\$\{booking\.id\}\/print`\}[\s\S]*?variant: "default"[\s\S]*?Print approval form/,
+      /href=\{`\/bookings\/\$\{booking\.id\}\/print`\}[\s\S]*?bg-violet-600[\s\S]*?Print approval form/,
     );
   });
 });
