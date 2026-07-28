@@ -18,16 +18,16 @@ describe("booking detail header actions", () => {
     expect(source).toContain('className="mt-5 flex flex-wrap gap-2"');
     expect(source).not.toContain('className="flex flex-col gap-2 sm:flex-row"');
     expect(source).toMatch(
-      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?variant: "success"[\s\S]*?Join Meeting/,
+      /href=\{teamsJoinUrl\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?bg-\[#5b5fc7\][\s\S]*?Join Teams Meeting/,
     );
     expect(source).toMatch(
-      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?bg-sky-600[\s\S]*?View on Calendar/,
+      /href=\{`\/bookings\/\$\{booking\.id\}\/calendar`\}[\s\S]*?target="_blank"[\s\S]*?rel="noreferrer"[\s\S]*?bg-sky-600[\s\S]*?View Outlook Calendar/,
     );
     expect(source).toMatch(
-      /loadingVariant="form"[\s\S]*?variant: "warning"[\s\S]*?Edit \/ reschedule/,
+      /loadingVariant="form"[\s\S]*?variant: "warning"[\s\S]*?text-white[\s\S]*?>[\s\S]*?Edit\s*</,
     );
     expect(source).toMatch(
-      /href=\{`\/bookings\/\$\{booking\.id\}\/print`\}[\s\S]*?bg-violet-600[\s\S]*?Print approval form/,
+      /href=\{`\/bookings\/\$\{booking\.id\}\/print`\}[\s\S]*?bg-violet-600[\s\S]*?Print Form/,
     );
   });
 });

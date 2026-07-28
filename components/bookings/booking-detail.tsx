@@ -125,12 +125,13 @@ export function BookingDetail({
                 target="_blank"
                 rel="noreferrer"
                 className={buttonVariants({
-                  variant: "success",
-                  className: "w-full sm:w-auto",
+                  variant: "default",
+                  className:
+                    "w-full border-[#5b5fc7] bg-[#5b5fc7] text-white shadow-[#5b5fc7]/25 hover:bg-[#464775] focus-visible:border-[#7b83eb] focus-visible:ring-[#7b83eb]/25 dark:bg-[#7b83eb] dark:text-slate-950 dark:hover:bg-[#959cf4] sm:w-auto",
                 })}
-              >
-                <ExternalLink data-icon="inline-start" />
-                Join Meeting
+            >
+              <ExternalLink data-icon="inline-start" />
+              Join Teams Meeting
               </a>
             ) : null}
             {calendarEventAvailable ? (
@@ -145,7 +146,7 @@ export function BookingDetail({
                 })}
               >
                 <CalendarDays data-icon="inline-start" />
-                View on Calendar
+                View Outlook Calendar
               </Link>
             ) : null}
             {isOwnerView ? (
@@ -157,11 +158,11 @@ export function BookingDetail({
                     loadingVariant="form"
                     className={buttonVariants({
                       variant: "warning",
-                      className: "w-full sm:w-auto",
+                      className: "w-full text-white hover:text-white dark:text-white sm:w-auto",
                     })}
                   >
                     <Edit3 data-icon="inline-start" />
-                    Edit / reschedule
+                    Edit
                   </RouteLoadingLink>
                 ) : null}
                 <Link
@@ -173,7 +174,7 @@ export function BookingDetail({
                   })}
                 >
                   <Printer data-icon="inline-start" />
-                  Print approval form
+                  Print Form
                 </Link>
               </>
             ) : null}
