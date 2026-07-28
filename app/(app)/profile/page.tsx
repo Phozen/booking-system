@@ -1,6 +1,11 @@
 import { LockKeyhole } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
+import {
+  getMicrosoftCalendarSyncConfig,
+  isDelegatedBookingOwnerCalendarSyncReady,
+} from "@/lib/integrations/microsoft-365-calendar/config";
+import { getOwnMicrosoftCalendarConnectionStatus } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { getUserNotificationPreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/profile/queries";
 import {
@@ -11,19 +16,37 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProfileDetail } from "@/components/profile/profile-detail";
 import { ProfileForm } from "@/components/profile/profile-form";
+import { MicrosoftCalendarConnectionCard } from "@/components/profile/microsoft-calendar-connection-card";
 import { NotificationPreferencesForm } from "@/components/notifications/notification-preferences-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ calendar?: string | string[] }>;
+}) {
   const { user } = await requireUser();
   const supabase = await createClient();
-  const [profile, settings, notificationPreferences] = await Promise.all([
-    getOwnProfile(supabase, user.id),
-    getAppSettings(),
-    getUserNotificationPreferences(supabase, user.id),
-  ]);
+  const [params, profile, settings, notificationPreferences, calendarConnection] =
+    await Promise.all([
+      searchParams,
+      getOwnProfile(supabase, user.id),
+      getAppSettings(),
+      getUserNotificationPreferences(supabase, user.id),
+      getOwnMicrosoftCalendarConnectionStatus(user.id),
+    ]);
+  const calendar = params.calendar;
+  const calendarMessage =
+    calendar === "connected" ||
+    calendar === "error" ||
+    calendar === "unavailable"
+      ? calendar
+      : undefined;
+  const calendarSyncReady = isDelegatedBookingOwnerCalendarSyncReady(
+    getMicrosoftCalendarSyncConfig(),
+  );
 
   if (!profile) {
     return (
@@ -49,6 +72,11 @@ export default async function ProfilePage() {
         <ProfileDetail profile={profile} />
         <div className="grid gap-6">
           <ProfileForm profile={profile} />
+          <MicrosoftCalendarConnectionCard
+            connection={calendarConnection}
+            calendarMessage={calendarMessage}
+            calendarSyncReady={calendarSyncReady}
+          />
           <section className="rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-normal">

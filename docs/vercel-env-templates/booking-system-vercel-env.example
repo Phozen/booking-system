@@ -16,19 +16,24 @@ COMPANY_NAME=YOUR_COMPANY_NAME
 SYSTEM_CONTACT_EMAIL=YOUR_CONTACT_EMAIL
 
 # Email provider
-EMAIL_PROVIDER=smtp
+EMAIL_PROVIDER=microsoft_graph
 EMAIL_FROM=Booking System <noreply@yourcompany.com>
 EMAIL_API_KEY=
 
-# Microsoft 365 SMTP. For Brevo, use smtp-relay.brevo.com on port 587 with
-# SMTP_SECURE=false and SMTP_REQUIRE_TLS=true; SMTP_PASSWORD must be a Brevo
-# SMTP key, not a Brevo API key or account password.
-SMTP_HOST=smtp.office365.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_REQUIRE_TLS=true
-SMTP_USER=noreply@yourcompany.com
-SMTP_PASSWORD=PASTE_MICROSOFT_365_MAILBOX_PASSWORD_OR_APP_PASSWORD_HERE
+# Microsoft Graph email. The sender must be the mailbox to which the Entra app
+# is restricted. EMAIL_FROM should identify that same mailbox.
+EMAIL_MICROSOFT_TENANT_ID=PASTE_TENANT_ID_HERE
+EMAIL_MICROSOFT_CLIENT_ID=PASTE_EMAIL_APP_CLIENT_ID_HERE
+EMAIL_MICROSOFT_CLIENT_SECRET=PASTE_EMAIL_APP_CLIENT_SECRET_HERE
+EMAIL_MICROSOFT_SENDER=noreply@yourcompany.com
+
+# Optional generic SMTP fallback for a non-Microsoft provider.
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_REQUIRE_TLS=
+SMTP_USER=
+SMTP_PASSWORD=
 
 # Microsoft 365 Calendar sync disabled until IT setup is ready
 CALENDAR_SYNC_PROVIDER=disabled

@@ -18,7 +18,16 @@ import {
 
 describe("Microsoft sign-in actions", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     process.env.MICROSOFT_TENANT_ID = "11111111-1111-4111-8111-111111111111";
+    process.env.CALENDAR_SYNC_PROVIDER = "microsoft_graph";
+    process.env.MICROSOFT_365_CALENDAR_SYNC_ENABLED = "true";
+    process.env.MICROSOFT_SYNC_MODE = "booking_owner_calendar";
+    process.env.MICROSOFT_GRAPH_AUTH_MODE = "delegated";
+    process.env.MICROSOFT_CLIENT_ID = "calendar-client-id";
+    process.env.MICROSOFT_CLIENT_SECRET = "calendar-client-secret";
+    process.env.MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY =
+      "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
     mocks.headers.mockResolvedValue(new Headers({ origin: "https://qbook.example.com" }));
     mocks.createClient.mockResolvedValue({
       auth: { signInWithOAuth: mocks.signInWithOAuth },
@@ -61,5 +70,15 @@ describe("Microsoft sign-in actions", () => {
         queryParams: { prompt: "consent" },
       },
     });
+  });
+
+  it("does not request calendar consent before delegated owner sync is ready", async () => {
+    process.env.MICROSOFT_365_CALENDAR_SYNC_ENABLED = "false";
+
+    await expect(connectMicrosoftCalendarAction()).rejects.toThrow(
+      "redirect:https://qbook.example.com/profile?calendar=unavailable",
+    );
+
+    expect(mocks.signInWithOAuth).not.toHaveBeenCalled();
   });
 });

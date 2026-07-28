@@ -277,12 +277,13 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Call `GET /api/cron/email/reminders` with valid authorization; confirm it queues eligible reminders only and returns safe counts.
 - [ ] Confirm the reminder cron route does not send email directly; queued rows are sent by `/api/cron/email/process`.
 - [ ] Optional: configure Resend and confirm a real email sends and `sent_at` is populated.
+- [ ] Optional: configure Microsoft Graph email and confirm a real email sends, appears in the configured sender mailbox Sent Items, and `sent_at` is populated.
 - [ ] Optional: configure SMTP locally or in Vercel and confirm a real email sends and `sent_at` is populated.
-- [ ] Optional Microsoft 365 SMTP values: `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=true`, `SMTP_USER=<service-mailbox>`, `SMTP_PASSWORD=<secret>`.
-- [ ] If Microsoft 365 SMTP fails, confirm `last_error` is safe and mentions authentication, connection, or TLS without exposing the SMTP password.
+- [ ] For Microsoft Graph email, confirm the Entra app has app-only `Mail.Send`, tenant admin consent, and Exchange scope limited to `EMAIL_MICROSOFT_SENDER`.
+- [ ] If Microsoft Graph email fails, confirm `last_error` is safe and does not expose an access token or client secret.
 - [ ] Confirm Supabase Auth emails are understood as separate from the app email queue and are configured in Supabase Dashboard if needed.
 
-### SMTP Vercel Verification
+### Microsoft Graph Email Vercel Verification
 
 - [ ] Copy `docs/vercel-env-templates/booking-system-vercel-env.example` to `.env.vercel.local`.
 - [ ] Replace placeholder values locally and paste/import values into Vercel Project Settings > Environment Variables.
@@ -291,7 +292,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Create a queued booking or invitation notification.
 - [ ] Open `/admin/email-notifications` as Admin or Super Admin.
 - [ ] Click `Process queued emails`.
-- [ ] Confirm provider shows `SMTP`.
+- [ ] Confirm provider shows `MICROSOFT_GRAPH` and the message appears in the sender mailbox Sent Items.
 - [ ] Confirm status changes to `sent`.
 - [ ] If failed, review `last_error`.
 - [ ] Confirm no secrets appear in UI or log output.
@@ -352,6 +353,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm service role key is never used in client components.
 - [ ] Confirm `EMAIL_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are not exposed to browser bundles.
 - [ ] Confirm `SMTP_PASSWORD` is not exposed to browser bundles.
+- [ ] Confirm `EMAIL_MICROSOFT_CLIENT_SECRET` is not exposed to browser bundles.
 - [ ] Confirm `MICROSOFT_CLIENT_SECRET` is not exposed to browser bundles.
 - [ ] Confirm Microsoft 365 Calendar sync remains disabled unless Microsoft Entra setup and manual Graph sync QA are intentionally being tested.
 - [ ] Confirm employees cannot access Microsoft 365 sync tracking records.
@@ -391,7 +393,7 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Confirm `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` by default.
 - [ ] Confirm `MICROSOFT_SYNC_MODE=disabled` by default.
 - [ ] Confirm `CALENDAR_SYNC_PROVIDER=disabled` and `N8N_CALENDAR_SYNC_ENABLED=false` by default.
-- [ ] Confirm Microsoft Graph sync is documented separately from Microsoft 365 SMTP email.
+- [ ] Confirm Microsoft Graph calendar sync is documented separately from Microsoft Graph email delivery.
 - [ ] Confirm migrations `0014_microsoft_calendar_sync_groundwork.sql` and `0021_n8n_calendar_webhook_provider.sql` are applied before enabling future calendar sync.
 - [ ] Confirm `booking_calendar_syncs` RLS denies employees direct access.
 - [ ] Confirm only sanitized sync errors are documented for `last_error`.

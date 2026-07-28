@@ -77,6 +77,7 @@ Server-only secrets:
 ```txt
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 EMAIL_API_KEY=
+EMAIL_MICROSOFT_CLIENT_SECRET=
 SMTP_PASSWORD=
 MICROSOFT_CLIENT_SECRET=
 ```
@@ -90,6 +91,9 @@ COMPANY_NAME=Your Company Name
 SYSTEM_CONTACT_EMAIL=admin@example.com
 EMAIL_PROVIDER=
 EMAIL_FROM=
+EMAIL_MICROSOFT_TENANT_ID=
+EMAIL_MICROSOFT_CLIENT_ID=
+EMAIL_MICROSOFT_SENDER=
 SMTP_HOST=
 SMTP_PORT=
 SMTP_SECURE=
@@ -108,14 +112,15 @@ Security rules:
 - Only `NEXT_PUBLIC_*` variables are browser-exposed.
 - `SUPABASE_SERVICE_ROLE_KEY` must remain server-only.
 - `EMAIL_API_KEY` must remain server-only and is used by Resend.
+- `EMAIL_MICROSOFT_CLIENT_SECRET` must remain server-only and is used by Microsoft Graph email.
 - `SMTP_PASSWORD` must remain server-only and is used by the SMTP provider.
 - `MICROSOFT_CLIENT_SECRET` must remain server-only and is used by the optional Microsoft Graph Calendar sync.
 - Real secrets must be entered in Vercel, never committed to the repository.
 - Do not store provider API keys in `system_settings`.
 
-Email can remain disabled for MVP testing. `EMAIL_PROVIDER` can be blank, `none`, `resend`, or `smtp`. If provider configuration is missing, queued email processing should fail safely with a clear configuration message instead of crashing.
+Email can remain disabled for controlled testing. `EMAIL_PROVIDER` can be blank, `none`, `microsoft_graph`, `resend`, or `smtp`. If provider configuration is missing, queued email processing should fail safely with a clear configuration message instead of crashing.
 
-Microsoft 365 Calendar sync is separate from SMTP email delivery. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra app registration, Graph permissions, and either the central calendar target or booking-owner mailbox mode are configured and verified. See `docs/MICROSOFT_365_CALENDAR_SYNC.md`.
+Microsoft Graph email and Microsoft 365 Calendar sync are separate. Keep `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until the calendar integration is configured and verified. See `docs/MICROSOFT_365_CALENDAR_SYNC.md`.
 
 ## Environment Groups
 
@@ -123,7 +128,7 @@ Production:
 
 - `NEXT_PUBLIC_APP_URL` should be the production Vercel URL until a custom domain is ready.
 - Supabase URL and keys should point to the production Supabase project.
-- Email variables can remain blank until Resend or SMTP is configured.
+- Email variables can remain blank until Microsoft Graph, Resend, or SMTP is configured.
 - Microsoft 365 Calendar sync variables can remain disabled/blank until Stage 2 sync is ready.
 
 Preview:
@@ -136,7 +141,7 @@ Local:
 
 - Store values in `.env.local`.
 - Use `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
-- Leave email provider variables blank unless testing real Resend or SMTP delivery.
+- Leave email provider variables blank unless testing real Microsoft Graph, Resend, or SMTP delivery.
 - Leave Microsoft 365 Calendar sync disabled unless testing the future Graph implementation.
 
 ## Supabase Production Setup
@@ -294,6 +299,7 @@ Supported app providers:
 
 ```txt
 EMAIL_PROVIDER=none
+EMAIL_PROVIDER=microsoft_graph
 EMAIL_PROVIDER=resend
 EMAIL_PROVIDER=smtp
 ```
@@ -340,43 +346,43 @@ the response and `/admin/system-health`; follow `docs/EMAIL_OPERATIONS.md` to
 retry safely. The legacy process/reminder routes remain protected manual
 endpoints and are not separately scheduled.
 
-### SMTP Setup For Microsoft 365
+### Microsoft Graph Email Setup
 
-SMTP is supported for Microsoft 365 and other SMTP providers.
+For Microsoft 365, use Microsoft Graph app-only delivery. It removes the mailbox-password SMTP dependency while keeping the existing durable queue, templates, retry behaviour, and Admin email screens unchanged.
 
-The SMTP provider implementation reads these exact environment names:
+The Microsoft Graph provider reads these exact server-only environment names:
 
 ```txt
 EMAIL_PROVIDER
 EMAIL_FROM
-SMTP_HOST
-SMTP_PORT
-SMTP_SECURE
-SMTP_REQUIRE_TLS
-SMTP_USER
-SMTP_PASSWORD
+EMAIL_MICROSOFT_TENANT_ID
+EMAIL_MICROSOFT_CLIENT_ID
+EMAIL_MICROSOFT_CLIENT_SECRET
+EMAIL_MICROSOFT_SENDER
 ```
 
-Example Vercel environment values:
+Set up the dedicated Entra email application first:
+
+1. Grant it application `Mail.Send` permission and obtain tenant admin consent.
+2. Limit it in Exchange to the intended sender mailbox using Application RBAC or an IT-approved equivalent.
+3. Put the following values in Vercel Production. `EMAIL_FROM` must identify the same mailbox as `EMAIL_MICROSOFT_SENDER`.
 
 ```txt
-EMAIL_PROVIDER=smtp
+EMAIL_PROVIDER=microsoft_graph
 EMAIL_FROM=Booking System <noreply-or-service-mailbox@company.com>
-SMTP_HOST=smtp.office365.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_REQUIRE_TLS=true
-SMTP_USER=noreply-or-service-mailbox@company.com
-SMTP_PASSWORD=mailbox-password-or-app-password
+EMAIL_MICROSOFT_TENANT_ID=tenant-id
+EMAIL_MICROSOFT_CLIENT_ID=email-app-client-id
+EMAIL_MICROSOFT_CLIENT_SECRET=email-app-client-secret
+EMAIL_MICROSOFT_SENDER=noreply-or-service-mailbox@company.com
 ```
 
-Microsoft 365 notes:
+Microsoft Graph email notes:
 
-- SMTP AUTH may need to be enabled for the specific mailbox.
 - Prefer a dedicated service mailbox such as `noreply@company.com`.
 - Avoid using a personal user mailbox for app notifications.
-- Do not commit SMTP credentials.
-- If SMTP is not ready, use `EMAIL_PROVIDER=none` or leave `EMAIL_PROVIDER` blank so queued emails fail safely with a configuration message.
+- The app records provider `microsoft_graph`; Graph `sendMail` does not provide a provider message ID.
+- Do not commit Entra client secrets.
+- If Graph is not ready, use `EMAIL_PROVIDER=none` or leave `EMAIL_PROVIDER` blank so queued emails fail safely with a configuration message.
 - Use `docs/vercel-env-templates/booking-system-vercel-env.example` as the safe Vercel import template and copy it locally to `.env.vercel.local` before replacing placeholders.
 
 Brevo SMTP notes:
@@ -386,14 +392,14 @@ Brevo SMTP notes:
 - `SMTP_PASSWORD` must be a Brevo SMTP key, not a Brevo API key or account password.
 - `EMAIL_FROM` must be a sender address verified in Brevo. A personal verified sender is acceptable before a custom domain is ready.
 
-Manual SMTP smoke test:
+Manual Microsoft Graph smoke test:
 
-1. Configure the SMTP environment variables in Vercel.
+1. Configure the Microsoft Graph email environment variables in Vercel.
 2. Redeploy the app.
 3. Create or queue a booking/invitation notification.
 4. Open `/admin/email-notifications` as Admin or Super Admin.
 5. Click `Process queued emails`.
-6. Confirm the provider shows `SMTP`.
+6. Confirm the provider shows `MICROSOFT_GRAPH` and the message appears in the sender mailbox Sent Items.
 7. Confirm the notification status changes to `sent`.
 8. If sending fails, review the safe `last_error` message.
 9. Confirm no secrets appear in the UI or log output.

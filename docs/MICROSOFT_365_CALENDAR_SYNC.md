@@ -1,8 +1,8 @@
 # Microsoft 365 Calendar Sync
 
-This document defines the planned Microsoft 365 Calendar integration for the Booking System.
+This document defines the implemented Microsoft 365 Calendar integration for the Booking System.
 
-Stage 2 implements outbound Microsoft Graph sync. The `n8n_webhook` provider is also available for Outlook event lifecycle sync through n8n create, update, and delete workflows. The app does not import Microsoft 365 calendar events, create Teams meetings, or perform two-way sync.
+The app provides outbound Microsoft Graph sync. The `n8n_webhook` provider is also available for Outlook event lifecycle sync through n8n create, update, and delete workflows. Direct Microsoft Graph delegated booking-owner sync can create Teams meetings for hybrid room bookings. The app does not import Microsoft 365 calendar events or perform two-way sync.
 
 ## Overview
 
@@ -18,7 +18,7 @@ When `CALENDAR_SYNC_PROVIDER=n8n_webhook` and `N8N_CALENDAR_SYNC_ENABLED=true`, 
 
 ## Recommended V1 Architecture
 
-Recommended v1 targets: central booking calendar mailbox for shared operational visibility, or booking-owner mailboxes for company-only deployments where every staff account belongs to the same Microsoft 365 tenant.
+The selected Qbook rollout model is delegated booking-owner mailboxes: each organiser connects their own eligible company Microsoft account, and Qbook creates the Outlook event (and, for hybrid bookings, Teams meeting) in that organiser's calendar. Qbook remains the authoritative room-booking ledger.
 
 Example:
 
@@ -30,14 +30,14 @@ The central calendar keeps operations simple because the app writes confirmed bo
 
 Facility or room resource calendars are the best long-term model if the company already maintains Microsoft 365 room calendars. That model can be added later by mapping facilities to external calendar IDs.
 
-Booking-owner mode supports two Microsoft Graph auth models:
+Booking-owner mode supports two Microsoft Graph auth models. The selected rollout model is delegated:
 
 - `MICROSOFT_GRAPH_AUTH_MODE=app_only` writes to `/users/{ownerEmail}/events` with application permissions and should be constrained by IT with an Exchange Application Access Policy or mail-enabled security group.
 - `MICROSOFT_GRAPH_AUTH_MODE=delegated` writes to `/me/events` with the booking owner's connected Microsoft OAuth token. Each user must connect Microsoft Calendar from their profile.
 
 ## Sync Target Options
 
-### Option 1: Central Booking Calendar Mailbox
+### Option 1: Central Booking Calendar Mailbox (not selected for this rollout)
 
 All confirmed bookings sync to one shared Microsoft 365 calendar.
 
@@ -51,7 +51,7 @@ Tradeoff:
 
 - Does not place events directly on each room resource calendar.
 
-### Option 2: Facility Or Room Resource Calendars
+### Option 2: Facility Or Room Resource Calendars (future option)
 
 Each Booking System facility maps to a Microsoft 365 room/resource calendar.
 
@@ -72,7 +72,7 @@ Tradeoff:
 
 - Requires facility-to-calendar mapping and more IT setup.
 
-### Option 3: Organizer Calendar
+### Option 3: Organizer Calendar (selected rollout model)
 
 Events sync to the booking owner's company mailbox calendar.
 
@@ -80,7 +80,7 @@ This is supported for company-only Microsoft 365 tenants through `MICROSOFT_SYNC
 
 ## Sync Behavior By Booking Status
 
-| Booking status | Planned Microsoft 365 behavior |
+| Booking status | Microsoft 365 behavior |
 | --- | --- |
 | Pending | Do not sync yet |
 | Confirmed | Create or update Microsoft 365 event |
@@ -91,7 +91,7 @@ This is supported for company-only Microsoft 365 tenants through `MICROSOFT_SYNC
 
 Sync is a side effect after booking state changes. Microsoft Graph failures do not roll back booking creation, approval, or cancellation. Failures are recorded in `booking_calendar_syncs` for Super Admin review and retry.
 
-## Planned Event Content
+## Event Content
 
 Subject:
 
@@ -217,13 +217,13 @@ For example:
 MICROSOFT_DEFAULT_CALENDAR_ID=booking-calendar@company.com
 ```
 
-In `booking_owner_calendar` mode, the app uses the booking owner's `profiles.email` as the Microsoft Graph user target:
+In app-only `booking_owner_calendar` mode, the app uses the booking owner's `profiles.email` as the Microsoft Graph user target:
 
 ```txt
 /users/{bookingOwnerEmail}/events
 ```
 
-The booking owner email must be valid and match `system_settings.allowed_email_domains`. If the domain allowlist is empty, or the email is missing, malformed, or outside the allowlist, the sync attempt is marked `skipped` with a safe reason. Existing synced events keep using the stored `booking_calendar_syncs.external_calendar_id` for update/delete, even if the profile email changes later.
+The booking owner email must be valid and match `system_settings.allowed_email_domains`. If the domain allowlist is empty, or the email is missing, malformed, or outside the allowlist, the sync attempt is marked `skipped` with a safe reason. Delegated mode writes to `/me/events` only after confirming that the connected Microsoft account matches the booking owner. Existing synced events keep using the stored `booking_calendar_syncs.external_calendar_id` for update/delete, even if the profile email changes later.
 
 ## Database Sync Tracking
 
@@ -383,22 +383,21 @@ The page does not show client secrets, access tokens, or raw Microsoft responses
 
 ## Manual IT Setup Checklist
 
-- [ ] Choose central calendar mailbox, booking-owner mailbox mode, or confirm room-calendar strategy.
-- [ ] Create or identify the Microsoft 365 calendar/mailbox for central mode, or confirm all booking owner emails are company Microsoft 365 mailboxes.
+- [x] Use delegated booking-owner mailbox mode for the rollout.
+- [ ] Confirm every pilot organiser has an eligible company Microsoft 365 mailbox and connects that same account from Profile.
 - [ ] Create Microsoft Entra app registration.
-- [ ] Grant the required Microsoft Graph calendar permissions.
-- [ ] For booking-owner mode, constrain application access to company staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
-- [ ] Provide tenant ID, client ID, client secret, and central calendar ID if using central mode to the deployment owner.
+- [ ] Grant delegated `Calendars.ReadWrite` consent for the Entra application and allow Teams meetings for pilot users.
+- [ ] Provide tenant ID, client ID, client secret, and a 32-byte base64 delegated-token encryption key to the deployment owner. A central calendar ID is not used in this model.
 - [ ] Add Microsoft env vars in Vercel as server-side variables.
 - [ ] Apply every migration in `supabase/migrations` to the target Supabase project.
-- [ ] Keep sync disabled until Stage 2 code is deployed and verified.
+- [ ] Enable the delegated owner-calendar configuration only after the controlled Outlook/Teams QA below succeeds.
 - [ ] To test Microsoft login, enable the Azure provider in Supabase Auth, add `{NEXT_PUBLIC_APP_URL}/auth/callback` as an allowed Supabase redirect URL, and add the Supabase provider callback URL shown by Supabase as the Microsoft Entra redirect URI.
 
 ## Implementation Notes
 
 The implementation includes:
 
-- Microsoft identity client credentials token request.
+- Microsoft Graph client-credentials token request for app-only modes and delegated-token refresh for the selected organiser-calendar mode.
 - Microsoft Graph fetch wrapper.
 - Confirmed-booking event create/update.
 - Cancelled-booking event delete.
@@ -450,7 +449,7 @@ https://graph.microsoft.com/.default
 - Facility-to-calendar mapping is deferred.
 - Inbound Microsoft 365 availability import is out of scope.
 - Two-way sync is out of scope.
-- Hybrid Teams meetings are supported only for direct Microsoft Graph delegated booking-owner calendar sync. A confirmed hybrid booking creates or updates one Outlook event with `isOnlineMeeting: true` and `onlineMeetingProvider: teamsForBusiness`; its existing internal QBook invitees are the Outlook attendees and the room remains the location. Pending requests do not create an event. The Teams join URL is not stored or displayed by QBook.
+- Hybrid Teams meetings are supported only for direct Microsoft Graph delegated booking-owner calendar sync. A confirmed hybrid booking creates or updates one Outlook event with `isOnlineMeeting: true` and `onlineMeetingProvider: teamsForBusiness`; its existing internal QBook invitees are the Outlook attendees and the room remains the location. Pending requests do not create an event. Qbook does not persist the Teams join URL; an authorised organiser or invitee retrieves it from the synced event only when needed.
 - Central-calendar mode, n8n-only mode, disabled sync, app-only owner sync, external guests, two-way sync, and turning Teams off after confirmation are out of scope. To change a confirmed meeting type, cancel and recreate it.
 
 ## Hybrid meeting prerequisites

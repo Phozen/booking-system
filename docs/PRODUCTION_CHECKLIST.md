@@ -59,11 +59,11 @@ Server-side app defaults:
 - [ ] `SMTP_SECURE` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_REQUIRE_TLS` is blank until SMTP is ready, or set intentionally.
 - [ ] `SMTP_USER` is blank until SMTP is ready, or set to the SMTP mailbox username.
-- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=false` until Microsoft Entra setup and manual Graph sync QA are complete.
+- [ ] `MICROSOFT_365_CALENDAR_SYNC_ENABLED=true` only after Microsoft Entra setup and manual delegated Outlook/Teams sync QA are complete.
 - [ ] `MICROSOFT_TENANT_ID` is set to the exact company Entra tenant ID before any Qbook sign-in is enabled.
-- [ ] `MICROSOFT_CLIENT_ID` is blank until Microsoft 365 Calendar sync is ready, or set from Microsoft Entra.
-- [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is blank until Microsoft 365 Calendar sync is ready, or set to the central booking calendar ID when using `central_calendar`.
-- [ ] `MICROSOFT_SYNC_MODE=disabled` until Microsoft 365 Calendar sync is ready to test; use `booking_owner_calendar` only after allowed company domains are configured.
+- [ ] `MICROSOFT_CLIENT_ID` and server-only `MICROSOFT_CLIENT_SECRET` are set from the approved Microsoft Entra application.
+- [ ] `MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY` is a server-only base64 32-byte key and is backed up through the approved secret-management process.
+- [ ] `CALENDAR_SYNC_PROVIDER=microsoft_graph`, `MICROSOFT_SYNC_MODE=booking_owner_calendar`, and `MICROSOFT_GRAPH_AUTH_MODE=delegated` are set for the rollout.
 - [ ] `MICROSOFT_GRAPH_BASE_URL=https://graph.microsoft.com/v1.0`, unless a different Microsoft Graph endpoint is intentionally required.
 - [ ] Production `system_settings` values intentionally override or match the environment identity fallbacks.
 
@@ -142,10 +142,10 @@ Email can stay disabled for MVP testing.
 - [ ] Processing queued emails with blank provider config fails safely with a clear error.
 - [ ] Resend sender domain or sender email is verified before real sending.
 - [ ] If using SMTP, SMTP host/port/TLS/user/password are configured in Vercel as server-side variables.
-- [ ] If using Microsoft 365 SMTP, SMTP AUTH is enabled for the dedicated service mailbox.
-- [ ] If using Microsoft 365 SMTP, recommended values are `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and `SMTP_REQUIRE_TLS=true`.
+- [ ] If using Microsoft Graph email, the Entra app has app-only `Mail.Send`, tenant admin consent, and Exchange access limited to `EMAIL_MICROSOFT_SENDER`.
+- [ ] If using Microsoft Graph email, `EMAIL_FROM` identifies the same mailbox as `EMAIL_MICROSOFT_SENDER`.
 - [ ] `EMAIL_FROM` matches a verified sender before real sending.
-- [ ] Queued email processing works from `/admin/email-notifications` after Resend or SMTP is configured.
+- [ ] Queued email processing works from `/admin/email-notifications` after Microsoft Graph, Resend, or SMTP is configured.
 - [ ] `vercel.json` schedules `/api/cron/email/process` every 5 minutes.
 - [ ] `vercel.json` schedules `/api/cron/email/reminders` every 15 minutes.
 - [ ] Both cron routes reject missing or invalid `Authorization: Bearer ${CRON_SECRET}`.
@@ -155,14 +155,14 @@ Email can stay disabled for MVP testing.
 
 ## Microsoft 365 Calendar Sync
 
-Microsoft 365 Calendar sync is separate from SMTP email delivery and should remain disabled until Microsoft Entra setup and manual Graph sync QA are ready.
+Microsoft 365 Calendar sync is separate from Microsoft Graph email delivery and should remain disabled until Microsoft Entra setup and manual Graph sync QA are ready.
 
 - [ ] Recommended v1 target is either a central booking calendar mailbox or booking-owner company mailboxes for single-tenant company use.
-- [ ] Microsoft Graph calendar sync is not confused with Microsoft 365 SMTP email settings.
+- [ ] Microsoft Graph calendar sync is not confused with Microsoft Graph email settings.
 - [ ] Microsoft Entra app registration and permissions are reviewed by IT before enabling sync.
 - [ ] `MICROSOFT_CLIENT_SECRET` is stored only in Vercel environment variables.
 - [ ] `MICROSOFT_DEFAULT_CALENDAR_ID` is the central booking calendar mailbox user ID or user principal name when using `central_calendar`.
-- [ ] If using `booking_owner_calendar`, allowed company email domains are configured and Microsoft Graph app-only access is constrained to staff mailboxes with an Exchange Application Access Policy or mail-enabled security group.
+- [ ] Allowed company email domains are configured, every pilot organiser can connect their own eligible Microsoft account, and delegated `Calendars.ReadWrite` consent is approved.
 - [ ] `/admin/integrations/microsoft-calendar` is available to Super Admins only.
 - [ ] Disabled sync, missing-config sync, confirmed-booking sync, approval sync, cancellation sync, and retry have been manually tested before production enablement.
 - [ ] `docs/MICROSOFT_365_CALENDAR_SYNC.md` has been reviewed by the deployment owner and IT.

@@ -4,6 +4,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { appConfig } from "@/config/app";
+import {
+  getMicrosoftCalendarSyncConfig,
+  isDelegatedBookingOwnerCalendarSyncReady,
+} from "@/lib/integrations/microsoft-365-calendar/config";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionResult = {
@@ -72,6 +76,14 @@ export async function connectMicrosoftCalendarAction(): Promise<void> {
   let errorRedirect = "";
   const requestHeaders = await headers();
   const origin = requestHeaders.get("origin") ?? appConfig.appUrl;
+
+  if (
+    !isDelegatedBookingOwnerCalendarSyncReady(
+      getMicrosoftCalendarSyncConfig(),
+    )
+  ) {
+    redirect(`${origin}/profile?calendar=unavailable`);
+  }
 
   try {
     const supabase = await createClient();

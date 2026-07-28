@@ -16,9 +16,11 @@ type MicrosoftCalendarConnectionStatus = {
 export function MicrosoftCalendarConnectionCard({
   connection,
   calendarMessage,
+  calendarSyncReady,
 }: {
   connection: MicrosoftCalendarConnectionStatus;
-  calendarMessage?: "connected" | "error";
+  calendarMessage?: "connected" | "error" | "unavailable";
+  calendarSyncReady: boolean;
 }) {
   const needsReconnect =
     connection.status === "reconnect_required" ||
@@ -37,7 +39,9 @@ export function MicrosoftCalendarConnectionCard({
           <p className="mt-1 text-sm text-muted-foreground">
             {connection.connected
               ? "Connected for delegated booking calendar sync."
-              : "Connect Microsoft Calendar so your bookings can sync to Outlook."}
+              : calendarSyncReady
+                ? "Connect Microsoft Calendar so your bookings can sync to Outlook."
+                : "Calendar sync is not configured yet. Ask a system administrator to complete the Microsoft 365 setup."}
           </p>
         </div>
       </div>
@@ -54,6 +58,15 @@ export function MicrosoftCalendarConnectionCard({
         <Alert variant="destructive">
           <AlertDescription>
             Microsoft Calendar connection could not be completed. Try again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {calendarMessage === "unavailable" ? (
+        <Alert variant="warning">
+          <AlertDescription>
+            Calendar sync is not ready for connection. Ask a system administrator
+            to complete the Microsoft 365 setup first.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -98,7 +111,11 @@ export function MicrosoftCalendarConnectionCard({
       ) : null}
 
       <form action={connectMicrosoftCalendarAction}>
-        <Button type="submit" variant={needsReconnect ? "default" : "outline"}>
+        <Button
+          type="submit"
+          disabled={!calendarSyncReady}
+          variant={needsReconnect ? "default" : "outline"}
+        >
           <RefreshCcw aria-hidden="true" />
           {needsReconnect ? "Connect Microsoft Calendar" : "Reconnect"}
         </Button>

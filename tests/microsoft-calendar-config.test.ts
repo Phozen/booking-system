@@ -4,6 +4,7 @@ import {
   getCalendarSyncProviderSummary,
   getMicrosoftCalendarSyncConfig,
   getN8nCalendarSyncConfig,
+  isDelegatedBookingOwnerCalendarSyncReady,
   parseCalendarSyncProvider,
   parseMicrosoftGraphAuthMode,
   parseMicrosoftCalendarSyncMode,
@@ -197,6 +198,29 @@ describe("Microsoft 365 calendar sync config", () => {
     expect(config.missingKeys).toEqual([
       "MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY",
     ]);
+  });
+
+  it("recognises only a fully configured delegated owner-calendar setup as ready", () => {
+    const ready = getMicrosoftCalendarSyncConfig({
+      CALENDAR_SYNC_PROVIDER: "microsoft_graph",
+      MICROSOFT_365_CALENDAR_SYNC_ENABLED: "true",
+      MICROSOFT_SYNC_MODE: "booking_owner_calendar",
+      MICROSOFT_GRAPH_AUTH_MODE: "delegated",
+      MICROSOFT_TENANT_ID: "tenant",
+      MICROSOFT_CLIENT_ID: "client",
+      MICROSOFT_CLIENT_SECRET: "secret",
+      MICROSOFT_DELEGATED_TOKEN_ENCRYPTION_KEY:
+        "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
+    });
+
+    expect(isDelegatedBookingOwnerCalendarSyncReady(ready)).toBe(true);
+    expect(
+      isDelegatedBookingOwnerCalendarSyncReady(
+        getMicrosoftCalendarSyncConfig({
+          MICROSOFT_365_CALENDAR_SYNC_ENABLED: "false",
+        }),
+      ),
+    ).toBe(false);
   });
 
   it("rejects delegated auth for central calendar mode", () => {

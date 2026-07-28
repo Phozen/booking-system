@@ -56,6 +56,7 @@ import {
 
 describe("Teams invitation status contract", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     state.booking = { user_id: "owner-1", teams_meeting: true };
     state.invitation = { id: "invitation-1" };
     state.sync = { external_event_id: "event-1", sync_status: "synced" };

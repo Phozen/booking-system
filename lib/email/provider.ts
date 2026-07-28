@@ -2,6 +2,8 @@ import "server-only";
 
 import { Resend } from "resend";
 
+import { getMicrosoftGraphEmailConfig } from "@/lib/email/microsoft-graph-config";
+import { createMicrosoftGraphEmailProvider } from "@/lib/email/providers/microsoft-graph";
 import { createSmtpProvider } from "@/lib/email/providers/smtp";
 import { normalizeEmailProviderName } from "@/lib/email/smtp-config";
 import type { EmailMessage, EmailProvider, EmailSendResult } from "@/lib/email/types";
@@ -71,7 +73,7 @@ export function getEmailProvider(): EmailProvider {
 
   if (provider === "none") {
     return configErrorProvider(
-      "Email provider is not configured. Set EMAIL_PROVIDER=resend or EMAIL_PROVIDER=smtp, then configure EMAIL_FROM and provider credentials.",
+      "Email provider is not configured. Set EMAIL_PROVIDER=microsoft_graph, EMAIL_PROVIDER=resend, or EMAIL_PROVIDER=smtp, then configure EMAIL_FROM and provider credentials.",
     );
   }
 
@@ -89,8 +91,12 @@ export function getEmailProvider(): EmailProvider {
     return createSmtpProvider();
   }
 
+  if (provider === "microsoft_graph") {
+    return createMicrosoftGraphEmailProvider(getMicrosoftGraphEmailConfig());
+  }
+
   return configErrorProvider(
-    "Unsupported email provider configured. Use EMAIL_PROVIDER=resend, EMAIL_PROVIDER=smtp, or leave it blank.",
+    "Unsupported email provider configured. Use EMAIL_PROVIDER=microsoft_graph, EMAIL_PROVIDER=resend, EMAIL_PROVIDER=smtp, or leave it blank.",
   );
 }
 

@@ -30,12 +30,16 @@ The example file is the canonical list of supported variables. Empty optional va
 | Variable | Purpose |
 | --- | --- |
 | `CRON_SECRET` | Bearer secret for protected email cron endpoints |
-| `EMAIL_PROVIDER` | Blank, `none`, `resend`, or `smtp` |
+| `EMAIL_PROVIDER` | Blank, `none`, `microsoft_graph`, `resend`, or `smtp` |
 | `EMAIL_API_KEY` | Resend API key when using Resend |
 | `EMAIL_FROM` | Verified sender identity |
+| `EMAIL_MICROSOFT_TENANT_ID`, `EMAIL_MICROSOFT_CLIENT_ID`, `EMAIL_MICROSOFT_CLIENT_SECRET` | Entra app credentials when using Microsoft Graph email |
+| `EMAIL_MICROSOFT_SENDER` | Mailbox from which Microsoft Graph sends email |
 | `SMTP_HOST`, `SMTP_PORT` | SMTP server connection |
 | `SMTP_SECURE`, `SMTP_REQUIRE_TLS` | SMTP transport flags |
 | `SMTP_USER`, `SMTP_PASSWORD` | SMTP credentials |
+
+For Microsoft 365, use `microsoft_graph`: grant the app-only `Mail.Send` permission with tenant admin consent and scope the app in Exchange to `EMAIL_MICROSOFT_SENDER`. `EMAIL_FROM` should identify that same sender. SMTP remains for other SMTP providers.
 
 The application’s primary automated route is `GET /api/cron/email/run`. Call it with `Authorization: Bearer ${CRON_SECRET}`. Do not expose the secret to browser code, screenshots, or logs.
 

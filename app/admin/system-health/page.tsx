@@ -2,6 +2,7 @@ import { Activity, AlertTriangle, CheckCircle2, Mail, PlugZap } from "lucide-rea
 import type { ReactNode } from "react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
+import { getMicrosoftGraphEmailConfig } from "@/lib/email/microsoft-graph-config";
 import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
 import { getEmailQueueHealth } from "@/lib/email/health";
@@ -74,6 +75,11 @@ export default async function SystemHealthPage() {
     emailProvider === "smtp"
       ? validateSmtpConfig(getSmtpConfigFromEnv(process.env))
       : null;
+  const microsoftGraphEmailConfig = getMicrosoftGraphEmailConfig();
+  const microsoftGraphEmailError =
+    emailProvider === "microsoft_graph"
+      ? microsoftGraphEmailConfig.validationError
+      : null;
   const microsoftConfig = getMicrosoftCalendarSyncConfig();
   const [emailHealth, queuedEmails, failedSyncs] = await Promise.all([
     getEmailQueueHealth(),
@@ -109,7 +115,8 @@ export default async function SystemHealthPage() {
           status={
             emailProvider === "none" ||
             !emailFrom ||
-            (emailProvider === "smtp" && smtpError)
+            (emailProvider === "smtp" && smtpError) ||
+            Boolean(microsoftGraphEmailError)
               ? "warning"
               : "ok"
           }
@@ -120,6 +127,8 @@ export default async function SystemHealthPage() {
                 ? "EMAIL_FROM is missing."
                 : smtpError
                   ? smtpError
+                  : microsoftGraphEmailError
+                    ? microsoftGraphEmailError
                   : `Provider: ${emailProvider.toUpperCase()}. Failed: ${emailHealth.failed}. Overdue: ${emailHealth.overdueQueued}. Stale sending: ${emailHealth.staleSending}. Queued: ${queuedEmails ?? "unknown"}.`
           }
           icon={<Mail className="size-5" aria-hidden="true" />}

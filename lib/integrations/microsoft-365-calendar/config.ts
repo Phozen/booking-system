@@ -196,6 +196,18 @@ export function getMicrosoftCalendarSyncConfig(
   };
 }
 
+export function isDelegatedBookingOwnerCalendarSyncReady(
+  config: MicrosoftCalendarSyncConfig = getMicrosoftCalendarSyncConfig(),
+) {
+  return (
+    config.provider === "microsoft_graph" &&
+    config.enabled &&
+    config.isConfigured &&
+    config.mode === "booking_owner_calendar" &&
+    config.graphAuthMode === "delegated"
+  );
+}
+
 export function getN8nCalendarSyncConfig(
   env: MicrosoftCalendarSyncEnv = process.env,
 ): N8nCalendarSyncConfig {
