@@ -35,7 +35,7 @@ jobs:
           exit 1
 
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Verify required Vercel credentials
         run: |
