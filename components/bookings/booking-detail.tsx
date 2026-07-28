@@ -100,7 +100,7 @@ export function BookingDetail({
         ]}
       />
 
-      <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
+      <header className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <BookingStatusBadge status={booking.status} />
           {!isOwnerView && viewerInvitation ? (
@@ -126,7 +126,10 @@ export function BookingDetail({
               href={teamsJoinUrl}
               target="_blank"
               rel="noreferrer"
-              className={buttonVariants({ size: "lg", className: "h-12 w-full sm:w-auto" })}
+              className={buttonVariants({
+                variant: "outline",
+                className: "w-full sm:w-auto",
+              })}
             >
               <ExternalLink data-icon="inline-start" />
               Join Meeting
@@ -135,7 +138,12 @@ export function BookingDetail({
           {calendarEventAvailable ? (
             <Link
               href={`/bookings/${booking.id}/calendar`}
-              className={buttonVariants({ variant: "secondary", size: "lg", className: "h-12 w-full sm:w-auto" })}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({
+                variant: "outline",
+                className: "w-full sm:w-auto",
+              })}
             >
               <CalendarDays data-icon="inline-start" />
               View on Calendar
