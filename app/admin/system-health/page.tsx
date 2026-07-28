@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getEmailAppUrlConfig } from "@/lib/email/app-url";
+import { getEmailCronMonitor } from "@/lib/email/cron-health";
 import { getMicrosoftGraphEmailConfig } from "@/lib/email/microsoft-graph-config";
 import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
@@ -83,8 +84,9 @@ export default async function SystemHealthPage() {
       : null;
   const microsoftConfig = getMicrosoftCalendarSyncConfig();
   const appUrlConfig = getEmailAppUrlConfig();
-  const [emailHealth, queuedEmails, failedSyncs] = await Promise.all([
+  const [emailHealth, emailCronMonitor, queuedEmails, failedSyncs] = await Promise.all([
     getEmailQueueHealth(),
+    getEmailCronMonitor(),
     getCount("email_notifications", "status", "queued"),
     getCount("booking_calendar_syncs", "sync_status", "failed"),
   ]);
@@ -139,6 +141,24 @@ export default async function SystemHealthPage() {
                   : `Provider: ${emailProvider.toUpperCase()}. Failed: ${emailHealth.failed}. Overdue: ${emailHealth.overdueQueued}. Stale sending: ${emailHealth.staleSending}. Queued: ${queuedEmails ?? "unknown"}.`
           }
           icon={<Mail className="size-5" aria-hidden="true" />}
+        />
+
+        <HealthCard
+          title="Email automation"
+          status={emailCronMonitor.healthy ? "ok" : "warning"}
+          description="The protected email cycle should run at least every five minutes through the approved external scheduler."
+          meta={
+            !emailCronMonitor.readable
+              ? "The email automation heartbeat could not be read."
+              : !emailCronMonitor.lastRunAt
+                ? "No completed email automation cycle has been recorded yet."
+                : emailCronMonitor.stale
+                  ? `The last completed cycle was ${emailCronMonitor.lastRunAt}. It is older than the ${emailCronMonitor.maxAgeMinutes}-minute limit.`
+                  : emailCronMonitor.lastRunHealthy
+                    ? `Last successful cycle: ${emailCronMonitor.lastRunAt}.`
+                    : `Last cycle completed with operator follow-up required: ${emailCronMonitor.lastRunAt}.`
+          }
+          icon={<Activity className="size-5" aria-hidden="true" />}
         />
 
         <HealthCard

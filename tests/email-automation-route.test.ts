@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   queueReminders: vi.fn(),
   processQueue: vi.fn(),
   getHealth: vi.fn(),
+  recordCronRun: vi.fn(),
 }));
 
 vi.mock("@/lib/email/reminders", () => ({
@@ -14,6 +15,9 @@ vi.mock("@/lib/email", () => ({
 }));
 vi.mock("@/lib/email/health", () => ({
   getEmailQueueHealth: mocks.getHealth,
+}));
+vi.mock("@/lib/email/cron-health", () => ({
+  recordEmailCronRun: mocks.recordCronRun,
 }));
 
 import { GET } from "@/app/api/cron/email/run/route";
@@ -40,6 +44,7 @@ describe("automated email cycle route", () => {
       oldestDueAt: null,
       healthy: true,
     });
+    mocks.recordCronRun.mockResolvedValue(undefined);
   });
 
   it("rejects unauthenticated scheduler calls without side effects", async () => {
@@ -50,6 +55,7 @@ describe("automated email cycle route", () => {
     expect(response.status).toBe(401);
     expect(mocks.queueReminders).not.toHaveBeenCalled();
     expect(mocks.processQueue).not.toHaveBeenCalled();
+    expect(mocks.recordCronRun).not.toHaveBeenCalled();
   });
 
   it("queues idempotent reminders before claiming and processing email", async () => {
@@ -67,6 +73,7 @@ describe("automated email cycle route", () => {
       mocks.processQueue.mock.invocationCallOrder[0],
     );
     expect(body.health.healthy).toBe(true);
+    expect(mocks.recordCronRun).toHaveBeenCalledWith(true);
   });
 
   it("returns a recoverable failure when reminder queueing fails", async () => {
@@ -79,6 +86,7 @@ describe("automated email cycle route", () => {
 
     expect(response.status).toBe(500);
     expect(mocks.processQueue).not.toHaveBeenCalled();
+    expect(mocks.recordCronRun).toHaveBeenCalledWith(false);
   });
 
   it("returns 500 when the queue claim fails", async () => {
@@ -92,6 +100,7 @@ describe("automated email cycle route", () => {
 
     expect(response.status).toBe(500);
     expect(mocks.getHealth).not.toHaveBeenCalled();
+    expect(mocks.recordCronRun).toHaveBeenCalledWith(false);
   });
 
   it("returns 503 when queue health needs operator recovery", async () => {
@@ -115,5 +124,6 @@ describe("automated email cycle route", () => {
     expect(response.status).toBe(503);
     expect(body.ok).toBe(false);
     expect(body.errors).toContain("Email queue requires operator recovery.");
+    expect(mocks.recordCronRun).toHaveBeenCalledWith(false);
   });
 });

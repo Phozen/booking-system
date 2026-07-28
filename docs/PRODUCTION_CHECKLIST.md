@@ -27,7 +27,7 @@ Use this checklist before and after the first Vercel production deployment.
 - [ ] Build command is `npm run build`.
 - [ ] Output directory is blank/default.
 - [ ] Node.js version is 22.x.
-- [ ] Production branch is correct.
+- [ ] Git integration is enabled, the production branch is protected `main`, and a green pull-request merge automatically deploys production.
 - [ ] Preview deployments are enabled only where intended.
 
 ## Vercel Environment Variables
@@ -146,10 +146,11 @@ Email can stay disabled for MVP testing.
 - [ ] If using Microsoft Graph email, `EMAIL_FROM` identifies the same mailbox as `EMAIL_MICROSOFT_SENDER`.
 - [ ] `EMAIL_FROM` matches a verified sender before real sending.
 - [ ] Queued email processing works from `/admin/email-notifications` after Microsoft Graph, Resend, or SMTP is configured.
-- [ ] `vercel.json` schedules `/api/cron/email/process` every 5 minutes.
-- [ ] `vercel.json` schedules `/api/cron/email/reminders` every 15 minutes.
-- [ ] Both cron routes reject missing or invalid `Authorization: Bearer ${CRON_SECRET}`.
-- [ ] The reminder cron only queues reminders; the process cron sends already-queued rows.
+- [ ] The approved scheduler calls `/api/cron/email/run` every 5 minutes with a valid `Authorization: Bearer ${CRON_SECRET}` header; Vercel's daily route is fallback-only.
+- [ ] The scheduler alerts the operational contact and backup on non-2xx responses without exposing `CRON_SECRET` in its history or alert payload.
+- [ ] The consolidated route queues reminders before processing email, and rejects missing or invalid authorization.
+- [ ] Admin > System health shows a recent healthy **Email automation** cycle before pilot use.
+- [ ] Evidence shows three consecutive successful five-minute cycles, with reminder and immediate-notification examples delivered once.
 - [ ] Sent notifications populate provider name, provider message ID when available, and `sent_at`.
 - [ ] Supabase Auth emails are reviewed separately in Supabase Dashboard > Authentication > SMTP settings if branded signup/password-reset emails are required.
 
@@ -229,6 +230,7 @@ When the Exabytes/custom domain is ready:
 ## Rollback Readiness
 
 - [ ] Previous Vercel deployment is available for rollback.
+- [ ] The previous READY deployment URL and commit SHA are recorded before each pilot merge.
 - [ ] Supabase backups are enabled.
 - [ ] Deployment owner knows how to roll back a Vercel deployment.
 - [ ] Migration rollback plan is documented for any future schema changes.

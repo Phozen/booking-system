@@ -1,7 +1,6 @@
 "use client";
 
 import { Filter, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -25,25 +24,15 @@ function statusLabel(value: (typeof userStatusOptions)[number]) {
 
 export function UserFilters({ filters }: { filters: UserFilters }) {
   const router = useRouter();
-  const [search, setSearch] = useState(filters.search ?? "");
-  const [role, setRole] = useState(filters.role ?? "all");
-  const [status, setStatus] = useState(filters.status ?? "all");
-
-  useEffect(() => {
-    setSearch(filters.search ?? "");
-    setRole(filters.role ?? "all");
-    setStatus(filters.status ?? "all");
-  }, [filters.search, filters.role, filters.status]);
+  const filterKey = `${filters.search ?? ""}:${filters.role ?? "all"}:${filters.status ?? "all"}`;
 
   function clearFilters() {
-    setSearch("");
-    setRole("all");
-    setStatus("all");
     router.replace("/admin/users");
   }
 
   return (
     <form
+      key={filterKey}
       action="/admin/users"
       className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
     >
@@ -55,8 +44,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
             id="search"
             name="search"
             type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            defaultValue={filters.search ?? ""}
             placeholder="Name, email, or department"
           />
         </div>
@@ -68,8 +56,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
           <Select
             id="role"
             name="role"
-            value={role}
-            onChange={(event) => setRole(event.target.value)}
+            defaultValue={filters.role ?? "all"}
             className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {userRoleOptions.map((role) => (
@@ -87,8 +74,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
           <Select
             id="status"
             name="status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
+            defaultValue={filters.status ?? "all"}
             className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {userStatusOptions.map((status) => (

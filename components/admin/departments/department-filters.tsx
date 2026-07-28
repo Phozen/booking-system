@@ -1,7 +1,6 @@
 "use client";
 
 import { Filter, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { departmentStatusOptions, type DepartmentFilters } from "@/lib/admin/departments/validation";
@@ -11,30 +10,25 @@ import { Select } from "@/components/ui/select";
 
 export function DepartmentFilters({ filters }: { filters: DepartmentFilters }) {
   const router = useRouter();
-  const [search, setSearch] = useState(filters.search ?? "");
-  const [status, setStatus] = useState(filters.status ?? "all");
-
-  useEffect(() => {
-    setSearch(filters.search ?? "");
-    setStatus(filters.status ?? "all");
-  }, [filters.search, filters.status]);
+  const filterKey = `${filters.search ?? ""}:${filters.status ?? "all"}`;
 
   function clearFilters() {
-    setSearch("");
-    setStatus("all");
     router.replace("/admin/departments");
   }
 
   return (
-    <form action="/admin/departments" className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0">
+    <form
+      key={filterKey}
+      action="/admin/departments"
+      className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
+    >
       <div className="grid gap-2">
         <label htmlFor="search" className="text-sm font-medium">Search</label>
         <Input
           id="search"
           name="search"
           type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          defaultValue={filters.search ?? ""}
           placeholder="Department name or mailbox"
         />
       </div>
@@ -43,8 +37,7 @@ export function DepartmentFilters({ filters }: { filters: DepartmentFilters }) {
         <Select
           id="status"
           name="status"
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
+          defaultValue={filters.status ?? "all"}
           className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           {departmentStatusOptions.map((option) => (

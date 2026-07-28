@@ -2,7 +2,7 @@
 
 ## Production schedule
 
-`vercel.json` invokes `GET /api/cron/email/run` once daily (`0 0 * * *`) as a Hobby-tier placeholder to bypass Vercel pricing restrictions. The actual production execution runs every 5 minutes and is triggered via an external scheduler (like cron-job.org) using the `CRON_SECRET` header. The route queues due reminders using idempotency keys, then atomically claims and sends up to 100 due emails. Configure a server-only `CRON_SECRET` in production; Vercel supplies it as a Bearer token, and the job runs only on production deployments.
+`vercel.json` invokes `GET /api/cron/email/run` once daily (`0 0 * * *`) as a fallback. The final-like pilot execution runs every five minutes through an approved external scheduler using the `CRON_SECRET` header. The route queues due reminders using idempotency keys, then atomically claims and sends up to 100 due emails. Configure the secret only in protected Vercel and scheduler secret fields. Configure the scheduler to alert the operational contact and backup on any non-2xx response. Vercel cron invocations run only on production deployments.
 
 ## Monitoring contract
 
@@ -17,8 +17,12 @@ It returns 503 when operator recovery is needed:
 - unreadable queue-health queries.
 
 The same counts appear under **Admin > System health**. Production is not verified
-until Vercel shows a recent successful invocation and the response reports
-`health.healthy: true` with every count at zero.
+until the **Email automation** card reports a recent successful cycle, Vercel or
+the external scheduler shows a recent successful invocation, and the response
+reports `health.healthy: true` with every count at zero. By default, System
+Health warns when no healthy completed cycle has been recorded for 15 minutes.
+
+Before pilot entry, retain evidence of three consecutive successful five-minute scheduler runs. Do not record the bearer secret in scheduler history, screenshots, support tickets, or logs.
 
 ## Recovery runbook
 

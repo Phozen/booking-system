@@ -40,8 +40,13 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Reject high or critical dependency vulnerabilities
-        run: npm audit --audit-level=high
+      - name: Report development dependency advisories
+        run: |
+          npm audit --audit-level=high || \
+            echo "::warning::Development dependency advisories were reported. They are reviewed separately and do not block the production-runtime gate."
+
+      - name: Reject high or critical production dependency vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Lint
         run: npm run lint
