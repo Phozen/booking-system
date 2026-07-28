@@ -120,7 +120,7 @@ export function BookingDetail({
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:items-end">
+        <div className="flex flex-wrap gap-2 sm:justify-end">
           {teamsJoinUrl ? (
             <a
               href={teamsJoinUrl}
@@ -150,14 +150,14 @@ export function BookingDetail({
             </Link>
           ) : null}
           {isOwnerView ? (
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <>
               {booking.status === "pending" || booking.status === "confirmed" ? (
                 <RouteLoadingLink
                   href={`/bookings/${booking.id}/edit`}
                   loadingLabel="Loading edit form..."
                   loadingVariant="form"
                   className={buttonVariants({
-                    variant: "outline",
+                    variant: "default",
                     className: "w-full sm:w-auto",
                   })}
                 >
@@ -168,14 +168,14 @@ export function BookingDetail({
               <Link
                 href={`/bookings/${booking.id}/print`}
                 className={buttonVariants({
-                  variant: "outline",
+                  variant: "default",
                   className: "w-full sm:w-auto",
                 })}
               >
                 <Printer data-icon="inline-start" />
                 Print approval form
               </Link>
-            </div>
+            </>
           ) : null}
         </div>
       </header>
