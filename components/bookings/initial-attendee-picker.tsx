@@ -15,16 +15,19 @@ export function InitialAttendeePicker({
   disabled,
   excludeUserId,
   onSelectedCountChange,
+  onDraftChange,
 }: {
   disabled?: boolean;
   excludeUserId?: string;
   onSelectedCountChange?: (count: number) => void;
+  onDraftChange?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [candidates, setCandidates] = useState<InviteCandidate[]>([]);
   const [selected, setSelected] = useState<InviteCandidate[]>([]);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [selectionStatus, setSelectionStatus] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const normalizedQuery = query.trim();
 
@@ -91,6 +94,7 @@ export function InitialAttendeePicker({
   );
   const label = (candidate: InviteCandidate) =>
     candidate.fullName?.trim() || candidate.email;
+  const isAtSelectionLimit = selected.length >= 50;
 
   useEffect(() => {
     onSelectedCountChange?.(selected.length);
@@ -123,7 +127,10 @@ export function InitialAttendeePicker({
             type="search"
             className="pl-9 pr-10"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSelectionStatus("");
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") event.preventDefault();
             }}
@@ -134,7 +141,7 @@ export function InitialAttendeePicker({
           />
           {searching ? (
             <Loader2
-              className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
+              className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground motion-reduce:animate-none"
               aria-hidden="true"
             />
           ) : null}
@@ -145,13 +152,15 @@ export function InitialAttendeePicker({
         <p
           id="initial-invitee-search-status"
           className="sr-only"
+          role="status"
           aria-live="polite"
         >
-          {searching
-            ? "Searching staff"
-            : normalizedQuery.length >= 2
-              ? `${availableCandidates.length} matching staff found`
-              : "Enter at least 2 characters to search"}
+          {selectionStatus ||
+            (searching
+              ? "Searching staff"
+              : normalizedQuery.length >= 2
+                ? `${availableCandidates.length} matching staff found`
+                : "Enter at least 2 characters to search")}
         </p>
       </div>
 
@@ -163,7 +172,11 @@ export function InitialAttendeePicker({
         </Alert>
       ) : null}
 
-      {normalizedQuery.length >= 2 && !searching && !error ? (
+      {isAtSelectionLimit ? (
+        <p className="rounded-md border border-dashed bg-muted/40 p-3 text-sm text-muted-foreground">
+          Maximum 50 attendees selected. Remove one to add another.
+        </p>
+      ) : normalizedQuery.length >= 2 && !searching && !error ? (
         availableCandidates.length > 0 ? (
           <div className="rounded-md border border-dashed bg-muted/40 p-1">
             <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -176,13 +189,13 @@ export function InitialAttendeePicker({
                     type="button"
                     className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => {
-                      setSelected((current) =>
-                        current.length < 50 ? [...current, candidate] : current,
-                      );
+                      setSelected((current) => [...current, candidate]);
+                      setSelectionStatus(`${label(candidate)} added to attendees.`);
+                      onDraftChange?.();
                       setQuery("");
                       requestAnimationFrame(() => searchInputRef.current?.focus());
                     }}
-                    disabled={disabled || selected.length >= 50}
+                    disabled={disabled}
                   >
                     <span className="block font-medium">{label(candidate)}</span>
                     <span className="text-xs text-muted-foreground">
@@ -222,11 +235,13 @@ export function InitialAttendeePicker({
                 size="icon"
                 disabled={disabled}
                 aria-label={`Remove ${label(candidate)}`}
-                onClick={() =>
+                onClick={() => {
                   setSelected((items) =>
                     items.filter((item) => item.id !== candidate.id),
-                  )
-                }
+                  );
+                  setSelectionStatus(`${label(candidate)} removed from attendees.`);
+                  onDraftChange?.();
+                }}
               >
                 <X aria-hidden="true" />
               </Button>
