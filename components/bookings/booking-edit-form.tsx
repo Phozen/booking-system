@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,11 +53,29 @@ import { BookingAvailabilityTimeline } from "@/components/bookings/booking-avail
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { DepartmentPicker } from "@/components/bookings/department-picker";
+import { FieldRequirementBadge } from "@/components/shared/field-requirement-badge";
 
 const initialState: BookingActionResult = {
   status: "idle",
   message: "",
 };
+
+function BookingFieldLabel({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor: string;
+  children: ReactNode;
+  required: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Label htmlFor={htmlFor}>{children}</Label>
+      <FieldRequirementBadge required={required} />
+    </div>
+  );
+}
 
 const drinkRequestItems = [
   { value: "Water", label: "Water" },
@@ -352,16 +370,15 @@ export function BookingEditForm({
 
       <section className="grid gap-4 border-b-2 border-border pb-7">
         <div className="sm:col-span-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
-            Step 1
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Venue
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-blue-700 dark:text-blue-300 sm:text-3xl">
+            Step 1: Venue
           </h2>
         </div>
 
         <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="facilityId">Facility</Label>
+          <BookingFieldLabel htmlFor="facilityId" required>
+            Facility
+          </BookingFieldLabel>
           <Select
             id="facilityId"
             name="facilityId"
@@ -373,7 +390,6 @@ export function BookingEditForm({
             )}
             aria-invalid={Boolean(fieldErrors.facilityId)}
             required
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
           >
             {facilities.map((facility) => (
               <option key={facility.id} value={facility.id}>
@@ -442,31 +458,30 @@ export function BookingEditForm({
       </section>
 
       <section className="grid gap-4 border-b-2 border-border pb-7">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-            Step 2
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Availability and Time
+        <div className="grid gap-4">
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 sm:text-3xl">
+            Step 2: Availability and Time
           </h2>
-        </div>
 
-        <div className="grid gap-2 sm:max-w-md">
-          <Label htmlFor="date">Date</Label>
-          <Input
-            id="date"
-            name="date"
-            type="date"
-            value={previewValues.date}
-            onChange={(event) => setPreviewField("date", event.target.value)}
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              fieldErrors.date && "date-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.date)}
-            required
-          />
-          <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
+          <div className="grid gap-2 sm:max-w-md">
+            <BookingFieldLabel htmlFor="date" required>
+              Date
+            </BookingFieldLabel>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              value={previewValues.date}
+              onChange={(event) => setPreviewField("date", event.target.value)}
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                fieldErrors.date && "date-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.date)}
+              required
+            />
+            <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
+          </div>
         </div>
 
         <BookingAvailabilityTimeline
@@ -498,17 +513,16 @@ export function BookingEditForm({
 
       <section className="grid gap-5 border-b-2 border-border pb-7 text-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-            Step 3
-          </p>
-          <h2 className="mt-1 text-lg font-bold tracking-normal">
-            Details
+          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-300 sm:text-3xl">
+            Step 3: Details
           </h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="title">Purpose</Label>
+            <BookingFieldLabel htmlFor="title" required>
+              Purpose
+            </BookingFieldLabel>
             <Input
               id="title"
               name="title"
@@ -527,7 +541,9 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="attendeeCount">Attendee count</Label>
+            <BookingFieldLabel htmlFor="attendeeCount" required={false}>
+              Attendee count
+            </BookingFieldLabel>
             <Input
               id="attendeeCount"
               name="attendeeCount"
@@ -555,7 +571,9 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="description">Description</Label>
+            <BookingFieldLabel htmlFor="description" required={false}>
+              Description
+            </BookingFieldLabel>
             <Textarea
               id="description"
               name="description"
@@ -566,7 +584,7 @@ export function BookingEditForm({
                 fieldErrors.description && "description-error",
               )}
               aria-invalid={Boolean(fieldErrors.description)}
-              className="min-h-28 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+              className="min-h-28"
             />
             <FormFieldError id="description-error">
               {fieldErrors.description}
@@ -574,10 +592,13 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
-              <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
-              Food/drinks required?
-            </Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
+                <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+                Food/drinks required?
+              </Label>
+              <FieldRequirementBadge required={false} />
+            </div>
             <Select
               id="cateringRequired"
               name="cateringRequired"
@@ -586,7 +607,6 @@ export function BookingEditForm({
                 setCateringRequired(event.target.value === "yes")
               }
               disabled={!hasFacilities || isPending}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
             >
               <option value="no">No</option>
               <option value="yes">Yes</option>
@@ -708,7 +728,9 @@ export function BookingEditForm({
               ) : null}
 
               <div className="grid gap-2">
-                <Label htmlFor="cateringPax">Number of pax</Label>
+                <BookingFieldLabel htmlFor="cateringPax" required>
+                  Number of pax
+                </BookingFieldLabel>
                 <Input
                   id="cateringPax"
                   name="cateringPax"
@@ -729,7 +751,9 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="cateringServingTime">Serving time</Label>
+                <BookingFieldLabel htmlFor="cateringServingTime" required>
+                  Serving time
+                </BookingFieldLabel>
                 <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
@@ -741,7 +765,6 @@ export function BookingEditForm({
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringServingTime)}
                   required
-                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 >
                   <option value="">Choose serving time</option>
                   {cateringServingTimeOptions.map((option) => (
@@ -756,9 +779,9 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="cateringDietaryNotes">
+                <BookingFieldLabel htmlFor="cateringDietaryNotes" required={false}>
                   Dietary / special notes
-                </Label>
+                </BookingFieldLabel>
                 <Textarea
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
@@ -771,7 +794,7 @@ export function BookingEditForm({
                       "cateringDietaryNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringDietaryNotes)}
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-20"
                 />
                 <FormFieldError id="cateringDietaryNotes-error">
                   {fieldErrors.cateringDietaryNotes}
@@ -779,9 +802,9 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="cateringNotes">
-                  Additional notes
-                </Label>
+                <BookingFieldLabel htmlFor="cateringNotes" required={false}>
+                  Additional catering notes
+                </BookingFieldLabel>
                 <Textarea
                   id="cateringNotes"
                   rows={4}
@@ -793,7 +816,7 @@ export function BookingEditForm({
                     fieldErrors.cateringNotes && "cateringNotes-error",
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringNotes)}
-                  className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-24"
                 />
                 <input
                   type="hidden"
