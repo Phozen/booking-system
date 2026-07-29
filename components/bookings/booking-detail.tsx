@@ -83,6 +83,14 @@ export function BookingDetail({
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
+  const canEdit = isOwnerView && (booking.status === "pending" || booking.status === "confirmed");
+  const primaryHeaderAction = teamsJoinUrl
+    ? "teams"
+    : calendarEventAvailable
+      ? "calendar"
+      : canEdit
+        ? "edit"
+        : "print";
   const invitationResponses = {
     accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
     pending: invitations.filter((invitation) => invitation.status === "pending").length,
@@ -140,9 +148,9 @@ export function BookingDetail({
                 target="_blank"
                 rel="noreferrer"
                 className={buttonVariants({
-                  variant: "default",
+                  variant: primaryHeaderAction === "calendar" ? "default" : "outline",
                   className:
-                    "w-full border-sky-700/70 bg-sky-600 text-white shadow-sky-700/20 hover:bg-sky-700 focus-visible:border-sky-500 focus-visible:ring-sky-500/25 dark:bg-sky-500 dark:text-sky-950 dark:hover:bg-sky-400 sm:w-auto",
+                    "w-full sm:w-auto",
                 })}
               >
                 <CalendarDays data-icon="inline-start" />
@@ -151,14 +159,14 @@ export function BookingDetail({
             ) : null}
             {isOwnerView ? (
               <>
-                {booking.status === "pending" || booking.status === "confirmed" ? (
+                {canEdit ? (
                   <RouteLoadingLink
                     href={`/bookings/${booking.id}/edit`}
                     loadingLabel="Loading edit form..."
                     loadingVariant="form"
                     className={buttonVariants({
-                      variant: "warning",
-                      className: "w-full text-white hover:text-white dark:text-white sm:w-auto",
+                      variant: primaryHeaderAction === "edit" ? "default" : "outline",
+                      className: "w-full sm:w-auto",
                     })}
                   >
                     <Edit3 data-icon="inline-start" />
@@ -168,9 +176,8 @@ export function BookingDetail({
                 <Link
                   href={`/bookings/${booking.id}/print`}
                   className={buttonVariants({
-                    variant: "default",
-                    className:
-                      "w-full border-violet-700/70 bg-violet-600 text-white shadow-violet-700/20 hover:bg-violet-700 focus-visible:border-violet-500 focus-visible:ring-violet-500/25 dark:bg-violet-500 dark:text-violet-950 dark:hover:bg-violet-400 sm:w-auto",
+                    variant: primaryHeaderAction === "print" ? "default" : "outline",
+                    className: "w-full sm:w-auto",
                   })}
                 >
                   <Printer data-icon="inline-start" />

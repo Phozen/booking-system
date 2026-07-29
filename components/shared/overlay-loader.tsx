@@ -27,7 +27,10 @@ export function OverlayLoader({
   if (!render) return null;
   
   return (
-    <div 
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm duration-300 fill-mode-both",
         show ? "animate-in fade-in zoom-in-95" : "animate-out fade-out zoom-out-95",

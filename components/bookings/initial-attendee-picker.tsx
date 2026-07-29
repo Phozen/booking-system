@@ -14,9 +14,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export function InitialAttendeePicker({
   disabled,
   excludeUserId,
+  onSelectedCountChange,
 }: {
   disabled?: boolean;
   excludeUserId?: string;
+  onSelectedCountChange?: (count: number) => void;
 }) {
   const [query, setQuery] = useState("");
   const [candidates, setCandidates] = useState<InviteCandidate[]>([]);
@@ -89,6 +91,10 @@ export function InitialAttendeePicker({
   );
   const label = (candidate: InviteCandidate) =>
     candidate.fullName?.trim() || candidate.email;
+
+  useEffect(() => {
+    onSelectedCountChange?.(selected.length);
+  }, [onSelectedCountChange, selected.length]);
 
   return (
     <section className="grid gap-3 border-b-2 border-border pb-7 text-sm">

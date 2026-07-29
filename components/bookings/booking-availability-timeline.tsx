@@ -132,6 +132,7 @@ export function BookingAvailabilityTimeline({
   const [items, setItems] = useState<AvailabilityTimelineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
     if (!facilityId || !date) {
@@ -175,7 +176,7 @@ export function BookingAvailabilityTimeline({
       });
 
     return () => controller.abort();
-  }, [facilityId, date]);
+  }, [facilityId, date, retryToken]);
 
   const timelineItems = useMemo(
     () => (facilityId && date ? items : []),
@@ -305,10 +306,14 @@ export function BookingAvailabilityTimeline({
   ].filter((minute, index, minutes) => minutes.indexOf(minute) === index);
 
   return (
-    <section className="grid gap-4 rounded-lg border border-border/75 bg-muted/15 p-4 shadow-sm sm:col-span-2 sm:p-5">
+    <section
+      aria-busy={loading}
+      aria-labelledby="booking-time-heading"
+      className="grid gap-4 rounded-lg border border-border/75 bg-muted/15 p-4 shadow-sm sm:col-span-2 sm:p-5"
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="font-semibold tracking-normal">Choose a time</h3>
+          <h3 id="booking-time-heading" className="font-semibold tracking-normal">Choose a time</h3>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Enter start and end times, or drag across an available space below.
           </p>
@@ -317,6 +322,14 @@ export function BookingAvailabilityTimeline({
           30-minute intervals
         </span>
       </div>
+
+      <p className="sr-only" role="status">
+        {loading
+          ? "Loading availability"
+          : error
+            ? "Availability could not be loaded. You can enter a time manually or try again."
+            : ""}
+      </p>
 
       <div className="grid gap-4 rounded-lg border border-border/70 bg-background p-4 sm:grid-cols-2">
         <div className="grid content-start gap-2">
@@ -368,9 +381,16 @@ export function BookingAvailabilityTimeline({
           Choose a date to view availability for {facilityName ?? "this facility"}.
         </div>
       ) : error ? (
-        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+          <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
           <AlertCircle className="mt-0.5 size-4" aria-hidden="true" />
-          <span>{error}</span>
+            <span>{error} Enter a time manually, or try again.</span>
+            <button
+              type="button"
+              className="ml-auto shrink-0 font-medium underline underline-offset-4"
+              onClick={() => setRetryToken((current) => current + 1)}
+            >
+              Retry
+            </button>
         </div>
       ) : (
         <div className="grid gap-3 lg:grid-cols-[6rem_minmax(0,1fr)]">
@@ -396,8 +416,6 @@ export function BookingAvailabilityTimeline({
           </div>
           <div
             ref={trackRef}
-            role="application"
-            aria-label={`Availability timeline for ${facilityName ?? "selected facility"} on ${date}`}
             className={cn(
               "relative min-h-[min(32rem,65svh)] overflow-hidden rounded-lg border bg-background touch-none",
               controlsDisabled ? "opacity-60" : "cursor-crosshair",
