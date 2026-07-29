@@ -27,6 +27,7 @@ import {
 import {
   formatEffectiveApprovalLabel,
   formatBookingWindowLabel,
+  getEffectiveApprovalRequired,
   type AppSettings,
 } from "@/lib/settings/app-settings";
 import {
@@ -189,6 +190,10 @@ export function BookingForm({
   const [otherDrinkRequest, setOtherDrinkRequest] = useState("");
   const [otherFoodRequest, setOtherFoodRequest] = useState("");
   const [cateringNotes, setCateringNotes] = useState("");
+  const [teamsMeeting, setTeamsMeeting] = useState(false);
+  const [selectedAttendeeCount, setSelectedAttendeeCount] = useState(0);
+  const [selectedDepartmentCount, setSelectedDepartmentCount] = useState(0);
+  const [isDirty, setIsDirty] = useState(false);
   const [previewValues, setPreviewValues] = useState<BookingPreviewValues>({
     date: initialDate ?? "",
     startTime: "",
@@ -210,6 +215,12 @@ export function BookingForm({
       previewValues.title ||
       previewValues.attendeeCount,
   );
+  const approvalRequired = selectedFacilityDetails
+    ? getEffectiveApprovalRequired(
+        selectedFacilityDetails.requiresApproval,
+        settings,
+      )
+    : settings.defaultApprovalRequired;
   const drinkRequests = [
     ...selectedDrinkItems,
     otherDrinkRequest.trim() ? `Other drinks: ${otherDrinkRequest.trim()}` : "",
@@ -328,6 +339,28 @@ export function BookingForm({
       event.preventDefault();
       setFieldErrors(nextErrors);
       showFormValidationError(nextErrors);
+      const firstInvalidField = (
+        [
+          ["facilityId", "facilityId"],
+          ["date", "date"],
+          ["startTime", "startTime"],
+          ["endTime", "endTime"],
+          ["title", "title"],
+          ["attendeeCount", "attendeeCount"],
+          ["description", "description"],
+          ["cateringType", "catering-drinks"],
+          ["cateringPax", "cateringPax"],
+          ["cateringServingTime", "cateringServingTime"],
+          ["cateringDietaryNotes", "cateringDietaryNotes"],
+          ["cateringNotes", "cateringNotes"],
+        ] as const
+      ).find(([field]) => nextErrors[field]);
+
+      if (firstInvalidField) {
+        requestAnimationFrame(() =>
+          document.getElementById(firstInvalidField[1])?.focus(),
+        );
+      }
       return;
     }
 
@@ -350,10 +383,16 @@ export function BookingForm({
       action={formAction}
       className="grid gap-7"
       noValidate
-      onChange={(event) => updatePreview(event.currentTarget)}
+      aria-busy={isPending}
+      onChange={(event) => {
+        setIsDirty(true);
+        updatePreview(event.currentTarget);
+      }}
       onSubmit={validateBeforeSubmit}
     >
       <OverlayLoader show={isPending} label="Creating booking..." />
+
+      <div className="contents" inert={isPending}>
 
       <ActionToastEffect
         state={state}
@@ -635,7 +674,15 @@ export function BookingForm({
               />
 
               <div className="grid gap-4 sm:col-span-2 lg:grid-cols-2">
-                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset
+                  id="catering-drinks"
+                  tabIndex={-1}
+                  aria-describedby={
+                    fieldErrors.cateringType ? "cateringType-error" : undefined
+                  }
+                  aria-invalid={Boolean(fieldErrors.cateringType)}
+                  className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3"
+                >
                   <legend className="px-1 text-sm font-semibold">
                     Drinks
                   </legend>
@@ -675,7 +722,13 @@ export function BookingForm({
                   </label>
                 </fieldset>
 
-                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset
+                  aria-describedby={
+                    fieldErrors.cateringType ? "cateringType-error" : undefined
+                  }
+                  aria-invalid={Boolean(fieldErrors.cateringType)}
+                  className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3"
+                >
                   <legend className="px-1 text-sm font-semibold">
                     Food
                   </legend>
@@ -842,13 +895,29 @@ export function BookingForm({
         </div>
       </section>
 
-      <InitialAttendeePicker disabled={!hasFacilities || isPending} />
+      <InitialAttendeePicker
+        disabled={!hasFacilities || isPending}
+        onSelectedCountChange={setSelectedAttendeeCount}
+      />
 
-      <DepartmentPicker departments={departments} disabled={!hasFacilities || isPending} />
+      <DepartmentPicker
+        departments={departments}
+        disabled={!hasFacilities || isPending}
+        onSelectedCountChange={setSelectedDepartmentCount}
+      />
 
       <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
         <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
-          <Input id="teamsMeeting" name="teamsMeeting" type="checkbox" value="yes" className="mt-0.5 size-4" disabled={!hasFacilities || isPending} />
+          <Input
+            id="teamsMeeting"
+            name="teamsMeeting"
+            type="checkbox"
+            value="yes"
+            checked={teamsMeeting}
+            onChange={(event) => setTeamsMeeting(event.target.checked)}
+            className="mt-0.5 size-4"
+            disabled={!hasFacilities || isPending}
+          />
           <span>Make this a Teams meeting</span>
         </Label>
         <p className="pl-7 text-muted-foreground">After confirmation, QBook sends one Outlook invitation to the internal attendees selected above. The join link is available only to the organiser and invited staff.</p>
@@ -899,6 +968,38 @@ export function BookingForm({
                 <dd className="font-medium">{previewValues.attendeeCount}</dd>
               </div>
             ) : null}
+            <div>
+              <dt className="text-muted-foreground">Food and drinks</dt>
+              <dd className="font-medium">
+                {cateringRequired
+                  ? drinkRequests.length + foodRequests.length > 0
+                    ? "Requested"
+                    : "Select requests"
+                  : "Not requested"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Internal attendees</dt>
+              <dd className="font-medium">
+                {selectedAttendeeCount > 0
+                  ? `${selectedAttendeeCount} selected`
+                  : "None selected"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Departments</dt>
+              <dd className="font-medium">
+                {selectedDepartmentCount > 0
+                  ? `${selectedDepartmentCount} selected`
+                  : "None selected"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Meeting type</dt>
+              <dd className="font-medium">
+                {teamsMeeting ? "Teams meeting" : "Room only"}
+              </dd>
+            </div>
           </dl>
         </section>
       ) : null}
@@ -907,17 +1008,30 @@ export function BookingForm({
         <Link
           href="/facilities"
           className={buttonVariants({ variant: "outline" })}
+          onClick={(event) => {
+            if (
+              isDirty &&
+              !window.confirm(
+                "Discard your booking draft and return to facilities?",
+              )
+            ) {
+              event.preventDefault();
+            }
+          }}
         >
-          Cancel
+          {isDirty ? "Discard and return" : "Back to facilities"}
         </Link>
         <Button type="submit" disabled={!hasFacilities || isPending}>
           <PendingButtonContent
             pending={isPending}
-            pendingLabel="Creating booking..."
+            pendingLabel={
+              approvalRequired ? "Submitting booking request..." : "Creating booking..."
+            }
           >
-            Create booking
+            {approvalRequired ? "Submit booking request" : "Create booking"}
           </PendingButtonContent>
         </Button>
+      </div>
       </div>
     </form>
   );
