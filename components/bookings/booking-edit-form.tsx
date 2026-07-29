@@ -154,6 +154,7 @@ export function BookingEditForm({
     title: booking.title,
     attendeeCount: booking.attendeeCount?.toString() ?? "",
   });
+  const [isDirty, setIsDirty] = useState(false);
 
   const selectedFacilityDetails = useMemo(
     () => facilities.find((facility) => facility.id === selectedFacility),
@@ -287,6 +288,16 @@ export function BookingEditForm({
       event.preventDefault();
       setFieldErrors(nextErrors);
       showFormValidationError(nextErrors);
+      const firstInvalidField = ([
+        ["facilityId", "facilityId"], ["date", "date"], ["startTime", "startTime"],
+        ["endTime", "endTime"], ["title", "title"], ["attendeeCount", "attendeeCount"],
+        ["description", "description"], ["cateringType", "catering-drinks"],
+        ["cateringPax", "cateringPax"], ["cateringServingTime", "cateringServingTime"],
+        ["cateringDietaryNotes", "cateringDietaryNotes"], ["cateringNotes", "cateringNotes"],
+      ] as const).find(([field]) => nextErrors[field]);
+      if (firstInvalidField) {
+        requestAnimationFrame(() => document.getElementById(firstInvalidField[1])?.focus());
+      }
       return;
     }
 
@@ -309,11 +320,16 @@ export function BookingEditForm({
       action={formAction}
       className="grid gap-7"
       noValidate
-      onChange={(event) => updatePreview(event.currentTarget)}
+      aria-busy={isPending}
+      onChange={(event) => {
+        setIsDirty(true);
+        updatePreview(event.currentTarget);
+      }}
       onSubmit={validateBeforeSubmit}
     >
       <OverlayLoader show={isPending} label="Saving changes..." />
 
+      <div className="contents" inert={isPending}>
       <ActionToastEffect
         state={state}
         successTitle="Booking updated"
@@ -321,7 +337,7 @@ export function BookingEditForm({
       />
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"} role={state.status === "error" ? "alert" : "status"}>
           {state.status === "error" ? (
             <AlertCircle aria-hidden="true" />
           ) : (
@@ -586,7 +602,7 @@ export function BookingEditForm({
               />
 
               <div className="grid gap-4 sm:col-span-2 lg:grid-cols-2">
-                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset id="catering-drinks" tabIndex={-1} aria-describedby={fieldErrors.cateringType ? "cateringType-error" : undefined} aria-invalid={Boolean(fieldErrors.cateringType)} className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
                   <legend className="px-1 text-sm font-semibold">
                     Drinks
                   </legend>
@@ -626,7 +642,7 @@ export function BookingEditForm({
                   </label>
                 </fieldset>
 
-                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset aria-describedby={fieldErrors.cateringType ? "cateringType-error" : undefined} aria-invalid={Boolean(fieldErrors.cateringType)} className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
                   <legend className="px-1 text-sm font-semibold">
                     Food
                   </legend>
@@ -793,7 +809,7 @@ export function BookingEditForm({
         </div>
       </section>
 
-      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} />
+      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} onDraftChange={() => setIsDirty(true)} />
 
       <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
         {booking.status === "pending" ? (
@@ -814,14 +830,20 @@ export function BookingEditForm({
         <Link
           href={`/bookings/${booking.id}`}
           className={buttonVariants({ variant: "outline" })}
+          onClick={(event) => {
+            if (isDirty && !window.confirm("Discard your booking changes and return to the booking?")) {
+              event.preventDefault();
+            }
+          }}
         >
-          Back to booking
+          {isDirty ? "Discard changes" : "Back to booking"}
         </Link>
         <Button type="submit" disabled={isPending}>
           <PendingButtonContent pending={isPending} pendingLabel="Saving...">
             Save changes
           </PendingButtonContent>
         </Button>
+      </div>
       </div>
     </form>
   );
