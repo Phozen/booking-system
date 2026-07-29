@@ -207,13 +207,12 @@ export function BookingForm({
   );
   const alertCopy =
     state.status !== "idle" ? getBookingAlertCopy(state) : null;
-  const hasPreviewDetails = Boolean(
-    selectedFacilityDetails ||
-      previewValues.date ||
-      previewValues.startTime ||
-      previewValues.endTime ||
-      previewValues.title ||
-      previewValues.attendeeCount,
+  const hasCompletePreview = Boolean(
+    selectedFacilityDetails &&
+      previewValues.date &&
+      previewValues.startTime &&
+      previewValues.endTime &&
+      previewValues.title,
   );
   const approvalRequired = selectedFacilityDetails
     ? getEffectiveApprovalRequired(
@@ -401,7 +400,10 @@ export function BookingForm({
       />
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"}>
+        <Alert
+          variant={state.status === "error" ? "destructive" : "success"}
+          role={state.status === "error" ? "alert" : "status"}
+        >
           {state.status === "error" ? (
             <AlertCircle aria-hidden="true" />
           ) : (
@@ -547,13 +549,14 @@ export function BookingForm({
           bookingWindowEnd={settings.bookingWindowEnd}
           startTime={previewValues.startTime}
           endTime={previewValues.endTime}
-          onTimeChange={(startTime, endTime) =>
+          onTimeChange={(startTime, endTime) => {
+            setIsDirty(true);
             setPreviewValues((current) => ({
               ...current,
               startTime,
               endTime,
-            }))
-          }
+            }));
+          }}
           disabled={!hasFacilities || isPending}
           locked={!previewValues.date}
           startTimeError={fieldErrors.startTime}
@@ -898,12 +901,14 @@ export function BookingForm({
       <InitialAttendeePicker
         disabled={!hasFacilities || isPending}
         onSelectedCountChange={setSelectedAttendeeCount}
+        onDraftChange={() => setIsDirty(true)}
       />
 
       <DepartmentPicker
         departments={departments}
         disabled={!hasFacilities || isPending}
         onSelectedCountChange={setSelectedDepartmentCount}
+        onDraftChange={() => setIsDirty(true)}
       />
 
       <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
@@ -923,7 +928,7 @@ export function BookingForm({
         <p className="pl-7 text-muted-foreground">After confirmation, QBook sends one Outlook invitation to the internal attendees selected above. The join link is available only to the organiser and invited staff.</p>
       </section>
 
-      {hasPreviewDetails ? (
+      {hasCompletePreview ? (
         <section className="grid gap-3 rounded-lg border-2 border-primary/55 bg-primary/10 p-4 shadow-md shadow-primary/10 ring-2 ring-primary/15">
           <div className="flex items-start gap-3">
             <CalendarClock

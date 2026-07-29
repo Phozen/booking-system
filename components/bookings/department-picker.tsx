@@ -15,11 +15,13 @@ export function DepartmentPicker({
   initialDepartmentIds = [],
   disabled,
   onSelectedCountChange,
+  onDraftChange,
 }: {
   departments: Department[];
   initialDepartmentIds?: string[];
   disabled?: boolean;
   onSelectedCountChange?: (count: number) => void;
+  onDraftChange?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [selectionStatus, setSelectionStatus] = useState("");
@@ -29,6 +31,7 @@ export function DepartmentPicker({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selected = departments.filter((department) => selectedIds.includes(department.id));
   const normalizedQuery = query.trim().toLowerCase();
+  const isAtSelectionLimit = selected.length >= 50;
   const available = useMemo(() => {
     if (normalizedQuery.length < 2) return [];
     return departments.filter(
@@ -57,20 +60,51 @@ export function DepartmentPicker({
             <Label htmlFor="department-search">Search departments</Label>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <Input ref={searchInputRef} id="department-search" type="search" className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} disabled={disabled} placeholder="Department name or email" aria-describedby="department-search-helper department-search-status" />
+              <Input
+                ref={searchInputRef}
+                id="department-search"
+                type="search"
+                className="pl-9"
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setSelectionStatus("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") event.preventDefault();
+                }}
+                disabled={disabled}
+                placeholder="Department name or email"
+                aria-describedby="department-search-helper department-search-status"
+              />
             </div>
             <FormFieldHelper id="department-search-helper">Enter at least 2 characters, then select one or more departments.</FormFieldHelper>
-            <p id="department-search-status" className="sr-only" aria-live="polite">
+            <p id="department-search-status" className="sr-only" role="status" aria-live="polite">
               {selectionStatus || (normalizedQuery.length >= 2 ? `${available.length} matching departments found` : "Enter at least 2 characters to search")}
             </p>
           </div>
-          {available.length > 0 ? (
+          {isAtSelectionLimit ? (
+            <p className="rounded-md border border-dashed bg-muted/40 p-3 text-sm text-muted-foreground">
+              Maximum 50 departments selected. Remove one to add another.
+            </p>
+          ) : available.length > 0 ? (
             <div className="rounded-md border border-dashed bg-muted/40 p-1">
               <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Search results</p>
               <ul className="grid gap-1" aria-label="Matching departments">
                 {available.map((department) => (
                   <li key={department.id}>
-                    <button type="button" className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none" disabled={disabled || selected.length >= 50} onClick={() => { if (selected.length >= 50) { setSelectionStatus("You can select up to 50 departments."); return; } setSelectedIds((current) => [...current, department.id]); setSelectionStatus(`${department.name} added to departments.`); setQuery(""); requestAnimationFrame(() => searchInputRef.current?.focus()); }}>
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer rounded-sm border border-transparent px-3 py-2 text-left transition hover:border-primary/35 hover:bg-background hover:shadow-sm focus-visible:border-primary focus-visible:bg-background focus-visible:outline-none"
+                      disabled={disabled}
+                      onClick={() => {
+                        setSelectedIds((current) => [...current, department.id]);
+                        setSelectionStatus(`${department.name} added to departments.`);
+                        onDraftChange?.();
+                        setQuery("");
+                        requestAnimationFrame(() => searchInputRef.current?.focus());
+                      }}
+                    >
                       <span className="block font-medium">{department.name}</span>
                       <span className="text-xs text-muted-foreground">{department.email}</span>
                     </button>
@@ -87,7 +121,22 @@ export function DepartmentPicker({
                 <li key={department.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
                   <input type="hidden" name="departmentId" value={department.id} />
                   <span className="min-w-0"><span className="block font-medium">{department.name}</span><span className="block truncate text-xs text-muted-foreground">{department.email}</span></span>
-                  <Button type="button" variant="ghost" size="icon" disabled={disabled} aria-label={`Remove ${department.name}`} onClick={() => { setSelectedIds((current) => current.filter((id) => id !== department.id)); setSelectionStatus(`${department.name} removed from departments.`); }}><X aria-hidden="true" /></Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={disabled}
+                    aria-label={`Remove ${department.name}`}
+                    onClick={() => {
+                      setSelectedIds((current) =>
+                        current.filter((id) => id !== department.id),
+                      );
+                      setSelectionStatus(`${department.name} removed from departments.`);
+                      onDraftChange?.();
+                    }}
+                  >
+                    <X aria-hidden="true" />
+                  </Button>
                 </li>
               ))}
             </ul>

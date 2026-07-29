@@ -33,13 +33,15 @@ export function OverlayLoader({
       aria-atomic="true"
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm duration-300 fill-mode-both",
-        show ? "animate-in fade-in zoom-in-95" : "animate-out fade-out zoom-out-95",
+        show
+          ? "animate-in fade-in zoom-in-95 motion-reduce:animate-none"
+          : "animate-out fade-out zoom-out-95 motion-reduce:animate-none",
         className
       )}
     >
       <div className="flex flex-col items-center gap-4 text-primary">
-        <Loader2 className="size-10 animate-spin" aria-hidden="true" />
-        <p className="text-lg font-semibold animate-pulse">{label}</p>
+        <Loader2 className="size-10 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+        <p className="text-lg font-semibold animate-pulse motion-reduce:animate-none">{label}</p>
       </div>
     </div>
   );

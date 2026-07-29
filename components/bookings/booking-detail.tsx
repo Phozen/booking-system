@@ -199,7 +199,7 @@ export function BookingDetail({
       ) : null}
 
       {isOwnerView && justCreated ? (
-        <Alert variant="success">
+        <Alert variant="success" role="status">
           <StaticToastEffect
             title={
               booking.status === "pending"

@@ -456,7 +456,7 @@ export function BookingAvailabilityTimeline({
             {loading ? (
               <div className="absolute inset-0 z-20 grid place-items-center bg-background/80">
                 <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                   Loading availability
                 </span>
               </div>
