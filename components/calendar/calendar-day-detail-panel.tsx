@@ -173,17 +173,14 @@ export function CalendarDayDetailPanel({
   );
 
   return (
-    <aside className="grid gap-4 rounded-lg border border-border/70 bg-card p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+    <aside className="hidden gap-4 rounded-lg border border-border bg-card p-4 md:grid">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase text-muted-foreground">
-            Selected day
-          </p>
-          <h2 className="mt-1 text-lg font-semibold tracking-normal">
+          <h2 className="qbook-type-section">
             {day.weekdayLabel}, {day.shortLabel}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {bookings.length} booking{bookings.length === 1 ? "" : "s"} shown.
+          <p className="qbook-type-meta mt-1 qbook-type-tabular">
+            {bookings.length} booking{bookings.length === 1 ? "" : "s"}
           </p>
         </div>
         <Link
@@ -191,7 +188,7 @@ export function CalendarDayDetailPanel({
           className={buttonVariants({ size: "sm" })}
         >
           <CalendarPlus data-icon="inline-start" />
-          Book on this day
+          Create booking
         </Link>
       </div>
 

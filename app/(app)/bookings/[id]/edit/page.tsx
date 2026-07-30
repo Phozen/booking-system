@@ -43,23 +43,20 @@ export default async function EditBookingPage({
       <PageHeader
         eyebrow="My bookings"
         title="Edit booking"
-        description="Update booking details or reschedule. Availability is checked again before changes are saved."
+        description="Update details or reschedule. Availability is checked again before changes are saved."
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
           { label: "My Bookings", href: "/my-bookings" },
           { label: booking.title, href: `/bookings/${booking.id}` },
           { label: "Edit" },
         ]}
       />
 
-      <section className="rounded-lg border bg-card p-5">
-        <BookingEditForm
-          booking={booking}
-          facilities={facilities}
-          settings={settings}
-          departments={departments}
-        />
-      </section>
+      <BookingEditForm
+        booking={booking}
+        facilities={facilities}
+        settings={settings}
+        departments={departments}
+      />
     </main>
   );
 }

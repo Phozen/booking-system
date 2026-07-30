@@ -20,16 +20,16 @@ export function AppHeader({
   unseenNotificationCount?: number;
 }) {
   return (
-    <header className="qbook-header-panel sticky top-0 z-40 border-b border-sidebar-border shadow-sm shadow-foreground/5 backdrop-blur-xl print:hidden">
-      <div className="relative mx-auto flex min-h-20 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 flex-1 items-center gap-6">
+    <header className="qbook-header-panel sticky top-0 z-40 border-b border-border/80 print:hidden">
+      <div className="relative mx-auto flex min-h-14 w-full max-w-screen-2xl items-center justify-between gap-3 px-4 sm:min-h-16 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-5">
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <CompanyBrand
-              logoClassName="w-16 sm:w-20"
-              textClassName="text-4xl sm:text-5xl"
+              logoClassName="w-12 sm:w-14"
+              textClassName="text-2xl sm:text-3xl"
               priority
             />
             <span className="sr-only">{appName}</span>

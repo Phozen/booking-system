@@ -21,31 +21,26 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header
-      className={cn(
-        "grid gap-4 pb-5",
-        className,
-      )}
-    >
+    <header className={cn("grid gap-3 pb-6", className)}>
       {breadcrumbs ? <Breadcrumbs items={breadcrumbs} /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-3xl">
+        <div className="min-w-0 max-w-3xl">
           {eyebrow ? (
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary/90">
+            <p className="qbook-type-meta font-medium uppercase tracking-wide text-muted-foreground">
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-1 text-3xl font-bold tracking-normal text-foreground sm:text-4xl">
+          <h1 className={cn("qbook-type-title", eyebrow ? "mt-1" : undefined)}>
             {title}
           </h1>
           {description ? (
-            <div className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            <div className="qbook-type-meta mt-2 max-w-2xl leading-6">
               {description}
             </div>
           ) : null}
         </div>
         {primaryAction || secondaryAction ? (
-          <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+          <div className="grid w-full shrink-0 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
             {secondaryAction}
             {primaryAction}
           </div>

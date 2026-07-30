@@ -1,6 +1,6 @@
 # Frontend UX/UI Specification
 
-> **Status (2026-07-22):** This document contains the original UX specification and historical improvement backlog. The implemented feature overview is maintained in [README](../README.md), [USER_FLOWS.md](USER_FLOWS.md), and [ARCHITECTURE.md](ARCHITECTURE.md). In particular, profile/user management, internal invitations, dark mode, notifications, department selection, and the current booking flows are implemented; recurring booking operations are retired. Do not treat older “missing”, “planned”, or recurrence-backlog entries below as current product commitments.
+> **Status (2026-07-30):** Employee UI redesign baseline is in place: warm-neutral canvas with clearer blue primary, simplified employee shell (no frosted mega-card nesting), shared type scale utilities (`.qbook-type-*`), quiet form sections with sticky primary CTAs, document-mode print route under `app/(document)/`, and redesigned employee calendar / invitations / profile hierarchy. Light and dark tokens were retuned together. Admin console redesign remains deferred. Older “missing”, “planned”, or recurrence-backlog entries below are historical and should not be treated as current product commitments. The implemented feature overview is maintained in [README](../README.md), [USER_FLOWS.md](USER_FLOWS.md), and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 This document is the source of truth for future frontend polish and UI implementation for the internal Booking System.
 
@@ -255,10 +255,11 @@ Examples:
 
 ### Final Visual Baseline
 
-- The app should use a warm neutral page background with white/card surfaces.
-- Primary actions use blue/indigo and should be visually stronger than secondary actions.
+- Employee surfaces use a warm-neutral page background with a clearer blue primary accent (see `app/globals.css` tokens; light and dark retuned together).
+- Primary actions use solid primary and should be visually stronger than secondary actions (one filled CTA per view).
 - Success states use emerald, pending/warning states use amber, destructive or failed states use rose, inactive/cancelled states use slate or zinc, and maintenance/info states use sky.
-- Cards, filter bars, dialogs, and tables should use soft borders and light shadows only where they improve separation.
+- Avoid nested cards: page sections prefer whitespace and dividers over card-in-card framing.
+- Printable approval forms use a document-mode shell (`app/(document)/`) with theme-aware screen chrome and white print output.
 - The visual system should remain professional and calm for internal company use.
 
 ### Color Role Guidance

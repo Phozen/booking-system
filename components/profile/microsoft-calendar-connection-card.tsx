@@ -27,16 +27,16 @@ export function MicrosoftCalendarConnectionCard({
     connection.status === "not_connected";
 
   return (
-    <section className="grid gap-4 rounded-lg border border-border/70 bg-card p-5 shadow-sm ring-1 ring-primary/5">
+    <section className="grid gap-4 rounded-lg border border-border bg-muted/20 p-4">
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <CalendarCheck className="size-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold tracking-normal">
+          <h3 className="text-base font-semibold tracking-normal">
             Microsoft Calendar
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </h3>
+          <p className="qbook-type-meta mt-1">
             {connection.connected
               ? "Connected for delegated booking calendar sync."
               : calendarSyncReady

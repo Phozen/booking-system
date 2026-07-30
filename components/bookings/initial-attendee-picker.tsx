@@ -101,17 +101,10 @@ export function InitialAttendeePicker({
   }, [onSelectedCountChange, selected.length]);
 
   return (
-    <section className="grid gap-3 border-b-2 border-border pb-7 text-sm">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
-            Attendees
-          </p>
-          <FieldRequirementBadge required={false} />
-        </div>
-        <h2 className="mt-1 text-lg font-bold tracking-normal">
-          Invite attendees
-        </h2>
+    <div className="grid gap-3 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="qbook-type-section text-base">Invite attendees</p>
+        <FieldRequirementBadge required={false} />
       </div>
 
       <div className="grid gap-2">
@@ -249,6 +242,6 @@ export function InitialAttendeePicker({
           ))}
         </ul>
       ) : null}
-    </section>
+    </div>
   );
 }

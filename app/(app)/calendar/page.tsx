@@ -28,6 +28,8 @@ import { CalendarDayDetailPanel } from "@/components/calendar/calendar-day-detai
 import { CalendarControls } from "@/components/calendar/calendar-controls";
 import { MonthCalendarGrid } from "@/components/calendar/month-calendar-grid";
 import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -138,10 +140,19 @@ export default async function EmployeeCalendarPage({
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Employee bookings"
-        title="Booking Calendar"
+        eyebrow="Bookings"
+        title="Calendar"
+        description="Review your bookings by month. Select a day for details or create a new booking."
+        primaryAction={
+          <Link
+            href={`/bookings/new?date=${encodeURIComponent(selectedDay.key)}`}
+            className={buttonVariants()}
+          >
+            Create booking
+          </Link>
+        }
       />
 
       <CalendarControls
@@ -151,9 +162,10 @@ export default async function EmployeeCalendarPage({
         selectedView={selectedView}
         showViewToggle={allowAllBookings}
         timezone={settings.defaultTimezone}
+        compact
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <MonthCalendarGrid
           days={days}
           groupedBookings={groupedBookings}

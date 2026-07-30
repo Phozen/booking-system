@@ -1,53 +1,35 @@
-import { CalendarClock, Mail, Phone, UserRound } from "lucide-react";
-import type { ReactNode } from "react";
+import { Mail, Phone, UserRound } from "lucide-react";
 
-import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { UserProfile } from "@/lib/profile/queries";
 import { StatusBadge } from "@/components/shared/status-badge";
 
-function formatOptionalDate(value: string | null) {
-  return value ? formatBookingDateTime(value) : "Not recorded";
-}
-
-function DetailItem({
-  label,
-  value,
-  className,
-}: {
-  label: string;
-  value: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`grid min-w-0 gap-1 border-b border-border/70 py-3 last:border-b-0 ${className ?? ""}`}>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="mt-1 min-w-0 break-words text-sm font-medium text-foreground">
-        {value}
-      </dd>
-    </div>
-  );
-}
-
 export function ProfileDetail({ profile }: { profile: UserProfile }) {
   return (
-    <section className="grid content-start gap-5 rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
+    <section className="grid gap-4 border-b border-border pb-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <UserRound className="size-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="break-words text-lg font-semibold tracking-normal">
+            <h2 className="qbook-type-section break-words">
               {profile.fullName || "Unnamed user"}
             </h2>
-            <p className="mt-1 flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+            <p className="qbook-type-meta mt-1 flex min-w-0 items-center gap-2">
               <Mail className="size-4 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 break-words leading-5 sm:truncate [overflow-wrap:anywhere]">
+              <span className="min-w-0 break-words leading-5 [overflow-wrap:anywhere]">
                 {profile.email}
               </span>
             </p>
+            {profile.department ? (
+              <p className="qbook-type-meta mt-1">{profile.department}</p>
+            ) : null}
+            {profile.phone ? (
+              <p className="qbook-type-meta mt-1 flex items-center gap-2">
+                <Phone className="size-4 shrink-0" aria-hidden="true" />
+                {profile.phone}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -56,37 +38,6 @@ export function ProfileDetail({ profile }: { profile: UserProfile }) {
           <StatusBadge kind="user" status={profile.status} />
         </div>
       </div>
-
-      <dl className="grid gap-0">
-        <DetailItem label="Department" value={profile.department || "Not set"} />
-        <DetailItem
-          label="Phone"
-          value={
-            <span className="inline-flex items-center gap-2">
-              <Phone className="size-4 text-muted-foreground" aria-hidden="true" />
-              {profile.phone || "Not set"}
-            </span>
-          }
-        />
-        <DetailItem
-          label="Last login"
-          value={
-            <span className="inline-flex items-center gap-2">
-              <CalendarClock
-                className="size-4 text-muted-foreground"
-                aria-hidden="true"
-              />
-              {formatOptionalDate(profile.lastLoginAt)}
-            </span>
-          }
-        />
-        <DetailItem label="Created" value={formatBookingDateTime(profile.createdAt)} />
-        <DetailItem label="Updated" value={formatBookingDateTime(profile.updatedAt)} />
-        <DetailItem
-          label="User ID"
-          value={<span className="block break-all">{profile.id}</span>}
-        />
-      </dl>
     </section>
   );
 }
