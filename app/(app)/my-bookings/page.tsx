@@ -30,9 +30,10 @@ export default async function MyBookingsPage({
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         eyebrow="Your bookings"
-        title="Bookings"
+        title="My bookings"
+        description="Rooms you have already booked."
         primaryAction={
-          <Link href="/bookings/new" className={buttonVariants()}>
+          <Link href="/bookings/new" className={buttonVariants({ size: "lg" })}>
             <CalendarPlus data-icon="inline-start" />
             Book a room
           </Link>

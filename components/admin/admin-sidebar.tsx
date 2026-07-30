@@ -16,8 +16,8 @@ export function AdminSidebar({
   role?: string | null;
 }) {
   return (
-    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border bg-sidebar print:hidden lg:block">
-      <div className="qbook-office-panel sticky top-0 flex h-svh flex-col gap-5 p-4">
+    <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border print:hidden lg:block">
+      <div className="qbook-nav-photo sticky top-0 flex h-svh flex-col gap-5 p-4">
         <div className="border-b border-sidebar-border pb-4">
           <Link
             href="/admin/dashboard"

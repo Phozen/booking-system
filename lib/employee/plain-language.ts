@@ -1,0 +1,33 @@
+/**
+ * Employee-facing copy only. Do not rename DB/API fields to match these.
+ */
+export const employeeCopy = {
+  room: "Room",
+  rooms: "Rooms",
+  bookARoom: "Book a room",
+  bookThisRoom: "Book this room",
+  bookThisDay: "Book this day",
+  myBookings: "My bookings",
+  invites: "Invites",
+  home: "Home",
+  calendar: "Calendar",
+  howManyPeople: "How many people",
+  numberOfPeople: "Number of people",
+  fitsPeople: (n: number) => `Fits ${n} people`,
+  needFoodOrDrinks: "Need food or drinks?",
+  printForm: "Print form",
+  yourBooking: "Your booking",
+  booked: "Booked",
+  comingUp: "Coming up",
+  open: "Open",
+  roomUnavailable: "Room unavailable",
+  pickARoom: "Pick a room",
+  pickDateAndTime: "Pick date and time",
+  meetingDetails: "Meeting details",
+  peopleAndExtras: "People and extras",
+  reviewAndSend: "Review and send",
+  sending: "Sending…",
+  continue: "Continue",
+  back: "Back",
+  stepOf: (current: number, total: number) => `Step ${current} of ${total}`,
+} as const;

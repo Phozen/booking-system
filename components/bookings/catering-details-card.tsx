@@ -44,7 +44,7 @@ export function CateringDetailsCard({
         </Alert>
       ) : (
         <dl className="mt-5 grid gap-5 sm:grid-cols-2">
-          <DetailItem label="Number of pax" value={catering.pax ?? "Not specified"} />
+          <DetailItem label="Number of people" value={catering.pax ?? "Not specified"} />
           <DetailItem
             label="Serving time"
             value={formatCateringServingTime(catering.servingTime)}

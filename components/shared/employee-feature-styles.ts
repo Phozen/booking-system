@@ -1,4 +1,10 @@
-export type EmployeeFeatureTone = "blue" | "emerald" | "amber" | "violet";
+export type EmployeeFeatureTone =
+  | "blue"
+  | "emerald"
+  | "amber"
+  | "violet"
+  | "sky"
+  | "slate";
 
 export const employeeFeatureStyles: Record<
   EmployeeFeatureTone,
@@ -21,6 +27,14 @@ export const employeeFeatureStyles: Record<
   },
   violet: {
     home: "border-violet-800 bg-violet-700 text-white shadow-violet-950/20 hover:bg-violet-800",
+    icon: "bg-white/15 text-white ring-white/30",
+  },
+  sky: {
+    home: "border-sky-800 bg-sky-700 text-white shadow-sky-950/20 hover:bg-sky-800",
+    icon: "bg-white/15 text-white ring-white/30",
+  },
+  slate: {
+    home: "border-slate-700 bg-slate-600 text-white shadow-slate-950/20 hover:bg-slate-700",
     icon: "bg-white/15 text-white ring-white/30",
   },
 };

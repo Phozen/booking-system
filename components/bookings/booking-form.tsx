@@ -24,12 +24,14 @@ import type { Department } from "@/lib/departments/queries";
 import {
   formatFacilityType,
 } from "@/lib/facilities/format";
+import { employeeCopy } from "@/lib/employee/plain-language";
 import {
   formatEffectiveApprovalLabel,
   formatBookingWindowLabel,
   getEffectiveApprovalRequired,
   type AppSettings,
 } from "@/lib/settings/app-settings";
+import { cn } from "@/lib/utils";
 import {
   Alert,
   AlertDescription,
@@ -138,23 +140,23 @@ function getBookingAlertCopy(state: BookingActionResult) {
 
   if (message.includes("booked") || message.includes("time slot")) {
     return {
-      title: "Booking conflict",
+      title: "That time is taken",
       message:
-        "This facility is already booked for the selected time. Please choose another time or facility.",
+        "This room is already booked for that time. Please choose another time or room.",
     };
   }
 
   if (message.includes("blocked")) {
     return {
-      title: "Facility unavailable",
-      message: "This facility is unavailable during the selected time.",
+      title: "Room unavailable",
+      message: "This room is unavailable during the selected time.",
     };
   }
 
   if (message.includes("maintenance")) {
     return {
-      title: "Facility under maintenance",
-      message: "This facility is under maintenance during the selected time.",
+      title: "Room under maintenance",
+      message: "This room is under maintenance during the selected time.",
     };
   }
 
@@ -163,6 +165,8 @@ function getBookingAlertCopy(state: BookingActionResult) {
     message: state.message,
   };
 }
+
+const TOTAL_STEPS = 5;
 
 export function BookingForm({
   facilities,
@@ -187,6 +191,7 @@ export function BookingForm({
       : facilities[0]?.id ?? "";
   const hasFacilities = facilities.length > 0;
   const [selectedFacility, setSelectedFacility] = useState(initialFacilityId);
+  const [wizardStep, setWizardStep] = useState(1);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
   const [cateringRequired, setCateringRequired] = useState(false);
   const [selectedDrinkItems, setSelectedDrinkItems] = useState<string[]>([]);
@@ -211,13 +216,6 @@ export function BookingForm({
   );
   const alertCopy =
     state.status !== "idle" ? getBookingAlertCopy(state) : null;
-  const hasCompletePreview = Boolean(
-    selectedFacilityDetails &&
-      previewValues.date &&
-      previewValues.startTime &&
-      previewValues.endTime &&
-      previewValues.title,
-  );
   const approvalRequired = selectedFacilityDetails
     ? getEffectiveApprovalRequired(
         selectedFacilityDetails.requiresApproval,
@@ -336,7 +334,7 @@ export function BookingForm({
         attendeeCount !== null &&
         attendeeCount > selectedFacilityDetails.capacity
       ) {
-        nextErrors.attendeeCount = `Attendee count should not exceed this facility's capacity of ${selectedFacilityDetails.capacity}.`;
+        nextErrors.attendeeCount = `How many people should not exceed this room’s limit of ${selectedFacilityDetails.capacity}.`;
       }
     }
 
@@ -361,15 +359,60 @@ export function BookingForm({
     );
   }
 
+  function goToStep(next: number) {
+    setWizardStep(Math.min(TOTAL_STEPS, Math.max(1, next)));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function validateCurrentStep(): boolean {
+    const nextErrors: BookingFieldErrors = {};
+
+    if (wizardStep === 1 && !selectedFacility) {
+      nextErrors.facilityId = "Choose a room to continue.";
+    }
+
+    if (wizardStep === 2) {
+      if (!previewValues.date) nextErrors.date = "Choose a date.";
+      if (!previewValues.startTime) nextErrors.startTime = "Choose a start time.";
+      if (!previewValues.endTime) nextErrors.endTime = "Choose an end time.";
+    }
+
+    if (wizardStep === 3) {
+      if (!previewValues.title.trim()) {
+        nextErrors.title = "Enter a short name for this meeting.";
+      }
+    }
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      setFieldErrors((current) => ({ ...current, ...nextErrors }));
+      showFormValidationError(nextErrors);
+      return false;
+    }
+
+    return true;
+  }
+
+  function handleContinue() {
+    if (!validateCurrentStep()) return;
+    goToStep(wizardStep + 1);
+  }
+
   return (
     <form
       action={formAction}
       className="grid gap-0 pb-24"
       noValidate
       onChange={(event) => updatePreview(event.currentTarget)}
-      onSubmit={validateBeforeSubmit}
+      onSubmit={(event) => {
+        if (wizardStep !== TOTAL_STEPS) {
+          event.preventDefault();
+          handleContinue();
+          return;
+        }
+        validateBeforeSubmit(event);
+      }}
     >
-      <OverlayLoader show={isPending} label="Creating booking..." />
+      <OverlayLoader show={isPending} label={employeeCopy.sending} />
 
       <ActionToastEffect
         state={state}
@@ -392,9 +435,9 @@ export function BookingForm({
       {!hasFacilities ? (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
-          <AlertTitle>No facilities available</AlertTitle>
+          <AlertTitle>No rooms available</AlertTitle>
           <AlertDescription>
-            There are no active facilities available for booking. Contact an
+            There are no active rooms available for booking. Contact an
             administrator if this looks wrong.
           </AlertDescription>
         </Alert>
@@ -402,99 +445,119 @@ export function BookingForm({
 
       <BookingFormSection
         step={1}
-        title="Venue"
-        description="Choose the room or facility for this booking."
+        totalSteps={TOTAL_STEPS}
+        title={employeeCopy.pickARoom}
+        description="Tap the room you want. You can change this later."
+        hidden={wizardStep !== 1}
       >
         <div className="grid gap-2">
-          <BookingFieldLabel htmlFor="facilityId" required>
-            Facility
+          <BookingFieldLabel htmlFor="facility-picker" required>
+            {employeeCopy.room}
           </BookingFieldLabel>
-          <Select
-            id="facilityId"
-            name="facilityId"
-            value={selectedFacility}
-            onChange={(event) => {
-              setIsDirty(true);
-              setSelectedFacility(event.target.value);
-            }}
-            disabled={!hasFacilities || isPending}
-            aria-describedby={getFieldDescribedBy(
-              fieldErrors.facilityId && "facilityId-error",
-            )}
-            aria-invalid={Boolean(fieldErrors.facilityId)}
-            required
-          >
-            {facilities.map((facility) => (
-              <option key={facility.id} value={facility.id}>
-                {facility.name} - {facility.level} -{" "}
-                {formatFacilityType(facility.type)} - Capacity{" "}
-                {facility.capacity}
-              </option>
-            ))}
-          </Select>
+          <input type="hidden" id="facility-picker" name="facilityId" value={selectedFacility} />
           <FormFieldError id="facilityId-error">
             {fieldErrors.facilityId}
           </FormFieldError>
         </div>
 
+        <div className="grid gap-3 sm:grid-cols-2" role="listbox" aria-label="Choose a room">
+          {facilities.map((facility) => {
+            const selected = facility.id === selectedFacility;
+            return (
+              <button
+                key={facility.id}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                disabled={!hasFacilities || isPending}
+                onClick={() => {
+                  setIsDirty(true);
+                  setSelectedFacility(facility.id);
+                  setFieldErrors((current) => ({ ...current, facilityId: undefined }));
+                }}
+                className={cn(
+                  "grid min-h-28 gap-3 rounded-xl border p-3 text-left transition-[border-color,box-shadow,background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/60 active:scale-[0.99] sm:grid-cols-[112px_minmax(0,1fr)]",
+                  selected
+                    ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/40"
+                    : "border-border/80 bg-card hover:border-primary/40 hover:bg-accent/40",
+                )}
+              >
+                <div className="aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted">
+                  <FacilityPhoto facility={facility} className="aspect-[4/3] min-h-24" />
+                </div>
+                <div className="grid gap-1 self-center">
+                  <p className="font-semibold leading-tight">{facility.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {facility.level} · {formatFacilityType(facility.type)}
+                  </p>
+                  <p className="text-sm font-medium">
+                    {employeeCopy.fitsPeople(facility.capacity)}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         {selectedFacilityDetails ? (
-          <aside className="grid gap-4 rounded-lg border border-border bg-muted/30 p-4 text-sm sm:grid-cols-[140px_minmax(0,1fr)]">
-            <div className="min-h-28 overflow-hidden rounded-md border border-border bg-card">
-              <FacilityPhoto
-                facility={selectedFacilityDetails}
-                className="aspect-[4/3] min-h-28"
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="qbook-type-meta">Selected facility</p>
-                  <p className="qbook-type-section mt-0.5">
-                    {selectedFacilityDetails.name}
-                  </p>
-                  <p className="qbook-type-meta mt-1">
-                    {selectedFacilityDetails.level} ﾂｷ{" "}
-                    {formatFacilityType(selectedFacilityDetails.type)}
-                  </p>
-                </div>
-                <div className="inline-flex items-center gap-2 text-muted-foreground">
-                  <Users className="size-4" aria-hidden="true" />
-                  <span className="qbook-type-tabular text-sm">
-                    Capacity {selectedFacilityDetails.capacity}
-                  </span>
-                </div>
+          <aside className="grid gap-3 rounded-xl border border-border bg-muted/30 p-4 text-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="qbook-type-meta">Selected room</p>
+                <p className="qbook-type-section mt-0.5">
+                  {selectedFacilityDetails.name}
+                </p>
+                <p className="qbook-type-meta mt-1">
+                  {selectedFacilityDetails.level} ·{" "}
+                  {formatFacilityType(selectedFacilityDetails.type)}
+                </p>
               </div>
-              <div className="inline-flex items-start gap-2 text-muted-foreground">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <span className="text-sm">
-                  {formatEffectiveApprovalLabel(
-                    selectedFacilityDetails.requiresApproval,
-                    settings,
-                  )}
+              <div className="inline-flex items-center gap-2 text-muted-foreground">
+                <Users className="size-4" aria-hidden="true" />
+                <span className="qbook-type-tabular text-sm">
+                  {employeeCopy.fitsPeople(selectedFacilityDetails.capacity)}
                 </span>
               </div>
-              <p className="qbook-type-meta">
-                {selectedFacilityDetails.equipment.length > 0
-                  ? `Equipment: ${selectedFacilityDetails.equipment
-                      .slice(0, 4)
-                      .map((item) =>
-                        item.quantity > 1
-                          ? `${item.name} (${item.quantity})`
-                          : item.name,
-                      )
-                      .join(", ")}${selectedFacilityDetails.equipment.length > 4 ? "..." : ""}`
-                  : "No equipment listed."}
-              </p>
             </div>
+            <div className="inline-flex items-start gap-2 text-muted-foreground">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span className="text-sm">
+                {formatEffectiveApprovalLabel(
+                  selectedFacilityDetails.requiresApproval,
+                  settings,
+                )}
+              </span>
+            </div>
+            <p className="qbook-type-meta">
+              {selectedFacilityDetails.equipment.length > 0
+                ? `Equipment: ${selectedFacilityDetails.equipment
+                    .slice(0, 4)
+                    .map((item) =>
+                      item.quantity > 1
+                        ? `${item.name} (${item.quantity})`
+                        : item.name,
+                    )
+                    .join(", ")}${selectedFacilityDetails.equipment.length > 4 ? "..." : ""}`
+                : "No equipment listed."}
+            </p>
           </aside>
         ) : null}
       </BookingFormSection>
 
       <BookingFormSection
         step={2}
-        title="When"
-        description="Pick a date, then select an available time on the timeline."
+        totalSteps={TOTAL_STEPS}
+        title={employeeCopy.pickDateAndTime}
+        description="Pick a date, then drag or tap an open time on the timeline."
+        hidden={wizardStep !== 2}
       >
+        {selectedFacilityDetails ? (
+          <p className="rounded-lg border border-border/70 bg-muted/40 px-3 py-2 text-sm">
+            Room: <span className="font-medium">{selectedFacilityDetails.name}</span>
+            {" · "}
+            {selectedFacilityDetails.level}
+          </p>
+        ) : null}
         <div className="grid gap-2 sm:max-w-md">
           <BookingFieldLabel htmlFor="date" required>
             Date
@@ -545,19 +608,21 @@ export function BookingForm({
 
       <BookingFormSection
         step={3}
-        title="Details"
-        description="Add the purpose and optional meeting details."
+        totalSteps={TOTAL_STEPS}
+        title={employeeCopy.meetingDetails}
+        description="Tell us what the meeting is for."
+        hidden={wizardStep !== 3}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
             <BookingFieldLabel htmlFor="title" required>
-              Purpose
+              Meeting name
             </BookingFieldLabel>
             <Input
               id="title"
               name="title"
               maxLength={160}
-              placeholder="Meeting name / event name"
+              placeholder="Example: Weekly team sync"
               value={previewValues.title}
               onChange={(event) => setPreviewField("title", event.target.value)}
               disabled={!hasFacilities || isPending}
@@ -572,7 +637,7 @@ export function BookingForm({
 
           <div className="grid gap-2">
             <BookingFieldLabel htmlFor="attendeeCount" required={false}>
-              Attendee count
+              {employeeCopy.howManyPeople}
             </BookingFieldLabel>
             <Input
               id="attendeeCount"
@@ -582,7 +647,7 @@ export function BookingForm({
               inputMode="numeric"
               placeholder={
                 selectedFacilityDetails
-                  ? `Optional (Max. ${selectedFacilityDetails.capacity})`
+                  ? `Optional (up to ${selectedFacilityDetails.capacity})`
                   : "Optional"
               }
               value={previewValues.attendeeCount}
@@ -602,12 +667,13 @@ export function BookingForm({
 
           <div className="grid gap-2 sm:col-span-2">
             <BookingFieldLabel htmlFor="description" required={false}>
-              Description
+              More details
             </BookingFieldLabel>
             <Textarea
               id="description"
               name="description"
               rows={5}
+              placeholder="Optional notes for yourself or the room admin"
               disabled={!hasFacilities || isPending}
               aria-describedby={getFieldDescribedBy(
                 fieldErrors.description && "description-error",
@@ -619,12 +685,58 @@ export function BookingForm({
               {fieldErrors.description}
             </FormFieldError>
           </div>
+        </div>
+      </BookingFormSection>
 
+      <BookingFormSection
+        step={4}
+        totalSteps={TOTAL_STEPS}
+        title={employeeCopy.peopleAndExtras}
+        description="Invite coworkers, add food or drinks, or skip this step."
+        hidden={wizardStep !== 4}
+      >
+        <InitialAttendeePicker
+          disabled={!hasFacilities || isPending}
+          onSelectedCountChange={setSelectedAttendeeCount}
+          onDraftChange={() => setIsDirty(true)}
+        />
+
+        <DepartmentPicker
+          departments={departments}
+          disabled={!hasFacilities || isPending}
+          onSelectedCountChange={setSelectedDepartmentCount}
+          onDraftChange={() => setIsDirty(true)}
+        />
+
+        <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+          <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
+            <Input
+              id="teamsMeeting"
+              name="teamsMeeting"
+              type="checkbox"
+              value="yes"
+              checked={teamsMeeting}
+              onChange={(event) => {
+                setIsDirty(true);
+                setTeamsMeeting(event.target.checked);
+              }}
+              className="mt-0.5 size-4"
+              disabled={!hasFacilities || isPending}
+            />
+            <span>Also create a Teams meeting link</span>
+          </Label>
+          <p className="qbook-type-meta pl-7">
+            After confirmation, invited staff get one Outlook invitation with
+            the join link.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
             <div className="flex flex-wrap items-center gap-2">
               <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
                 <Coffee className="size-4 text-muted-foreground" aria-hidden="true" />
-                Food or drinks required?
+                {employeeCopy.needFoodOrDrinks}
               </Label>
               <FieldRequirementBadge required={false} />
             </div>
@@ -638,7 +750,7 @@ export function BookingForm({
               disabled={!hasFacilities || isPending}
             >
               <option value="no">No</option>
-              <option value="yes">Yes - show catering options</option>
+              <option value="yes">Yes — show options</option>
             </Select>
           </div>
 
@@ -662,7 +774,7 @@ export function BookingForm({
                       return (
                         <label
                           key={item.value}
-                          className="flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
+                          className="flex min-h-11 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
                         >
                           <input
                             type="checkbox"
@@ -702,7 +814,7 @@ export function BookingForm({
                       return (
                         <label
                           key={item.value}
-                          className="flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
+                          className="flex min-h-11 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium"
                         >
                           <input
                             type="checkbox"
@@ -758,7 +870,7 @@ export function BookingForm({
 
               <div className="grid gap-2">
                 <BookingFieldLabel htmlFor="cateringPax" required>
-                  Number of pax
+                  {employeeCopy.numberOfPeople}
                 </BookingFieldLabel>
                 <Input
                   id="cateringPax"
@@ -814,7 +926,7 @@ export function BookingForm({
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
                   rows={3}
-                  placeholder="Vegetarian, halal, allergies, VIP requirements"
+                  placeholder="Vegetarian, allergies, or other needs"
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
                     fieldErrors.cateringDietaryNotes &&
@@ -830,7 +942,7 @@ export function BookingForm({
 
               <div className="grid gap-2 sm:col-span-2">
                 <BookingFieldLabel htmlFor="cateringNotes" required={false}>
-                  Additional catering notes
+                  Extra notes for catering
                 </BookingFieldLabel>
                 <Textarea
                   id="cateringNotes"
@@ -859,152 +971,141 @@ export function BookingForm({
       </BookingFormSection>
 
       <BookingFormSection
-        step={4}
-        title="People and options"
-        description="Invite staff, tag departments, and set Teams options if needed."
+        step={5}
+        totalSteps={TOTAL_STEPS}
+        title={employeeCopy.reviewAndSend}
+        description="Check the details, then send your booking."
+        hidden={wizardStep !== 5}
       >
-        <InitialAttendeePicker
-          disabled={!hasFacilities || isPending}
-          onSelectedCountChange={setSelectedAttendeeCount}
-          onDraftChange={() => setIsDirty(true)}
-        />
-
-        <DepartmentPicker
-          departments={departments}
-          disabled={!hasFacilities || isPending}
-          onSelectedCountChange={setSelectedDepartmentCount}
-          onDraftChange={() => setIsDirty(true)}
-        />
-
-        <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4 text-sm">
-          <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
-            <Input
-              id="teamsMeeting"
-              name="teamsMeeting"
-              type="checkbox"
-              value="yes"
-              checked={teamsMeeting}
-              onChange={(event) => {
-                setIsDirty(true);
-                setTeamsMeeting(event.target.checked);
-              }}
-              className="mt-0.5 size-4"
-              disabled={!hasFacilities || isPending}
-            />
-            <span>Make this a Teams meeting</span>
-          </Label>
-          <p className="qbook-type-meta pl-7">
-            After confirmation, QBook sends one Outlook invitation to the
-            internal attendees selected above. The join link is available only
-            to the organiser and invited staff.
-          </p>
+        <div className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:p-5">
+          <h3 className="qbook-type-section text-base">Booking summary</h3>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="qbook-type-meta">{employeeCopy.room}</dt>
+              <dd className="font-medium">
+                {selectedFacilityDetails
+                  ? `${selectedFacilityDetails.name}, ${selectedFacilityDetails.level}`
+                  : "Choose a room"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Date</dt>
+              <dd className="qbook-type-tabular font-medium">
+                {previewValues.date || "Choose a date"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Time</dt>
+              <dd className="qbook-type-tabular font-medium">
+                {previewValues.startTime || "Start"} –{" "}
+                {previewValues.endTime || "End"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Meeting name</dt>
+              <dd className="font-medium">
+                {previewValues.title || "Enter a meeting name"}
+              </dd>
+            </div>
+            {previewValues.attendeeCount ? (
+              <div>
+                <dt className="qbook-type-meta">{employeeCopy.howManyPeople}</dt>
+                <dd className="qbook-type-tabular font-medium">
+                  {previewValues.attendeeCount}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt className="qbook-type-meta">Food and drinks</dt>
+              <dd className="font-medium">
+                {cateringRequired
+                  ? drinkRequests.length + foodRequests.length > 0
+                    ? "Requested"
+                    : "Select requests"
+                  : "Not requested"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Invited staff</dt>
+              <dd className="font-medium">
+                {selectedAttendeeCount > 0
+                  ? `${selectedAttendeeCount} selected`
+                  : "None selected"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Departments</dt>
+              <dd className="font-medium">
+                {selectedDepartmentCount > 0
+                  ? `${selectedDepartmentCount} selected`
+                  : "None selected"}
+              </dd>
+            </div>
+            <div>
+              <dt className="qbook-type-meta">Meeting type</dt>
+              <dd className="font-medium">
+                {teamsMeeting ? "Teams meeting" : "Room only"}
+              </dd>
+            </div>
+          </dl>
+          {approvalRequired ? (
+            <p className="rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+              This room needs approval. After you send, an admin will review it.
+            </p>
+          ) : null}
         </div>
-
-        {hasCompletePreview ? (
-          <div className="grid gap-3 rounded-lg border border-border bg-card p-4">
-            <h3 className="qbook-type-section text-base">Booking summary</h3>
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="qbook-type-meta">Facility</dt>
-                <dd className="font-medium">
-                  {selectedFacilityDetails
-                    ? `${selectedFacilityDetails.name}, ${selectedFacilityDetails.level}`
-                    : "Choose a facility"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Date</dt>
-                <dd className="qbook-type-tabular font-medium">
-                  {previewValues.date || "Choose a date"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Time</dt>
-                <dd className="qbook-type-tabular font-medium">
-                  {previewValues.startTime || "Start"} -{" "}
-                  {previewValues.endTime || "End"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Purpose</dt>
-                <dd className="font-medium">
-                  {previewValues.title || "Enter a purpose"}
-                </dd>
-              </div>
-              {previewValues.attendeeCount ? (
-                <div>
-                  <dt className="qbook-type-meta">Attendees</dt>
-                  <dd className="qbook-type-tabular font-medium">
-                    {previewValues.attendeeCount}
-                  </dd>
-                </div>
-              ) : null}
-              <div>
-                <dt className="qbook-type-meta">Food and drinks</dt>
-                <dd className="font-medium">
-                  {cateringRequired
-                    ? drinkRequests.length + foodRequests.length > 0
-                      ? "Requested"
-                      : "Select requests"
-                    : "Not requested"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Internal attendees</dt>
-                <dd className="font-medium">
-                  {selectedAttendeeCount > 0
-                    ? `${selectedAttendeeCount} selected`
-                    : "None selected"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Departments</dt>
-                <dd className="font-medium">
-                  {selectedDepartmentCount > 0
-                    ? `${selectedDepartmentCount} selected`
-                    : "None selected"}
-                </dd>
-              </div>
-              <div>
-                <dt className="qbook-type-meta">Meeting type</dt>
-                <dd className="font-medium">
-                  {teamsMeeting ? "Teams meeting" : "Room only"}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        ) : null}
       </BookingFormSection>
 
       <BookingStickyActions>
-        <Link
-          href="/facilities"
-          className={buttonVariants({ variant: "ghost" })}
-          onClick={(event) => {
-            if (
-              isDirty &&
-              !window.confirm(
-                "Discard your booking draft and return to facilities?",
-              )
-            ) {
-              event.preventDefault();
-            }
-          }}
-        >
-          {isDirty ? "Discard and return" : "Back to facilities"}
-        </Link>
-        <Button type="submit" disabled={!hasFacilities || isPending}>
-          <PendingButtonContent
-            pending={isPending}
-            pendingLabel={
-              approvalRequired
-                ? "Submitting booking request..."
-                : "Creating booking..."
-            }
+        {wizardStep > 1 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="min-h-11"
+            onClick={() => goToStep(wizardStep - 1)}
+            disabled={isPending}
           >
-            {approvalRequired ? "Submit booking request" : "Create booking"}
-          </PendingButtonContent>
-        </Button>
+            {employeeCopy.back}
+          </Button>
+        ) : (
+          <Link
+            href="/facilities"
+            className={buttonVariants({ variant: "ghost", size: "lg" })}
+            onClick={(event) => {
+              if (
+                isDirty &&
+                !window.confirm(
+                  "Discard your booking draft and return to rooms?",
+                )
+              ) {
+                event.preventDefault();
+              }
+            }}
+          >
+            {isDirty ? "Discard and return" : `Back to ${employeeCopy.rooms.toLowerCase()}`}
+          </Link>
+        )}
+        {wizardStep < TOTAL_STEPS ? (
+          <Button
+            type="button"
+            size="lg"
+            className="min-h-11"
+            disabled={!hasFacilities || isPending}
+            onClick={handleContinue}
+          >
+            {employeeCopy.continue}
+          </Button>
+        ) : (
+          <Button type="submit" size="lg" className="min-h-11" disabled={!hasFacilities || isPending}>
+            <PendingButtonContent
+              pending={isPending}
+              pendingLabel={employeeCopy.sending}
+            >
+              {approvalRequired ? "Send for approval" : "Confirm booking"}
+            </PendingButtonContent>
+          </Button>
+        )}
       </BookingStickyActions>
     </form>
   );

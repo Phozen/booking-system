@@ -40,7 +40,7 @@ function InvitationCard({ invitation }: { invitation: InvitedBooking }) {
           <p className="qbook-type-meta mt-1">
             {booking.facility
               ? `${booking.facility.name}, ${booking.facility.level}`
-              : "Facility unavailable"}
+              : "Room unavailable"}
           </p>
         </div>
         {!isPending ? (
@@ -139,8 +139,8 @@ export function InvitationsPageList({
   if (!hasAnyInvitations) {
     return (
       <EmptyState
-        title="No invitations yet"
-        description="When someone invites you to a booking, it will show up here so you can accept or decline."
+        title="No invites yet"
+        description="When someone invites you to a meeting, it will show up here."
         action={
           <Link href="/calendar" className={buttonVariants({ variant: "outline" })}>
             View calendar

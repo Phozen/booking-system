@@ -20,7 +20,7 @@ export function AppHeader({
   unseenNotificationCount?: number;
 }) {
   return (
-    <header className="qbook-header-panel sticky top-0 z-40 border-b border-border/80 print:hidden">
+    <header className="qbook-nav-photo sticky top-0 z-40 border-b border-border/80 print:hidden">
       <div className="relative mx-auto flex min-h-14 w-full max-w-screen-2xl items-center justify-between gap-3 px-4 sm:min-h-16 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-5">
           <Link

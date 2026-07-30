@@ -12,6 +12,7 @@ import {
 } from "@/lib/facilities/format";
 import type { Facility } from "@/lib/facilities/queries";
 import type { AvailabilityTimelineItem } from "@/lib/facilities/availability-timeline";
+import { employeeCopy } from "@/lib/employee/plain-language";
 import {
   formatEffectiveApprovalCopy,
   formatEffectiveApprovalLabel,
@@ -49,7 +50,7 @@ export function FacilityDetail({
       <div className="grid gap-3">
         <Breadcrumbs
           items={[
-            { label: "Facilities", href: "/facilities" },
+            { label: employeeCopy.rooms, href: "/facilities" },
             { label: facility.name },
           ]}
         />
@@ -58,7 +59,7 @@ export function FacilityDetail({
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
-          Facilities
+          {employeeCopy.rooms}
         </Link>
       </div>
 
@@ -88,10 +89,10 @@ export function FacilityDetail({
               <dd className="font-medium">{formatFacilityType(facility.type)}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Capacity</dt>
+              <dt className="text-muted-foreground">Size</dt>
               <dd className="inline-flex items-center gap-2 font-medium">
                 <Users className="size-4" aria-hidden="true" />
-                {facility.capacity}
+                {employeeCopy.fitsPeople(facility.capacity)}
               </dd>
             </div>
             <div>
@@ -118,11 +119,11 @@ export function FacilityDetail({
               })}
             >
               <CalendarPlus data-icon="inline-start" />
-              Book this facility
+              {employeeCopy.bookThisRoom}
             </Link>
           ) : (
             <div className="mt-auto rounded-lg border bg-muted p-3 text-sm text-muted-foreground">
-              This facility is not available for booking right now.
+              This room is not available for booking right now.
             </div>
           )}
         </div>
@@ -155,7 +156,7 @@ export function FacilityDetail({
             </ul>
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">
-              Equipment has not been listed for this facility.
+              Equipment has not been listed for this room.
             </p>
           )}
         </div>

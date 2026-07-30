@@ -311,6 +311,56 @@
     backdrop-filter: blur(12px);
   }
 
+  /* Office photo behind nav chrome only — content stays clean */
+  .qbook-nav-photo {
+    position: relative;
+    isolation: isolate;
+    background-color: color-mix(in oklch, var(--card) 88%, transparent);
+    background-image: url("/office-login-background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .qbook-nav-photo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--background) 92%, transparent),
+        color-mix(in oklch, var(--background) 86%, transparent)
+      ),
+      linear-gradient(
+        to right,
+        color-mix(in oklch, var(--card) 78%, transparent),
+        color-mix(in oklch, var(--card) 62%, transparent)
+      );
+    backdrop-filter: blur(12px);
+  }
+
+  .dark .qbook-nav-photo::before {
+    background:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--background) 94%, transparent),
+        color-mix(in oklch, var(--background) 88%, transparent)
+      ),
+      linear-gradient(
+        to right,
+        color-mix(in oklch, var(--card) 82%, transparent),
+        color-mix(in oklch, var(--card) 68%, transparent)
+      );
+  }
+
+  .qbook-nav-photo > * {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Form section grouping — whitespace, not rainbow cards */
   .qbook-form-section {
     display: grid;

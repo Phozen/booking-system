@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
+import { employeeCopy } from "@/lib/employee/plain-language";
 import {
   formatContactAdministratorMessage,
   getAppSettings,
@@ -52,9 +53,9 @@ export default async function NewBookingPage({
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Book"
-        title="Create booking"
-        description="Choose a facility, pick an available time, then add meeting details."
+        eyebrow={employeeCopy.bookARoom}
+        title={employeeCopy.bookARoom}
+        description="Follow the steps. You can go back anytime before you send."
       />
 
       {profile?.status !== "active" ? (
@@ -68,9 +69,9 @@ export default async function NewBookingPage({
         </Alert>
       ) : loadError ? (
         <Alert variant="destructive">
-          <AlertTitle>Facilities unavailable</AlertTitle>
+          <AlertTitle>Rooms unavailable</AlertTitle>
           <AlertDescription>
-            Facilities could not be loaded. Refresh the page or try again in a
+            Rooms could not be loaded. Refresh the page or try again in a
             moment.
           </AlertDescription>
         </Alert>

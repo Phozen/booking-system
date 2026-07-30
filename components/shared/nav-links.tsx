@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import {
   adminNavigationGroups,
+  employeeHeaderNavigation,
   employeeNavigation,
   getAdminNavigationGroups,
 } from "@/config/navigation";
@@ -41,11 +42,11 @@ function NavigationLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
+        "inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium shadow-xs shadow-foreground/5 transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-black/25",
         compact ? "w-full" : "",
         active
           ? "translate-y-0.5 scale-[0.99] border-primary/90 bg-primary text-primary-foreground shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.3)]"
-          : "border-border/75 bg-card/85 text-foreground hover:border-primary/35 hover:bg-accent/70 hover:text-accent-foreground",
+          : "border-border/90 bg-card/95 text-foreground hover:border-primary/35 hover:bg-accent/90 hover:text-accent-foreground",
       )}
     >
       <Icon className="size-4" aria-hidden="true" />
@@ -61,9 +62,11 @@ export function EmployeeNavigation({
   compact?: boolean;
   onNavigate?: () => void;
 }) {
+  const items = compact ? employeeNavigation : employeeHeaderNavigation;
+
   return (
     <nav aria-label="Employee navigation" className={cn(compact ? "grid gap-1" : "flex items-center gap-1")}>
-      {employeeNavigation.map((item) => (
+      {items.map((item) => (
         <NavigationLink
           key={item.href}
           item={item}

@@ -64,8 +64,8 @@ export default async function ProfilePage({
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Account"
-        title="Your profile"
-        description="Update your contact details. Integrations and notifications are below."
+        title="Your details"
+        description="Keep your name and contact info up to date so coworkers and admins can reach you."
       />
 
       <ProfileDetail profile={profile} />

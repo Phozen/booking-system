@@ -295,7 +295,7 @@ export function CateringEditForm({
 
               <div className="grid gap-2">
                 <Label htmlFor={`cateringPax-${bookingId}`}>
-                  Number of pax
+                  Number of people
                 </Label>
                 <Input
                   id={`cateringPax-${bookingId}`}

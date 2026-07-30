@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getEmployeeFacilities } from "@/lib/facilities/queries";
+import { employeeCopy } from "@/lib/employee/plain-language";
 import {
   formatContactAdministratorMessage,
   getAppSettings,
@@ -25,27 +26,32 @@ export default async function FacilitiesPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
-        eyebrow="Facilities"
-        title="Facilities"
-        description="Browse available facilities when capacity, level, or equipment matters. Book directly when you already know the facility."
+        eyebrow={employeeCopy.rooms}
+        title={employeeCopy.rooms}
+        description="Browse rooms by size, floor, and equipment. Then book the one you need."
+        primaryAction={
+          <Link href="/bookings/new" className={buttonVariants({ size: "lg" })}>
+            {employeeCopy.bookARoom}
+          </Link>
+        }
       />
 
       {facilities.length > 0 ? (
-        <section className="grid gap-4">
+        <section className="grid gap-4" aria-label="Available rooms">
           {facilities.map((facility) => (
             <FacilityCard key={facility.id} facility={facility} />
           ))}
         </section>
       ) : (
         <EmptyState
-          title="No active facilities are available"
-          description={`Facilities may be inactive, archived, or temporarily unavailable. ${formatContactAdministratorMessage(settings)}`}
+          title="No rooms are available right now"
+          description={`Rooms may be closed or temporarily unavailable. ${formatContactAdministratorMessage(settings)}`}
           action={
             <Link
               href="/dashboard"
               className={buttonVariants({ variant: "outline" })}
             >
-              Back to dashboard
+              Back to home
             </Link>
           }
         />

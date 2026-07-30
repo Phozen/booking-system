@@ -8,33 +8,33 @@ type BookingStatusToken = {
 
 export const bookingStatusTokens = {
   pending: {
-    label: "Pending Approval",
-    description: "Waiting for admin review.",
+    label: "Waiting for approval",
+    description: "An admin still needs to approve this booking.",
     tone: "amber",
   },
   confirmed: {
     label: "Confirmed",
-    description: "Booking is confirmed.",
+    description: "This booking is approved and ready.",
     tone: "emerald",
   },
   rejected: {
     label: "Rejected",
-    description: "Booking request was rejected.",
+    description: "This booking request was not approved.",
     tone: "rose",
   },
   cancelled: {
     label: "Cancelled",
-    description: "Booking was cancelled.",
+    description: "This booking was cancelled.",
     tone: "slate",
   },
   completed: {
     label: "Completed",
-    description: "Booking has finished.",
+    description: "This booking has finished.",
     tone: "emerald",
   },
   expired: {
     label: "Expired",
-    description: "Booking request expired.",
+    description: "This booking request expired.",
     tone: "zinc",
   },
 } as const satisfies Record<string, BookingStatusToken>;

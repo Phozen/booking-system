@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   ClipboardCheck,
   Clock,
+  Home,
   Wrench,
   FileClock,
   Activity,
@@ -25,11 +26,69 @@ export const authNavigation = [
 ] as const;
 
 export const employeeNavigation = [
-  { title: "Book", href: "/bookings/new", icon: CalendarPlus, match: "exact", tone: "blue" },
-  { title: "Calendar", href: "/calendar", icon: CalendarDays, match: "exact", tone: "emerald" },
-  { title: "My bookings", href: "/my-bookings", icon: Clock, match: "exact", tone: "amber" },
-  { title: "Invitations", href: "/invitations", icon: UserPlus, match: "exact", tone: "violet" },
+  {
+    title: "Home",
+    href: "/dashboard",
+    icon: Home,
+    match: "exact",
+    tone: "slate",
+    header: false,
+    help: "See what’s next and jump to common tasks.",
+  },
+  {
+    title: "Book a room",
+    href: "/bookings/new",
+    icon: CalendarPlus,
+    match: "exact",
+    tone: "blue",
+    header: true,
+    help: "Reserve a meeting room in a few guided steps.",
+  },
+  {
+    title: "Rooms",
+    href: "/facilities",
+    icon: Building2,
+    match: "prefix",
+    tone: "sky",
+    header: true,
+    help: "Browse rooms by size, floor, and equipment.",
+  },
+  {
+    title: "Calendar",
+    href: "/calendar",
+    icon: CalendarDays,
+    match: "exact",
+    tone: "emerald",
+    header: true,
+    help: "See when rooms are free or already booked.",
+  },
+  {
+    title: "My bookings",
+    href: "/my-bookings",
+    icon: Clock,
+    match: "exact",
+    tone: "amber",
+    header: true,
+    help: "View and manage rooms you already booked.",
+  },
+  {
+    title: "Invites",
+    href: "/invitations",
+    icon: UserPlus,
+    match: "exact",
+    tone: "violet",
+    header: false,
+    help: "Accept or decline invitations from coworkers.",
+  },
 ] as const;
+
+export const employeeHeaderNavigation = employeeNavigation.filter(
+  (item) => item.header,
+);
+
+export const employeeHomeActions = employeeNavigation.filter(
+  (item) => item.href !== "/dashboard",
+);
 
 export const adminNavigation = [
   { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, match: "exact" },

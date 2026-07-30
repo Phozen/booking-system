@@ -46,13 +46,13 @@ export function BookingAgendaList({
       ) : (
         <EmptyState
           title="No bookings this month"
-          description="Nothing matches these filters. Clear filters or create a booking."
+          description="Nothing matches these filters. Clear filters or book a room."
           action={
             <Link
               href="/bookings/new"
               className={buttonVariants({ size: "sm" })}
             >
-              Create booking
+              Book a room
             </Link>
           }
         />

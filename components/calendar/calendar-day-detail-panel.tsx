@@ -188,7 +188,7 @@ export function CalendarDayDetailPanel({
           className={buttonVariants({ size: "sm" })}
         >
           <CalendarPlus data-icon="inline-start" />
-          Create booking
+          Book this day
         </Link>
       </div>
 
@@ -262,7 +262,7 @@ export function CalendarDayDetailPanel({
               className={buttonVariants()}
             >
               <CalendarPlus data-icon="inline-start" />
-              Book on this day
+              Book this day
             </Link>
           }
         />

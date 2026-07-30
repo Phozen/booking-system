@@ -50,10 +50,10 @@ function parseStatus(value: string | string[] | undefined): BookingStatus | unde
 function toCalendarBooking(booking: EmployeeCalendarBooking): CalendarBooking {
   const isOther = booking.visibilityContext === "other";
   const contextLabel = isOther
-    ? "Other booking"
+    ? "Booked"
     : booking.invitationStatus
       ? getInvitationContextLabel(booking.invitationStatus)
-      : "Owned";
+      : "Your booking";
   const userLabel =
     booking.user?.fullName && booking.user.email
       ? `${booking.user.fullName} (${booking.user.email})`
@@ -66,7 +66,7 @@ function toCalendarBooking(booking: EmployeeCalendarBooking): CalendarBooking {
     status: booking.status,
     startsAt: booking.startsAt,
     endsAt: booking.endsAt,
-    facilityName: booking.facility?.name ?? "Facility unavailable",
+    facilityName: booking.facility?.name ?? "Room unavailable",
     facilityLevel: booking.facility?.level ?? "Level unavailable",
     approvalRequired: booking.approvalRequired,
     userLabel,
@@ -142,15 +142,15 @@ export default async function EmployeeCalendarPage({
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="Bookings"
+        eyebrow="Schedule"
         title="Calendar"
-        description="Review your bookings by month. Select a day for details or create a new booking."
+        description="See when rooms are free or already booked. Tap a day for details."
         primaryAction={
           <Link
             href={`/bookings/new?date=${encodeURIComponent(selectedDay.key)}`}
-            className={buttonVariants()}
+            className={buttonVariants({ size: "lg" })}
           >
-            Create booking
+            Book a room
           </Link>
         }
       />

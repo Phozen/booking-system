@@ -94,7 +94,7 @@ export function BookingDetail({
     (booking.status === "pending" || booking.status === "confirmed");
   const facilityLine = booking.facility
     ? `${booking.facility.name}, ${booking.facility.level}`
-    : "Facility unavailable";
+    : "Room unavailable";
 
   const primaryAction = !isOwnerView && viewerInvitation?.status === "pending" ? (
     <InvitationResponseActions invitationId={viewerInvitation.id} />
@@ -103,7 +103,7 @@ export function BookingDetail({
       href={`/bookings/${booking.id}/edit`}
       loadingLabel="Loading edit form..."
       loadingVariant="form"
-      className={buttonVariants({ className: "w-full sm:w-auto" })}
+      className={buttonVariants({ size: "lg", className: "w-full min-h-11 sm:w-auto" })}
     >
       <Edit3 data-icon="inline-start" />
       Edit booking
@@ -163,7 +163,7 @@ export function BookingDetail({
           })}
         >
           <Printer data-icon="inline-start" />
-          Print approval form
+          Print form
         </Link>
       ) : null}
     </div>
@@ -174,8 +174,8 @@ export function BookingDetail({
       <PageHeader
         breadcrumbs={[
           isOwnerView
-            ? { label: "My Bookings", href: "/my-bookings" }
-            : { label: "Invitations", href: "/invitations" },
+            ? { label: "My bookings", href: "/my-bookings" }
+            : { label: "Invites", href: "/invitations" },
           { label: booking.title },
         ]}
         title={booking.title}
@@ -282,8 +282,8 @@ export function BookingDetail({
       <section className="grid gap-4 border-t border-border pt-6">
         <h2 className="qbook-type-section">Booking details</h2>
         <dl className="grid gap-5 sm:grid-cols-2">
-          <DetailItem label="Facility">
-            {booking.facility?.name ?? "Facility unavailable"}
+          <DetailItem label="Room">
+            {booking.facility?.name ?? "Room unavailable"}
           </DetailItem>
           <DetailItem label="Level">
             {booking.facility?.level ?? "Unavailable"}
@@ -303,7 +303,7 @@ export function BookingDetail({
               {formatBookingWindow(booking.startsAt, booking.endsAt)}
             </span>
           </DetailItem>
-          <DetailItem label="Attendee count">
+          <DetailItem label="How many people">
             <span className="qbook-type-tabular">
               {booking.attendeeCount ?? "Not provided"}
             </span>

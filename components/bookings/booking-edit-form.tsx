@@ -349,7 +349,7 @@ export function BookingEditForm({
       >
         <div className="grid gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Label htmlFor="facilityId">Facility</Label>
+            <Label htmlFor="facilityId">Room</Label>
             <FieldRequirementBadge required />
           </div>
           <Select
@@ -396,14 +396,14 @@ export function BookingEditForm({
                     {selectedFacilityDetails.name}
                   </p>
                   <p className="qbook-type-meta mt-1">
-                    {selectedFacilityDetails.level} ﾂｷ{" "}
+                    {selectedFacilityDetails.level} ·{" "}
                     {formatFacilityType(selectedFacilityDetails.type)}
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-2 text-muted-foreground">
                   <Users className="size-4" aria-hidden="true" />
                   <span className="qbook-type-tabular text-sm">
-                    Capacity {selectedFacilityDetails.capacity}
+                    Fits {selectedFacilityDetails.capacity} people
                   </span>
                 </div>
               </div>
@@ -516,7 +516,7 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="attendeeCount">Attendee count</Label>
+            <Label htmlFor="attendeeCount">How many people</Label>
             <Input
               id="attendeeCount"
               name="attendeeCount"
@@ -696,7 +696,7 @@ export function BookingEditForm({
               ) : null}
 
               <div className="grid gap-2">
-                <Label htmlFor="cateringPax">Number of pax</Label>
+                <Label htmlFor="cateringPax">Number of people</Label>
                 <Input
                   id="cateringPax"
                   name="cateringPax"
