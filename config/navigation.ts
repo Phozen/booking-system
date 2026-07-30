@@ -86,8 +86,16 @@ export const employeeHeaderNavigation = employeeNavigation.filter(
   (item) => item.header,
 );
 
-export const employeeHomeActions = employeeNavigation.filter(
-  (item) => item.href !== "/dashboard",
+/** Big quick-action cards on the employee home dashboard (Rooms stays in top nav only). */
+const DASHBOARD_ACTION_HREFS = new Set([
+  "/bookings/new",
+  "/calendar",
+  "/my-bookings",
+  "/invitations",
+]);
+
+export const employeeDashboardActions = employeeNavigation.filter((item) =>
+  DASHBOARD_ACTION_HREFS.has(item.href),
 );
 
 export const adminNavigation = [

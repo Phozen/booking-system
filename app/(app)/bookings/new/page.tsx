@@ -51,7 +51,7 @@ export default async function NewBookingPage({
     date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined;
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow={employeeCopy.bookARoom}
         title={employeeCopy.bookARoom}

@@ -331,28 +331,28 @@
     background:
       linear-gradient(
         to bottom,
-        color-mix(in oklch, var(--background) 92%, transparent),
-        color-mix(in oklch, var(--background) 86%, transparent)
+        color-mix(in oklch, var(--background) 78%, transparent),
+        color-mix(in oklch, var(--background) 62%, transparent)
       ),
       linear-gradient(
         to right,
-        color-mix(in oklch, var(--card) 78%, transparent),
-        color-mix(in oklch, var(--card) 62%, transparent)
+        color-mix(in oklch, var(--card) 55%, transparent),
+        color-mix(in oklch, var(--card) 38%, transparent)
       );
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(6px);
   }
 
   .dark .qbook-nav-photo::before {
     background:
       linear-gradient(
         to bottom,
-        color-mix(in oklch, var(--background) 94%, transparent),
-        color-mix(in oklch, var(--background) 88%, transparent)
+        color-mix(in oklch, var(--background) 82%, transparent),
+        color-mix(in oklch, var(--background) 68%, transparent)
       ),
       linear-gradient(
         to right,
-        color-mix(in oklch, var(--card) 82%, transparent),
-        color-mix(in oklch, var(--card) 68%, transparent)
+        color-mix(in oklch, var(--card) 58%, transparent),
+        color-mix(in oklch, var(--card) 42%, transparent)
       );
   }
 
@@ -382,8 +382,8 @@
     margin-bottom: -0.5rem;
     padding: 1rem;
     border-top: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
-    background: color-mix(in oklch, var(--background) 92%, transparent);
-    backdrop-filter: blur(10px);
+    background: transparent;
+    backdrop-filter: none;
   }
 
   @media (min-width: 640px) {

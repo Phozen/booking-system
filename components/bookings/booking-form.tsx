@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, Coffee, ShieldCheck, Users } from "lucide-react";
 
@@ -58,12 +58,22 @@ import { FieldRequirementBadge } from "@/components/shared/field-requirement-bad
 import {
   BookingFormSection,
   BookingStickyActions,
+  BookingWizardNav,
+  type BookingWizardStepItem,
 } from "@/components/bookings/booking-form-section";
 
 const initialState: BookingActionResult = {
   status: "idle",
   message: "",
 };
+
+const WIZARD_STEP_LABELS = [
+  employeeCopy.pickARoom,
+  employeeCopy.pickDateAndTime,
+  employeeCopy.meetingDetails,
+  employeeCopy.peopleAndExtras,
+  employeeCopy.reviewAndSend,
+] as const;
 
 function BookingFieldLabel({
   htmlFor,
@@ -192,8 +202,11 @@ export function BookingForm({
   const hasFacilities = facilities.length > 0;
   const [selectedFacility, setSelectedFacility] = useState(initialFacilityId);
   const [wizardStep, setWizardStep] = useState(1);
+  const [submitUnlocked, setSubmitUnlocked] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
   const [cateringRequired, setCateringRequired] = useState(false);
+  const [cateringPax, setCateringPax] = useState("");
+  const [cateringServingTime, setCateringServingTime] = useState("");
   const [selectedDrinkItems, setSelectedDrinkItems] = useState<string[]>([]);
   const [selectedFoodItems, setSelectedFoodItems] = useState<string[]>([]);
   const [otherDrinkRequest, setOtherDrinkRequest] = useState("");
@@ -262,13 +275,17 @@ export function BookingForm({
     };
 
     setIsDirty(true);
+    const nextAttendeeCount = getValue("attendeeCount");
     setPreviewValues({
       date: getValue("date"),
       startTime: getValue("startTime"),
       endTime: getValue("endTime"),
       title: getValue("title"),
-      attendeeCount: getValue("attendeeCount"),
+      attendeeCount: nextAttendeeCount,
     });
+    if (nextAttendeeCount.trim()) {
+      setCateringPax(nextAttendeeCount.trim());
+    }
   }
 
   function setPreviewField<Key extends keyof BookingPreviewValues>(
@@ -280,9 +297,101 @@ export function BookingForm({
       ...current,
       [key]: value,
     }));
+    if (key === "attendeeCount") {
+      const next = String(value).trim();
+      if (next) {
+        setCateringPax(next);
+      }
+    }
+  }
+
+  function capacityErrorForAttendeeCount(raw: string): string | undefined {
+    const trimmed = raw.trim();
+    if (!trimmed || !selectedFacilityDetails) return undefined;
+    const count = Number(trimmed);
+    if (!Number.isFinite(count)) return undefined;
+    if (count > selectedFacilityDetails.capacity) {
+      return `How many people should not exceed this room’s limit of ${selectedFacilityDetails.capacity}.`;
+    }
+    return undefined;
+  }
+
+  function getStepErrors(step: number): BookingFieldErrors {
+    const nextErrors: BookingFieldErrors = {};
+
+    if (step === 1 && !selectedFacility) {
+      nextErrors.facilityId = "Choose a room to continue.";
+    }
+
+    if (step === 2) {
+      if (!previewValues.date) nextErrors.date = "Choose a date.";
+      if (!previewValues.startTime) nextErrors.startTime = "Choose a start time.";
+      if (!previewValues.endTime) nextErrors.endTime = "Choose an end time.";
+    }
+
+    if (step === 3) {
+      if (!previewValues.title.trim()) {
+        nextErrors.title = "Enter a short name for this meeting.";
+      }
+      const capacityMessage = capacityErrorForAttendeeCount(
+        previewValues.attendeeCount,
+      );
+      if (capacityMessage) {
+        nextErrors.attendeeCount = capacityMessage;
+      }
+    }
+
+    if (step === 4 && cateringRequired) {
+      if (!derivedCateringType) {
+        nextErrors.cateringType = "Choose at least one food or drink item.";
+      }
+      if (!cateringPax.trim()) {
+        nextErrors.cateringPax = "Enter the number of people for catering.";
+      }
+      if (!cateringServingTime) {
+        nextErrors.cateringServingTime =
+          "Choose when the food or drinks should be served.";
+      }
+    }
+
+    return nextErrors;
+  }
+
+  function stepHasError(step: number, errors: BookingFieldErrors) {
+    if (step === 1) return Boolean(errors.facilityId);
+    if (step === 2) {
+      return Boolean(errors.date || errors.startTime || errors.endTime);
+    }
+    if (step === 3) {
+      return Boolean(
+        errors.title || errors.description || errors.attendeeCount,
+      );
+    }
+    if (step === 4) {
+      return Boolean(
+        errors.cateringType ||
+          errors.cateringPax ||
+          errors.cateringServingTime ||
+          errors.cateringDietaryNotes ||
+          errors.cateringNotes,
+      );
+    }
+    return false;
+  }
+
+  function firstInvalidStep(errors: BookingFieldErrors) {
+    for (let step = 1; step <= TOTAL_STEPS; step += 1) {
+      if (stepHasError(step, errors)) return step;
+    }
+    return TOTAL_STEPS;
   }
 
   function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!submitUnlocked) {
+      event.preventDefault();
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const parsed = bookingFormSchema.safeParse(formDataToBookingValues(formData));
     const nextErrors: BookingFieldErrors = {};
@@ -324,17 +433,11 @@ export function BookingForm({
         nextErrors.endTime = windowMessage;
       }
 
-      const attendeeCount =
-        parsed.data.attendeeCount === "" || parsed.data.attendeeCount === undefined
-          ? null
-          : parsed.data.attendeeCount;
-
-      if (
-        selectedFacilityDetails &&
-        attendeeCount !== null &&
-        attendeeCount > selectedFacilityDetails.capacity
-      ) {
-        nextErrors.attendeeCount = `How many people should not exceed this room’s limit of ${selectedFacilityDetails.capacity}.`;
+      const capacityMessage = capacityErrorForAttendeeCount(
+        previewValues.attendeeCount,
+      );
+      if (capacityMessage) {
+        nextErrors.attendeeCount = capacityMessage;
       }
     }
 
@@ -342,6 +445,7 @@ export function BookingForm({
       event.preventDefault();
       setFieldErrors(nextErrors);
       showFormValidationError(nextErrors);
+      goToStep(firstInvalidStep(nextErrors));
       return;
     }
 
@@ -360,34 +464,57 @@ export function BookingForm({
   }
 
   function goToStep(next: number) {
-    setWizardStep(Math.min(TOTAL_STEPS, Math.max(1, next)));
+    const clamped = Math.min(TOTAL_STEPS, Math.max(1, next));
+    setWizardStep(clamped);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  useEffect(() => {
+    if (wizardStep !== TOTAL_STEPS) {
+      setSubmitUnlocked(false);
+      return;
+    }
+
+    setSubmitUnlocked(false);
+    const timer = window.setTimeout(() => {
+      setSubmitUnlocked(true);
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [wizardStep]);
+
   function validateCurrentStep(): boolean {
-    const nextErrors: BookingFieldErrors = {};
-
-    if (wizardStep === 1 && !selectedFacility) {
-      nextErrors.facilityId = "Choose a room to continue.";
-    }
-
-    if (wizardStep === 2) {
-      if (!previewValues.date) nextErrors.date = "Choose a date.";
-      if (!previewValues.startTime) nextErrors.startTime = "Choose a start time.";
-      if (!previewValues.endTime) nextErrors.endTime = "Choose an end time.";
-    }
-
-    if (wizardStep === 3) {
-      if (!previewValues.title.trim()) {
-        nextErrors.title = "Enter a short name for this meeting.";
-      }
-    }
+    const nextErrors = getStepErrors(wizardStep);
 
     if (Object.values(nextErrors).some(Boolean)) {
       setFieldErrors((current) => ({ ...current, ...nextErrors }));
       showFormValidationError(nextErrors);
       return false;
     }
+
+    setFieldErrors((current) => {
+      const cleared = { ...current };
+      for (const key of Object.keys(nextErrors) as BookingFieldId[]) {
+        delete cleared[key];
+      }
+      // Clear known fields for this step even when valid
+      if (wizardStep === 1) delete cleared.facilityId;
+      if (wizardStep === 2) {
+        delete cleared.date;
+        delete cleared.startTime;
+        delete cleared.endTime;
+      }
+      if (wizardStep === 3) {
+        delete cleared.title;
+        delete cleared.attendeeCount;
+      }
+      if (wizardStep === 4) {
+        delete cleared.cateringType;
+        delete cleared.cateringPax;
+        delete cleared.cateringServingTime;
+      }
+      return cleared;
+    });
 
     return true;
   }
@@ -396,6 +523,47 @@ export function BookingForm({
     if (!validateCurrentStep()) return;
     goToStep(wizardStep + 1);
   }
+
+  function handleStepSelect(target: number) {
+    if (target === wizardStep) return;
+
+    if (target < wizardStep) {
+      goToStep(target);
+      return;
+    }
+
+    for (let step = wizardStep; step < target; step += 1) {
+      const nextErrors = getStepErrors(step);
+      if (Object.values(nextErrors).some(Boolean)) {
+        setFieldErrors((current) => ({ ...current, ...nextErrors }));
+        showFormValidationError(nextErrors);
+        goToStep(step);
+        return;
+      }
+    }
+
+    goToStep(target);
+  }
+
+  const wizardNavSteps: BookingWizardStepItem[] = WIZARD_STEP_LABELS.map(
+    (label, index) => {
+      const step = index + 1;
+      const hasAttemptedErrors = stepHasError(step, fieldErrors);
+
+      let status: BookingWizardStepItem["status"];
+      if (step === wizardStep) {
+        status = hasAttemptedErrors ? "error" : "current";
+      } else if (hasAttemptedErrors) {
+        status = "error";
+      } else if (step < wizardStep) {
+        status = "complete";
+      } else {
+        status = "upcoming";
+      }
+
+      return { step, label, status };
+    },
+  );
 
   return (
     <form
@@ -443,6 +611,10 @@ export function BookingForm({
         </Alert>
       ) : null}
 
+      <div className="grid gap-6 lg:grid-cols-[13.5rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <BookingWizardNav steps={wizardNavSteps} onSelect={handleStepSelect} />
+
+        <div className="min-w-0">
       <BookingFormSection
         step={1}
         totalSteps={TOTAL_STEPS}
@@ -744,9 +916,14 @@ export function BookingForm({
               id="cateringRequired"
               name="cateringRequired"
               defaultValue="no"
-              onChange={(event) =>
-                setCateringRequired(event.target.value === "yes")
-              }
+              onChange={(event) => {
+                const enabled = event.target.value === "yes";
+                setCateringRequired(enabled);
+                setIsDirty(true);
+                if (enabled && previewValues.attendeeCount.trim()) {
+                  setCateringPax(previewValues.attendeeCount.trim());
+                }
+              }}
               disabled={!hasFacilities || isPending}
             >
               <option value="no">No</option>
@@ -878,7 +1055,11 @@ export function BookingForm({
                   type="number"
                   min={1}
                   inputMode="numeric"
-                  defaultValue={previewValues.attendeeCount}
+                  value={cateringPax}
+                  onChange={(event) => {
+                    setIsDirty(true);
+                    setCateringPax(event.target.value);
+                  }}
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
                     fieldErrors.cateringPax && "cateringPax-error",
@@ -898,6 +1079,11 @@ export function BookingForm({
                 <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
+                  value={cateringServingTime}
+                  onChange={(event) => {
+                    setIsDirty(true);
+                    setCateringServingTime(event.target.value);
+                  }}
                   disabled={!hasFacilities || isPending}
                   aria-describedby={getFieldDescribedBy(
                     fieldErrors.cateringServingTime &&
@@ -1097,7 +1283,12 @@ export function BookingForm({
             {employeeCopy.continue}
           </Button>
         ) : (
-          <Button type="submit" size="lg" className="min-h-11" disabled={!hasFacilities || isPending}>
+          <Button
+            type="submit"
+            size="lg"
+            className="min-h-11"
+            disabled={!hasFacilities || isPending || !submitUnlocked}
+          >
             <PendingButtonContent
               pending={isPending}
               pendingLabel={employeeCopy.sending}
@@ -1107,6 +1298,8 @@ export function BookingForm({
           </Button>
         )}
       </BookingStickyActions>
+        </div>
+      </div>
     </form>
   );
 }
