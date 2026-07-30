@@ -37,7 +37,7 @@ export function MonthCalendarGrid({
         {Array.from({ length: leadingPlaceholderCount }, (_, index) => (
           <div
             key={`leading-placeholder-${index}`}
-            className="min-h-36 border-r border-t border-border/50 bg-muted/15 p-2 last:border-r-0"
+            className="min-h-28 border-r border-t border-border/50 bg-muted/15 p-1.5 last:border-r-0"
             aria-hidden="true"
           />
         ))}
@@ -49,9 +49,9 @@ export function MonthCalendarGrid({
             <div
               key={day.key}
               className={cn(
-                "relative min-h-36 border-r border-t border-border/70 bg-background p-2 last:border-r-0",
+                "relative min-h-28 border-r border-t border-border/70 bg-background p-1.5 last:border-r-0",
                 day.isToday && "bg-primary/5",
-                isSelected && "bg-accent/50 ring-2 ring-inset ring-primary/40",
+                isSelected && "bg-accent/40 ring-2 ring-inset ring-primary/35",
               )}
             >
               {getDayHref ? (
@@ -64,10 +64,10 @@ export function MonthCalendarGrid({
                   aria-current={isSelected ? "date" : undefined}
                 />
               ) : null}
-              <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="mb-1.5 flex items-center justify-between gap-1">
                 <span
                   className={cn(
-                    "relative z-10 inline-flex size-8 items-center justify-center rounded-full text-sm font-semibold qbook-type-tabular",
+                    "relative z-10 inline-flex size-7 items-center justify-center rounded-full text-sm font-semibold qbook-type-tabular",
                     (day.isToday || isSelected) &&
                       "bg-primary text-primary-foreground",
                   )}
@@ -82,7 +82,7 @@ export function MonthCalendarGrid({
                 ) : null}
               </div>
 
-              <div className="pointer-events-none relative z-10 grid gap-1 pr-1">
+              <div className="pointer-events-none relative z-10 grid gap-0.5">
                 {bookings.length > 0 ? (
                   bookings.slice(0, 2).map((booking) => (
                     <CalendarBookingItem

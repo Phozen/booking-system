@@ -136,7 +136,7 @@ export default async function EmployeeCalendarPage({
         className="pb-2"
       />
 
-      <div className="grid gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <CalendarControls
           basePath="/calendar"
           selectedMonth={selectedMonth}
@@ -158,7 +158,7 @@ export default async function EmployeeCalendarPage({
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
         <MonthCalendarGrid
           days={days}
           groupedBookings={groupedBookings}
@@ -168,9 +168,6 @@ export default async function EmployeeCalendarPage({
         <CalendarDayDetailPanel
           day={selectedDay}
           bookings={selectedBookings}
-          timezone={settings.defaultTimezone}
-          bookingWindowStart={settings.bookingWindowStart}
-          bookingWindowEnd={settings.bookingWindowEnd}
         />
       </div>
       <BookingAgendaList days={days} groupedBookings={groupedBookings} />
