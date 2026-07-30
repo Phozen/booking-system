@@ -66,12 +66,68 @@ export function CalendarControls({
   /** Employee calendar uses quieter chrome than admin. */
   compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <section aria-label="Calendar filters">
+        <form className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="grid min-w-0 flex-1 gap-1.5 sm:max-w-[12rem]">
+            <label htmlFor="month" className="qbook-type-meta font-medium">
+              Month
+            </label>
+            <Input
+              id="month"
+              name="month"
+              type="month"
+              defaultValue={selectedMonth.value}
+              className="qbook-type-tabular"
+            />
+          </div>
+
+          <div className="grid min-w-0 flex-1 gap-1.5 sm:max-w-[12rem]">
+            <label htmlFor="status" className="qbook-type-meta font-medium">
+              Status
+            </label>
+            <Select
+              id="status"
+              name="status"
+              defaultValue={selectedStatus ?? "all"}
+            >
+              {adminBookingStatusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status === "all"
+                    ? "All statuses"
+                    : status.replaceAll("_", " ")}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="flex gap-2 sm:pb-0.5">
+            <button
+              className={buttonVariants({ size: "sm" })}
+              type="submit"
+            >
+              <CalendarDays data-icon="inline-start" />
+              Apply
+            </button>
+            <Link
+              href={basePath}
+              className={buttonVariants({
+                variant: "ghost",
+                size: "sm",
+              })}
+            >
+              Clear
+            </Link>
+          </div>
+        </form>
+      </section>
+    );
+  }
+
   return (
     <section
-      className={cn(
-        "grid gap-4",
-        !compact && "rounded-lg border border-border bg-card p-4",
-      )}
+      className="grid gap-4 rounded-lg border border-border bg-card p-4"
       aria-label="Calendar filters"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

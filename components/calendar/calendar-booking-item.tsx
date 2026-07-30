@@ -6,10 +6,48 @@ import { ArrowRight, CalendarClock, MapPin, UserRound, X } from "lucide-react";
 
 import { formatBookingDate, formatBookingWindow } from "@/lib/bookings/format";
 import type { CalendarBooking } from "@/lib/calendar/group-bookings";
+import {
+  getBookingRelationshipBadgeClassName,
+  getBookingRelationshipSurfaceClassName,
+  getBookingRelationshipToken,
+} from "@/components/shared/booking-relationship-tokens";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { centeredDialogClassName } from "@/components/shared/dialog-styles";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+function RelationshipBadge({
+  booking,
+}: {
+  booking: CalendarBooking;
+}) {
+  if (!booking.contextLabel && !booking.relationship) {
+    return null;
+  }
+
+  const label =
+    booking.contextLabel ??
+    (booking.relationship
+      ? getBookingRelationshipToken(booking.relationship).label
+      : null);
+
+  if (!label) {
+    return null;
+  }
+
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold",
+        booking.relationship
+          ? getBookingRelationshipBadgeClassName(booking.relationship)
+          : "border-primary/25 bg-primary/10 text-primary",
+      )}
+    >
+      {label}
+    </span>
+  );
+}
 
 export function CalendarBookingItem({
   booking,
@@ -27,6 +65,10 @@ export function CalendarBookingItem({
     triggerRef.current?.focus();
   }
 
+  const relationshipLabel = booking.relationship
+    ? getBookingRelationshipToken(booking.relationship).shortLabel
+    : undefined;
+
   const detailRows = (
     <dl className="grid gap-3 text-sm">
       <div>
@@ -39,13 +81,11 @@ export function CalendarBookingItem({
           <StatusBadge kind="booking" status={booking.status} />
         </dd>
       </div>
-      {booking.contextLabel ? (
+      {booking.contextLabel || booking.relationship ? (
         <div>
           <dt className="text-muted-foreground">Relationship</dt>
           <dd className="mt-1">
-            <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-              {booking.contextLabel}
-            </span>
+            <RelationshipBadge booking={booking} />
           </dd>
         </div>
       ) : null}
@@ -76,7 +116,17 @@ export function CalendarBookingItem({
           ref={triggerRef}
           type="button"
           onClick={() => dialogRef.current?.showModal()}
-          className="pointer-events-auto group relative z-10 w-full truncate rounded-md border border-border/70 bg-card px-2 py-1 text-left text-xs font-medium shadow-sm transition-colors hover:border-primary/45 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(
+            "pointer-events-auto group relative z-10 w-full truncate rounded-md border px-2 py-1 text-left text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            booking.relationship
+              ? getBookingRelationshipSurfaceClassName(booking.relationship)
+              : "border-border/70 bg-card shadow-sm hover:border-primary/45 hover:bg-accent/60",
+          )}
+          aria-label={
+            relationshipLabel
+              ? `${booking.title}, ${relationshipLabel}`
+              : booking.title
+          }
         >
           {booking.title}
         </button>
@@ -122,31 +172,22 @@ export function CalendarBookingItem({
         <StatusBadge kind="booking" status={booking.status} />
       </div>
 
-      {booking.contextLabel ? (
+      {booking.contextLabel || booking.relationship ? (
         <div>
-          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-            {booking.contextLabel}
-          </span>
+          <RelationshipBadge booking={booking} />
         </div>
       ) : null}
 
       <dl className="grid min-w-0 gap-1 break-words text-muted-foreground">
-        {!compact ? (
-          <div className="inline-flex items-center gap-2">
-            <CalendarClock className="size-4" aria-hidden="true" />
-            <span>
-              {formatBookingDate(booking.startsAt)},{" "}
-              {formatBookingWindow(booking.startsAt, booking.endsAt)}
-            </span>
-          </div>
-        ) : (
-          <div>{formatBookingWindow(booking.startsAt, booking.endsAt)}</div>
-        )}
         <div className="inline-flex items-center gap-2">
-          <MapPin
-            className={cn("size-4", compact ? "hidden" : "")}
-            aria-hidden="true"
-          />
+          <CalendarClock className="size-4" aria-hidden="true" />
+          <span>
+            {formatBookingDate(booking.startsAt)},{" "}
+            {formatBookingWindow(booking.startsAt, booking.endsAt)}
+          </span>
+        </div>
+        <div className="inline-flex items-center gap-2">
+          <MapPin className="size-4" aria-hidden="true" />
           <span>
             {booking.facilityName}, {booking.facilityLevel}
             {booking.facilityType ? ` - ${booking.facilityType}` : ""}
@@ -154,32 +195,26 @@ export function CalendarBookingItem({
         </div>
         {booking.userLabel ? (
           <div className="inline-flex items-center gap-2">
-            <UserRound
-              className={cn("size-4", compact ? "hidden" : "")}
-              aria-hidden="true"
-            />
+            <UserRound className="size-4" aria-hidden="true" />
             <span>{booking.userLabel}</span>
           </div>
         ) : null}
       </dl>
 
-      {!compact ? (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
-          {booking.href ? "View details" : "Limited calendar item"}
-          {booking.href ? (
-            <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
-          ) : null}
-        </span>
-      ) : null}
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+        {booking.href ? "View details" : "Limited calendar item"}
+        {booking.href ? (
+          <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+        ) : null}
+      </span>
     </>
   );
 
   const className = cn(
-    "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm shadow-sm shadow-primary/5 ring-1 ring-primary/10 transition-all",
+    "group grid gap-2 rounded-lg border border-border/70 bg-card p-3 text-sm transition-colors",
     booking.href
-      ? "hover:border-primary/40 hover:bg-accent/55 hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+      ? "hover:border-primary/40 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       : "cursor-default",
-    compact ? "p-2 text-xs" : "",
   );
 
   return (
@@ -189,7 +224,11 @@ export function CalendarBookingItem({
         type="button"
         onClick={() => dialogRef.current?.showModal()}
         className={cn(className, "text-left")}
-        aria-label={`${booking.title} calendar item`}
+        aria-label={
+          relationshipLabel
+            ? `${booking.title}, ${relationshipLabel}`
+            : `${booking.title} calendar item`
+        }
       >
         {content}
       </button>

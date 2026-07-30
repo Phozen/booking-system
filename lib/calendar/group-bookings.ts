@@ -3,6 +3,7 @@ import {
   formatCalendarDateKey,
 } from "@/lib/calendar/date-range";
 import type { BookingStatus } from "@/lib/bookings/queries";
+import type { BookingRelationship } from "@/components/shared/booking-relationship-tokens";
 
 export type CalendarBooking = {
   id: string;
@@ -16,6 +17,8 @@ export type CalendarBooking = {
   facilityType?: string;
   userLabel?: string;
   contextLabel?: string;
+  /** Owned vs invited — used for accessible color coding on employee calendar. */
+  relationship?: BookingRelationship;
   approvalRequired?: boolean;
   isManageable?: boolean;
 };

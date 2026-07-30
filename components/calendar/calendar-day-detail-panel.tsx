@@ -6,9 +6,11 @@ import type { CalendarBooking } from "@/lib/calendar/group-bookings";
 import { formatBookingWindow } from "@/lib/bookings/format";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
-  getBookingStatusSurfaceClassName,
-  getBookingStatusToken,
-} from "@/components/shared/booking-status-tokens";
+  getBookingRelationshipBadgeClassName,
+  getBookingRelationshipSurfaceClassName,
+  getBookingRelationshipToken,
+} from "@/components/shared/booking-relationship-tokens";
+import { getBookingStatusToken } from "@/components/shared/booking-status-tokens";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -116,11 +118,16 @@ function TimelineBlock({
   const width = 100 / block.columns;
   const left = block.column * width;
 
+  const relationship = block.booking.relationship;
+  const surfaceClass = relationship
+    ? getBookingRelationshipSurfaceClassName(relationship)
+    : "border-border/70 bg-muted/40 text-foreground";
+
   return (
     <div
       className={cn(
-        "absolute overflow-hidden rounded-md border px-2 py-1.5 text-xs leading-tight shadow-sm",
-        getBookingStatusSurfaceClassName(block.booking.status),
+        "absolute overflow-hidden rounded-md border px-2 py-1.5 text-xs leading-tight",
+        surfaceClass,
       )}
       style={{
         top: `${top}%`,
@@ -134,7 +141,14 @@ function TimelineBlock({
         {formatBookingWindow(block.booking.startsAt, block.booking.endsAt)}
       </p>
       <span className="sr-only">
-        {getBookingStatusToken(block.booking.status).label}
+        {[
+          relationship
+            ? getBookingRelationshipToken(relationship).label
+            : null,
+          getBookingStatusToken(block.booking.status).label,
+        ]
+          .filter(Boolean)
+          .join(", ")}
       </span>
     </div>
   );
@@ -204,6 +218,24 @@ export function CalendarDayDetailPanel({
                   <span className="font-medium">{booking.title}</span>
                   <StatusBadge kind="booking" status={booking.status} />
                 </div>
+                {booking.relationship || booking.contextLabel ? (
+                  <span
+                    className={cn(
+                      "inline-flex w-fit rounded-full border px-2 py-0.5 text-xs font-semibold",
+                      booking.relationship
+                        ? getBookingRelationshipBadgeClassName(
+                            booking.relationship,
+                          )
+                        : "border-primary/25 bg-primary/10 text-primary",
+                    )}
+                  >
+                    {booking.contextLabel ??
+                      (booking.relationship
+                        ? getBookingRelationshipToken(booking.relationship)
+                            .label
+                        : null)}
+                  </span>
+                ) : null}
                 <dl className="grid gap-1 text-muted-foreground">
                   <div>
                     <dt className="sr-only">Time</dt>
