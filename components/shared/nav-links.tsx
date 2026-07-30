@@ -62,7 +62,7 @@ export function EmployeeNavigation({
   compact?: boolean;
   onNavigate?: () => void;
 }) {
-  const items = compact ? employeeNavigation : employeeHeaderNavigation;
+  const items = employeeHeaderNavigation;
 
   return (
     <nav aria-label="Employee navigation" className={cn(compact ? "grid gap-1" : "flex items-center gap-1")}>

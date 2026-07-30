@@ -368,7 +368,7 @@
     padding-block: 0.25rem;
   }
 
-  .qbook-form-section + .qbook-form-section {
+  .qbook-form-section:not(.hidden) + .qbook-form-section:not(.hidden) {
     margin-top: 1.75rem;
     padding-top: 1.75rem;
     border-top: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
@@ -376,21 +376,18 @@
 
   .qbook-sticky-actions {
     position: sticky;
-    bottom: 0;
+    bottom: 0.75rem;
     z-index: 20;
-    margin-inline: -1rem;
-    margin-bottom: -0.5rem;
-    padding: 1rem;
-    border-top: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
-    background: transparent;
-    backdrop-filter: none;
-  }
-
-  @media (min-width: 640px) {
-    .qbook-sticky-actions {
-      margin-inline: -1.5rem;
-      padding-inline: 1.5rem;
-    }
+    margin-inline: 0;
+    margin-bottom: 0;
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+    background-color: color-mix(in oklch, var(--card) 88%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 4px 24px color-mix(in oklch, var(--foreground) 6%, transparent),
+      0 1px 2px color-mix(in oklch, var(--foreground) 4%, transparent);
   }
 
   @media (max-width: 639px) {

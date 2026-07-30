@@ -7,7 +7,6 @@ import {
   CalendarCheck,
   ClipboardCheck,
   Clock,
-  Home,
   Wrench,
   FileClock,
   Activity,
@@ -27,15 +26,6 @@ export const authNavigation = [
 
 export const employeeNavigation = [
   {
-    title: "Home",
-    href: "/dashboard",
-    icon: Home,
-    match: "exact",
-    tone: "slate",
-    header: false,
-    help: "See what’s next and jump to common tasks.",
-  },
-  {
     title: "Book a room",
     href: "/bookings/new",
     icon: CalendarPlus,
@@ -43,15 +33,6 @@ export const employeeNavigation = [
     tone: "blue",
     header: true,
     help: "Reserve a meeting room in a few guided steps.",
-  },
-  {
-    title: "Rooms",
-    href: "/facilities",
-    icon: Building2,
-    match: "prefix",
-    tone: "sky",
-    header: true,
-    help: "Browse rooms by size, floor, and equipment.",
   },
   {
     title: "Calendar",
@@ -77,8 +58,17 @@ export const employeeNavigation = [
     icon: UserPlus,
     match: "exact",
     tone: "violet",
-    header: false,
+    header: true,
     help: "Accept or decline invitations from coworkers.",
+  },
+  {
+    title: "Rooms",
+    href: "/facilities",
+    icon: Building2,
+    match: "prefix",
+    tone: "sky",
+    header: true,
+    help: "Browse rooms by size, floor, and equipment.",
   },
 ] as const;
 
