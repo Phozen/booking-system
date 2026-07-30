@@ -30,7 +30,7 @@ export default async function EmployeeLayout({
   const profileCompletion = getMissingProfileFields(profile);
 
   return (
-    <div className="qbook-office-surface flex min-h-svh flex-col bg-background">
+    <div className="qbook-office-surface flex min-h-svh flex-col">
       <SkipLink />
       <AppHeader
         appName={settings.appName}
@@ -46,7 +46,7 @@ export default async function EmployeeLayout({
           profileHref="/profile"
         />
       ) : null}
-      <div id="main-content" tabIndex={-1} className="qbook-content-card">
+      <div id="main-content" tabIndex={-1} className="qbook-content-card flex-1">
         {children}
       </div>
     </div>

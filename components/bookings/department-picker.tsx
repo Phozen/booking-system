@@ -46,13 +46,10 @@ export function DepartmentPicker({
   }, [onSelectedCountChange, selected.length]);
 
   return (
-    <section className="grid gap-3 border-b-2 border-border pb-7 text-sm">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">Departments</p>
-          <FieldRequirementBadge required={false} />
-        </div>
-        <h2 className="mt-1 text-lg font-bold tracking-normal">Involved departments</h2>
+    <div className="grid gap-3 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="qbook-type-section text-base">Involved departments</p>
+        <FieldRequirementBadge required={false} />
       </div>
       {departments.length > 0 ? (
         <>
@@ -145,6 +142,6 @@ export function DepartmentPicker({
       ) : (
         <p className="rounded-lg border border-dashed p-4 text-muted-foreground">No active departments are available. A Super Admin can add one when ready.</p>
       )}
-    </section>
+    </div>
   );
 }

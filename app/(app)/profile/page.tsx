@@ -50,7 +50,7 @@ export default async function ProfilePage({
 
   if (!profile) {
     return (
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <PageHeader
           eyebrow="Account"
           title="Profile unavailable"
@@ -61,43 +61,47 @@ export default async function ProfilePage({
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Account"
         title="Your profile"
-        description="View your account details and update contact fields."
+        description="Update your contact details. Integrations and notifications are below."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] lg:items-start">
-        <ProfileDetail profile={profile} />
-        <div className="grid gap-6">
-          <ProfileForm profile={profile} />
-          <MicrosoftCalendarConnectionCard
-            connection={calendarConnection}
-            calendarMessage={calendarMessage}
-            calendarSyncReady={calendarSyncReady}
-          />
-          <section className="rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-            <div className="mb-4">
-              <h2 className="text-base font-semibold tracking-normal">
-                Notification preferences
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Choose which non-critical booking notifications you want to
-                receive.
-              </p>
-            </div>
-            <NotificationPreferencesForm preferences={notificationPreferences} />
-          </section>
-          <Alert variant="info">
-            <LockKeyhole className="size-4" aria-hidden="true" />
-            <AlertDescription>
-              Email, password, role, and account status are managed separately
-              for security. {formatContactAdministratorMessage(settings)}
-            </AlertDescription>
-          </Alert>
+      <ProfileDetail profile={profile} />
+      <ProfileForm profile={profile} />
+
+      <section className="grid gap-4 border-t border-border pt-8">
+        <div>
+          <h2 className="qbook-type-section">Integrations</h2>
+          <p className="qbook-type-meta mt-1">
+            Optional connections that sync bookings to your calendar.
+          </p>
         </div>
-      </div>
+        <MicrosoftCalendarConnectionCard
+          connection={calendarConnection}
+          calendarMessage={calendarMessage}
+          calendarSyncReady={calendarSyncReady}
+        />
+      </section>
+
+      <section className="grid gap-4 border-t border-border pt-8">
+        <div>
+          <h2 className="qbook-type-section">Notification preferences</h2>
+          <p className="qbook-type-meta mt-1">
+            Choose which non-critical booking notifications you want to receive.
+          </p>
+        </div>
+        <NotificationPreferencesForm preferences={notificationPreferences} />
+      </section>
+
+      <Alert variant="info">
+        <LockKeyhole className="size-4" aria-hidden="true" />
+        <AlertDescription>
+          Email, password, role, and account status are managed separately for
+          security. {formatContactAdministratorMessage(settings)}
+        </AlertDescription>
+      </Alert>
     </main>
   );
 }

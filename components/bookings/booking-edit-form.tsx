@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent, ReactNode } from "react";
+import type { FormEvent } from "react";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,29 +53,16 @@ import { BookingAvailabilityTimeline } from "@/components/bookings/booking-avail
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { DepartmentPicker } from "@/components/bookings/department-picker";
+import {
+  BookingFormSection,
+  BookingStickyActions,
+} from "@/components/bookings/booking-form-section";
 import { FieldRequirementBadge } from "@/components/shared/field-requirement-badge";
 
 const initialState: BookingActionResult = {
   status: "idle",
   message: "",
 };
-
-function BookingFieldLabel({
-  htmlFor,
-  children,
-  required,
-}: {
-  htmlFor: string;
-  children: ReactNode;
-  required: boolean;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Label htmlFor={htmlFor}>{children}</Label>
-      <FieldRequirementBadge required={required} />
-    </div>
-  );
-}
 
 const drinkRequestItems = [
   { value: "Water", label: "Water" },
@@ -146,6 +133,7 @@ export function BookingEditForm({
   const hasFacilities = facilities.length > 0;
   const [selectedFacility, setSelectedFacility] = useState(booking.facilityId);
   const [fieldErrors, setFieldErrors] = useState<BookingFieldErrors>({});
+  const [isDirty, setIsDirty] = useState(false);
   
   const [cateringRequired, setCateringRequired] = useState(booking.catering.required);
   
@@ -172,7 +160,6 @@ export function BookingEditForm({
     title: booking.title,
     attendeeCount: booking.attendeeCount?.toString() ?? "",
   });
-  const [isDirty, setIsDirty] = useState(false);
 
   const selectedFacilityDetails = useMemo(
     () => facilities.find((facility) => facility.id === selectedFacility),
@@ -224,6 +211,7 @@ export function BookingEditForm({
       return typeof value === "string" ? value : "";
     };
 
+    setIsDirty(true);
     setPreviewValues({
       date: getValue("date"),
       startTime: getValue("startTime"),
@@ -237,6 +225,7 @@ export function BookingEditForm({
     key: Key,
     value: BookingPreviewValues[Key],
   ) {
+    setIsDirty(true);
     setPreviewValues((current) => ({
       ...current,
       [key]: value,
@@ -306,16 +295,6 @@ export function BookingEditForm({
       event.preventDefault();
       setFieldErrors(nextErrors);
       showFormValidationError(nextErrors);
-      const firstInvalidField = ([
-        ["facilityId", "facilityId"], ["date", "date"], ["startTime", "startTime"],
-        ["endTime", "endTime"], ["title", "title"], ["attendeeCount", "attendeeCount"],
-        ["description", "description"], ["cateringType", "catering-drinks"],
-        ["cateringPax", "cateringPax"], ["cateringServingTime", "cateringServingTime"],
-        ["cateringDietaryNotes", "cateringDietaryNotes"], ["cateringNotes", "cateringNotes"],
-      ] as const).find(([field]) => nextErrors[field]);
-      if (firstInvalidField) {
-        requestAnimationFrame(() => document.getElementById(firstInvalidField[1])?.focus());
-      }
       return;
     }
 
@@ -336,18 +315,13 @@ export function BookingEditForm({
   return (
     <form
       action={formAction}
-      className="grid gap-7"
+      className="grid gap-0 pb-24"
       noValidate
-      aria-busy={isPending}
-      onChange={(event) => {
-        setIsDirty(true);
-        updatePreview(event.currentTarget);
-      }}
+      onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={validateBeforeSubmit}
     >
       <OverlayLoader show={isPending} label="Saving changes..." />
 
-      <div className="contents" inert={isPending}>
       <ActionToastEffect
         state={state}
         successTitle="Booking updated"
@@ -355,7 +329,7 @@ export function BookingEditForm({
       />
 
       {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"} role={state.status === "error" ? "alert" : "status"}>
+        <Alert variant={state.status === "error" ? "destructive" : "success"}>
           {state.status === "error" ? (
             <AlertCircle aria-hidden="true" />
           ) : (
@@ -368,22 +342,24 @@ export function BookingEditForm({
         </Alert>
       ) : null}
 
-      <section className="grid gap-4 border-b-2 border-border pb-7">
-        <div className="sm:col-span-2">
-          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-blue-700 dark:text-blue-300 sm:text-3xl">
-            Step 1: Venue
-          </h2>
-        </div>
-
-        <div className="grid gap-2 sm:col-span-2">
-          <BookingFieldLabel htmlFor="facilityId" required>
-            Facility
-          </BookingFieldLabel>
+      <BookingFormSection
+        step={1}
+        title="Venue"
+        description="Choose the room or facility for this booking."
+      >
+        <div className="grid gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="facilityId">Facility</Label>
+            <FieldRequirementBadge required />
+          </div>
           <Select
             id="facilityId"
             name="facilityId"
             value={selectedFacility}
-            onChange={(event) => setSelectedFacility(event.target.value)}
+            onChange={(event) => {
+              setIsDirty(true);
+              setSelectedFacility(event.target.value);
+            }}
             disabled={!hasFacilities || isPending}
             aria-describedby={getFieldDescribedBy(
               fieldErrors.facilityId && "facilityId-error",
@@ -405,42 +381,42 @@ export function BookingEditForm({
         </div>
 
         {selectedFacilityDetails ? (
-          <aside className="grid gap-4 rounded-lg border border-sky-200 bg-sky-50/70 p-4 text-sm text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 sm:col-span-2 sm:grid-cols-[180px_minmax(0,1fr)] dark:border-sky-900 dark:bg-sky-950/25 dark:text-sky-100">
-            <div className="min-h-36 overflow-hidden rounded-md border border-sky-200 bg-background dark:border-sky-900">
+          <aside className="grid gap-4 rounded-lg border border-border bg-muted/30 p-4 text-sm sm:grid-cols-[140px_minmax(0,1fr)]">
+            <div className="min-h-28 overflow-hidden rounded-md border border-border bg-card">
               <FacilityPhoto
                 facility={selectedFacilityDetails}
-                className="aspect-[4/3] min-h-36"
+                className="aspect-[4/3] min-h-28"
               />
             </div>
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase text-muted-foreground">
-                    Selected facility
-                  </p>
-                  <h2 className="mt-1 text-2xl font-bold tracking-normal sm:text-3xl">
+                  <p className="qbook-type-meta">Selected facility</p>
+                  <p className="qbook-type-section mt-0.5">
                     {selectedFacilityDetails.name}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground">
-                    {selectedFacilityDetails.level} -{" "}
+                  </p>
+                  <p className="qbook-type-meta mt-1">
+                    {selectedFacilityDetails.level} ﾂｷ{" "}
                     {formatFacilityType(selectedFacilityDetails.type)}
                   </p>
                 </div>
-                <div className="inline-flex items-center gap-2 text-sky-800 dark:text-sky-200">
+                <div className="inline-flex items-center gap-2 text-muted-foreground">
                   <Users className="size-4" aria-hidden="true" />
-                  Capacity {selectedFacilityDetails.capacity}
+                  <span className="qbook-type-tabular text-sm">
+                    Capacity {selectedFacilityDetails.capacity}
+                  </span>
                 </div>
               </div>
-              <div className="inline-flex items-start gap-2 text-sky-800 dark:text-sky-200">
-                <ShieldCheck className="mt-0.5 size-4" aria-hidden="true" />
-                <span>
+              <div className="inline-flex items-start gap-2 text-muted-foreground">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span className="text-sm">
                   {formatEffectiveApprovalLabel(
                     selectedFacilityDetails.requiresApproval,
                     settings,
                   )}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="qbook-type-meta">
                 {selectedFacilityDetails.equipment.length > 0
                   ? `Equipment: ${selectedFacilityDetails.equipment
                       .slice(0, 4)
@@ -455,33 +431,33 @@ export function BookingEditForm({
             </div>
           </aside>
         ) : null}
-      </section>
+      </BookingFormSection>
 
-      <section className="grid gap-4 border-b-2 border-border pb-7">
-        <div className="grid gap-4">
-          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 sm:text-3xl">
-            Step 2: Availability and Time
-          </h2>
-
-          <div className="grid gap-2 sm:max-w-md">
-            <BookingFieldLabel htmlFor="date" required>
-              Date
-            </BookingFieldLabel>
-            <Input
-              id="date"
-              name="date"
-              type="date"
-              value={previewValues.date}
-              onChange={(event) => setPreviewField("date", event.target.value)}
-              disabled={!hasFacilities || isPending}
-              aria-describedby={getFieldDescribedBy(
-                fieldErrors.date && "date-error",
-              )}
-              aria-invalid={Boolean(fieldErrors.date)}
-              required
-            />
-            <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
+      <BookingFormSection
+        step={2}
+        title="When"
+        description="Pick a date, then select an available time on the timeline."
+      >
+        <div className="grid gap-2 sm:max-w-md">
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="date">Date</Label>
+            <FieldRequirementBadge required />
           </div>
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            value={previewValues.date}
+            onChange={(event) => setPreviewField("date", event.target.value)}
+            disabled={!hasFacilities || isPending}
+            aria-describedby={getFieldDescribedBy(
+              fieldErrors.date && "date-error",
+            )}
+            aria-invalid={Boolean(fieldErrors.date)}
+            required
+            className="qbook-type-tabular"
+          />
+          <FormFieldError id="date-error">{fieldErrors.date}</FormFieldError>
         </div>
 
         <BookingAvailabilityTimeline
@@ -506,23 +482,22 @@ export function BookingEditForm({
           endTimeError={fieldErrors.endTime}
           currentBookingId={booking.id}
         />
-        <p className="text-sm text-muted-foreground">
+        <p className="qbook-type-meta">
           Booking hours: {formatBookingWindowLabel(settings)}.
         </p>
-      </section>
+      </BookingFormSection>
 
-      <section className="grid gap-5 border-b-2 border-border pb-7 text-sm">
-        <div>
-          <h2 className="text-2xl font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-300 sm:text-3xl">
-            Step 3: Details
-          </h2>
-        </div>
-
+      <BookingFormSection
+        step={3}
+        title="Details"
+        description="Update the purpose and optional meeting details."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
-            <BookingFieldLabel htmlFor="title" required>
-              Purpose
-            </BookingFieldLabel>
+            <div className="flex flex-wrap items-center gap-2">
+              <Label htmlFor="title">Purpose</Label>
+              <FieldRequirementBadge required />
+            </div>
             <Input
               id="title"
               name="title"
@@ -541,9 +516,7 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2">
-            <BookingFieldLabel htmlFor="attendeeCount" required={false}>
-              Attendee count
-            </BookingFieldLabel>
+            <Label htmlFor="attendeeCount">Attendee count</Label>
             <Input
               id="attendeeCount"
               name="attendeeCount"
@@ -571,9 +544,7 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <BookingFieldLabel htmlFor="description" required={false}>
-              Description
-            </BookingFieldLabel>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               name="description"
@@ -592,13 +563,10 @@ export function BookingEditForm({
           </div>
 
           <div className="grid gap-2 sm:col-span-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
-                <Coffee className="size-4 text-amber-700 dark:text-amber-300" aria-hidden="true" />
-                Food/drinks required?
-              </Label>
-              <FieldRequirementBadge required={false} />
-            </div>
+            <Label htmlFor="cateringRequired" className="inline-flex items-center gap-2">
+              <Coffee className="size-4 text-muted-foreground" aria-hidden="true" />
+              Food or drinks required?
+            </Label>
             <Select
               id="cateringRequired"
               name="cateringRequired"
@@ -609,7 +577,7 @@ export function BookingEditForm({
               disabled={!hasFacilities || isPending}
             >
               <option value="no">No</option>
-              <option value="yes">Yes</option>
+              <option value="yes">Yes - show catering options</option>
             </Select>
           </div>
 
@@ -622,7 +590,7 @@ export function BookingEditForm({
               />
 
               <div className="grid gap-4 sm:col-span-2 lg:grid-cols-2">
-                <fieldset id="catering-drinks" tabIndex={-1} aria-describedby={fieldErrors.cateringType ? "cateringType-error" : undefined} aria-invalid={Boolean(fieldErrors.cateringType)} className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
                   <legend className="px-1 text-sm font-semibold">
                     Drinks
                   </legend>
@@ -662,7 +630,7 @@ export function BookingEditForm({
                   </label>
                 </fieldset>
 
-                <fieldset aria-describedby={fieldErrors.cateringType ? "cateringType-error" : undefined} aria-invalid={Boolean(fieldErrors.cateringType)} className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
+                <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
                   <legend className="px-1 text-sm font-semibold">
                     Food
                   </legend>
@@ -718,7 +686,7 @@ export function BookingEditForm({
                     {[...drinkRequests, ...foodRequests].map((item) => (
                       <span
                         key={item}
-                        className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+                        className="rounded-md border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground"
                       >
                         {item}
                       </span>
@@ -728,9 +696,7 @@ export function BookingEditForm({
               ) : null}
 
               <div className="grid gap-2">
-                <BookingFieldLabel htmlFor="cateringPax" required>
-                  Number of pax
-                </BookingFieldLabel>
+                <Label htmlFor="cateringPax">Number of pax</Label>
                 <Input
                   id="cateringPax"
                   name="cateringPax"
@@ -751,9 +717,7 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2">
-                <BookingFieldLabel htmlFor="cateringServingTime" required>
-                  Serving time
-                </BookingFieldLabel>
+                <Label htmlFor="cateringServingTime">Serving time</Label>
                 <Select
                   id="cateringServingTime"
                   name="cateringServingTime"
@@ -765,6 +729,7 @@ export function BookingEditForm({
                   )}
                   aria-invalid={Boolean(fieldErrors.cateringServingTime)}
                   required
+                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
                 >
                   <option value="">Choose serving time</option>
                   {cateringServingTimeOptions.map((option) => (
@@ -779,9 +744,9 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <BookingFieldLabel htmlFor="cateringDietaryNotes" required={false}>
+                <Label htmlFor="cateringDietaryNotes">
                   Dietary / special notes
-                </BookingFieldLabel>
+                </Label>
                 <Textarea
                   id="cateringDietaryNotes"
                   name="cateringDietaryNotes"
@@ -802,9 +767,9 @@ export function BookingEditForm({
               </div>
 
               <div className="grid gap-2 sm:col-span-2">
-                <BookingFieldLabel htmlFor="cateringNotes" required={false}>
-                  Additional catering notes
-                </BookingFieldLabel>
+                <Label htmlFor="cateringNotes">
+                  Additional notes
+                </Label>
                 <Textarea
                   id="cateringNotes"
                   rows={4}
@@ -830,31 +795,47 @@ export function BookingEditForm({
             </>
           ) : null}
         </div>
-      </section>
+      </BookingFormSection>
 
-      <DepartmentPicker departments={departments} initialDepartmentIds={booking.departments.map((department) => department.id)} disabled={isPending} onDraftChange={() => setIsDirty(true)} />
+      <BookingFormSection
+        step={4}
+        title="People and options"
+        description="Tag departments and set Teams options if needed."
+      >
+        <DepartmentPicker
+          departments={departments}
+          initialDepartmentIds={booking.departments.map((department) => department.id)}
+          disabled={isPending}
+          onDraftChange={() => setIsDirty(true)}
+        />
 
-      <section className="grid gap-2 rounded-lg border border-border/70 p-4 text-sm">
-        {booking.status === "pending" ? (
-          <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
-            <Input id="teamsMeeting" name="teamsMeeting" type="checkbox" value="yes" defaultChecked={booking.teamsMeeting} className="mt-0.5 size-4" disabled={isPending} />
-            <span>Make this a Teams meeting</span>
-          </Label>
-        ) : (
-          <>
-            <input type="hidden" name="teamsMeeting" value={booking.teamsMeeting ? "yes" : "no"} />
-            <p className="font-medium">{booking.teamsMeeting ? "Teams meeting" : "Room-only meeting"}</p>
-            <p className="text-muted-foreground">The meeting type is fixed after confirmation. Cancel and recreate the booking to change it.</p>
-          </>
-        )}
-      </section>
+        <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+          {booking.status === "pending" ? (
+            <Label htmlFor="teamsMeeting" className="flex items-start gap-3 font-medium">
+              <Input id="teamsMeeting" name="teamsMeeting" type="checkbox" value="yes" defaultChecked={booking.teamsMeeting} className="mt-0.5 size-4" disabled={isPending} />
+              <span>Make this a Teams meeting</span>
+            </Label>
+          ) : (
+            <>
+              <input type="hidden" name="teamsMeeting" value={booking.teamsMeeting ? "yes" : "no"} />
+              <p className="font-medium">{booking.teamsMeeting ? "Teams meeting" : "Room-only meeting"}</p>
+              <p className="qbook-type-meta">The meeting type is fixed after confirmation. Cancel and recreate the booking to change it.</p>
+            </>
+          )}
+        </div>
+      </BookingFormSection>
 
-      <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <BookingStickyActions>
         <Link
           href={`/bookings/${booking.id}`}
-          className={buttonVariants({ variant: "outline" })}
+          className={buttonVariants({ variant: "ghost" })}
           onClick={(event) => {
-            if (isDirty && !window.confirm("Discard your booking changes and return to the booking?")) {
+            if (
+              isDirty &&
+              !window.confirm(
+                "Discard your booking changes and return to the booking?",
+              )
+            ) {
               event.preventDefault();
             }
           }}
@@ -866,8 +847,7 @@ export function BookingEditForm({
             Save changes
           </PendingButtonContent>
         </Button>
-      </div>
-      </div>
+      </BookingStickyActions>
     </form>
   );
 }

@@ -42,10 +42,10 @@ function PrintField({
 }) {
   return (
     <div>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+      <dt className="qbook-type-meta font-medium uppercase tracking-wide">
         {label}
       </dt>
-      <dd className="mt-1 break-words text-sm font-medium text-zinc-950">
+      <dd className="mt-1 break-words text-sm font-medium text-foreground print:text-zinc-950">
         {valueOrDash(value)}
       </dd>
     </div>
@@ -60,8 +60,8 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="break-inside-avoid rounded-lg border border-zinc-300 p-5">
-      <h2 className="text-base font-semibold tracking-normal text-zinc-950">
+    <section className="break-inside-avoid rounded-lg border border-border p-5 print:border-zinc-300">
+      <h2 className="qbook-type-section text-foreground print:text-zinc-950">
         {title}
       </h2>
       <div className="mt-4">{children}</div>
@@ -95,7 +95,7 @@ export function BookingPrintForm({
   ).length;
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-6 text-zinc-950 print:bg-white print:px-0 print:py-0">
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground print:bg-white print:px-0 print:py-0 print:text-zinc-950">
       <style>{`
         @media print {
           @page { margin: 14mm; }
@@ -104,32 +104,38 @@ export function BookingPrintForm({
         }
       `}</style>
 
-      <div className="print-hidden mx-auto mb-4 flex max-w-4xl flex-col gap-2 sm:flex-row sm:justify-end">
-        <Link href={backHref} className={buttonVariants({ variant: "outline" })}>
-          Back
-        </Link>
-        <PrintButton />
+      <div className="print-hidden mx-auto mb-6 flex max-w-3xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="qbook-type-meta">Booking approval form</p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link href={backHref} className={buttonVariants({ variant: "ghost" })}>
+            Back to booking
+          </Link>
+          <PrintButton />
+        </div>
       </div>
 
-      <article className="mx-auto grid max-w-4xl gap-5 bg-white p-6 shadow-sm print:max-w-none print:p-0 print:shadow-none">
-        <header className="border-b border-zinc-300 pb-5">
+      <article className="mx-auto grid max-w-3xl gap-5 rounded-lg border border-border bg-card p-6 shadow-sm print:max-w-none print:rounded-none print:border-0 print:bg-white print:p-0 print:shadow-none">
+        <header className="border-b border-border pb-5 print:border-zinc-300">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <CompanyBrand
-              logoClassName="w-24 print:w-24"
-              textClassName="text-4xl print:text-4xl"
+              logoClassName="w-20 print:w-24"
+              textClassName="text-3xl print:text-4xl"
               priority
             />
             <div className="text-left sm:text-right">
-              <p className="text-sm font-medium text-zinc-600">{appName}</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-normal text-zinc-950">
+              <h1 className="qbook-type-title text-xl sm:text-2xl">
                 Booking Approval Form
               </h1>
-              <p className="mt-2 text-sm text-zinc-600">
-                {companyName} | Booking reference: {booking.id}
+              <p className="qbook-type-meta mt-2">
+                {companyName}
               </p>
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="qbook-type-meta mt-1 qbook-type-tabular">
+                Ref: {booking.id}
+              </p>
+              <p className="qbook-type-meta mt-1">
                 Generated {formatBookingDateTime(new Date().toISOString())}
               </p>
+              <p className="sr-only">{appName}</p>
             </div>
           </div>
         </header>
@@ -184,14 +190,14 @@ export function BookingPrintForm({
           {booking.departments.length > 0 ? (
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-300">
+                <tr className="border-b border-border print:border-zinc-300">
                   <th className="py-2 pr-3 font-semibold">Department</th>
                   <th className="py-2 pr-3 font-semibold">Notification mailbox</th>
                 </tr>
               </thead>
               <tbody>
                 {booking.departments.map((department) => (
-                  <tr key={department.id} className="border-b border-zinc-200">
+                  <tr key={department.id} className="border-b border-border/70 print:border-zinc-200">
                     <td className="py-2 pr-3">{department.name}</td>
                     <td className="break-all py-2 pr-3">{department.email}</td>
                   </tr>
@@ -199,19 +205,19 @@ export function BookingPrintForm({
               </tbody>
             </table>
           ) : (
-            <p className="text-sm text-zinc-600">No departments were tagged for this booking.</p>
+            <p className="qbook-type-meta">No departments were tagged for this booking.</p>
           )}
         </Section>
 
         <Section title="Invited attendees">
-          <p className="mb-4 text-sm text-zinc-600">
-            Total invited: {invitations.length} | Accepted: {acceptedCount} |
-            Pending: {pendingCount} | Declined: {declinedCount}
+          <p className="qbook-type-meta mb-4 qbook-type-tabular">
+            Total invited: {invitations.length} · Accepted: {acceptedCount} ·
+            Pending: {pendingCount} · Declined: {declinedCount}
           </p>
           {invitations.length > 0 ? (
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-300">
+                <tr className="border-b border-border print:border-zinc-300">
                   <th className="py-2 pr-3 font-semibold">Name</th>
                   <th className="py-2 pr-3 font-semibold">Email</th>
                   <th className="py-2 pr-3 font-semibold">Status</th>
@@ -219,7 +225,7 @@ export function BookingPrintForm({
               </thead>
               <tbody>
                 {invitations.map((invitation) => (
-                  <tr key={invitation.id} className="border-b border-zinc-200">
+                  <tr key={invitation.id} className="border-b border-border/70 print:border-zinc-200">
                     <td className="py-2 pr-3">
                       {invitation.invitedUser?.fullName || "-"}
                     </td>
@@ -234,7 +240,7 @@ export function BookingPrintForm({
               </tbody>
             </table>
           ) : (
-            <p className="text-sm text-zinc-600">No invited attendees.</p>
+            <p className="qbook-type-meta">No invited attendees.</p>
           )}
         </Section>
 
@@ -257,7 +263,7 @@ export function BookingPrintForm({
               const notes = booking.catering.notes || "";
               const drinksMatch = notes.match(/Drinks:\s*([^\n]+)/);
               const foodMatch = notes.match(/Food:\s*([^\n]+)/);
-              
+
               let remainingNotes = notes;
               if (drinksMatch) remainingNotes = remainingNotes.replace(drinksMatch[0], "");
               if (foodMatch) remainingNotes = remainingNotes.replace(foodMatch[0], "");
@@ -282,9 +288,7 @@ export function BookingPrintForm({
         </Section>
 
         <section className="grid gap-4">
-          <h2 className="text-base font-semibold tracking-normal text-zinc-950">
-            Approval / signature sections
-          </h2>
+          <h2 className="qbook-type-section">Approval / signature sections</h2>
           <SignatureBlock title="Requested by" />
           <SignatureBlock title="Superior / HOD / Boss approval" />
           <SignatureBlock title="Admin / Facilities approval" />

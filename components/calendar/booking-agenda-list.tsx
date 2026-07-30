@@ -2,6 +2,8 @@ import type { CalendarDay } from "@/lib/calendar/date-range";
 import type { GroupedCalendarBookings } from "@/lib/calendar/group-bookings";
 import { CalendarBookingItem } from "@/components/calendar/calendar-booking-item";
 import { EmptyState } from "@/components/shared/empty-state";
+import { buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
 
 export function BookingAgendaList({
   days,
@@ -17,21 +19,19 @@ export function BookingAgendaList({
 
   return (
     <section className="grid gap-4 md:hidden" aria-labelledby="agenda-heading">
-      <div>
-        <h2 id="agenda-heading" className="font-semibold tracking-normal">
-          Agenda view
-        </h2>
-      </div>
+      <h2 id="agenda-heading" className="qbook-type-section">
+        Agenda
+      </h2>
 
       {daysWithBookings.length > 0 ? (
         daysWithBookings.map((day) => (
           <section
             key={day.key}
-            className="grid gap-3 rounded-lg border border-border/70 bg-card p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10"
+            className="grid gap-3 border-b border-border pb-4 last:border-b-0"
           >
             <div>
               <h3 className="font-medium tracking-normal">{day.shortLabel}</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="qbook-type-meta qbook-type-tabular">
                 {(groupedBookings[day.key] ?? []).length} booking
                 {(groupedBookings[day.key] ?? []).length === 1 ? "" : "s"}
               </p>
@@ -46,7 +46,15 @@ export function BookingAgendaList({
       ) : (
         <EmptyState
           title="No bookings this month"
-          description="There are no bookings matching the selected month and filters."
+          description="Nothing matches these filters. Clear filters or create a booking."
+          action={
+            <Link
+              href="/bookings/new"
+              className={buttonVariants({ size: "sm" })}
+            >
+              Create booking
+            </Link>
+          }
         />
       )}
     </section>

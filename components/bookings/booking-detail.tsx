@@ -17,7 +17,7 @@ import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { StaticToastEffect } from "@/components/shared/static-toast-effect";
-import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { PageHeader } from "@/components/shared/page-header";
 import { RouteLoadingLink } from "@/components/shared/route-loading-link";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
@@ -26,6 +26,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function DetailItem({
   label,
@@ -36,7 +37,7 @@ function DetailItem({
 }) {
   return (
     <div>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dt className="qbook-type-meta">{label}</dt>
       <dd className="mt-1 min-w-0 break-words font-medium">{children}</dd>
     </div>
   );
@@ -83,123 +84,139 @@ export function BookingDetail({
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
-  const canEdit = isOwnerView && (booking.status === "pending" || booking.status === "confirmed");
-  const primaryHeaderAction = teamsJoinUrl
-    ? "teams"
-    : calendarEventAvailable
-      ? "calendar"
-      : canEdit
-        ? "edit"
-        : "print";
   const invitationResponses = {
     accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
     pending: invitations.filter((invitation) => invitation.status === "pending").length,
     declined: invitations.filter((invitation) => invitation.status === "declined").length,
   };
+  const canEdit =
+    isOwnerView &&
+    (booking.status === "pending" || booking.status === "confirmed");
+  const facilityLine = booking.facility
+    ? `${booking.facility.name}, ${booking.facility.level}`
+    : "Facility unavailable";
+
+  const primaryAction = !isOwnerView && viewerInvitation?.status === "pending" ? (
+    <InvitationResponseActions invitationId={viewerInvitation.id} />
+  ) : canEdit ? (
+    <RouteLoadingLink
+      href={`/bookings/${booking.id}/edit`}
+      loadingLabel="Loading edit form..."
+      loadingVariant="form"
+      className={buttonVariants({ className: "w-full sm:w-auto" })}
+    >
+      <Edit3 data-icon="inline-start" />
+      Edit booking
+    </RouteLoadingLink>
+  ) : teamsJoinUrl ? (
+    <a
+      href={teamsJoinUrl}
+      target="_blank"
+      rel="noreferrer"
+      className={buttonVariants({ className: "w-full sm:w-auto" })}
+    >
+      <ExternalLink data-icon="inline-start" />
+      Join Teams meeting
+    </a>
+  ) : null;
+
+  const teamsIsPrimary = Boolean(teamsJoinUrl && !canEdit && !(
+    !isOwnerView && viewerInvitation?.status === "pending"
+  ));
+
+  const secondaryActions = (
+    <div className="flex flex-wrap gap-2">
+      {teamsJoinUrl && !teamsIsPrimary ? (
+        <a
+          href={teamsJoinUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
+        >
+          <ExternalLink data-icon="inline-start" />
+          Join Teams
+        </a>
+      ) : null}
+      {calendarEventAvailable ? (
+        <Link
+          href={`/bookings/${booking.id}/calendar`}
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
+        >
+          <CalendarDays data-icon="inline-start" />
+          Outlook calendar
+        </Link>
+      ) : null}
+      {isOwnerView ? (
+        <Link
+          href={`/bookings/${booking.id}/print`}
+          className={buttonVariants({
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
+        >
+          <Printer data-icon="inline-start" />
+          Print approval form
+        </Link>
+      ) : null}
+    </div>
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <Breadcrumbs
-        items={[
+      <PageHeader
+        breadcrumbs={[
           isOwnerView
             ? { label: "My Bookings", href: "/my-bookings" }
             : { label: "Invitations", href: "/invitations" },
           { label: booking.title },
         ]}
+        title={booking.title}
+        description={
+          <span className="flex flex-col gap-2">
+            <span className="flex flex-wrap items-center gap-2">
+              <BookingStatusBadge status={booking.status} />
+              {!isOwnerView && viewerInvitation ? (
+                <StatusBadge kind="invitation" status={viewerInvitation.status} />
+              ) : null}
+            </span>
+            <span>
+              {facilityLine}
+              {" · "}
+              <span className="qbook-type-tabular">
+                {formatBookingDate(booking.startsAt)} ·{" "}
+                {formatBookingWindow(booking.startsAt, booking.endsAt)}
+              </span>
+            </span>
+          </span>
+        }
+        primaryAction={primaryAction}
+        secondaryAction={
+          isOwnerView || calendarEventAvailable || teamsJoinUrl
+            ? secondaryActions
+            : undefined
+        }
       />
-
-      <header>
-        <div>
-          <BookingStatusBadge status={booking.status} />
-          {!isOwnerView && viewerInvitation ? (
-            <StatusBadge
-              kind="invitation"
-              status={viewerInvitation.status}
-              className="ml-2"
-            />
-          ) : null}
-          <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
-            {booking.title}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {booking.facility
-              ? `${booking.facility.name}, ${booking.facility.level}`
-              : "Facility unavailable"}
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {teamsJoinUrl ? (
-              <a
-                href={teamsJoinUrl}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonVariants({
-                  variant: "default",
-                  className:
-                    "w-full border-[#5b5fc7] bg-[#5b5fc7] text-white shadow-[#5b5fc7]/25 hover:bg-[#464775] focus-visible:border-[#7b83eb] focus-visible:ring-[#7b83eb]/25 dark:bg-[#7b83eb] dark:text-slate-950 dark:hover:bg-[#959cf4] sm:w-auto",
-                })}
-            >
-              <ExternalLink data-icon="inline-start" />
-              Join Teams Meeting
-              </a>
-            ) : null}
-            {calendarEventAvailable ? (
-              <Link
-                href={`/bookings/${booking.id}/calendar`}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonVariants({
-                  variant: primaryHeaderAction === "calendar" ? "default" : "outline",
-                  className:
-                    "w-full sm:w-auto",
-                })}
-              >
-                <CalendarDays data-icon="inline-start" />
-                View Outlook Calendar
-              </Link>
-            ) : null}
-            {isOwnerView ? (
-              <>
-                {canEdit ? (
-                  <RouteLoadingLink
-                    href={`/bookings/${booking.id}/edit`}
-                    loadingLabel="Loading edit form..."
-                    loadingVariant="form"
-                    className={buttonVariants({
-                      variant: primaryHeaderAction === "edit" ? "default" : "outline",
-                      className: "w-full sm:w-auto",
-                    })}
-                  >
-                    <Edit3 data-icon="inline-start" />
-                    Edit
-                  </RouteLoadingLink>
-                ) : null}
-                <Link
-                  href={`/bookings/${booking.id}/print`}
-                  className={buttonVariants({
-                    variant: primaryHeaderAction === "print" ? "default" : "outline",
-                    className: "w-full sm:w-auto",
-                  })}
-                >
-                  <Printer data-icon="inline-start" />
-                  Print Form
-                </Link>
-              </>
-            ) : null}
-          </div>
-        </div>
-      </header>
 
       {calendarUnavailable ? (
         <Alert variant="warning">
           <AlertTitle>Outlook event unavailable</AlertTitle>
           <AlertDescription>
-            The Outlook event is not ready or is no longer available. Your room booking is unchanged.
+            The Outlook event is not ready or is no longer available. Your room
+            booking is unchanged.
           </AlertDescription>
         </Alert>
       ) : null}
 
       {isOwnerView && justCreated ? (
-        <Alert variant="success" role="status">
+        <Alert variant="success">
           <StaticToastEffect
             title={
               booking.status === "pending"
@@ -225,11 +242,12 @@ export function BookingDetail({
                 : "Booking created."}{" "}
               You can add attendees and departments from this page whenever needed.
             </span>
-            <span className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <span>
               <Link
                 href="#booking-participants"
                 className={buttonVariants({
                   size: "sm",
+                  variant: "outline",
                   className: "w-full sm:w-auto",
                 })}
               >
@@ -241,11 +259,29 @@ export function BookingDetail({
         </Alert>
       ) : null}
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
-        <h2 className="text-lg font-semibold tracking-normal">
-          Booking details
-        </h2>
-        <dl className="mt-5 grid gap-5 sm:grid-cols-2">
+      {!isOwnerView && viewerInvitation && viewerInvitation.status !== "pending" ? (
+        <section className="rounded-lg border border-border bg-muted/30 p-5">
+          <h2 className="qbook-type-section">Your invitation</h2>
+          <p className="qbook-type-meta mt-2">
+            Your response is recorded as{" "}
+            <span className="font-medium text-foreground">
+              {viewerInvitation.status}
+            </span>
+            . Only the organizer can cancel or manage the booking.
+          </p>
+        </section>
+      ) : null}
+
+      {!isOwnerView && viewerInvitation?.status === "pending" ? (
+        <p className="qbook-type-meta">
+          You can view this booking because you were invited. Only the organizer
+          can cancel or manage the booking.
+        </p>
+      ) : null}
+
+      <section className="grid gap-4 border-t border-border pt-6">
+        <h2 className="qbook-type-section">Booking details</h2>
+        <dl className="grid gap-5 sm:grid-cols-2">
           <DetailItem label="Facility">
             {booking.facility?.name ?? "Facility unavailable"}
           </DetailItem>
@@ -258,13 +294,19 @@ export function BookingDetail({
               : "Unavailable"}
           </DetailItem>
           <DetailItem label="Date">
-            {formatBookingDate(booking.startsAt)}
+            <span className="qbook-type-tabular">
+              {formatBookingDate(booking.startsAt)}
+            </span>
           </DetailItem>
           <DetailItem label="Time">
-            {formatBookingWindow(booking.startsAt, booking.endsAt)}
+            <span className="qbook-type-tabular">
+              {formatBookingWindow(booking.startsAt, booking.endsAt)}
+            </span>
           </DetailItem>
           <DetailItem label="Attendee count">
-            {booking.attendeeCount ?? "Not provided"}
+            <span className="qbook-type-tabular">
+              {booking.attendeeCount ?? "Not provided"}
+            </span>
           </DetailItem>
           <DetailItem label="Meeting type">
             {booking.teamsMeeting
@@ -290,53 +332,28 @@ export function BookingDetail({
               : "Not required"}
           </DetailItem>
           <DetailItem label="Created">
-            {formatBookingDateTime(booking.createdAt)}
+            <span className="qbook-type-tabular">
+              {formatBookingDateTime(booking.createdAt)}
+            </span>
           </DetailItem>
         </dl>
       </section>
 
       <CateringDetailsCard catering={booking.catering} />
 
-      <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
-        <h2 className="text-lg font-semibold tracking-normal">Description</h2>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+      <section className="grid gap-3 border-t border-border pt-6">
+        <h2 className="qbook-type-section">Description</h2>
+        <p className="text-sm leading-6 text-muted-foreground">
           {booking.description || "No description was provided."}
         </p>
       </section>
 
       {booking.cancellationReason ? (
-        <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
-          <h2 className="text-lg font-semibold tracking-normal">
-            Cancellation reason
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        <section className="grid gap-3 border-t border-border pt-6">
+          <h2 className="qbook-type-section">Cancellation reason</h2>
+          <p className="text-sm leading-6 text-muted-foreground">
             {booking.cancellationReason}
           </p>
-        </section>
-      ) : null}
-
-      {!isOwnerView && viewerInvitation ? (
-        <section className="grid gap-4 rounded-lg border border-sky-200 bg-sky-50/70 p-5 text-sky-950 shadow-sm shadow-sky-500/10 ring-1 ring-sky-200/60 dark:border-sky-800 dark:bg-sky-950/25 dark:text-sky-100">
-          <div>
-            <h2 className="text-lg font-semibold tracking-normal">
-              Your invitation
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              You can view this booking because you were invited. Only the
-              organizer can cancel or manage the booking.
-            </p>
-          </div>
-          {viewerInvitation.status === "pending" ? (
-            <InvitationResponseActions invitationId={viewerInvitation.id} />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Your response is recorded as{" "}
-              <span className="font-medium text-foreground">
-                {viewerInvitation.status}
-              </span>
-              .
-            </p>
-          )}
         </section>
       ) : null}
 
@@ -352,12 +369,14 @@ export function BookingDetail({
       ) : null}
 
       {isOwnerView && isCancellableBooking(booking.status) ? (
-        <section className="grid gap-4 rounded-lg border border-destructive/35 bg-rose-50/60 p-5 text-rose-950 shadow-sm shadow-rose-500/10 ring-1 ring-rose-200/60 dark:border-rose-900 dark:bg-rose-950/25 dark:text-rose-100">
+        <section
+          className={cn(
+            "mt-2 grid gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-5",
+          )}
+        >
           <div>
-            <h2 className="text-lg font-semibold tracking-normal">
-              Cancel booking
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <h2 className="qbook-type-section">Cancel booking</h2>
+            <p className="qbook-type-meta mt-2">
               Only cancel when you no longer need the room. The selected time may
               become available to other employees.
             </p>
@@ -365,7 +384,6 @@ export function BookingDetail({
           <CancelBookingForm bookingId={booking.id} />
         </section>
       ) : null}
-
     </main>
   );
 }

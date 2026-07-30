@@ -64,7 +64,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   return (
     <form
       action={formAction}
-      className="grid gap-5 rounded-xl border border-border/80 bg-card p-5 shadow-sm sm:p-6"
+      className="grid gap-5"
       noValidate
       onSubmit={validateBeforeSubmit}
     >
@@ -74,10 +74,10 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
         errorTitle="Profile not saved"
       />
       <div>
-        <h2 className="text-lg font-semibold tracking-normal">
-          Edit profile
+        <h2 className="qbook-type-section">
+          Contact details
         </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="qbook-type-meta mt-1">
           Update contact details used in bookings and reports.
         </p>
       </div>
