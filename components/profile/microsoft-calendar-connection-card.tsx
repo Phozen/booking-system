@@ -25,18 +25,28 @@ export function MicrosoftCalendarConnectionCard({
   const needsReconnect =
     connection.status === "reconnect_required" ||
     connection.status === "not_connected";
+  const setupUnavailableId = "microsoft-calendar-setup-unavailable";
 
   return (
-    <section className="grid gap-4 rounded-lg border border-border bg-muted/20 p-4">
+    <div
+      className="grid gap-4 rounded-lg border border-border bg-muted/20 p-4"
+      aria-labelledby="microsoft-calendar-heading"
+    >
       <div className="flex items-start gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <CalendarCheck className="size-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold tracking-normal">
+          <h3
+            id="microsoft-calendar-heading"
+            className="text-base font-semibold tracking-normal"
+          >
             Microsoft Calendar
           </h3>
-          <p className="qbook-type-meta mt-1">
+          <p
+            id={!calendarSyncReady ? setupUnavailableId : undefined}
+            className="qbook-type-meta mt-1"
+          >
             {connection.connected
               ? "Connected for delegated booking calendar sync."
               : calendarSyncReady
@@ -114,12 +124,15 @@ export function MicrosoftCalendarConnectionCard({
         <Button
           type="submit"
           disabled={!calendarSyncReady}
-          variant={needsReconnect ? "default" : "outline"}
+          variant={needsReconnect && calendarSyncReady ? "default" : "outline"}
+          aria-describedby={
+            !calendarSyncReady ? setupUnavailableId : undefined
+          }
         >
-          <RefreshCcw aria-hidden="true" />
+          <RefreshCcw data-icon="inline-start" aria-hidden="true" />
           {needsReconnect ? "Connect Microsoft Calendar" : "Reconnect"}
         </Button>
       </form>
-    </section>
+    </div>
   );
 }

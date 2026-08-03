@@ -87,6 +87,9 @@ export async function updateOwnProfileAction(
   );
 
   revalidatePath("/profile");
+  revalidatePath("/admin/profile");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin", "layout");
 
   return {
     status: "success",
