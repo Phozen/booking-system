@@ -1,93 +1,29 @@
 import Link from "next/link";
-import { ArrowRight, MapPin, UserRound } from "lucide-react";
 
-import {
-  formatBookingDate,
-  formatBookingWindow,
-} from "@/lib/bookings/format";
 import type { BookingInvitationStatus, InvitedBooking } from "@/lib/bookings/invitations/types";
-import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
+import { CompactInvitationSection } from "@/components/bookings/invitations/compact-invitation-section";
+import { InvitationCard } from "@/components/bookings/invitations/invitation-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 
-function getOrganizerLabel(invitation: InvitedBooking) {
-  const organizer = invitation.booking.organizer;
+function sortByMeetingTime(
+  invitations: InvitedBooking[],
+  order: "asc" | "desc",
+) {
+  return [...invitations].sort((left, right) => {
+    const leftTime = new Date(left.booking.startsAt).getTime();
+    const rightTime = new Date(right.booking.startsAt).getTime();
 
-  if (!organizer) {
-    return "Organizer unavailable";
-  }
-
-  return organizer.fullName?.trim() || organizer.email;
-}
-
-function InvitationCard({ invitation }: { invitation: InvitedBooking }) {
-  const booking = invitation.booking;
-  const isPending = invitation.invitation.status === "pending";
-
-  return (
-    <article className="grid gap-4 border-b border-border py-5 last:border-b-0">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <StatusBadge kind="invitation" status={invitation.invitation.status} />
-          <h3 className="qbook-type-section mt-2 break-words text-base">
-            {booking.title}
-          </h3>
-          <p className="qbook-type-meta mt-1 qbook-type-tabular">
-            {formatBookingDate(booking.startsAt)} ·{" "}
-            {formatBookingWindow(booking.startsAt, booking.endsAt)}
-          </p>
-          <p className="qbook-type-meta mt-1">
-            {booking.facility
-              ? `${booking.facility.name}, ${booking.facility.level}`
-              : "Room unavailable"}
-          </p>
-        </div>
-        {!isPending ? (
-          <Link
-            href={`/bookings/${booking.id}`}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            View details
-            <ArrowRight data-icon="inline-end" />
-          </Link>
-        ) : null}
-      </div>
-
-      <dl className="grid min-w-0 gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <div className="inline-flex min-w-0 items-center gap-2">
-          <UserRound className="size-4 shrink-0" aria-hidden="true" />
-          <span className="min-w-0 break-words">
-            Organized by {getOrganizerLabel(invitation)}
-          </span>
-        </div>
-        <div className="inline-flex min-w-0 items-center gap-2">
-          <MapPin className="size-4 shrink-0" aria-hidden="true" />
-          <span className="min-w-0 break-words">
-            Room status: {booking.status.replaceAll("_", " ")}
-          </span>
-        </div>
-      </dl>
-
-      {isPending ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <InvitationResponseActions invitationId={invitation.invitation.id} />
-          <Link
-            href={`/bookings/${booking.id}`}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            View details
-          </Link>
-        </div>
-      ) : null}
-    </article>
-  );
+    return order === "asc" ? leftTime - rightTime : rightTime - leftTime;
+  });
 }
 
 function InvitationSection({
+  sectionId,
   title,
   invitations,
 }: {
+  sectionId: string;
   title: string;
   invitations: InvitedBooking[];
 }) {
@@ -95,20 +31,30 @@ function InvitationSection({
     return null;
   }
 
+  const headingId = `${sectionId}-heading`;
+  const countLabel =
+    invitations.length === 1 ? "1 invite" : `${invitations.length} invites`;
+
   return (
-    <section className="grid gap-1">
-      <div className="flex items-center justify-between pb-2">
-        <h2 className="qbook-type-section">{title}</h2>
-        <span className="qbook-type-meta qbook-type-tabular">
+    <section className="grid gap-3" aria-labelledby={headingId}>
+      <div className="flex items-center justify-between border-b-2 border-border pb-2">
+        <h2
+          id={headingId}
+          className="text-base font-semibold tracking-normal"
+        >
+          {title}
+        </h2>
+        <span
+          className="rounded-full border border-border/70 bg-muted px-2 py-0.5 text-sm font-medium tabular-nums text-muted-foreground"
+          aria-label={countLabel}
+        >
           {invitations.length}
         </span>
       </div>
-      <div className="grid">
+
+      <div className="grid gap-3">
         {invitations.map((invitation) => (
-          <InvitationCard
-            key={invitation.invitation.id}
-            invitation={invitation}
-          />
+          <InvitationCard key={invitation.invitation.id} invitation={invitation} />
         ))}
       </div>
     </section>
@@ -135,6 +81,9 @@ export function InvitationsPageList({
   const hasAnyInvitations = invitations.some(
     (invitation) => invitation.invitation.status !== "removed",
   );
+  const pending = sortByMeetingTime(byStatus.pending, "asc");
+  const accepted = sortByMeetingTime(byStatus.accepted, "desc");
+  const declined = sortByMeetingTime(byStatus.declined, "desc");
 
   if (!hasAnyInvitations) {
     return (
@@ -142,9 +91,14 @@ export function InvitationsPageList({
         title="No invites yet"
         description="When someone invites you to a meeting, it will show up here."
         action={
-          <Link href="/calendar" className={buttonVariants({ variant: "outline" })}>
-            View calendar
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/calendar" className={buttonVariants({ variant: "outline" })}>
+              View calendar
+            </Link>
+            <Link href="/my-bookings" className={buttonVariants({ variant: "ghost" })}>
+              My bookings
+            </Link>
+          </div>
         }
       />
     );
@@ -153,17 +107,28 @@ export function InvitationsPageList({
   return (
     <div className="grid gap-8">
       <InvitationSection
+        sectionId="pending"
         title="Pending"
-        invitations={byStatus.pending}
+        invitations={pending}
       />
-      <InvitationSection
-        title="Accepted"
-        invitations={byStatus.accepted}
-      />
-      <InvitationSection
-        title="Declined"
-        invitations={byStatus.declined}
-      />
+      {accepted.length > 0 ? (
+        <CompactInvitationSection
+          sectionId="accepted"
+          title="Accepted"
+          invitations={accepted}
+          muted
+          compact
+        />
+      ) : null}
+      {declined.length > 0 ? (
+        <CompactInvitationSection
+          sectionId="declined"
+          title="Declined"
+          invitations={declined}
+          muted
+          compact
+        />
+      ) : null}
     </div>
   );
 }

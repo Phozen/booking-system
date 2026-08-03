@@ -47,7 +47,11 @@ export function InvitationResponseActions({
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       ) : null}
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div
+        role="group"
+        aria-label="Respond to invitation"
+        className="flex flex-col gap-2 sm:flex-row"
+      >
         <form action={acceptAction} className="w-full sm:w-auto">
           <Button
             type="submit"
@@ -59,7 +63,7 @@ export function InvitationResponseActions({
               pending={acceptPending}
               pendingLabel="Accepting..."
             >
-              <CheckCircle2 data-icon="inline-start" />
+              <CheckCircle2 data-icon="inline-start" aria-hidden="true" />
               Accept invitation
             </PendingButtonContent>
           </Button>
@@ -75,7 +79,7 @@ export function InvitationResponseActions({
               pending={declinePending}
               pendingLabel="Declining..."
             >
-              <XCircle data-icon="inline-start" />
+              <XCircle data-icon="inline-start" aria-hidden="true" />
               Decline invitation
             </PendingButtonContent>
           </Button>
