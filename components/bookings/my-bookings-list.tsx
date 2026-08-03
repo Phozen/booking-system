@@ -9,6 +9,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { BookingCard } from "@/components/bookings/booking-card";
+import { CompactBookingSection } from "@/components/bookings/compact-booking-section";
 import { HighlightScrollEffect } from "@/components/bookings/highlight-scroll-effect";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
@@ -212,7 +213,7 @@ export function MyBookingsList({
             emptyDescription="Once a booking is confirmed, its room and time slot will appear here."
             highlightId={highlightId}
           />
-          <BookingSection
+          <CompactBookingSection
             sectionId="history"
             title="History"
             bookings={groupedBookings.history}
@@ -220,13 +221,15 @@ export function MyBookingsList({
             emptyDescription="Completed, expired, and rejected room requests will appear here for reference."
             muted
             highlightId={highlightId}
+            compact
           />
-          <BookingSection
+          <CompactBookingSection
             sectionId="cancelled"
             title="Cancelled"
             bookings={groupedBookings.cancelled}
             emptyMessage="No cancelled room bookings."
             highlightId={highlightId}
+            compact
           />
         </>
       )}
