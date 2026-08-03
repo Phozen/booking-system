@@ -13,8 +13,13 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewAdminBookingPage() {
+export default async function NewAdminBookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   await requireAdmin();
+  const { date } = await searchParams;
   const supabase = createAdminClient();
   const [facilities, users, settings, departments] = await Promise.all([
     getBookableFacilities(supabase),
@@ -22,6 +27,8 @@ export default async function NewAdminBookingPage() {
     getAppSettings(),
     getActiveDepartments(supabase),
   ]);
+  const defaultDate =
+    date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined;
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -51,6 +58,7 @@ export default async function NewAdminBookingPage() {
           users={users}
           settings={settings}
           departments={departments}
+          defaultDate={defaultDate}
         />
       </section>
     </main>

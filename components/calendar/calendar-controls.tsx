@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 
 import type { CalendarMonth } from "@/lib/calendar/date-range";
+import { buildCalendarHref } from "@/lib/calendar/selection";
 import type { BookingStatus } from "@/lib/bookings/queries";
 import type { CalendarViewMode } from "@/lib/calendar/visibility";
 import type { Facility } from "@/lib/facilities/queries";
@@ -11,43 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-function buildHref({
-  basePath,
-  month,
-  status,
-  facilityId,
-  view,
-}: {
-  basePath: string;
-  month: CalendarMonth;
-  status?: BookingStatus;
-  facilityId?: string;
-  view?: CalendarViewMode;
-}) {
-  const params = new URLSearchParams({
-    month: month.value,
-  });
-
-  if (view) {
-    params.set("view", view);
-  }
-
-  if (status) {
-    params.set("status", status);
-  }
-
-  if (facilityId) {
-    params.set("facilityId", facilityId);
-  }
-
-  return `${basePath}?${params.toString()}`;
-}
-
 export function CalendarControls({
   basePath,
   selectedMonth,
   selectedStatus,
   selectedFacilityId,
+  selectedDate,
   facilities,
   showFacilityFilter,
   selectedView,
@@ -58,6 +28,7 @@ export function CalendarControls({
   selectedMonth: CalendarMonth;
   selectedStatus?: BookingStatus;
   selectedFacilityId?: string;
+  selectedDate?: string;
   timezone?: string;
   facilities?: Facility[];
   showFacilityFilter?: boolean;
@@ -66,10 +37,21 @@ export function CalendarControls({
   /** Employee calendar uses quieter chrome than admin. */
   compact?: boolean;
 }) {
+  const hrefOptions = {
+    month: selectedMonth.value,
+    status: selectedStatus,
+    facilityId: selectedFacilityId,
+    view: selectedView,
+    date: selectedDate,
+  };
+
   if (compact) {
     return (
       <section aria-label="Calendar filters">
         <form className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          {selectedDate ? (
+            <input type="hidden" name="date" value={selectedDate} />
+          ) : null}
           <div className="grid min-w-0 flex-1 gap-1.5 sm:max-w-[12rem]">
             <label htmlFor="month" className="qbook-type-meta font-medium">
               Month
@@ -107,7 +89,7 @@ export function CalendarControls({
               className={buttonVariants({ size: "sm" })}
               type="submit"
             >
-              <CalendarDays data-icon="inline-start" />
+              <CalendarDays data-icon="inline-start" aria-hidden="true" />
               Apply
             </button>
             <Link
@@ -144,11 +126,8 @@ export function CalendarControls({
             className="grid grid-cols-2 gap-2 sm:flex"
           >
             <Link
-              href={buildHref({
-                basePath,
-                month: selectedMonth,
-                status: selectedStatus,
-                facilityId: selectedFacilityId,
+              href={buildCalendarHref(basePath, {
+                ...hrefOptions,
                 view: "my",
               })}
               className={buttonVariants({
@@ -160,11 +139,8 @@ export function CalendarControls({
               My bookings
             </Link>
             <Link
-              href={buildHref({
-                basePath,
-                month: selectedMonth,
-                status: selectedStatus,
-                facilityId: selectedFacilityId,
+              href={buildCalendarHref(basePath, {
+                ...hrefOptions,
                 view: "all",
               })}
               className={buttonVariants({
@@ -189,6 +165,9 @@ export function CalendarControls({
       >
         {selectedView ? (
           <input type="hidden" name="view" value={selectedView} />
+        ) : null}
+        {selectedDate ? (
+          <input type="hidden" name="date" value={selectedDate} />
         ) : null}
         <div className="grid gap-2">
           <label htmlFor="month" className="text-sm font-medium">
@@ -248,7 +227,7 @@ export function CalendarControls({
           className={buttonVariants({ size: "sm", className: "w-full md:w-auto" })}
           type="submit"
         >
-          <CalendarDays data-icon="inline-start" />
+          <CalendarDays data-icon="inline-start" aria-hidden="true" />
           Apply
         </button>
 

@@ -10,6 +10,11 @@ import {
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
 import {
+  buildCalendarHref,
+  getSelectedCalendarDay,
+  parseCalendarDateParam,
+} from "@/lib/calendar/selection";
+import {
   groupCalendarBookingsByDay,
   type CalendarBooking,
 } from "@/lib/calendar/group-bookings";
@@ -110,23 +115,15 @@ export default async function EmployeeCalendarPage({
   const calendarBookings = bookings.map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
-  const requestedDate = Array.isArray(params.date) ? params.date[0] : params.date;
-  const selectedDay =
-    days.find((day) => day.key === requestedDate) ??
-    days.find((day) => day.isToday) ??
-    days[0];
+  const requestedDate = parseCalendarDateParam(params.date);
+  const selectedDay = getSelectedCalendarDay(days, requestedDate);
   const selectedBookings = groupedBookings[selectedDay.key] ?? [];
-  const getDayHref = (dayKey: string) => {
-    const query = new URLSearchParams();
-
-    query.set("month", selectedMonth.value);
-    if (selectedStatus) {
-      query.set("status", selectedStatus);
-    }
-    query.set("date", dayKey);
-
-    return `/calendar?${query.toString()}`;
-  };
+  const getDayHref = (dayKey: string) =>
+    buildCalendarHref("/calendar", {
+      month: selectedMonth.value,
+      status: selectedStatus,
+      date: dayKey,
+    });
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
@@ -141,6 +138,7 @@ export default async function EmployeeCalendarPage({
           basePath="/calendar"
           selectedMonth={selectedMonth}
           selectedStatus={selectedStatus}
+          selectedDate={selectedDay.key}
           timezone={settings.defaultTimezone}
           compact
         />

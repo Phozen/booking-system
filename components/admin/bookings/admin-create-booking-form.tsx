@@ -34,11 +34,13 @@ export function AdminCreateBookingForm({
   users,
   settings,
   departments,
+  defaultDate,
 }: {
   facilities: Facility[];
   users: AdminBookingUserOption[];
   settings: AppSettings;
   departments: Department[];
+  defaultDate?: string;
 }) {
   const [state, formAction, isPending] = useActionState(
     adminCreateBookingAction,
@@ -102,7 +104,14 @@ export function AdminCreateBookingForm({
 
         <div className="grid gap-2">
           <Label htmlFor="date">Date</Label>
-          <Input id="date" name="date" type="date" disabled={isPending} required />
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            defaultValue={defaultDate}
+            disabled={isPending}
+            required
+          />
         </div>
 
         <div className="grid gap-2">

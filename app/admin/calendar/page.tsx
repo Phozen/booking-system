@@ -15,6 +15,11 @@ import {
   getCalendarMonthRange,
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
+import {
+  buildCalendarHref,
+  getSelectedCalendarDay,
+  parseCalendarDateParam,
+} from "@/lib/calendar/selection";
 import { parseCalendarViewMode } from "@/lib/calendar/visibility";
 import {
   groupCalendarBookingsByDay,
@@ -27,6 +32,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
 import { CalendarControls } from "@/components/calendar/calendar-controls";
+import { CalendarDayDetailPanel } from "@/components/calendar/calendar-day-detail-panel";
 import { MonthCalendarGrid } from "@/components/calendar/month-calendar-grid";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -111,6 +117,7 @@ export default async function AdminCalendarPage({
     status?: string | string[];
     facilityId?: string | string[];
     view?: string | string[];
+    date?: string | string[];
   }>;
 }) {
   const { user } = await requireAdmin();
@@ -154,19 +161,29 @@ export default async function AdminCalendarPage({
       : (bookings as AdminCalendarBooking[]).map(toCalendarBooking);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
+  const requestedDate = parseCalendarDateParam(params.date);
+  const selectedDay = getSelectedCalendarDay(days, requestedDate);
+  const selectedBookings = groupedBookings[selectedDay.key] ?? [];
+  const getDayHref = (dayKey: string) =>
+    buildCalendarHref("/admin/calendar", {
+      month: selectedMonth.value,
+      status: selectedStatus,
+      facilityId: selectedFacilityId,
+      view: selectedView,
+      date: dayKey,
+    });
+  const descriptionBase = selectedStatus
+    ? `Showing ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}.`
+    : selectedView === "my"
+      ? `Showing bookings you own or are invited to for ${selectedMonth.label}.`
+      : `Showing all bookings for ${selectedMonth.label}.`;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         eyebrow="Admin area"
         title="Booking Calendar"
-        description={
-          selectedStatus
-            ? `Showing ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-            : selectedView === "my"
-              ? `Showing bookings you own or are invited to for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-              : `Showing all bookings for ${selectedMonth.label}. Times use ${settings.defaultTimezone}.`
-        }
+        description={`${descriptionBase} Tap a day for details. Times use ${settings.defaultTimezone}.`}
       />
 
       <CalendarControls
@@ -174,6 +191,7 @@ export default async function AdminCalendarPage({
         selectedMonth={selectedMonth}
         selectedStatus={selectedStatus}
         selectedFacilityId={selectedFacilityId}
+        selectedDate={selectedDay.key}
         selectedView={selectedView}
         showViewToggle
         timezone={settings.defaultTimezone}
@@ -181,7 +199,19 @@ export default async function AdminCalendarPage({
         showFacilityFilter
       />
 
-      <MonthCalendarGrid days={days} groupedBookings={groupedBookings} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
+        <MonthCalendarGrid
+          days={days}
+          groupedBookings={groupedBookings}
+          selectedDate={selectedDay.key}
+          getDayHref={getDayHref}
+        />
+        <CalendarDayDetailPanel
+          day={selectedDay}
+          bookings={selectedBookings}
+          bookDayHref={`/admin/bookings/new?date=${encodeURIComponent(selectedDay.key)}`}
+        />
+      </div>
       <BookingAgendaList days={days} groupedBookings={groupedBookings} />
     </main>
   );

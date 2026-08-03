@@ -16,26 +16,42 @@ function formatDayPanelTitle(day: CalendarDay) {
 export function CalendarDayDetailPanel({
   day,
   bookings,
+  bookDayHref,
 }: {
   day: CalendarDay;
   bookings: CalendarBooking[];
+  bookDayHref?: string | null;
 }) {
+  const headingId = `calendar-day-${day.key}-heading`;
+  const resolvedBookDayHref =
+    bookDayHref === undefined
+      ? `/bookings/new?date=${encodeURIComponent(day.key)}`
+      : bookDayHref;
+  const showBookDayAction = resolvedBookDayHref !== null;
+
   return (
-    <aside className="hidden gap-4 self-start rounded-lg border border-border bg-card p-4 md:grid lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+    <aside
+      className="hidden gap-4 self-start rounded-lg border border-border bg-card p-4 md:grid lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
+      aria-labelledby={headingId}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="qbook-type-section">{formatDayPanelTitle(day)}</h2>
+          <h2 id={headingId} className="qbook-type-section">
+            {formatDayPanelTitle(day)}
+          </h2>
           <p className="qbook-type-meta mt-1 qbook-type-tabular">
             {bookings.length} booking{bookings.length === 1 ? "" : "s"}
           </p>
         </div>
-        <Link
-          href={`/bookings/new?date=${encodeURIComponent(day.key)}`}
-          className={buttonVariants({ size: "sm", className: "shrink-0" })}
-        >
-          <CalendarPlus data-icon="inline-start" />
-          Book this day
-        </Link>
+        {showBookDayAction ? (
+          <Link
+            href={resolvedBookDayHref}
+            className={buttonVariants({ size: "sm", className: "shrink-0" })}
+          >
+            <CalendarPlus data-icon="inline-start" aria-hidden="true" />
+            Book this day
+          </Link>
+        ) : null}
       </div>
 
       {bookings.length > 0 ? (
@@ -50,13 +66,15 @@ export function CalendarDayDetailPanel({
         <EmptyState
           title="No bookings on this day"
           action={
-            <Link
-              href={`/bookings/new?date=${encodeURIComponent(day.key)}`}
-              className={buttonVariants()}
-            >
-              <CalendarPlus data-icon="inline-start" />
-              Book this day
-            </Link>
+            showBookDayAction ? (
+              <Link
+                href={resolvedBookDayHref}
+                className={buttonVariants()}
+              >
+                <CalendarPlus data-icon="inline-start" aria-hidden="true" />
+                Book this day
+              </Link>
+            ) : undefined
           }
         />
       )}
