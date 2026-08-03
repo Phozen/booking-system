@@ -24,6 +24,7 @@ import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
 import { BookingUsageActions } from "@/components/admin/bookings/booking-usage-actions";
+import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
 function DetailItem({
@@ -59,42 +60,46 @@ export function AdminBookingDetail({
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <div>
-        <Link
-          href="/admin/bookings"
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-        >
-          <ArrowLeft data-icon="inline-start" />
-          Back to bookings
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Admin booking detail"
+        title={booking.title}
+        description={<BookingStatusBadge status={booking.status} />}
+        breadcrumbs={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Bookings", href: "/admin/bookings" },
+          { label: booking.title },
+        ]}
+        secondaryAction={
+          <Link
+            href="/admin/bookings"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to bookings
+          </Link>
+        }
+        primaryAction={
+          <Link
+            href={`/admin/bookings/${booking.id}/print`}
+            className={buttonVariants({
+              variant: "outline",
+              className: "w-full sm:w-auto",
+            })}
+          >
+            <Printer data-icon="inline-start" />
+            Print approval form
+          </Link>
+        }
+      />
 
-      <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            Admin booking detail
-          </p>
-          <h1 className="mt-1 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
-            {booking.title}
-          </h1>
-          <div className="mt-3">
-            <BookingStatusBadge status={booking.status} />
-          </div>
-        </div>
-        <Link
-          href={`/admin/bookings/${booking.id}/print`}
-          className={buttonVariants({
-            variant: "outline",
-            className: "w-full sm:w-auto",
-          })}
+      <section
+        aria-labelledby="admin-booking-information"
+        className="rounded-lg border bg-card p-5"
+      >
+        <h2
+          id="admin-booking-information"
+          className="text-lg font-semibold tracking-normal"
         >
-          <Printer data-icon="inline-start" />
-          Print approval form
-        </Link>
-      </header>
-
-      <section className="rounded-lg border bg-card p-5">
-        <h2 className="text-lg font-semibold tracking-normal">
           Booking information
         </h2>
         <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -264,11 +269,16 @@ export function AdminBookingDetail({
         </div>
       </section>
 
-      <section className="grid gap-5">
-        <h2 className="text-lg font-semibold tracking-normal">Admin actions</h2>
+      <section aria-labelledby="admin-booking-actions" className="grid gap-5">
+        <h2
+          id="admin-booking-actions"
+          className="text-lg font-semibold tracking-normal"
+        >
+          Admin actions
+        </h2>
 
         {booking.status === "pending" ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-6">
             <AdminBookingActionForm
               title="Approve booking"
               description="Re-checks active booking conflicts before confirming."
@@ -276,42 +286,52 @@ export function AdminBookingDetail({
               submitLabel="Approve booking"
               action={approveBookingAction.bind(null, booking.id)}
             />
-            <AdminBookingActionForm
-              title="Reject booking"
-              description="Rejects the pending request and queues a rejection email record."
-              label="Rejection remarks"
-              submitLabel="Reject booking"
-              variant="destructive"
-              action={rejectBookingAction.bind(null, booking.id)}
-              confirmation={{
-                title: "Reject this booking request?",
-                description:
-                  "The booking will be marked as rejected. The requester may receive a rejection notification, and the request cannot be approved afterward.",
-                confirmLabel: "Reject booking",
-                cancelLabel: "Keep pending",
-                pendingLabel: "Rejecting...",
-              }}
-            />
+            <div className="border-t border-border/70 pt-6">
+              <AdminBookingActionForm
+                title="Reject booking"
+                description="Rejects the pending request and queues a rejection email record."
+                label="Rejection remarks"
+                submitLabel="Reject booking"
+                variant="destructive"
+                action={rejectBookingAction.bind(null, booking.id)}
+                confirmation={{
+                  title: "Reject this booking request?",
+                  description:
+                    "The booking will be marked as rejected. The requester may receive a rejection notification, and the request cannot be approved afterward.",
+                  confirmLabel: "Reject booking",
+                  cancelLabel: "Keep pending",
+                  pendingLabel: "Rejecting...",
+                }}
+              />
+            </div>
           </div>
         ) : null}
 
         {isCancellableBooking(booking.status) ? (
-          <AdminBookingActionForm
-            title="Cancel booking"
-            description="Cancels this booking and queues a cancellation email record for the booking owner."
-            label="Cancellation reason"
-            submitLabel="Cancel booking"
-            variant="destructive"
-            action={adminCancelBookingAction.bind(null, booking.id)}
-            confirmation={{
-              title: "Cancel this user's booking?",
-              description:
-                "This cancels another user's booking. The requester may receive a cancellation notification, and the facility time may become available to others.",
-              confirmLabel: "Cancel booking",
-              cancelLabel: "Keep booking",
-              pendingLabel: "Cancelling...",
-            }}
-          />
+          <div
+            className={
+              booking.status === "pending"
+                ? "border-t border-border/70 pt-6"
+                : undefined
+            }
+          >
+            <AdminBookingActionForm
+              title="Cancel booking"
+              description="Cancels this booking and queues a cancellation email record for the booking owner."
+              label="Cancellation reason"
+              submitLabel="Cancel booking"
+              variant="destructive"
+              action={adminCancelBookingAction.bind(null, booking.id)}
+              confirmation={{
+                title: "Cancel this user's booking?",
+                description:
+                  "This cancels another user's booking. The requester may receive a cancellation notification, and the facility time may become available to others.",
+                confirmLabel: "Cancel booking",
+                cancelLabel: "Keep booking",
+                pendingLabel: "Cancelling...",
+              }}
+            />
+          </div>
         ) : null}
 
         {!isCancellableBooking(booking.status) ? (

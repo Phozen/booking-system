@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { FormStickyActions } from "@/components/shared/form-sticky-actions";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 function toDateTimeInputs(value: string, timeZone: string) {
@@ -288,7 +289,7 @@ export function BlockedPeriodForm({
 
       </fieldset>
 
-      <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <FormStickyActions>
         {blockedPeriod?.isActive ? (
           <ConfirmDialog
             triggerLabel="Deactivate"
@@ -317,7 +318,7 @@ export function BlockedPeriodForm({
             {blockedPeriod ? "Save blocked period" : "Create blocked period"}
           </PendingButtonContent>
         </Button>
-      </div>
+      </FormStickyActions>
     </form>
   );
 }

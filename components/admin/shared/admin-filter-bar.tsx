@@ -7,14 +7,21 @@ export function AdminFilterBar({
   description,
   children,
   className,
+  ariaLabel,
 }: {
   title?: ReactNode;
   description?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Overrides the default landmark label when `title` is not a string. */
+  ariaLabel?: string;
 }) {
+  const landmarkLabel =
+    typeof title === "string" ? title : (ariaLabel ?? "Filters");
+
   return (
     <section
+      aria-label={landmarkLabel}
       className={cn(
         "rounded-lg border border-border/70 bg-card/95 p-4 shadow-sm shadow-primary/5 ring-1 ring-primary/10",
         className,
@@ -26,9 +33,7 @@ export function AdminFilterBar({
             <h2 className="font-semibold tracking-normal">{title}</h2>
           ) : null}
           {description ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {description}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
       ) : null}

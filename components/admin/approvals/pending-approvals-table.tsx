@@ -1,10 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { CheckSquare, Mail } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Filter, RotateCcw } from "lucide-react";
 
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
+import type { Facility } from "@/lib/facilities/queries";
 import {
   formatBookingDate,
   formatBookingDateTime,
@@ -14,12 +12,13 @@ import {
   formatCateringServingTime,
   formatCateringType,
 } from "@/lib/bookings/catering/format";
+import { PendingApprovalRowActions } from "@/components/admin/approvals/pending-approval-row-actions";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 function formatCateringSummary(booking: AdminBooking) {
@@ -40,116 +39,172 @@ function formatCateringSummary(booking: AdminBooking) {
 
 export function PendingApprovalsTable({
   bookings,
+  facilities,
+  selectedFacilityId,
+  selectedDateFrom,
+  selectedDateTo,
+  selectedUserSearch,
 }: {
   bookings: AdminBooking[];
+  facilities: Facility[];
+  selectedFacilityId?: string;
+  selectedDateFrom?: string;
+  selectedDateTo?: string;
+  selectedUserSearch?: string;
 }) {
-  const [departmentId, setDepartmentId] = useState("all");
-  const departments = useMemo(
-    () => {
-      const byId = new Map<string, AdminBooking["departments"][number]>();
-      bookings.forEach((booking) => {
-        booking.departments.forEach((department) => byId.set(department.id, department));
-      });
-      return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
-    },
-    [bookings],
-  );
-  const visibleBookings = useMemo(
-    () =>
-      departmentId === "all"
-        ? bookings
-        : bookings.filter((booking) => booking.departments.some((department) => department.id === departmentId)),
-    [bookings, departmentId],
+  const hasActiveFilters = Boolean(
+    selectedFacilityId ||
+      selectedDateFrom ||
+      selectedDateTo ||
+      selectedUserSearch,
   );
 
   return (
     <div className="grid gap-5">
-      {departments.length > 0 ? (
-        <AdminFilterBar>
-          <div className="grid max-w-sm gap-2">
-            <Label htmlFor="approval-department-filter">Department</Label>
+      <AdminFilterBar title="Approval filters">
+        <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,260px)_minmax(0,160px)_minmax(0,160px)_minmax(0,220px)_auto_auto] xl:items-end [&>*]:min-w-0">
+          <div className="grid gap-2">
+            <label htmlFor="facilityId" className="text-sm font-medium">
+              Room
+            </label>
             <Select
-              id="approval-department-filter"
-              value={departmentId}
-              onChange={(event) => setDepartmentId(event.target.value)}
+              id="facilityId"
+              name="facilityId"
+              defaultValue={selectedFacilityId ?? "all"}
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <option value="all">All departments</option>
-              {departments.map((department) => (
-                <option key={department.id} value={department.id}>
-                  {department.name}
+              <option value="all">All rooms</option>
+              {facilities.map((facility) => (
+                <option key={facility.id} value={facility.id}>
+                  {facility.name} - {facility.level}
                 </option>
               ))}
             </Select>
           </div>
-        </AdminFilterBar>
-      ) : null}
-      <AdminTableShell
-      title="Approval queue"
-      mobileCards={
-        visibleBookings.length > 0 ? (
-          visibleBookings.map((booking) => (
-            <MobileRecordCard
-              key={booking.id}
-              eyebrow="Pending room request"
-              title={booking.title}
-              rows={[
-                {
-                  label: "Room",
-                  value: booking.facility
-                    ? `${booking.facility.name}, ${booking.facility.level}`
-                    : "Room unavailable",
-                },
-                {
-                  label: "Requester",
-                  value:
-                    booking.user?.fullName || booking.user?.email || "Unknown",
-                },
-                {
-                  label: "Date and time",
-                  value: `${formatBookingDate(booking.startsAt)} - ${formatBookingWindow(
-                    booking.startsAt,
-                    booking.endsAt,
-                  )}`,
-                },
-                {
-                  label: "Requested",
-                  value: formatBookingDateTime(booking.createdAt),
-                },
-                {
-                  label: "Catering",
-                  value: formatCateringSummary(booking),
-                },
-                {
-                  label: "Departments",
-                  value:
-                    booking.departments.length > 0
-                      ? booking.departments.map((department) => department.name).join(", ")
-                      : "None tagged",
-                },
-              ]}
-              actions={
-                <Link
-                  href={`/admin/bookings/${booking.id}`}
-                  className={buttonVariants({
-                    variant: "outline",
-                    size: "sm",
-                  })}
-                >
-                  <CheckSquare data-icon="inline-start" />
-                  Review request
-                </Link>
-              }
+
+          <div className="grid gap-2">
+            <label htmlFor="dateFrom" className="text-sm font-medium">
+              From date
+            </label>
+            <Input
+              id="dateFrom"
+              name="dateFrom"
+              type="date"
+              defaultValue={selectedDateFrom ?? ""}
+              className="h-10"
             />
-          ))
-        ) : (
-          <EmptyState
-            className="bg-transparent"
-            title="No pending approvals"
-          />
-        )
-      }
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="dateTo" className="text-sm font-medium">
+              To date
+            </label>
+            <Input
+              id="dateTo"
+              name="dateTo"
+              type="date"
+              defaultValue={selectedDateTo ?? ""}
+              className="h-10"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="q" className="text-sm font-medium">
+              User / email
+            </label>
+            <Input
+              id="q"
+              name="q"
+              type="search"
+              placeholder="Name or email"
+              defaultValue={selectedUserSearch ?? ""}
+              className="h-10"
+            />
+          </div>
+
+          <button
+            className={buttonVariants({
+              variant: "outline",
+              className: "w-full md:w-auto",
+            })}
+            type="submit"
+          >
+            <Filter data-icon="inline-start" />
+            Apply filters
+          </button>
+          {hasActiveFilters ? (
+            <Link
+              href="/admin/approvals"
+              className={buttonVariants({
+                variant: "ghost",
+                className: "w-full md:w-auto",
+              })}
+            >
+              <RotateCcw data-icon="inline-start" />
+              Clear filters
+            </Link>
+          ) : null}
+        </form>
+      </AdminFilterBar>
+
+      <AdminTableShell
+        title="Approval queue"
+        mobileCards={
+          bookings.length > 0 ? (
+            bookings.map((booking) => (
+              <MobileRecordCard
+                key={booking.id}
+                eyebrow="Pending room request"
+                title={booking.title}
+                rows={[
+                  {
+                    label: "Room",
+                    value: booking.facility
+                      ? `${booking.facility.name}, ${booking.facility.level}`
+                      : "Room unavailable",
+                  },
+                  {
+                    label: "Requester",
+                    value:
+                      booking.user?.fullName || booking.user?.email || "Unknown",
+                  },
+                  {
+                    label: "Date and time",
+                    value: `${formatBookingDate(booking.startsAt)} - ${formatBookingWindow(
+                      booking.startsAt,
+                      booking.endsAt,
+                    )}`,
+                  },
+                  {
+                    label: "Requested",
+                    value: formatBookingDateTime(booking.createdAt),
+                  },
+                  {
+                    label: "Catering",
+                    value: formatCateringSummary(booking),
+                  },
+                  {
+                    label: "Departments",
+                    value:
+                      booking.departments.length > 0
+                        ? booking.departments
+                            .map((department) => department.name)
+                            .join(", ")
+                        : "None tagged",
+                  },
+                ]}
+                actions={<PendingApprovalRowActions bookingId={booking.id} />}
+              />
+            ))
+          ) : (
+            <EmptyState
+              className="bg-transparent"
+              title="No pending approvals."
+            />
+          )
+        }
       >
-      <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
@@ -160,12 +215,14 @@ export function PendingApprovalsTable({
               <th className="px-4 py-3 font-medium">Requested</th>
               <th className="px-4 py-3 font-medium">Catering</th>
               <th className="px-4 py-3 font-medium">Departments</th>
-              <th className="px-4 py-3 text-right font-medium">Review</th>
+              <th className="sticky right-0 border-l bg-muted/60 px-4 py-3 text-right font-medium">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            {visibleBookings.length > 0 ? (
-              visibleBookings.map((booking) => (
+            {bookings.length > 0 ? (
+              bookings.map((booking) => (
                 <tr key={booking.id} className="border-t">
                   <td className="px-4 py-3 font-medium">{booking.title}</td>
                   <td className="px-4 py-3">
@@ -185,52 +242,31 @@ export function PendingApprovalsTable({
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatBookingDateTime(booking.createdAt)}
                   </td>
-                  <td className="px-4 py-3">
-                    {formatCateringSummary(booking)}
-                  </td>
+                  <td className="px-4 py-3">{formatCateringSummary(booking)}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {booking.departments.length > 0
-                      ? booking.departments.map((department) => (
-                        <a
-                          key={department.id}
-                          href={`mailto:${department.email}`}
-                          className="mr-2 inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                        >
-                          <Mail className="size-3" aria-hidden="true" />
-                          {department.name}
-                        </a>
-                      ))
+                      ? booking.departments
+                          .map((department) => department.name)
+                          .join(", ")
                       : "-"}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/bookings/${booking.id}`}
-                      className={buttonVariants({
-                        variant: "outline",
-                        size: "sm",
-                      })}
-                    >
-                      <CheckSquare data-icon="inline-start" />
-                      Review
-                    </Link>
+                  <td className="sticky right-0 border-l bg-background px-4 py-3 text-right">
+                    <PendingApprovalRowActions bookingId={booking.id} />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  className="px-4 py-8"
-                  colSpan={9}
-                >
+                <td className="px-4 py-8" colSpan={9}>
                   <EmptyState
                     className="border-0 bg-transparent py-4"
-                    title="No pending approvals"
+                    title="No pending approvals."
                   />
                 </td>
               </tr>
             )}
           </tbody>
-      </table>
+        </table>
       </AdminTableShell>
     </div>
   );

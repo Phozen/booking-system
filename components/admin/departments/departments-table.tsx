@@ -19,10 +19,11 @@ export function DepartmentsTable({
   filters: DepartmentFilterValues;
 }) {
   return (
-    <AdminTableShell
-      title="Departments"
-      filters={<DepartmentFilters filters={filters} />}
-      mobileCards={
+    <div className="grid gap-5">
+      <DepartmentFilters filters={filters} />
+      <AdminTableShell
+        title="Departments"
+        mobileCards={
         departments.length > 0 ? (
           departments.map((department) => (
             <MobileRecordCard
@@ -74,5 +75,6 @@ export function DepartmentsTable({
         </tbody>
       </table>
     </AdminTableShell>
+    </div>
   );
 }

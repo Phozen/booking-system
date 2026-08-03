@@ -28,10 +28,11 @@ export function UsersTable({
   filters: UserFilterValues;
 }) {
   return (
-    <AdminTableShell
-      title="Users"
-      filters={<UserFilters filters={filters} />}
-      mobileCards={
+    <div className="grid gap-5">
+      <UserFilters filters={filters} />
+      <AdminTableShell
+        title="Users"
+        mobileCards={
         users.length > 0 ? (
           users.map((user) => (
             <MobileRecordCard
@@ -134,6 +135,7 @@ export function UsersTable({
           )}
         </tbody>
       </table>
-    </AdminTableShell>
+      </AdminTableShell>
+    </div>
   );
 }

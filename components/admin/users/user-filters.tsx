@@ -10,6 +10,7 @@ import {
   userRoleOptions,
   userStatusOptions,
 } from "@/lib/admin/users/validation";
+import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -31,11 +32,12 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
   }
 
   return (
-    <form
-      key={filterKey}
-      action="/admin/users"
-      className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
-    >
+    <AdminFilterBar title="User filters">
+      <form
+        key={filterKey}
+        action="/admin/users"
+        className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
+      >
         <div className="grid gap-2">
           <label htmlFor="search" className="text-sm font-medium">
             Search
@@ -104,6 +106,7 @@ export function UserFilters({ filters }: { filters: UserFilters }) {
           <RotateCcw data-icon="inline-start" />
           Clear
         </button>
-    </form>
+      </form>
+    </AdminFilterBar>
   );
 }

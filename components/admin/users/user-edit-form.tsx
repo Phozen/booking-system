@@ -25,6 +25,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { FormStickyActions } from "@/components/shared/form-sticky-actions";
 import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -216,9 +217,14 @@ export function UserEditForm({
 
       <fieldset disabled={isPending} className="m-0 grid gap-6 border-0 p-0">
         <legend className="sr-only">User profile and access controls</legend>
-      <section className="grid gap-4">
+      <section aria-labelledby="user-profile-heading" className="grid gap-4">
         <div>
-          <h3 className="text-sm font-semibold tracking-normal">Profile fields</h3>
+          <h3
+            id="user-profile-heading"
+            className="text-sm font-semibold tracking-normal"
+          >
+            Profile fields
+          </h3>
           <p className="mt-1 text-sm text-muted-foreground">
             These optional fields help admins identify employees in booking and
             report views.
@@ -278,9 +284,17 @@ export function UserEditForm({
         </div>
       </section>
 
-      <section className="grid gap-4 border-t pt-5">
+      <section
+        aria-labelledby="user-access-heading"
+        className="grid gap-4 border-t pt-5"
+      >
         <div>
-          <h3 className="text-sm font-semibold tracking-normal">Access controls</h3>
+          <h3
+            id="user-access-heading"
+            className="text-sm font-semibold tracking-normal"
+          >
+            Access controls
+          </h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Role controls admin access. Status controls whether the user can
             access protected pages.
@@ -349,7 +363,7 @@ export function UserEditForm({
 
       </fieldset>
 
-      <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <FormStickyActions>
         <ConfirmDialog
           triggerLabel={isPending ? "Saving..." : confirmCopy.triggerLabel}
           title={confirmCopy.title}
@@ -367,7 +381,7 @@ export function UserEditForm({
           triggerClassName="w-full sm:w-auto"
           onConfirm={() => formRef.current?.requestSubmit()}
         />
-      </div>
+      </FormStickyActions>
     </form>
   );
 }

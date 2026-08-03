@@ -94,6 +94,14 @@ type AdminBookingRecord = {
 export type AdminBookingFilters = {
   facilityId?: string;
   status?: BookingStatus;
+  /** YYYY-MM-DD inclusive start for booking start time */
+  dateFrom?: string;
+  /** YYYY-MM-DD inclusive end for booking start time */
+  dateTo?: string;
+  /** Matches requester email or full name (post-query filter) */
+  userSearch?: string;
+  /** Facility level exact match (post-query filter) */
+  level?: string;
 };
 
 export type AdminBookingUserOption = {
@@ -301,15 +309,42 @@ export async function getAdminBookings(
     query = query.eq("facility_id", filters.facilityId);
   }
 
+  if (filters.dateFrom) {
+    query = query.gte("starts_at", `${filters.dateFrom}T00:00:00.000Z`);
+  }
+
+  if (filters.dateTo) {
+    query = query.lte("starts_at", `${filters.dateTo}T23:59:59.999Z`);
+  }
+
   const { data, error } = await query;
 
   if (error) {
     throw new Error("Unable to load bookings.");
   }
 
-  return ((data as unknown as AdminBookingRecord[] | null) ?? []).map(
+  let bookings = ((data as unknown as AdminBookingRecord[] | null) ?? []).map(
     mapAdminBooking,
   );
+
+  if (filters.level) {
+    bookings = bookings.filter(
+      (booking) => booking.facility?.level === filters.level,
+    );
+  }
+
+  if (filters.userSearch) {
+    const needle = filters.userSearch.trim().toLowerCase();
+    if (needle) {
+      bookings = bookings.filter((booking) => {
+        const email = booking.user?.email?.toLowerCase() ?? "";
+        const name = booking.user?.fullName?.toLowerCase() ?? "";
+        return email.includes(needle) || name.includes(needle);
+      });
+    }
+  }
+
+  return bookings;
 }
 
 export async function getAdminBookingById(
@@ -329,21 +364,58 @@ export async function getAdminBookingById(
   return data ? mapAdminBooking(data as unknown as AdminBookingRecord) : null;
 }
 
-export async function getPendingApprovalBookings(supabase: SupabaseClient) {
-  const { data, error } = await supabase
+export type PendingApprovalFilters = {
+  facilityId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  userSearch?: string;
+};
+
+export async function getPendingApprovalBookings(
+  supabase: SupabaseClient,
+  filters: PendingApprovalFilters = {},
+) {
+  let query = supabase
     .from("bookings")
     .select(adminBookingSelect)
     .eq("status", "pending")
     .eq("approval_required", true)
     .order("starts_at", { ascending: true });
 
+  if (filters.facilityId) {
+    query = query.eq("facility_id", filters.facilityId);
+  }
+
+  if (filters.dateFrom) {
+    query = query.gte("starts_at", `${filters.dateFrom}T00:00:00.000Z`);
+  }
+
+  if (filters.dateTo) {
+    query = query.lte("starts_at", `${filters.dateTo}T23:59:59.999Z`);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
     throw new Error("Unable to load pending approvals.");
   }
 
-  return ((data as unknown as AdminBookingRecord[] | null) ?? []).map(
+  let bookings = ((data as unknown as AdminBookingRecord[] | null) ?? []).map(
     mapAdminBooking,
   );
+
+  if (filters.userSearch) {
+    const needle = filters.userSearch.trim().toLowerCase();
+    if (needle) {
+      bookings = bookings.filter((booking) => {
+        const email = booking.user?.email?.toLowerCase() ?? "";
+        const name = booking.user?.fullName?.toLowerCase() ?? "";
+        return email.includes(needle) || name.includes(needle);
+      });
+    }
+  }
+
+  return bookings;
 }
 
 export async function getActiveBookingUserOptions(supabase: SupabaseClient) {

@@ -181,12 +181,45 @@ function mapEmailNotification(
   };
 }
 
-export async function getAdminEmailNotifications(supabase: SupabaseClient) {
-  const { data, error } = await supabase
+export type AdminEmailNotificationFilters = {
+  status?: EmailNotificationStatus;
+  type?: EmailNotificationType;
+  dateFrom?: string;
+  dateTo?: string;
+  recipient?: string;
+};
+
+export async function getAdminEmailNotifications(
+  supabase: SupabaseClient,
+  filters: AdminEmailNotificationFilters = {},
+) {
+  let query = supabase
     .from("email_notifications")
     .select(emailNotificationSelect)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  if (filters.type) {
+    query = query.eq("type", filters.type);
+  }
+
+  if (filters.dateFrom) {
+    query = query.gte("created_at", `${filters.dateFrom}T00:00:00.000Z`);
+  }
+
+  if (filters.dateTo) {
+    query = query.lte("created_at", `${filters.dateTo}T23:59:59.999Z`);
+  }
+
+  if (filters.recipient) {
+    query = query.ilike("recipient_email", `%${filters.recipient}%`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error("Unable to load email notifications.");

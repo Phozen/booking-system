@@ -31,6 +31,7 @@ import {
 } from "@/components/shared/form-field-error";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { FormStickyActions } from "@/components/shared/form-sticky-actions";
 import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
@@ -339,20 +340,20 @@ export function FacilityForm({ facility }: { facility?: Facility }) {
         </FormFieldError>
       </div>
 
-        <div className="grid gap-3 border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push("/admin/facilities")}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isPending}>
-          <PendingButtonContent pending={isPending} pendingLabel="Saving...">
-            {facility ? "Save facility" : "Create facility"}
-          </PendingButtonContent>
-        </Button>
-        </div>
+        <FormStickyActions>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/facilities")}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            <PendingButtonContent pending={isPending} pendingLabel="Saving...">
+              {facility ? "Save facility" : "Create facility"}
+            </PendingButtonContent>
+          </Button>
+        </FormStickyActions>
       </fieldset>
     </form>
   );

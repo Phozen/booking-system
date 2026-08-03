@@ -25,6 +25,7 @@ import {
   getFieldDescribedBy,
 } from "@/components/shared/form-field-error";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
+import { FormStickyActions } from "@/components/shared/form-sticky-actions";
 import { showFormValidationError } from "@/components/shared/form-validation-toast";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
@@ -137,9 +138,14 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
       <fieldset disabled={isPending} className="m-0 grid gap-6 border-0 p-0">
         <legend className="sr-only">System settings</legend>
-      <section className="grid gap-5 rounded-lg border bg-card p-5">
+      <section
+        aria-labelledby="settings-identity-heading"
+        className="grid gap-5 rounded-lg border bg-card p-5"
+      >
         <div>
-          <h2 className="font-semibold tracking-normal">Identity</h2>
+          <h2 id="settings-identity-heading" className="font-semibold tracking-normal">
+            Identity
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Names and contact details shown across the internal app.
           </p>
@@ -204,9 +210,17 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </div>
       </section>
 
-      <section className="grid gap-5 rounded-lg border bg-card p-5">
+      <section
+        aria-labelledby="settings-microsoft-heading"
+        className="grid gap-5 rounded-lg border bg-card p-5"
+      >
         <div>
-          <h2 className="font-semibold tracking-normal">Company Microsoft access</h2>
+          <h2
+            id="settings-microsoft-heading"
+            className="font-semibold tracking-normal"
+          >
+            Company Microsoft access
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Control which Microsoft email domains can access Qbook.
           </p>
@@ -252,9 +266,14 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </div>
       </section>
 
-      <section className="grid gap-5 rounded-lg border bg-card p-5">
+      <section
+        aria-labelledby="settings-booking-heading"
+        className="grid gap-5 rounded-lg border bg-card p-5"
+      >
         <div>
-          <h2 className="font-semibold tracking-normal">Booking behavior</h2>
+          <h2 id="settings-booking-heading" className="font-semibold tracking-normal">
+            Booking behavior
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Configure approval defaults and facility-level override behavior.
           </p>
@@ -333,9 +352,14 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </div>
       </section>
 
-      <section className="grid gap-5 rounded-lg border bg-card p-5">
+      <section
+        aria-labelledby="settings-time-heading"
+        className="grid gap-5 rounded-lg border bg-card p-5"
+      >
         <div>
-          <h2 className="font-semibold tracking-normal">Time and reminders</h2>
+          <h2 id="settings-time-heading" className="font-semibold tracking-normal">
+            Time and reminders
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Defaults used for display and future reminder scheduling.
           </p>
@@ -433,9 +457,14 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         </div>
       </section>
 
-      <section className="grid gap-5 rounded-lg border bg-card p-5">
+      <section
+        aria-labelledby="settings-email-heading"
+        className="grid gap-5 rounded-lg border bg-card p-5"
+      >
         <div>
-          <h2 className="font-semibold tracking-normal">Email recipients</h2>
+          <h2 id="settings-email-heading" className="font-semibold tracking-normal">
+            Email recipients
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Choose which active roles receive each operational email. These
             controls do not change in-app notifications or department mailbox
@@ -481,13 +510,13 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
 
       </fieldset>
 
-      <div className="grid border-t pt-5 sm:flex sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+      <FormStickyActions>
         <Button type="submit" disabled={isPending}>
           <PendingButtonContent pending={isPending} pendingLabel="Saving...">
             Save settings
           </PendingButtonContent>
         </Button>
-      </div>
+      </FormStickyActions>
     </form>
   );
 }

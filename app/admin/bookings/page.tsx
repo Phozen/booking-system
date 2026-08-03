@@ -16,6 +16,8 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
 function parseStatus(value: string | undefined): BookingStatus | undefined {
   if (!value || value === "all") {
     return undefined;
@@ -28,13 +30,31 @@ function parseStatus(value: string | undefined): BookingStatus | undefined {
     : undefined;
 }
 
+function parseDate(value: string | undefined) {
+  return value && datePattern.test(value) ? value : undefined;
+}
+
 export default async function AdminBookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; facilityId?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    facilityId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    q?: string;
+    level?: string;
+  }>;
 }) {
   await requireAdmin();
-  const { status, facilityId } = await searchParams;
+  const {
+    status,
+    facilityId,
+    dateFrom,
+    dateTo,
+    q,
+    level,
+  } = await searchParams;
   const supabase = await createClient();
   const facilities = await getAdminFacilities(supabase);
   const selectedStatus = parseStatus(status);
@@ -44,9 +64,24 @@ export default async function AdminBookingsPage({
     facilities.some((item) => item.id === facilityId)
       ? facilityId
       : undefined;
+  const selectedDateFrom = parseDate(dateFrom);
+  const selectedDateTo = parseDate(dateTo);
+  const selectedUserSearch = q?.trim() || undefined;
+  const levelOptions = [
+    ...new Set(facilities.map((facility) => facility.level).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b));
+  const selectedLevel =
+    level && level !== "all" && levelOptions.includes(level)
+      ? level
+      : undefined;
+
   const filters: AdminBookingFilters = {
     status: selectedStatus,
     facilityId: selectedFacilityId,
+    dateFrom: selectedDateFrom,
+    dateTo: selectedDateTo,
+    userSearch: selectedUserSearch,
+    level: selectedLevel,
   };
   const bookings = await getAdminBookings(supabase, filters);
 
@@ -69,8 +104,13 @@ export default async function AdminBookingsPage({
       <AdminBookingsTable
         bookings={bookings}
         facilities={facilities}
+        levelOptions={levelOptions}
         selectedStatus={selectedStatus}
         selectedFacilityId={selectedFacilityId}
+        selectedDateFrom={selectedDateFrom}
+        selectedDateTo={selectedDateTo}
+        selectedUserSearch={selectedUserSearch}
+        selectedLevel={selectedLevel}
       />
     </main>
   );

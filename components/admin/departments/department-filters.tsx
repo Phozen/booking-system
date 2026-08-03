@@ -4,6 +4,7 @@ import { Filter, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { departmentStatusOptions, type DepartmentFilters } from "@/lib/admin/departments/validation";
+import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -17,11 +18,12 @@ export function DepartmentFilters({ filters }: { filters: DepartmentFilters }) {
   }
 
   return (
-    <form
-      key={filterKey}
-      action="/admin/departments"
-      className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
-    >
+    <AdminFilterBar title="Department filters">
+      <form
+        key={filterKey}
+        action="/admin/departments"
+        className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto_auto] md:items-end [&>*]:min-w-0"
+      >
       <div className="grid gap-2">
         <label htmlFor="search" className="text-sm font-medium">Search</label>
         <Input
@@ -55,6 +57,7 @@ export function DepartmentFilters({ filters }: { filters: DepartmentFilters }) {
         <RotateCcw data-icon="inline-start" />
         Clear
       </button>
-    </form>
+      </form>
+    </AdminFilterBar>
   );
 }

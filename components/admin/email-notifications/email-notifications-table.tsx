@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Filter, RotateCcw } from "lucide-react";
 
 import {
   processQueuedEmailNotificationsAction,
@@ -10,8 +11,12 @@ import {
   type EmailNotificationsActionResult,
 } from "@/lib/admin/email-notifications/actions";
 import type { AdminEmailNotification } from "@/lib/admin/email-notifications/queries";
-import type { EmailNotificationType } from "@/lib/email/types";
+import type {
+  EmailNotificationStatus,
+  EmailNotificationType,
+} from "@/lib/email/types";
 import { formatBookingDateTime } from "@/lib/bookings/format";
+import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,6 +25,28 @@ import { buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+
+const emailStatusOptions: EmailNotificationStatus[] = [
+  "queued",
+  "sending",
+  "sent",
+  "failed",
+  "cancelled",
+];
+
+const emailTypeOptions: EmailNotificationType[] = [
+  "booking_confirmation",
+  "booking_approval",
+  "booking_rejection",
+  "booking_cancellation",
+  "booking_catering_request",
+  "booking_reminder",
+  "booking_invitation",
+  "booking_invitation_accepted",
+  "booking_invitation_declined",
+];
 
 function formatNotificationType(type: EmailNotificationType) {
   const labels: Record<EmailNotificationType, string> = {
@@ -61,13 +88,30 @@ function formatProvider(provider: string | null) {
 
 export function EmailNotificationsTable({
   notifications,
+  selectedStatus,
+  selectedType,
+  selectedDateFrom,
+  selectedDateTo,
+  selectedRecipient,
 }: {
   notifications: AdminEmailNotification[];
+  selectedStatus?: EmailNotificationStatus;
+  selectedType?: EmailNotificationType;
+  selectedDateFrom?: string;
+  selectedDateTo?: string;
+  selectedRecipient?: string;
 }) {
   const [result, setResult] = useState<EmailNotificationsActionResult | null>(
     null,
   );
   const [isPending, setIsPending] = useState(false);
+  const hasActiveFilters = Boolean(
+    selectedStatus ||
+      selectedType ||
+      selectedDateFrom ||
+      selectedDateTo ||
+      selectedRecipient,
+  );
 
   async function runAction(action: "process" | "retry" | "reminders") {
     setIsPending(true);
@@ -143,6 +187,106 @@ export function EmailNotificationsTable({
         </Alert>
       ) : null}
 
+      <AdminFilterBar title="Notification filters">
+        <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,160px)_minmax(0,220px)_minmax(0,150px)_minmax(0,150px)_minmax(0,220px)_auto_auto] xl:items-end [&>*]:min-w-0">
+          <div className="grid gap-2">
+            <label htmlFor="status" className="text-sm font-medium">
+              Status
+            </label>
+            <Select
+              id="status"
+              name="status"
+              defaultValue={selectedStatus ?? "all"}
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="all">All statuses</option>
+              {emailStatusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="type" className="text-sm font-medium">
+              Type
+            </label>
+            <Select
+              id="type"
+              name="type"
+              defaultValue={selectedType ?? "all"}
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="all">All types</option>
+              {emailTypeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {formatNotificationType(type)}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="dateFrom" className="text-sm font-medium">
+              From date
+            </label>
+            <Input
+              id="dateFrom"
+              name="dateFrom"
+              type="date"
+              defaultValue={selectedDateFrom ?? ""}
+              className="h-10"
+            />
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="dateTo" className="text-sm font-medium">
+              To date
+            </label>
+            <Input
+              id="dateTo"
+              name="dateTo"
+              type="date"
+              defaultValue={selectedDateTo ?? ""}
+              className="h-10"
+            />
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="recipient" className="text-sm font-medium">
+              Recipient
+            </label>
+            <Input
+              id="recipient"
+              name="recipient"
+              type="search"
+              placeholder="Email contains"
+              defaultValue={selectedRecipient ?? ""}
+              className="h-10"
+            />
+          </div>
+          <button
+            type="submit"
+            className={buttonVariants({
+              variant: "outline",
+              className: "w-full md:w-auto",
+            })}
+          >
+            <Filter data-icon="inline-start" />
+            Apply filters
+          </button>
+          {hasActiveFilters ? (
+            <Link
+              href="/admin/email-notifications"
+              className={buttonVariants({
+                variant: "ghost",
+                className: "w-full md:w-auto",
+              })}
+            >
+              <RotateCcw data-icon="inline-start" />
+              Clear filters
+            </Link>
+          ) : null}
+        </form>
+      </AdminFilterBar>
+
       <AdminTableShell
         title="Notification records"
         mobileCards={
@@ -200,7 +344,9 @@ export function EmailNotificationsTable({
                     label: "Email preview",
                     value: (
                       <details className="max-w-xl">
-                        <summary className="cursor-pointer font-medium text-primary">View rendered email</summary>
+                        <summary className="cursor-pointer font-medium text-primary">
+                          View rendered email
+                        </summary>
                         <pre className="mt-2 whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-xs text-foreground">
                           {notification.previewText}
                         </pre>
@@ -218,99 +364,98 @@ export function EmailNotificationsTable({
           )
         }
       >
-          <table className="w-full min-w-[1560px] border-collapse text-left text-sm">
-            <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Recipient</th>
-                <th className="px-4 py-3 font-medium">Subject</th>
-                <th className="px-4 py-3 font-medium">Related booking</th>
-                <th className="px-4 py-3 font-medium">Attempts</th>
-                <th className="px-4 py-3 font-medium">Provider</th>
-                <th className="px-4 py-3 font-medium">Scheduled</th>
-                <th className="px-4 py-3 font-medium">Sent</th>
-                <th className="px-4 py-3 font-medium">Last error</th>
-                <th className="px-4 py-3 font-medium">Preview</th>
-                <th className="px-4 py-3 font-medium">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <tr key={notification.id} className="border-t">
-                    <td className="px-4 py-3">
-                      {formatNotificationType(notification.type)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge kind="email" status={notification.status} />
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {notification.recipientEmail}
-                    </td>
-                    <td className="max-w-[280px] truncate px-4 py-3 font-medium">
-                      {notification.subject}
-                    </td>
-                    <td className="px-4 py-3">
-                      {notification.booking ? (
-                        <Link
-                          href={`/admin/bookings/${notification.booking.id}`}
-                          className={buttonVariants({
-                            variant: "link",
-                            size: "sm",
-                          })}
-                        >
-                          {notification.booking.title}
-                        </Link>
-                      ) : (
-                        <span className="text-muted-foreground">None</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {notification.attempts}/{notification.maxAttempts}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {formatProvider(notification.provider)}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {formatBookingDateTime(notification.scheduledFor)}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {notification.sentAt
-                        ? formatBookingDateTime(notification.sentAt)
-                        : "Not sent"}
-                    </td>
-                    <td className="max-w-[300px] truncate px-4 py-3 text-muted-foreground">
-                      {notification.lastError || "None"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <details className="min-w-72">
-                        <summary className="cursor-pointer font-medium text-primary">View email</summary>
-                        <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-xs text-foreground">
-                          {notification.previewText}
-                        </pre>
-                      </details>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {formatBookingDateTime(notification.createdAt)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    className="px-4 py-8"
-                    colSpan={12}
-                  >
-                    <EmptyState
-                      className="border-0 bg-transparent py-4"
-                      title="No email notifications found"
-                    />
+        <table className="w-full min-w-[1560px] border-collapse text-left text-sm">
+          <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 font-medium">Type</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Recipient</th>
+              <th className="px-4 py-3 font-medium">Subject</th>
+              <th className="px-4 py-3 font-medium">Related booking</th>
+              <th className="px-4 py-3 font-medium">Attempts</th>
+              <th className="px-4 py-3 font-medium">Provider</th>
+              <th className="px-4 py-3 font-medium">Scheduled</th>
+              <th className="px-4 py-3 font-medium">Sent</th>
+              <th className="px-4 py-3 font-medium">Last error</th>
+              <th className="px-4 py-3 font-medium">Preview</th>
+              <th className="px-4 py-3 font-medium">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <tr key={notification.id} className="border-t">
+                  <td className="px-4 py-3">
+                    {formatNotificationType(notification.type)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge kind="email" status={notification.status} />
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {notification.recipientEmail}
+                  </td>
+                  <td className="max-w-[280px] truncate px-4 py-3 font-medium">
+                    {notification.subject}
+                  </td>
+                  <td className="px-4 py-3">
+                    {notification.booking ? (
+                      <Link
+                        href={`/admin/bookings/${notification.booking.id}`}
+                        className={buttonVariants({
+                          variant: "link",
+                          size: "sm",
+                        })}
+                      >
+                        {notification.booking.title}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">None</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {notification.attempts}/{notification.maxAttempts}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatProvider(notification.provider)}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatBookingDateTime(notification.scheduledFor)}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {notification.sentAt
+                      ? formatBookingDateTime(notification.sentAt)
+                      : "Not sent"}
+                  </td>
+                  <td className="max-w-[300px] truncate px-4 py-3 text-muted-foreground">
+                    {notification.lastError || "None"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <details className="min-w-72">
+                      <summary className="cursor-pointer font-medium text-primary">
+                        View email
+                      </summary>
+                      <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-xs text-foreground">
+                        {notification.previewText}
+                      </pre>
+                    </details>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatBookingDateTime(notification.createdAt)}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              ))
+            ) : (
+              <tr>
+                <td className="px-4 py-8" colSpan={12}>
+                  <EmptyState
+                    className="border-0 bg-transparent py-4"
+                    title="No email notifications found"
+                  />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </AdminTableShell>
     </div>
   );
