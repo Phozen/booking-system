@@ -40,6 +40,7 @@ auth-state*.json
 # misc
 .DS_Store
 *.pem
+.cursor/checkpoints/
 
 # debug
 npm-debug.log*
