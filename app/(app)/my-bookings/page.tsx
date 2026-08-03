@@ -15,10 +15,10 @@ export const dynamic = "force-dynamic";
 export default async function MyBookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; highlight?: string }>;
 }) {
   const { user } = await requireUser();
-  const { created } = await searchParams;
+  const { created, highlight } = await searchParams;
   const supabase = await createClient();
   const [bookings, invitationSummary] = await Promise.all([
     getMyBookings(supabase, user.id),
@@ -31,7 +31,7 @@ export default async function MyBookingsPage({
       <PageHeader
         eyebrow="Your bookings"
         title="My bookings"
-        description="Rooms you have already booked."
+        description="Review pending requests, upcoming rooms, and past bookings."
         primaryAction={
           <Link href="/bookings/new" className={buttonVariants({ size: "lg" })}>
             <CalendarPlus data-icon="inline-start" />
@@ -43,6 +43,7 @@ export default async function MyBookingsPage({
       <MyBookingsList
         groupedBookings={groupedBookings}
         created={created === "1"}
+        highlightId={highlight}
         invitationSummary={invitationSummary}
       />
     </main>

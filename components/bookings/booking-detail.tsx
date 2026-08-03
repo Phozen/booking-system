@@ -174,7 +174,10 @@ export function BookingDetail({
       <PageHeader
         breadcrumbs={[
           isOwnerView
-            ? { label: "My bookings", href: "/my-bookings" }
+            ? {
+                label: "My bookings",
+                href: `/my-bookings?highlight=${booking.id}`,
+              }
             : { label: "Invites", href: "/invitations" },
           { label: booking.title },
         ]}

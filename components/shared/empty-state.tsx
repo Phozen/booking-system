@@ -9,12 +9,14 @@ export function EmptyState({
   action,
   icon,
   className,
+  titleAs: TitleTag = "h2",
 }: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
   icon?: ReactNode;
   className?: string;
+  titleAs?: "h2" | "h3" | "p";
 }) {
   return (
     <div
@@ -26,9 +28,9 @@ export function EmptyState({
       <div className="mb-3 flex size-10 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
         {icon ?? <Inbox className="size-5" aria-hidden="true" />}
       </div>
-      <h2 className="text-base font-semibold tracking-normal text-foreground">
+      <TitleTag className="text-base font-semibold tracking-normal text-foreground">
         {title}
-      </h2>
+      </TitleTag>
       {description ? (
         <p className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">
           {description}
