@@ -97,7 +97,8 @@ export function FacilityEquipmentManager({
           })
         ) : (
           <p className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-            No active equipment exists yet. Add equipment from Admin Equipment.
+            No active equipment in the catalog yet. Add items in the equipment
+            catalog on the Facilities page.
           </p>
         )}
 

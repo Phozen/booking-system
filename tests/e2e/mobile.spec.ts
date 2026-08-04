@@ -52,7 +52,7 @@ test.describe("mobile admin smoke checks", () => {
   });
 
   test("equipment editor is usable without horizontal overflow", async ({ page }) => {
-    await page.goto("/admin/equipment");
+    await page.goto("/admin/facilities#equipment");
     const equipmentItem = page.locator("details").first();
 
     await equipmentItem.locator("summary").click();

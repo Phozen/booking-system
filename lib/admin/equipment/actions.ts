@@ -38,7 +38,6 @@ function getEquipmentFieldErrors(errors: ZodError<EquipmentFormValues>) {
 }
 
 function revalidateEquipmentPaths() {
-  revalidatePath("/admin/equipment");
   revalidatePath("/admin/facilities");
   revalidatePath("/admin/facilities/[id]", "page");
   revalidatePath("/facilities");

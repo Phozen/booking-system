@@ -1,7 +1,6 @@
 import {
   BarChart3,
   Building2,
-  Boxes,
   CalendarDays,
   CalendarPlus,
   CalendarCheck,
@@ -94,7 +93,6 @@ export const adminNavigation = [
   { title: "Bookings", href: "/admin/bookings", icon: CalendarCheck, match: "prefix" },
   { title: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, match: "prefix" },
   { title: "Facilities", href: "/admin/facilities", icon: Building2, match: "prefix" },
-  { title: "Equipment", href: "/admin/equipment", icon: Boxes, match: "prefix" },
   { title: "Users", href: "/admin/users", icon: UsersRound, match: "prefix", superAdminOnly: true },
   { title: "Departments", href: "/admin/departments", icon: Building2, match: "prefix", superAdminOnly: true },
   { title: "Unavailability", href: "/admin/unavailability", icon: Wrench, match: "prefix" },
@@ -124,7 +122,6 @@ export function getAdminNavigationGroups(role?: string | null) {
           "/admin/bookings",
           "/admin/approvals",
           "/admin/facilities",
-          "/admin/equipment",
           "/admin/users",
           "/admin/departments",
           "/admin/unavailability",

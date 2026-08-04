@@ -84,9 +84,9 @@ Design personality:
 | `/admin/dashboard` | Admin overview | Exists | Currently foundational; needs metrics and recent activity polish. |
 | `/admin/profile` | Admin-side profile | Exists | Admin/Super Admin version of the self-service profile page inside the admin shell. |
 | `/admin/calendar` | All-bookings calendar | Exists | Admin-only calendar for reviewing bookings across facilities and users. |
-| `/admin/facilities` | Facility list and management | Exists | Needs shared admin shell and filters. |
+| `/admin/facilities` | Facility list and management | Exists | Includes the facilities table and shared equipment catalog. |
 | `/admin/facilities/new` | Create facility | Exists | Form foundation exists. |
-| `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details, admin photo management, and facility equipment assignment backed by the dedicated `/admin/equipment` admin UI. |
+| `/admin/facilities/[id]` | Edit facility | Exists | Includes facility details, admin photo management, and facility equipment assignment. |
 | `/admin/bookings` | All bookings | Exists | Status/facility filters exist; needs broader filters and responsive pattern. |
 | `/admin/bookings/[id]` | Admin booking detail/actions | Exists | Needs consistent destructive confirmation UX. |
 | `/admin/bookings/[id]/print` | Printable admin approval form | Exists | Admin/Super Admin printable form with requester, attendees, catering, and signatures. |

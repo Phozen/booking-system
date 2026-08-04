@@ -22,7 +22,7 @@ test.describe("admin smoke flows", () => {
   }
 
   test("equipment details can be opened for editing", async ({ page }) => {
-    await page.goto("/admin/equipment");
+    await page.goto("/admin/facilities#equipment");
     const equipmentItem = page.locator("details").first();
 
     await expect(equipmentItem).toBeVisible();
