@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
-import { cn } from "@/lib/utils";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -87,127 +86,94 @@ export function PendingApprovalRowActions({
     }
   }
 
-  const rejectDialog = (
-    <ConfirmDialog
-      triggerLabel="Reject"
-      title="Reject this booking request?"
-      description={
-        <RejectRemarksFields
-          bookingId={bookingId}
-          disabled={isPending}
-          onRemarksChange={setRejectRemarks}
-        />
-      }
-      confirmLabel="Reject booking"
-      cancelLabel="Keep pending"
-      pendingLabel="Rejecting..."
-      destructive
-      pending={rejectPending}
-      disabled={isPending}
-      triggerSize="sm"
-      triggerClassName={cn(
-        "min-w-24",
-        variant === "card" && "w-full",
-      )}
-      onConfirm={() => rejectFormRef.current?.requestSubmit()}
-    />
+  const feedbackAlert = feedback ? (
+    <Alert
+      variant={feedback.status === "error" ? "destructive" : "success"}
+      className="py-2"
+    >
+      <AlertDescription className="text-xs">{feedback.message}</AlertDescription>
+    </Alert>
+  ) : null;
+
+  const approveButton = (
+    <form action={approveAction} className="w-full">
+      <input type="hidden" name="remarks" value="" />
+      <Button
+        type="submit"
+        size="sm"
+        disabled={isPending}
+        className="w-full"
+      >
+        <PendingButtonContent
+          pending={approvePending}
+          pendingLabel="Approving..."
+        >
+          <Check data-icon="inline-start" />
+          Approve
+        </PendingButtonContent>
+      </Button>
+    </form>
   );
 
+  const rejectButton = (
+    <form ref={rejectFormRef} action={rejectAction} className="w-full">
+      <input type="hidden" name="remarks" defaultValue="" />
+      <ConfirmDialog
+        triggerLabel="Reject"
+        title="Reject this booking request?"
+        description={
+          <RejectRemarksFields
+            bookingId={bookingId}
+            disabled={isPending}
+            onRemarksChange={setRejectRemarks}
+          />
+        }
+        confirmLabel="Reject booking"
+        cancelLabel="Keep pending"
+        pendingLabel="Rejecting..."
+        destructive
+        pending={rejectPending}
+        disabled={isPending}
+        triggerSize="sm"
+        triggerClassName="w-full"
+        onConfirm={() => rejectFormRef.current?.requestSubmit()}
+      />
+    </form>
+  );
+
+  const openLink = (
+    <Link
+      href={`/admin/bookings/${bookingId}`}
+      className={buttonVariants({
+        variant: "outline",
+        size: "sm",
+        className: "w-full",
+      })}
+    >
+      <Eye data-icon="inline-start" />
+      Open
+    </Link>
+  );
+
+  // Card: fragment so MobileRecordCard can stack each action full-width.
   if (variant === "card") {
     return (
       <>
-        {feedback ? (
-          <Alert
-            variant={feedback.status === "error" ? "destructive" : "success"}
-            className="py-2"
-          >
-            <AlertDescription className="text-xs">
-              {feedback.message}
-            </AlertDescription>
-          </Alert>
-        ) : null}
-        <form action={approveAction}>
-          <input type="hidden" name="remarks" value="" />
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isPending}
-            className="w-full min-w-24"
-          >
-            <PendingButtonContent
-              pending={approvePending}
-              pendingLabel="Approving..."
-            >
-              <Check data-icon="inline-start" />
-              Approve
-            </PendingButtonContent>
-          </Button>
-        </form>
-        <form ref={rejectFormRef} action={rejectAction}>
-          <input type="hidden" name="remarks" defaultValue="" />
-          {rejectDialog}
-        </form>
-        <Link
-          href={`/admin/bookings/${bookingId}`}
-          className={buttonVariants({
-            variant: "ghost",
-            size: "sm",
-            className: "w-full",
-          })}
-        >
-          <Eye data-icon="inline-start" />
-          Open
-        </Link>
+        {feedbackAlert}
+        {approveButton}
+        {rejectButton}
+        {openLink}
       </>
     );
   }
 
+  // Table: fixed-width vertical stack — never wraps into a staggered row.
   return (
-    <div className="grid min-w-[14rem] gap-1.5 justify-items-end">
-      {feedback ? (
-        <Alert
-          variant={feedback.status === "error" ? "destructive" : "success"}
-          className="w-full py-2"
-        >
-          <AlertDescription className="text-xs">
-            {feedback.message}
-          </AlertDescription>
-        </Alert>
-      ) : null}
-      <div className="flex flex-nowrap items-center justify-end gap-2">
-        <form action={approveAction} className="contents">
-          <input type="hidden" name="remarks" value="" />
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isPending}
-            className="min-w-24"
-          >
-            <PendingButtonContent
-              pending={approvePending}
-              pendingLabel="Approving..."
-            >
-              <Check data-icon="inline-start" />
-              Approve
-            </PendingButtonContent>
-          </Button>
-        </form>
-        <form ref={rejectFormRef} action={rejectAction} className="contents">
-          <input type="hidden" name="remarks" defaultValue="" />
-          {rejectDialog}
-        </form>
-      </div>
-      <Link
-        href={`/admin/bookings/${bookingId}`}
-        className={buttonVariants({
-          variant: "ghost",
-          size: "sm",
-          className: "h-8 px-2 text-muted-foreground",
-        })}
-      >
-        <Eye data-icon="inline-start" />
-        Open detail
-      </Link>
+    <div className="grid w-36 gap-2 justify-self-end">
+      {feedbackAlert}
+      {approveButton}
+      {rejectButton}
+      {openLink}
     </div>
   );
 }
