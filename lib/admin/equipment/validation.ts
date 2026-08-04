@@ -10,10 +10,6 @@ export const equipmentFormSchema = z.object({
     .string()
     .trim()
     .max(1000, "Description must be 1,000 characters or fewer."),
-  iconName: z
-    .string()
-    .trim()
-    .max(80, "Icon name must be 80 characters or fewer."),
 });
 
 export const equipmentIdSchema = z.string().uuid();
@@ -29,6 +25,5 @@ export function formDataToEquipmentValues(formData: FormData) {
   return {
     name: getValue("name"),
     description: getValue("description"),
-    iconName: getValue("iconName"),
   };
 }

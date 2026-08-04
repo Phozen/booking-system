@@ -50,7 +50,7 @@ function EquipmentEditForm({ item }: { item: EquipmentItem }) {
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor={`${idPrefix}-name`}>Name</Label>
           <Input
@@ -70,23 +70,6 @@ function EquipmentEditForm({ item }: { item: EquipmentItem }) {
           </FormFieldError>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={`${idPrefix}-icon-name`}>Icon name (optional)</Label>
-          <Input
-            id={`${idPrefix}-icon-name`}
-            name="iconName"
-            defaultValue={item.iconName ?? ""}
-            disabled={isPending}
-            maxLength={80}
-            aria-describedby={getFieldDescribedBy(
-              state.fieldErrors?.iconName && `${idPrefix}-icon-name-error`,
-            )}
-            aria-invalid={Boolean(state.fieldErrors?.iconName)}
-          />
-          <FormFieldError id={`${idPrefix}-icon-name-error`}>
-            {state.fieldErrors?.iconName}
-          </FormFieldError>
-        </div>
-        <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor={`${idPrefix}-description`}>Description (optional)</Label>
           <Textarea
             id={`${idPrefix}-description`}

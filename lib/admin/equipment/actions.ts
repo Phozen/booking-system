@@ -14,7 +14,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type EquipmentFieldErrors = Partial<
-  Record<"name" | "description" | "iconName", string>
+  Record<"name" | "description", string>
 >;
 
 export type EquipmentActionResult = {
@@ -34,7 +34,6 @@ function getEquipmentFieldErrors(errors: ZodError<EquipmentFormValues>) {
   return {
     name: fieldErrors.name?.[0],
     description: fieldErrors.description?.[0],
-    iconName: fieldErrors.iconName?.[0],
   };
 }
 
@@ -65,11 +64,10 @@ export async function createEquipmentAction(
     };
   }
 
-  const { name, description, iconName } = parsed.data;
+  const { name, description } = parsed.data;
   const payload = {
     name,
     description: description || null,
-    icon_name: iconName || null,
     is_active: true,
   };
   const supabase = createAdminClient();
@@ -134,7 +132,7 @@ export async function updateEquipmentAction(
   const supabase = createAdminClient();
   const { data: existing } = await supabase
     .from("equipment")
-    .select("id,name,description,icon_name,is_active")
+    .select("id,name,description,is_active")
     .eq("id", equipmentId)
     .maybeSingle();
 
@@ -142,17 +140,15 @@ export async function updateEquipmentAction(
     return { status: "error", message: "Equipment could not be found." };
   }
 
-  const { name, description, iconName } = parsed.data;
+  const { name, description } = parsed.data;
   const payload = {
     name,
     description: description || null,
-    icon_name: iconName || null,
   };
 
   if (
     existing.name === payload.name &&
-    existing.description === payload.description &&
-    existing.icon_name === payload.icon_name
+    existing.description === payload.description
   ) {
     return { status: "success", message: "Equipment details are already up to date." };
   }

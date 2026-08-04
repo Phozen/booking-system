@@ -41,7 +41,7 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
           <h2 className="font-semibold tracking-normal">Add equipment</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Catalog entries are shared across facilities. Name is required;
-            icon and description are optional.
+            description is optional.
           </p>
         </div>
         {state.status !== "idle" ? (
@@ -49,7 +49,7 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -68,22 +68,6 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
             </FormFieldError>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="iconName">Icon name (optional)</Label>
-            <Input
-              id="iconName"
-              name="iconName"
-              disabled={isPending}
-              maxLength={80}
-              aria-describedby={getFieldDescribedBy(
-                state.fieldErrors?.iconName && "icon-name-error",
-              )}
-              aria-invalid={Boolean(state.fieldErrors?.iconName)}
-            />
-            <FormFieldError id="icon-name-error">
-              {state.fieldErrors?.iconName}
-            </FormFieldError>
-          </div>
-          <div className="grid gap-2 sm:col-span-3">
             <Label htmlFor="description">Description (optional)</Label>
             <Textarea
               id="description"
