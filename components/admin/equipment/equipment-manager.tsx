@@ -39,6 +39,10 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
         />
         <div>
           <h2 className="font-semibold tracking-normal">Add equipment</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Catalog entries are shared across facilities. Name is required;
+            icon and description are optional.
+          </p>
         </div>
         {state.status !== "idle" ? (
           <Alert variant={state.status === "error" ? "destructive" : "success"}>
@@ -111,6 +115,10 @@ export function EquipmentManager({ equipment }: { equipment: EquipmentItem[] }) 
           <h2 id="equipment-library-heading" className="font-semibold tracking-normal">
             Equipment library
           </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Expand an item to edit or archive it. Room assignment happens on each
+            facility page.
+          </p>
         </div>
         {equipment.length > 0 ? (
           <div className="grid gap-3">

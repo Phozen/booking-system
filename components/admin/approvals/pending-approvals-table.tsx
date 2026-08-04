@@ -193,7 +193,12 @@ export function PendingApprovalsTable({
                         : "None tagged",
                   },
                 ]}
-                actions={<PendingApprovalRowActions bookingId={booking.id} />}
+                actions={
+                  <PendingApprovalRowActions
+                    bookingId={booking.id}
+                    variant="card"
+                  />
+                }
               />
             ))
           ) : (
@@ -215,7 +220,7 @@ export function PendingApprovalsTable({
               <th className="px-4 py-3 font-medium">Requested</th>
               <th className="px-4 py-3 font-medium">Catering</th>
               <th className="px-4 py-3 font-medium">Departments</th>
-              <th className="sticky right-0 border-l bg-muted/60 px-4 py-3 text-right font-medium">
+              <th className="sticky right-0 min-w-64 whitespace-nowrap border-l bg-muted/60 px-4 py-3 text-right font-medium">
                 Actions
               </th>
             </tr>
@@ -223,7 +228,7 @@ export function PendingApprovalsTable({
           <tbody>
             {bookings.length > 0 ? (
               bookings.map((booking) => (
-                <tr key={booking.id} className="border-t">
+                <tr key={booking.id} className="border-t align-top">
                   <td className="px-4 py-3 font-medium">{booking.title}</td>
                   <td className="px-4 py-3">
                     {booking.facility
@@ -250,8 +255,11 @@ export function PendingApprovalsTable({
                           .join(", ")
                       : "-"}
                   </td>
-                  <td className="sticky right-0 border-l bg-background px-4 py-3 text-right">
-                    <PendingApprovalRowActions bookingId={booking.id} />
+                  <td className="sticky right-0 min-w-64 whitespace-nowrap border-l bg-background px-4 py-3 text-right">
+                    <PendingApprovalRowActions
+                      bookingId={booking.id}
+                      variant="table"
+                    />
                   </td>
                 </tr>
               ))

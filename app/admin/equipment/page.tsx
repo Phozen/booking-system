@@ -15,10 +15,7 @@ export default async function AdminEquipmentPage() {
       <PageHeader
         eyebrow="Admin area"
         title="Equipment management"
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Equipment" },
-        ]}
+        description="Maintain the global equipment catalog. Assign items to rooms when editing a facility."
       />
 
       <EquipmentManager equipment={equipment} />

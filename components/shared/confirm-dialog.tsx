@@ -20,6 +20,7 @@ export function ConfirmDialog({
   pending,
   onConfirm,
   triggerClassName,
+  triggerSize,
 }: {
   triggerLabel: string;
   title: string;
@@ -32,6 +33,7 @@ export function ConfirmDialog({
   pending?: boolean;
   onConfirm: () => void | Promise<void>;
   triggerClassName?: string;
+  triggerSize?: "default" | "sm" | "lg" | "icon";
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -67,6 +69,7 @@ export function ConfirmDialog({
         ref={triggerRef}
         type="button"
         variant={destructive ? "destructive" : "outline"}
+        size={triggerSize}
         className={triggerClassName}
         disabled={disabled || isPending}
         onClick={() => dialogRef.current?.showModal()}

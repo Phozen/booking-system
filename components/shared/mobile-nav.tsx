@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { AdminNavigation, EmployeeNavigation } from "@/components/shared/nav-links";
@@ -11,6 +12,16 @@ import { cn } from "@/lib/utils";
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** Matches Tailwind `lg` (admin shell) and `xl` (employee header). */
+const COLLAPSE_MEDIA = {
+  admin: "(min-width: 1024px)",
+  employee: "(min-width: 1280px)",
+} as const;
+
+function clearBodyScrollLock() {
+  document.body.style.overflow = "";
+}
 
 export function MobileNav({
   variant,
@@ -36,10 +47,40 @@ export function MobileNav({
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const close = () => setOpen(false);
+  const pathname = usePathname();
+
+  const close = () => {
+    clearBodyScrollLock();
+    setOpen(false);
+  };
+
+  // Close when navigating so a leftover open state cannot keep body locked.
+  useEffect(() => {
+    clearBodyScrollLock();
+    setOpen(false);
+  }, [pathname]);
+
+  // Close when the shell hides this nav at desktop breakpoints.
+  useEffect(() => {
+    const media = window.matchMedia(COLLAPSE_MEDIA[variant]);
+
+    function onBreakpointChange(event: MediaQueryListEvent | MediaQueryList) {
+      if (event.matches) {
+        clearBodyScrollLock();
+        setOpen(false);
+      }
+    }
+
+    onBreakpointChange(media);
+    media.addEventListener("change", onBreakpointChange);
+    return () => media.removeEventListener("change", onBreakpointChange);
+  }, [variant]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      clearBodyScrollLock();
+      return;
+    }
 
     const panel = panelRef.current;
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -59,6 +100,7 @@ export function MobileNav({
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
+        clearBodyScrollLock();
         setOpen(false);
         return;
       }
@@ -96,7 +138,7 @@ export function MobileNav({
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      clearBodyScrollLock();
       if (previouslyFocused?.isConnected) {
         previouslyFocused.focus();
       } else {
@@ -120,7 +162,15 @@ export function MobileNav({
           open &&
             "translate-y-0.5 scale-[0.99] border-primary/60 bg-accent/95 text-accent-foreground shadow-[inset_0_2px_5px_rgb(0_0_0_/_0.24)]",
         )}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() =>
+          setOpen((current) => {
+            if (current) {
+              clearBodyScrollLock();
+              return false;
+            }
+            return true;
+          })
+        }
       >
         {open ? (
           <X data-icon="inline-start" aria-hidden="true" />

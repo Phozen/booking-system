@@ -16,13 +16,51 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
+import { cn } from "@/lib/utils";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
   message: "",
 };
 
-export function PendingApprovalRowActions({ bookingId }: { bookingId: string }) {
+function RejectRemarksFields({
+  bookingId,
+  disabled,
+  onRemarksChange,
+}: {
+  bookingId: string;
+  disabled: boolean;
+  onRemarksChange: (value: string) => void;
+}) {
+  return (
+    <div className="grid gap-3">
+      <p>
+        The booking will be marked as rejected. The requester may receive a
+        rejection notification.
+      </p>
+      <div className="grid gap-2 text-left">
+        <Label htmlFor={`reject-remarks-field-${bookingId}`}>
+          Rejection remarks (optional)
+        </Label>
+        <Textarea
+          id={`reject-remarks-field-${bookingId}`}
+          rows={3}
+          maxLength={1000}
+          disabled={disabled}
+          onChange={(event) => onRemarksChange(event.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PendingApprovalRowActions({
+  bookingId,
+  variant = "table",
+}: {
+  bookingId: string;
+  variant?: "table" | "card";
+}) {
   const rejectFormRef = useRef<HTMLFormElement>(null);
   const [approveState, approveAction, approvePending] = useActionState(
     approveBookingAction.bind(null, bookingId),
@@ -40,21 +78,62 @@ export function PendingApprovalRowActions({ bookingId }: { bookingId: string }) 
         ? rejectState
         : null;
 
-  return (
-    <div className="grid gap-2">
-      {feedback ? (
-        <Alert
-          variant={feedback.status === "error" ? "destructive" : "success"}
-          className="py-2"
-        >
-          <AlertDescription className="text-xs">{feedback.message}</AlertDescription>
-        </Alert>
-      ) : null}
+  function setRejectRemarks(value: string) {
+    const hidden = rejectFormRef.current?.querySelector<HTMLInputElement>(
+      'input[name="remarks"]',
+    );
+    if (hidden) {
+      hidden.value = value;
+    }
+  }
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
+  const rejectDialog = (
+    <ConfirmDialog
+      triggerLabel="Reject"
+      title="Reject this booking request?"
+      description={
+        <RejectRemarksFields
+          bookingId={bookingId}
+          disabled={isPending}
+          onRemarksChange={setRejectRemarks}
+        />
+      }
+      confirmLabel="Reject booking"
+      cancelLabel="Keep pending"
+      pendingLabel="Rejecting..."
+      destructive
+      pending={rejectPending}
+      disabled={isPending}
+      triggerSize="sm"
+      triggerClassName={cn(
+        "min-w-24",
+        variant === "card" && "w-full",
+      )}
+      onConfirm={() => rejectFormRef.current?.requestSubmit()}
+    />
+  );
+
+  if (variant === "card") {
+    return (
+      <>
+        {feedback ? (
+          <Alert
+            variant={feedback.status === "error" ? "destructive" : "success"}
+            className="py-2"
+          >
+            <AlertDescription className="text-xs">
+              {feedback.message}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <form action={approveAction}>
           <input type="hidden" name="remarks" value="" />
-          <Button type="submit" size="sm" disabled={isPending} className="min-w-24">
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isPending}
+            className="w-full min-w-24"
+          >
             <PendingButtonContent
               pending={approvePending}
               pendingLabel="Approving..."
@@ -64,59 +143,71 @@ export function PendingApprovalRowActions({ bookingId }: { bookingId: string }) 
             </PendingButtonContent>
           </Button>
         </form>
-
-        <form ref={rejectFormRef} action={rejectAction} className="contents">
+        <form ref={rejectFormRef} action={rejectAction}>
           <input type="hidden" name="remarks" defaultValue="" />
-          <ConfirmDialog
-            triggerLabel="Reject"
-            title="Reject this booking request?"
-            description={
-              <div className="grid gap-3">
-                <p>
-                  The booking will be marked as rejected. The requester may
-                  receive a rejection notification.
-                </p>
-                <div className="grid gap-2 text-left">
-                  <Label htmlFor={`reject-remarks-field-${bookingId}`}>
-                    Rejection remarks (optional)
-                  </Label>
-                  <Textarea
-                    id={`reject-remarks-field-${bookingId}`}
-                    rows={3}
-                    maxLength={1000}
-                    disabled={isPending}
-                    onChange={(event) => {
-                      const hidden =
-                        rejectFormRef.current?.querySelector<HTMLInputElement>(
-                          'input[name="remarks"]',
-                        );
-                      if (hidden) {
-                        hidden.value = event.target.value;
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            }
-            confirmLabel="Reject booking"
-            cancelLabel="Keep pending"
-            pendingLabel="Rejecting..."
-            destructive
-            pending={rejectPending}
-            disabled={isPending}
-            triggerClassName="min-w-24"
-            onConfirm={() => rejectFormRef.current?.requestSubmit()}
-          />
+          {rejectDialog}
         </form>
-
         <Link
           href={`/admin/bookings/${bookingId}`}
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
+          className={buttonVariants({
+            variant: "ghost",
+            size: "sm",
+            className: "w-full",
+          })}
         >
           <Eye data-icon="inline-start" />
           Open
         </Link>
+      </>
+    );
+  }
+
+  return (
+    <div className="grid min-w-[14rem] gap-1.5 justify-items-end">
+      {feedback ? (
+        <Alert
+          variant={feedback.status === "error" ? "destructive" : "success"}
+          className="w-full py-2"
+        >
+          <AlertDescription className="text-xs">
+            {feedback.message}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      <div className="flex flex-nowrap items-center justify-end gap-2">
+        <form action={approveAction} className="contents">
+          <input type="hidden" name="remarks" value="" />
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isPending}
+            className="min-w-24"
+          >
+            <PendingButtonContent
+              pending={approvePending}
+              pendingLabel="Approving..."
+            >
+              <Check data-icon="inline-start" />
+              Approve
+            </PendingButtonContent>
+          </Button>
+        </form>
+        <form ref={rejectFormRef} action={rejectAction} className="contents">
+          <input type="hidden" name="remarks" defaultValue="" />
+          {rejectDialog}
+        </form>
       </div>
+      <Link
+        href={`/admin/bookings/${bookingId}`}
+        className={buttonVariants({
+          variant: "ghost",
+          size: "sm",
+          className: "h-8 px-2 text-muted-foreground",
+        })}
+      >
+        <Eye data-icon="inline-start" />
+        Open detail
+      </Link>
     </div>
   );
 }
