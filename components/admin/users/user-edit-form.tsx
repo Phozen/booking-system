@@ -315,7 +315,7 @@ export function UserEditForm({
                 fieldErrors.role && "role-error",
               )}
               aria-invalid={Boolean(fieldErrors.role)}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {editableUserRoleOptions.map((role) => (
                 <option key={role} value={role}>
@@ -345,7 +345,7 @@ export function UserEditForm({
                 fieldErrors.status && "status-error",
               )}
               aria-invalid={Boolean(fieldErrors.status)}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {editableUserStatusOptions.map((status) => (
                 <option key={status} value={status}>

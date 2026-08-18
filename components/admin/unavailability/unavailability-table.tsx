@@ -179,7 +179,7 @@ export function UnavailabilityTable({
               id="type"
               name="type"
               defaultValue={selectedType ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All types</option>
               <option value="closure">Closure</option>
@@ -194,7 +194,7 @@ export function UnavailabilityTable({
               id="active"
               name="active"
               defaultValue={selectedActive ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All</option>
               <option value="active">Active</option>
@@ -209,7 +209,7 @@ export function UnavailabilityTable({
               id="scope"
               name="scope"
               defaultValue={selectedScope ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All scopes</option>
               <option value="all_facilities">All facilities</option>
@@ -225,7 +225,7 @@ export function UnavailabilityTable({
               id="facilityId"
               name="facilityId"
               defaultValue={selectedFacilityId ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All facilities</option>
               {facilities.map((facility) => (

@@ -72,7 +72,7 @@ export function ReportFilters({
             id="facilityId"
             name="facilityId"
             defaultValue={filters.facilityId ?? "all"}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="all">All facilities</option>
             {facilities.map((facility) => (
@@ -91,7 +91,7 @@ export function ReportFilters({
             id="status"
             name="status"
             defaultValue={filters.status ?? "all"}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {reportBookingStatusOptions.map((status) => (
               <option key={status} value={status}>

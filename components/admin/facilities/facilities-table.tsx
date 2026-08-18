@@ -65,7 +65,7 @@ export function FacilitiesTable({
               id="level"
               name="level"
               defaultValue={selectedLevel ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All levels</option>
               {levelOptions.map((level) => (
@@ -83,7 +83,7 @@ export function FacilitiesTable({
               id="type"
               name="type"
               defaultValue={selectedType ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All types</option>
               {facilityTypeOptions.map((type) => (
@@ -101,7 +101,7 @@ export function FacilitiesTable({
               id="status"
               name="status"
               defaultValue={selectedStatus ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All statuses</option>
               {facilityStatusOptions.map((status) => (

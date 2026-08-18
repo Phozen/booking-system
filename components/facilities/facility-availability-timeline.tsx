@@ -49,7 +49,7 @@ export function FacilityAvailabilityTimeline({
             name="date"
             type="date"
             defaultValue={date}
-            className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 rounded-lg border border-input bg-input-background px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           <button className={buttonVariants({ variant: "outline" })} type="submit">
             View

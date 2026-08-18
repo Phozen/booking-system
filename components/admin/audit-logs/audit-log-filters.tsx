@@ -78,7 +78,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             id="action"
             name="action"
             defaultValue={filters.action ?? "all"}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {auditActionOptions.map((action) => (
               <option key={action} value={action}>
@@ -96,7 +96,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
             id="entityType"
             name="entityType"
             defaultValue={filters.entityType ?? "all"}
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {auditEntityTypeOptions.map((entityType) => (
               <option key={entityType} value={entityType}>

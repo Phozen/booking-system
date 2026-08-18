@@ -62,7 +62,7 @@ export function AdminBookingsTable({
               id="status"
               name="status"
               defaultValue={selectedStatus ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {adminBookingStatusOptions.map((status) => (
                 <option key={status} value={status}>
@@ -80,7 +80,7 @@ export function AdminBookingsTable({
               id="facilityId"
               name="facilityId"
               defaultValue={selectedFacilityId ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All rooms</option>
               {facilities.map((facility) => (
@@ -139,7 +139,7 @@ export function AdminBookingsTable({
               id="level"
               name="level"
               defaultValue={selectedLevel ?? "all"}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="all">All levels</option>
               {levelOptions.map((level) => (

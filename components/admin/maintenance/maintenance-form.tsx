@@ -149,7 +149,7 @@ export function MaintenanceForm({
             name="facilityId"
             defaultValue={maintenanceClosure?.facilityId ?? ""}
             required
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="" disabled>
               Select a facility
@@ -235,7 +235,7 @@ export function MaintenanceForm({
               id="status"
               name="status"
               defaultValue={maintenanceClosure.status}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {maintenanceStatusOptions.map((status) => (
                 <option key={status} value={status}>
@@ -266,7 +266,7 @@ export function MaintenanceForm({
           defaultValue={maintenanceClosure?.reason ?? ""}
           rows={4}
           maxLength={1000}
-          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
       </section>

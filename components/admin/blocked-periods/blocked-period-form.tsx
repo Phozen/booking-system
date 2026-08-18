@@ -160,7 +160,7 @@ export function BlockedPeriodForm({
             onChange={(event) =>
               setScope(event.target.value as BlockedPeriodScope)
             }
-            className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {blockedPeriodScopeOptions.map((option) => (
               <option key={option} value={option}>
@@ -244,7 +244,7 @@ export function BlockedPeriodForm({
           defaultValue={blockedPeriod?.reason ?? ""}
           rows={4}
           maxLength={1000}
-          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
 

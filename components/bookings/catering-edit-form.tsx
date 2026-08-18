@@ -184,7 +184,7 @@ export function CateringEditForm({
               name="cateringRequired"
               defaultValue={catering.required ? "yes" : "no"}
               onChange={(event) => setRequired(event.target.value === "yes")}
-              className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+              className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50"
             >
               <option value="no">No</option>
               <option value="yes">Yes</option>
@@ -317,7 +317,7 @@ export function CateringEditForm({
                   name="cateringServingTime"
                   defaultValue={catering.servingTime ?? ""}
                   required
-                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="h-10 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50"
                 >
                   <option value="">Choose serving time</option>
                   {cateringServingTimeOptions.map((option) => (
@@ -338,7 +338,7 @@ export function CateringEditForm({
                   rows={3}
                   defaultValue={catering.dietaryNotes ?? ""}
                   placeholder="Halal, vegetarian, allergies, VIP requirements"
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50"
                 />
               </div>
 
@@ -351,7 +351,7 @@ export function CateringEditForm({
                   rows={3}
                   value={cateringNotes}
                   onChange={(event) => setCateringNotes(event.target.value)}
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30"
+                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50"
                 />
                 <input
                   type="hidden"
