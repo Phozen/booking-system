@@ -65,3 +65,7 @@ supabase/.temp/
 next-env.d.ts
 .next-dev.err.log
 .next-dev.out.log
+
+# Local-only dev login helpers (not for production)
+/gen-session.mjs
+/login-bridge.mjs
