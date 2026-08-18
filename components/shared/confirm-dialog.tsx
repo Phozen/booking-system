@@ -5,8 +5,8 @@ import { useId, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CenteredDialog } from "@/components/shared/centered-dialog";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
-import { centeredDialogClassName } from "@/components/shared/dialog-styles";
 
 export function ConfirmDialog({
   triggerLabel,
@@ -76,11 +76,10 @@ export function ConfirmDialog({
       >
         {triggerLabel}
       </Button>
-      <dialog
+      <CenteredDialog
         ref={dialogRef}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className={centeredDialogClassName}
       >
         <div className="grid gap-4 p-5">
           <div className="flex gap-3">
@@ -129,7 +128,7 @@ export function ConfirmDialog({
             </Button>
           </div>
         </div>
-      </dialog>
+      </CenteredDialog>
     </>
   );
 }

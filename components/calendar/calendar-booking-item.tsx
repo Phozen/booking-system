@@ -12,7 +12,7 @@ import {
   getBookingRelationshipToken,
 } from "@/components/shared/booking-relationship-tokens";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { centeredDialogClassName } from "@/components/shared/dialog-styles";
+import { CenteredDialog } from "@/components/shared/centered-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -130,11 +130,7 @@ export function CalendarBookingItem({
         >
           {booking.title}
         </button>
-        <dialog
-          ref={dialogRef}
-          aria-labelledby={titleId}
-          className={`${centeredDialogClassName} pointer-events-auto`}
-        >
+        <CenteredDialog ref={dialogRef} aria-labelledby={titleId}>
           <div className="grid gap-4 p-5">
             <div className="flex items-start justify-between gap-3">
               <h2 id={titleId} className="text-lg font-semibold tracking-normal">
@@ -158,7 +154,7 @@ export function CalendarBookingItem({
               ) : null}
             </div>
           </div>
-        </dialog>
+        </CenteredDialog>
       </>
     );
   }
@@ -232,11 +228,7 @@ export function CalendarBookingItem({
       >
         {content}
       </button>
-      <dialog
-        ref={dialogRef}
-        aria-labelledby={titleId}
-        className={`${centeredDialogClassName} pointer-events-auto`}
-      >
+      <CenteredDialog ref={dialogRef} aria-labelledby={titleId}>
         <div className="grid gap-4 p-5">
           <div className="flex items-start justify-between gap-3">
             <h2 id={titleId} className="text-lg font-semibold tracking-normal">
@@ -260,7 +252,7 @@ export function CalendarBookingItem({
             ) : null}
           </div>
         </div>
-      </dialog>
+      </CenteredDialog>
     </>
   );
 }
