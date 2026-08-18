@@ -22,7 +22,7 @@ export function AdminTableShell({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-lg border border-border/75 bg-card",
+        "qbook-reveal overflow-hidden rounded-lg border border-border/75 bg-card",
         className,
       )}
     >
@@ -43,12 +43,12 @@ export function AdminTableShell({
       {filters ? <div className="border-b border-border/75 p-4">{filters}</div> : null}
 
       {mobileCards ? (
-        <div className="grid gap-3 p-3 md:hidden">{mobileCards}</div>
+        <div className="qbook-stagger grid gap-3 p-3 md:hidden">{mobileCards}</div>
       ) : null}
 
       <div
         className={cn(
-          "overflow-x-auto focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          "qbook-rows overflow-x-auto focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           mobileCards ? "hidden md:block" : "",
         )}
         tabIndex={0}

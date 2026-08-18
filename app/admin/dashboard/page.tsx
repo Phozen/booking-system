@@ -103,7 +103,7 @@ export default async function AdminDashboardPage() {
 
       <section
         aria-labelledby="admin-dashboard-metrics"
-        className="grid gap-3 sm:grid-cols-3"
+        className="qbook-stagger grid gap-3 sm:grid-cols-3"
       >
         <h2 id="admin-dashboard-metrics" className="sr-only">
           Summary metrics
@@ -114,16 +114,15 @@ export default async function AdminDashboardPage() {
             <Link
               key={metric.href}
               href={metric.href}
-              className="grid gap-2 rounded-lg border border-border/80 bg-card p-4 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-colors hover:border-primary/45 hover:bg-accent/55 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
+              className="grid gap-2 rounded-lg border border-border/80 bg-card p-4 text-card-foreground shadow-sm shadow-foreground/10 ring-1 ring-border/60 transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/45 hover:bg-accent/55 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/25"
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-muted-foreground">
                   {metric.label}
                 </p>
-                <Icon
-                  className="size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
+                <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
+                  <Icon className="size-4" aria-hidden="true" />
+                </span>
               </div>
               <p className="text-3xl font-semibold tracking-normal tabular-nums">
                 {metric.value}

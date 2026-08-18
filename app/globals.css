@@ -439,6 +439,19 @@
     }
   }
 
+  /* Admin table row hover (applied via AdminTableShell) */
+  .qbook-rows tbody tr {
+    transition: background-color var(--dur-fast) var(--ease-out-quart);
+  }
+  @media (hover: hover) {
+    .qbook-rows tbody tr:hover {
+      background-color: color-mix(in oklch, var(--accent) 40%, transparent);
+    }
+    .qbook-rows tbody tr:hover td.sticky {
+      background-color: color-mix(in oklch, var(--accent) 40%, transparent);
+    }
+  }
+
   @media (max-width: 639px) {
     .qbook-office-surface,
     .qbook-office-panel {
