@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, ChevronRight } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import {
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
 
       <section
         aria-label="Quick actions"
-        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+        className="qbook-stagger grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
       >
         {employeeDashboardActions.map((item) => {
           const Icon = item.icon;
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
               className={`group grid min-h-32 place-items-center gap-3 rounded-xl border p-4 text-center shadow-lg transition-[background-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.96] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/60 sm:min-h-44 sm:gap-4 sm:p-6 ${tone.home}`}
             >
               <div
-                className={`flex size-14 items-center justify-center rounded-xl ring-1 sm:size-16 ${tone.icon}`}
+                className={`flex size-14 items-center justify-center rounded-xl ring-1 transition-transform duration-200 ease-out group-hover:scale-105 sm:size-16 ${tone.icon}`}
               >
                 <Icon className="size-7 sm:size-9" aria-hidden="true" />
               </div>
@@ -72,12 +72,12 @@ export default async function DashboardPage() {
         </div>
 
         {upcomingBookings.length > 0 ? (
-          <div className="mt-4 grid gap-2">
+          <div className="qbook-stagger mt-4 grid gap-2">
             {upcomingBookings.map((booking) => (
               <Link
                 key={booking.id}
                 href={`/bookings/${booking.id}`}
-                className="grid min-h-14 gap-2 rounded-lg border border-border/75 bg-background px-4 py-3 shadow-xs shadow-foreground/5 transition-colors hover:border-primary/35 hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/20 sm:grid-cols-[1fr_auto] sm:items-center"
+                className="group grid min-h-14 gap-2 rounded-lg border border-border/75 bg-background px-4 py-3 shadow-xs shadow-foreground/5 transition-[background-color,border-color,box-shadow] duration-150 hover:border-primary/35 hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 dark:shadow-black/20 sm:grid-cols-[1fr_auto] sm:items-center"
               >
                 <div className="min-w-0">
                   <span className="block truncate font-medium">
@@ -93,8 +93,9 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <BookingStatusBadge status={booking.status} />
-                  <span className="text-sm font-medium text-primary">
+                  <span className="inline-flex items-center gap-0.5 text-sm font-medium text-primary transition-transform duration-150 group-hover:translate-x-0.5">
                     {employeeCopy.open}
+                    <ChevronRight className="size-4" aria-hidden="true" />
                   </span>
                 </div>
               </Link>

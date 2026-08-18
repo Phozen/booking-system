@@ -85,7 +85,7 @@ function BookingSection({
       </div>
 
       {bookings.length > 0 ? (
-        <div className="grid gap-3">
+        <div className="qbook-stagger grid gap-3">
           {bookings.map((booking) => (
             <BookingCard
               key={booking.id}

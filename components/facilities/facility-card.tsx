@@ -21,9 +21,12 @@ function EquipmentSummary({ facility }: { facility: Facility }) {
 
 export function FacilityCard({ facility }: { facility: Facility }) {
   return (
-    <article className="grid overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground sm:grid-cols-[180px_1fr]">
-      <div className="aspect-[16/10] bg-muted sm:aspect-auto">
-        <FacilityPhoto facility={facility} />
+    <article className="group qbook-elevate grid overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground hover:border-primary/40 sm:grid-cols-[180px_1fr]">
+      <div className="aspect-[16/10] overflow-hidden bg-muted sm:aspect-auto">
+        <FacilityPhoto
+          facility={facility}
+          className="transition-transform duration-300 ease-out group-hover:scale-105"
+        />
       </div>
 
       <div className="flex flex-col gap-3 p-4 sm:p-5">
@@ -79,7 +82,10 @@ export function FacilityCard({ facility }: { facility: Facility }) {
             })}
           >
             See details
-            <ArrowRight data-icon="inline-end" />
+            <ArrowRight
+              data-icon="inline-end"
+              className="transition-transform duration-150 ease-out group-hover:translate-x-0.5"
+            />
           </Link>
         </div>
       </div>

@@ -37,7 +37,7 @@ export default async function FacilitiesPage() {
       />
 
       {facilities.length > 0 ? (
-        <section className="grid gap-4" aria-label="Available rooms">
+        <section className="qbook-stagger grid gap-4" aria-label="Available rooms">
           {facilities.map((facility) => (
             <FacilityCard key={facility.id} facility={facility} />
           ))}

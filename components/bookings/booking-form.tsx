@@ -568,7 +568,7 @@ export function BookingForm({
   return (
     <form
       action={formAction}
-      className="grid gap-0 pb-24"
+      className="qbook-reveal grid gap-0 pb-24"
       noValidate
       onChange={(event) => updatePreview(event.currentTarget)}
       onSubmit={(event) => {

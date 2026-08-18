@@ -63,10 +63,14 @@ export function FacilityDetail({
         </Link>
       </div>
 
-      <header className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-        <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm shadow-primary/5 ring-1 ring-primary/10">
-          <div className="aspect-[16/9] bg-muted">
-            <FacilityPhoto facility={facility} priority />
+      <header className="qbook-reveal grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="group overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+          <div className="aspect-[16/9] overflow-hidden bg-muted">
+            <FacilityPhoto
+              facility={facility}
+              className="transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              priority
+            />
           </div>
         </div>
 
@@ -172,11 +176,11 @@ export function FacilityDetail({
       {facility.photos.length > 1 ? (
         <section className="rounded-lg border border-border/70 bg-card p-5 shadow-sm shadow-primary/5 ring-1 ring-primary/10">
           <h2 className="text-lg font-semibold tracking-normal">Photos</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="qbook-stagger mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {facility.photos.map((photo) => (
               <div
                 key={photo.id}
-                className="aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
+                className="qbook-elevate aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
               >
                 {photo.publicUrl ? (
                   <div

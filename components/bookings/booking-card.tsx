@@ -27,7 +27,7 @@ export function BookingCard({
       id={`booking-${booking.id}`}
       aria-labelledby={titleId}
       className={cn(
-        "scroll-mt-24 grid gap-3 rounded-lg border p-4 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center",
+        "group qbook-elevate scroll-mt-24 grid gap-3 rounded-lg border p-4 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center",
         muted
           ? "border-slate-300 bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200"
           : getBookingStatusSurfaceClassName(booking.status),
@@ -78,7 +78,10 @@ export function BookingCard({
         })}
       >
         Open booking
-        <ArrowRight data-icon="inline-end" />
+        <ArrowRight
+          data-icon="inline-end"
+          className="transition-transform duration-150 ease-out group-hover:translate-x-0.5"
+        />
       </Link>
     </article>
   );
