@@ -89,6 +89,18 @@
   --chart-4: oklch(0.6 0.17 25);
   --chart-5: oklch(0.62 0.12 230);
   --radius: 0.5rem;
+  /* Motion + elevation tokens (UI polish layer) */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+  --shadow-card:
+    0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent),
+    0 4px 16px color-mix(in oklch, var(--foreground) 5%, transparent);
+  --shadow-card-hover:
+    0 6px 24px color-mix(in oklch, var(--foreground) 9%, transparent),
+    0 2px 6px color-mix(in oklch, var(--foreground) 6%, transparent);
   --sidebar: oklch(0.97 0.01 75);
   --sidebar-foreground: oklch(0.22 0.02 255);
   --sidebar-primary: oklch(0.48 0.14 250);
@@ -138,6 +150,12 @@
   --sidebar-accent-foreground: oklch(0.95 0.008 75);
   --sidebar-border: oklch(0.34 0.025 255);
   --sidebar-ring: oklch(0.7 0.11 245);
+  --shadow-card:
+    0 1px 2px color-mix(in oklch, black 32%, transparent),
+    0 4px 16px color-mix(in oklch, black 30%, transparent);
+  --shadow-card-hover:
+    0 8px 28px color-mix(in oklch, black 42%, transparent),
+    0 2px 6px color-mix(in oklch, black 32%, transparent);
 }
 
 @layer base {
@@ -390,6 +408,37 @@
       0 1px 2px color-mix(in oklch, var(--foreground) 4%, transparent);
   }
 
+  /* UI polish: content reveal, stagger, and card elevation */
+  .qbook-reveal {
+    animation: qbook-reveal var(--dur-slow) var(--ease-out-quart) both;
+  }
+
+  .qbook-stagger > * {
+    animation: qbook-reveal var(--dur-slow) var(--ease-out-quart) both;
+  }
+  .qbook-stagger > *:nth-child(1) { animation-delay: 20ms; }
+  .qbook-stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .qbook-stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .qbook-stagger > *:nth-child(4) { animation-delay: 140ms; }
+  .qbook-stagger > *:nth-child(5) { animation-delay: 180ms; }
+  .qbook-stagger > *:nth-child(6) { animation-delay: 220ms; }
+  .qbook-stagger > *:nth-child(7) { animation-delay: 260ms; }
+  .qbook-stagger > *:nth-child(n+8) { animation-delay: 300ms; }
+
+  .qbook-elevate {
+    transition:
+      transform var(--dur-base) var(--ease-out-quart),
+      box-shadow var(--dur-base) var(--ease-out-quart),
+      border-color var(--dur-base) var(--ease-out-quart);
+  }
+
+  @media (hover: hover) {
+    .qbook-elevate:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-hover);
+    }
+  }
+
   @media (max-width: 639px) {
     .qbook-office-surface,
     .qbook-office-panel {
@@ -419,5 +468,42 @@
       width: 100% !important;
       margin: 0 !important;
     }
+  }
+}
+
+@keyframes qbook-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Smooth cross-page view transitions (next-view-transitions) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-base);
+  animation-timing-function: var(--ease-out-quart);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qbook-reveal,
+  .qbook-stagger > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .qbook-elevate {
+    transition: none !important;
+  }
+  .qbook-elevate:hover {
+    transform: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
   }
 }

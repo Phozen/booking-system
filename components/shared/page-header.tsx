@@ -21,7 +21,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn("grid gap-3 pb-6", className)}>
+    <header className={cn("qbook-reveal grid gap-3 pb-6", className)}>
       {breadcrumbs ? <Breadcrumbs items={breadcrumbs} /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 max-w-3xl">

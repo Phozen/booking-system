@@ -21,11 +21,11 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-card-foreground",
+        "qbook-reveal flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-card-foreground",
         className,
       )}
     >
-      <div className="mb-3 flex size-10 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
+      <div className="mb-3 flex size-11 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground shadow-xs">
         {icon ?? <Inbox className="size-5" aria-hidden="true" />}
       </div>
       <TitleTag className="text-base font-semibold tracking-normal text-foreground">
