@@ -21,6 +21,11 @@ describe("booking detail header actions", () => {
     expect(pageHeaderSource).not.toMatch(/<header className="[^"]*border-b/);
   });
 
+  it("shows the primary action above secondaries on mobile", () => {
+    expect(pageHeaderSource).toContain("flex-col-reverse");
+    expect(pageHeaderSource).toContain("{secondaryAction} {primaryAction}");
+  });
+
   it("keeps exactly one filled primary action with outline secondaries in a wrapping row", () => {
     expect(bookingDetailSource).toContain('className="flex flex-wrap gap-2"');
     expect(bookingDetailSource).not.toContain(

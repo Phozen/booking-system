@@ -40,7 +40,7 @@ export function PageHeader({
           ) : null}
         </div>
         {primaryAction || secondaryAction ? (
-          <div className="grid w-full shrink-0 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+          <div className="flex w-full shrink-0 flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
             {secondaryAction}
             {primaryAction}
           </div>
