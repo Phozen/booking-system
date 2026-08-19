@@ -445,7 +445,7 @@ export function BookingForm({
       event.preventDefault();
       setFieldErrors(nextErrors);
       showFormValidationError(nextErrors);
-      goToStep(firstInvalidStep(nextErrors));
+      goToStep(firstInvalidStep(nextErrors), { scroll: false });
       return;
     }
 
@@ -463,9 +463,13 @@ export function BookingForm({
     );
   }
 
-  function goToStep(next: number) {
+  function goToStep(next: number, options?: { scroll?: boolean }) {
     const clamped = Math.min(TOTAL_STEPS, Math.max(1, next));
     setWizardStep(clamped);
+    if (options?.scroll === false) {
+      return;
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -537,7 +541,7 @@ export function BookingForm({
       if (Object.values(nextErrors).some(Boolean)) {
         setFieldErrors((current) => ({ ...current, ...nextErrors }));
         showFormValidationError(nextErrors);
-        goToStep(step);
+        goToStep(step, { scroll: false });
         return;
       }
     }
@@ -632,7 +636,13 @@ export function BookingForm({
           </FormFieldError>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2" role="listbox" aria-label="Choose a room">
+        <div
+          id="facilityId"
+          className="grid gap-3 sm:grid-cols-2"
+          role="listbox"
+          tabIndex={-1}
+          aria-label="Choose a room"
+        >
           {facilities.map((facility) => {
             const selected = facility.id === selectedFacility;
             return (
@@ -939,7 +949,11 @@ export function BookingForm({
                 value={derivedCateringType}
               />
 
-              <div className="grid gap-4 sm:col-span-2 lg:grid-cols-2">
+              <div
+                id="cateringType"
+                tabIndex={-1}
+                className="grid gap-4 sm:col-span-2 lg:grid-cols-2"
+              >
                 <fieldset className="grid gap-3 rounded-lg border border-border/70 bg-background/70 p-3">
                   <legend className="px-1 text-sm font-semibold">
                     Drinks

@@ -2,6 +2,8 @@
 
 import { toast } from "sonner";
 
+import { focusFirstInvalidField } from "@/lib/forms/invalid-field-focus";
+
 export function showFormValidationError(
   errors: Record<string, string | null | undefined>,
   fallback = "Check the highlighted fields and try again.",
@@ -24,4 +26,5 @@ export function showFormValidationError(
     description,
     duration: 9000,
   });
+  focusFirstInvalidField(errors);
 }
