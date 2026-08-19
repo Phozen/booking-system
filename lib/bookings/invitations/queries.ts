@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { BookingStatus } from "@/lib/bookings/queries";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
+import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
 import type {
   BookingInvitation,
   BookingInvitationStatus,
@@ -271,7 +272,7 @@ export async function searchInviteCandidatesForBooking(
 ): Promise<InviteCandidate[] | null> {
   const { data: booking, error: bookingError } = await supabase
     .from("bookings")
-    .select("id")
+    .select("id,status")
     .eq("id", bookingId)
     .eq("user_id", ownerUserId)
     .maybeSingle();
@@ -282,6 +283,10 @@ export async function searchInviteCandidatesForBooking(
 
   if (!booking) {
     return null;
+  }
+
+  if (!canManageBookingInvitations(booking.status)) {
+    return [];
   }
 
   const search = normalizeCandidateSearch(searchValue);

@@ -15,9 +15,12 @@ import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   canInviteUser,
+  canManageBookingInvitations,
   formDataToInvitationResponseValues,
   formDataToInviteUserValues,
   invitationIdSchema,
+  invitationManagementLockedMessage,
+  invitationResponseLockedMessage,
   invitationResponseSchema,
   inviteUserSchema,
   inviteUsersSchema,
@@ -277,6 +280,13 @@ export async function inviteUserToBookingAction(
     };
   }
 
+  if (!canManageBookingInvitations(booking.status)) {
+    return {
+      status: "error",
+      message: invitationManagementLockedMessage,
+    };
+  }
+
   const { data: invitee, error: inviteeError } = await supabase
     .from("profiles")
     .select("id,email,full_name,status")
@@ -420,6 +430,15 @@ export async function inviteUsersToBookingAction(
     return {
       status: "error",
       message: "You can only invite users to bookings you own.",
+      invitedUserIds: [],
+      failures: [],
+    };
+  }
+
+  if (!canManageBookingInvitations(booking.status)) {
+    return {
+      status: "error",
+      message: invitationManagementLockedMessage,
       invitedUserIds: [],
       failures: [],
     };
@@ -658,6 +677,13 @@ export async function removeInvitationAction(
     };
   }
 
+  if (!canManageBookingInvitations(booking.status)) {
+    return {
+      status: "error",
+      message: invitationManagementLockedMessage,
+    };
+  }
+
   const { error: deleteError } = await supabase
     .from("booking_invitations")
     .delete()
@@ -763,6 +789,13 @@ export async function respondToInvitationAction(
     return {
       status: "error",
       message: "This invitation has already been answered.",
+    };
+  }
+
+  if (!canManageBookingInvitations(booking.status)) {
+    return {
+      status: "error",
+      message: invitationResponseLockedMessage,
     };
   }
 

@@ -11,6 +11,7 @@ import {
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import { formatFacilityType } from "@/lib/facilities/format";
+import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
@@ -92,11 +93,16 @@ export function BookingDetail({
   const canEdit =
     isOwnerView &&
     (booking.status === "pending" || booking.status === "confirmed");
+  const canRespondToInvitation =
+    !isOwnerView &&
+    viewerInvitation?.status === "pending" &&
+    canManageBookingInvitations(booking.status);
   const facilityLine = booking.facility
     ? `${booking.facility.name}, ${booking.facility.level}`
     : "Room unavailable";
 
-  const primaryAction = !isOwnerView && viewerInvitation?.status === "pending" ? (
+  const primaryAction =
+    canRespondToInvitation && viewerInvitation ? (
     <InvitationResponseActions invitationId={viewerInvitation.id} />
   ) : canEdit ? (
     <RouteLoadingLink
@@ -120,9 +126,9 @@ export function BookingDetail({
     </a>
   ) : null;
 
-  const teamsIsPrimary = Boolean(teamsJoinUrl && !canEdit && !(
-    !isOwnerView && viewerInvitation?.status === "pending"
-  ));
+  const teamsIsPrimary = Boolean(
+    teamsJoinUrl && !canEdit && !canRespondToInvitation,
+  );
 
   const secondaryActions = (
     <div className="flex flex-wrap gap-2">
@@ -277,8 +283,9 @@ export function BookingDetail({
 
       {!isOwnerView && viewerInvitation?.status === "pending" ? (
         <p className="qbook-type-meta">
-          You can view this booking because you were invited. Only the organizer
-          can cancel or manage the booking.
+          {canRespondToInvitation
+            ? "You can view this booking because you were invited. Only the organizer can cancel or manage the booking."
+            : "This booking is no longer active, so the invitation cannot be answered."}
         </p>
       ) : null}
 
@@ -364,7 +371,7 @@ export function BookingDetail({
         <InvitationList
           bookingId={booking.id}
           invitations={invitations}
-          canManage
+          canManage={canEdit}
           highlight={highlightInvitations}
           departments={departments}
           selectedDepartmentIds={booking.departments.map((department) => department.id)}

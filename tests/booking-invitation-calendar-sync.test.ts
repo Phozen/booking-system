@@ -337,6 +337,28 @@ describe("booking invitation calendar attendee resync", () => {
     );
   });
 
+  it("rejects answering an invitation after the booking is cancelled", async () => {
+    setupAdminClient({
+      bookingStatus: "cancelled",
+      includeExistingInvitationCheck: false,
+    });
+    mocks.requireUser.mockResolvedValue({
+      user: { id: invitee.id, email: invitee.email },
+      profile: null,
+    });
+
+    const result = await respondToInvitationAction(
+      invitation.id,
+      "accepted",
+      { status: "idle", message: "" },
+      createResponseForm(),
+    );
+
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("pending or confirmed");
+    expect(mocks.syncConfirmedBookingToMicrosoftCalendar).not.toHaveBeenCalled();
+  });
+
   it("resyncs attendees after accepting an invitation for a confirmed booking", async () => {
     setupAdminClient({ includeExistingInvitationCheck: false });
     mocks.requireUser.mockResolvedValue({
@@ -360,6 +382,35 @@ describe("booking invitation calendar attendee resync", () => {
         reason: "invitation_accepted",
       },
     );
+  });
+
+  it("rejects inviting users after the booking is cancelled", async () => {
+    setupAdminClient({ bookingStatus: "cancelled" });
+
+    const result = await inviteUserToBookingAction(
+      { status: "idle", message: "" },
+      createInviteForm(),
+    );
+
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("pending or confirmed");
+    expect(mocks.syncConfirmedBookingToMicrosoftCalendar).not.toHaveBeenCalled();
+  });
+
+  it("rejects removing invitations after the booking is cancelled", async () => {
+    setupAdminClient({
+      bookingStatus: "cancelled",
+      includeExistingInvitationCheck: false,
+    });
+
+    const result = await removeInvitationAction(invitation.id, {
+      status: "idle",
+      message: "",
+    });
+
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("pending or confirmed");
+    expect(mocks.syncConfirmedBookingToMicrosoftCalendar).not.toHaveBeenCalled();
   });
 
   it("resyncs attendees after removing an invitation for a confirmed booking", async () => {

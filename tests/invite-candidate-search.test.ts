@@ -7,7 +7,13 @@ import { searchInviteCandidatesForBooking } from "@/lib/bookings/invitations/que
 const bookingId = "11111111-1111-4111-8111-111111111111";
 const ownerUserId = "22222222-2222-4222-8222-222222222222";
 
-function createSearchClient({ canManage = true }: { canManage?: boolean } = {}) {
+function createSearchClient({
+  canManage = true,
+  status = "confirmed",
+}: {
+  canManage?: boolean;
+  status?: string;
+} = {}) {
   const bookingQuery = {
     select: vi.fn(),
     eq: vi.fn(),
@@ -16,7 +22,7 @@ function createSearchClient({ canManage = true }: { canManage?: boolean } = {}) 
   bookingQuery.select.mockReturnValue(bookingQuery);
   bookingQuery.eq.mockReturnValue(bookingQuery);
   bookingQuery.maybeSingle.mockResolvedValue({
-    data: canManage ? { id: bookingId } : null,
+    data: canManage ? { id: bookingId, status } : null,
     error: null,
   });
 
@@ -112,6 +118,20 @@ describe("invitation candidate search", () => {
     );
 
     expect(result).toBeNull();
+    expect(profileQuery.select).not.toHaveBeenCalled();
+  });
+
+  it("does not search the directory when the owned booking is no longer editable", async () => {
+    const { client, profileQuery } = createSearchClient({ status: "cancelled" });
+
+    const result = await searchInviteCandidatesForBooking(
+      client as never,
+      bookingId,
+      ownerUserId,
+      "Alex",
+    );
+
+    expect(result).toEqual([]);
     expect(profileQuery.select).not.toHaveBeenCalled();
   });
 });

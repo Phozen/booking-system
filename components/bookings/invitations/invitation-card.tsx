@@ -6,6 +6,7 @@ import {
   formatBookingWindow,
 } from "@/lib/bookings/format";
 import type { InvitedBooking } from "@/lib/bookings/invitations/types";
+import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
 import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,6 +31,8 @@ export function InvitationCard({
 }) {
   const booking = invitation.booking;
   const isPending = invitation.invitation.status === "pending";
+  const canRespond =
+    isPending && canManageBookingInvitations(booking.status);
   const titleId = `invitation-${invitation.invitation.id}-title`;
 
   return (
@@ -61,7 +64,7 @@ export function InvitationCard({
               : "Room unavailable"}
           </p>
         </div>
-        {!isPending ? (
+        {!canRespond ? (
           <Link
             href={`/bookings/${booking.id}`}
             className={buttonVariants({
@@ -91,7 +94,7 @@ export function InvitationCard({
         </div>
       </dl>
 
-      {isPending ? (
+      {canRespond ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <InvitationResponseActions invitationId={invitation.invitation.id} />
           <Link
@@ -106,6 +109,10 @@ export function InvitationCard({
             <ArrowRight data-icon="inline-end" />
           </Link>
         </div>
+      ) : isPending ? (
+        <p className="text-sm text-muted-foreground">
+          This booking is no longer active, so the invitation cannot be answered.
+        </p>
       ) : null}
     </article>
   );

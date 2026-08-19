@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   canInviteUser,
+  canManageBookingInvitations,
   getInvitationContextLabel,
   getInvitationStatusLabel,
+  invitationManagementLockedMessage,
+  invitationResponseLockedMessage,
   inviteUserSchema,
   inviteUsersSchema,
   invitationResponseSchema,
@@ -99,5 +102,16 @@ describe("booking invitation validation", () => {
   it("formats invitation labels", () => {
     expect(getInvitationStatusLabel("accepted")).toBe("Accepted");
     expect(getInvitationContextLabel("pending")).toBe("Pending invitation");
+  });
+
+  it("allows participant changes only on pending or confirmed bookings", () => {
+    expect(canManageBookingInvitations("pending")).toBe(true);
+    expect(canManageBookingInvitations("confirmed")).toBe(true);
+    expect(canManageBookingInvitations("cancelled")).toBe(false);
+    expect(canManageBookingInvitations("rejected")).toBe(false);
+    expect(canManageBookingInvitations("completed")).toBe(false);
+    expect(canManageBookingInvitations("expired")).toBe(false);
+    expect(invitationManagementLockedMessage).toContain("pending or confirmed");
+    expect(invitationResponseLockedMessage).toContain("pending or confirmed");
   });
 });

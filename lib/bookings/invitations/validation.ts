@@ -75,6 +75,16 @@ export function getInvitationContextLabel(status: BookingInvitationStatus) {
   return labels[status];
 }
 
+export const invitationManagementLockedMessage =
+  "Participants can only be changed while the booking is pending or confirmed.";
+
+export const invitationResponseLockedMessage =
+  "This invitation can only be answered while the booking is pending or confirmed.";
+
+export function canManageBookingInvitations(status: string) {
+  return status === "pending" || status === "confirmed";
+}
+
 export function canInviteUser({
   ownerUserId,
   invitedUserId,
