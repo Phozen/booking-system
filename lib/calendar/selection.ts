@@ -25,6 +25,19 @@ export function getSelectedCalendarDay(
   );
 }
 
+export function getCalendarDaySelectLabel(
+  day: Pick<CalendarDay, "weekdayLabel" | "shortLabel">,
+  bookingCount: number,
+) {
+  const dateLabel = `Select ${day.weekdayLabel}, ${day.shortLabel}`;
+
+  if (bookingCount <= 0) {
+    return `${dateLabel}, no bookings`;
+  }
+
+  return `${dateLabel}, ${bookingCount} booking${bookingCount === 1 ? "" : "s"}`;
+}
+
 export function buildCalendarQueryParams({
   month,
   status,

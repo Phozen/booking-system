@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   doesDateRangeOverlap,
@@ -8,6 +10,7 @@ import {
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
 import { groupCalendarBookingsByDay } from "@/lib/calendar/group-bookings";
+import { getCalendarDaySelectLabel } from "@/lib/calendar/selection";
 
 const appTimeZone = "Asia/Kuala_Lumpur";
 
@@ -119,5 +122,57 @@ describe("calendar grouping", () => {
 
     expect(grouped["2026-05-01"]).toHaveLength(2);
     expect(grouped["2026-05-01"][0].id).toBe("booking-1");
+  });
+});
+
+describe("calendar day selection labels", () => {
+  it("labels empty days so they stay selectable", () => {
+    expect(
+      getCalendarDaySelectLabel(
+        { weekdayLabel: "Friday", shortLabel: "Fri, 21 Aug" },
+        0,
+      ),
+    ).toBe("Select Friday, Fri, 21 Aug, no bookings");
+  });
+
+  it("includes the booking count for occupied days", () => {
+    expect(
+      getCalendarDaySelectLabel(
+        { weekdayLabel: "Friday", shortLabel: "Fri, 21 Aug" },
+        1,
+      ),
+    ).toBe("Select Friday, Fri, 21 Aug, 1 booking");
+    expect(
+      getCalendarDaySelectLabel(
+        { weekdayLabel: "Friday", shortLabel: "Fri, 21 Aug" },
+        2,
+      ),
+    ).toBe("Select Friday, Fri, 21 Aug, 2 bookings");
+  });
+});
+
+describe("mobile calendar empty-day selection", () => {
+  const monthGridSource = readFileSync(
+    join(process.cwd(), "components/calendar/month-calendar-grid.tsx"),
+    "utf8",
+  ).replace(/\s+/g, " ");
+  const dayPanelSource = readFileSync(
+    join(process.cwd(), "components/calendar/calendar-day-detail-panel.tsx"),
+    "utf8",
+  ).replace(/\s+/g, " ");
+
+  it("keeps the month grid tappable on phones without booking titles in cells", () => {
+    expect(monthGridSource).not.toContain(
+      'className="hidden overflow-hidden rounded-lg border border-border bg-card md:block"',
+    );
+    expect(monthGridSource).toContain("min-h-11");
+    expect(monthGridSource).toContain("hidden gap-0.5 md:grid");
+    expect(monthGridSource).toContain("getCalendarDaySelectLabel(day, bookings.length)");
+  });
+
+  it("shows the selected-day panel on phones so empty days can be booked", () => {
+    expect(dayPanelSource).not.toContain("hidden gap-4 self-start");
+    expect(dayPanelSource).toContain("No bookings on this day");
+    expect(dayPanelSource).toContain("Book this day");
   });
 });

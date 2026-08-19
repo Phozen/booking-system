@@ -31,7 +31,7 @@ export function CalendarDayDetailPanel({
 
   return (
     <aside
-      className="hidden gap-4 self-start rounded-lg border border-border bg-card p-4 md:grid lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
+      className="grid gap-4 self-start rounded-lg border border-border bg-card p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
       aria-labelledby={headingId}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
