@@ -473,6 +473,7 @@ export function BookingForm({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  // Brief lock so a double-tap on Continue cannot immediately submit Confirm.
   useEffect(() => {
     if (wizardStep !== TOTAL_STEPS) {
       setSubmitUnlocked(false);
@@ -1302,10 +1303,13 @@ export function BookingForm({
             size="lg"
             className="min-h-11"
             disabled={!hasFacilities || isPending || !submitUnlocked}
+            aria-busy={isPending || !submitUnlocked}
           >
             <PendingButtonContent
-              pending={isPending}
-              pendingLabel={employeeCopy.sending}
+              pending={isPending || !submitUnlocked}
+              pendingLabel={
+                isPending ? employeeCopy.sending : "Please wait..."
+              }
             >
               {approvalRequired ? "Send for approval" : "Confirm booking"}
             </PendingButtonContent>
