@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireUser } from "@/lib/auth/guards";
+import { getCurrentAuthState } from "@/lib/auth/session";
 import { getFacilityAvailabilityTimeline } from "@/lib/facilities/availability-timeline";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,7 +10,15 @@ const uuidPattern =
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function GET(request: Request) {
-  await requireUser();
+  const authState = await getCurrentAuthState();
+
+  if (!authState.user || authState.profile?.status !== "active") {
+    return NextResponse.json(
+      { error: "Authentication required." },
+      { status: 401 },
+    );
+  }
+
   const url = new URL(request.url);
   const facilityId = url.searchParams.get("facilityId") ?? "";
   const date = url.searchParams.get("date") ?? "";
