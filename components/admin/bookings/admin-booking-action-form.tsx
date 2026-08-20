@@ -95,6 +95,7 @@ export function AdminBookingActionForm({
             destructive={variant === "destructive"}
             pending={isPending}
             triggerClassName="w-full sm:w-auto"
+            triggerVariant={variant === "destructive" ? undefined : "default"}
             onConfirm={() => formRef.current?.requestSubmit()}
           />
         ) : (

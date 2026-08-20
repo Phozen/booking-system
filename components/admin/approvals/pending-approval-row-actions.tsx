@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useRef } from "react";
-import { Check, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 
 import {
   approveBookingAction,
@@ -10,12 +10,11 @@ import {
   type AdminBookingActionResult,
 } from "@/lib/admin/bookings/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { approveBookingConfirmation } from "@/components/admin/approvals/approve-booking-confirmation";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { PendingButtonContent } from "@/components/shared/pending-button-content";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -60,6 +59,7 @@ export function PendingApprovalRowActions({
   bookingId: string;
   variant?: "table" | "card";
 }) {
+  const approveFormRef = useRef<HTMLFormElement>(null);
   const rejectFormRef = useRef<HTMLFormElement>(null);
   const [approveState, approveAction, approvePending] = useActionState(
     approveBookingAction.bind(null, bookingId),
@@ -96,22 +96,22 @@ export function PendingApprovalRowActions({
   ) : null;
 
   const approveButton = (
-    <form action={approveAction} className="w-full">
+    <form ref={approveFormRef} action={approveAction} className="w-full">
       <input type="hidden" name="remarks" value="" />
-      <Button
-        type="submit"
-        size="sm"
+      <ConfirmDialog
+        triggerLabel="Approve"
+        title={approveBookingConfirmation.title}
+        description={approveBookingConfirmation.description}
+        confirmLabel={approveBookingConfirmation.confirmLabel}
+        cancelLabel={approveBookingConfirmation.cancelLabel}
+        pendingLabel={approveBookingConfirmation.pendingLabel}
+        pending={approvePending}
         disabled={isPending}
-        className="w-full"
-      >
-        <PendingButtonContent
-          pending={approvePending}
-          pendingLabel="Approving..."
-        >
-          <Check data-icon="inline-start" />
-          Approve
-        </PendingButtonContent>
-      </Button>
+        triggerSize="sm"
+        triggerClassName="w-full"
+        triggerVariant="default"
+        onConfirm={() => approveFormRef.current?.requestSubmit()}
+      />
     </form>
   );
 

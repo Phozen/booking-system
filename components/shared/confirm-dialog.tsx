@@ -21,6 +21,7 @@ export function ConfirmDialog({
   onConfirm,
   triggerClassName,
   triggerSize,
+  triggerVariant,
 }: {
   triggerLabel: string;
   title: string;
@@ -34,6 +35,7 @@ export function ConfirmDialog({
   onConfirm: () => void | Promise<void>;
   triggerClassName?: string;
   triggerSize?: "default" | "sm" | "lg" | "icon";
+  triggerVariant?: "default" | "outline" | "destructive";
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +70,7 @@ export function ConfirmDialog({
       <Button
         ref={triggerRef}
         type="button"
-        variant={destructive ? "destructive" : "outline"}
+        variant={triggerVariant ?? (destructive ? "destructive" : "outline")}
         size={triggerSize}
         className={triggerClassName}
         disabled={disabled || isPending}

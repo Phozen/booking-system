@@ -24,6 +24,7 @@ import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
 import { BookingUsageActions } from "@/components/admin/bookings/booking-usage-actions";
+import { approveBookingConfirmation } from "@/components/admin/approvals/approve-booking-confirmation";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -285,6 +286,7 @@ export function AdminBookingDetail({
               label="Approval remarks"
               submitLabel="Approve booking"
               action={approveBookingAction.bind(null, booking.id)}
+              confirmation={approveBookingConfirmation}
             />
             <div className="border-t border-border/70 pt-6">
               <AdminBookingActionForm
