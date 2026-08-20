@@ -31,6 +31,10 @@ export function getLoginMessage(
     return formatAccountInactiveMessage(settings);
   }
 
+  if (searchParams.error === "legacy") {
+    return "Email and password sign-in is disabled. Continue with Microsoft.";
+  }
+
   if (searchParams.error === "microsoft") {
     return "Microsoft login was cancelled or denied. Try again with your authorized company account.";
   }

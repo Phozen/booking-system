@@ -26,10 +26,10 @@ test.describe("public and logged-out access", () => {
     page,
   }) => {
     await page.goto("/register");
-    await expect(page).toHaveURL(/\/login\?error=disabled/);
+    await expect(page).toHaveURL(/\/login\?error=legacy/);
 
     await page.goto("/reset-password");
-    await expect(page).toHaveURL(/\/login\?error=disabled/);
+    await expect(page).toHaveURL(/\/login\?error=legacy/);
   });
 
   test("logged-out employee pages redirect to login", async ({ page }) => {
