@@ -47,8 +47,44 @@ export function CalendarControls({
 
   if (compact) {
     return (
-      <section aria-label="Calendar filters">
+      <section aria-label="Calendar filters" className="grid gap-3">
+        {showViewToggle ? (
+          <nav
+            aria-label="Calendar visibility"
+            className="grid grid-cols-2 gap-2 sm:inline-flex"
+          >
+            <Link
+              href={buildCalendarHref(basePath, {
+                ...hrefOptions,
+                view: "my",
+              })}
+              className={buttonVariants({
+                variant: selectedView === "my" ? "default" : "outline",
+                size: "sm",
+              })}
+              aria-current={selectedView === "my" ? "page" : undefined}
+            >
+              My bookings
+            </Link>
+            <Link
+              href={buildCalendarHref(basePath, {
+                ...hrefOptions,
+                view: "all",
+              })}
+              className={buttonVariants({
+                variant: selectedView === "all" ? "default" : "outline",
+                size: "sm",
+              })}
+              aria-current={selectedView === "all" ? "page" : undefined}
+            >
+              All bookings
+            </Link>
+          </nav>
+        ) : null}
         <form className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          {selectedView ? (
+            <input type="hidden" name="view" value={selectedView} />
+          ) : null}
           {selectedDate ? (
             <input type="hidden" name="date" value={selectedDate} />
           ) : null}

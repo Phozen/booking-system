@@ -30,4 +30,11 @@ describe("booking relationship tokens", () => {
     expect(getBookingRelationshipSwatchClassName("owned")).toContain("bg-primary");
     expect(getBookingRelationshipSwatchClassName("invited")).toContain("bg-sky");
   });
+
+  it("labels company bookings separately from owned and invited", () => {
+    expect(getBookingRelationshipToken("other").shortLabel).toBe("Booked");
+    expect(getBookingRelationshipToken("other").label).toBe("Company booking");
+    expect(getBookingRelationshipSurfaceClassName("other")).toContain("bg-muted");
+    expect(getBookingRelationshipBadgeClassName("other")).toContain("muted");
+  });
 });

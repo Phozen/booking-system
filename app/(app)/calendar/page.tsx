@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/auth/guards";
 import {
+  getCompanyCalendarBookings,
   getEmployeeCalendarBookings,
-  type EmployeeCalendarBooking,
 } from "@/lib/bookings/calendar-queries";
 import type { BookingStatus } from "@/lib/bookings/queries";
 import {
@@ -9,16 +9,18 @@ import {
   getCalendarMonthRange,
   parseCalendarMonth,
 } from "@/lib/calendar/date-range";
+import { toEmployeeCalendarItem } from "@/lib/calendar/employee-items";
 import {
   buildCalendarHref,
   getSelectedCalendarDay,
   parseCalendarDateParam,
 } from "@/lib/calendar/selection";
+import { groupCalendarBookingsByDay } from "@/lib/calendar/group-bookings";
 import {
-  groupCalendarBookingsByDay,
-  type CalendarBooking,
-} from "@/lib/calendar/group-bookings";
-import { getInvitationContextLabel } from "@/lib/bookings/invitations/validation";
+  canViewAllCalendarBookings,
+  getCalendarVisibilityMode,
+  parseCalendarViewMode,
+} from "@/lib/calendar/visibility";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -29,11 +31,7 @@ import { CalendarControls } from "@/components/calendar/calendar-controls";
 import { CalendarRelationshipLegend } from "@/components/calendar/calendar-relationship-legend";
 import { MonthCalendarGrid } from "@/components/calendar/month-calendar-grid";
 import { PageHeader } from "@/components/shared/page-header";
-import type { BookingRelationship } from "@/components/shared/booking-relationship-tokens";
-import {
-  bookingRelationshipTokens,
-  getBookingRelationshipToken,
-} from "@/components/shared/booking-relationship-tokens";
+import { bookingRelationshipTokens } from "@/components/shared/booking-relationship-tokens";
 
 export const dynamic = "force-dynamic";
 
@@ -51,85 +49,72 @@ function parseStatus(value: string | string[] | undefined): BookingStatus | unde
     : undefined;
 }
 
-function toRelationship(
-  booking: EmployeeCalendarBooking,
-): BookingRelationship {
-  return booking.visibilityContext === "invited" || booking.invitationStatus
-    ? "invited"
-    : "owned";
-}
-
-function toCalendarBooking(booking: EmployeeCalendarBooking): CalendarBooking {
-  const relationship = toRelationship(booking);
-  const contextLabel = booking.invitationStatus
-    ? getInvitationContextLabel(booking.invitationStatus)
-    : getBookingRelationshipToken(relationship).label;
-  const userLabel =
-    booking.user?.fullName && booking.user.email
-      ? `${booking.user.fullName} (${booking.user.email})`
-      : booking.user?.email || booking.user?.fullName || undefined;
-
-  return {
-    id: booking.id,
-    href: `/bookings/${booking.id}`,
-    title: booking.title,
-    status: booking.status,
-    startsAt: booking.startsAt,
-    endsAt: booking.endsAt,
-    facilityName: booking.facility?.name ?? "Room unavailable",
-    facilityLevel: booking.facility?.level ?? "Level unavailable",
-    approvalRequired: booking.approvalRequired,
-    userLabel,
-    contextLabel,
-    relationship,
-    isManageable: relationship === "owned",
-  };
-}
-
 export default async function EmployeeCalendarPage({
   searchParams,
 }: {
   searchParams: Promise<{
     month?: string | string[];
     status?: string | string[];
+    view?: string | string[];
     date?: string | string[];
   }>;
 }) {
-  const { user } = await requireUser();
+  const { user, profile } = await requireUser();
   const params = await searchParams;
   const settings = await getAppSettings();
+  const visibilityMode = getCalendarVisibilityMode(settings);
+  const allowAll = canViewAllCalendarBookings(profile.role, visibilityMode);
   const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
+  const selectedView = parseCalendarViewMode({
+    value: params.view,
+    allowAll,
+    defaultView: "my",
+  });
   const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const supabase = await createClient();
   const adminSupabase = createAdminClient();
-  const bookings = await getEmployeeCalendarBookings(
-    supabase,
-    user.id,
-    range,
-    {
-      status: selectedStatus,
-    },
-    adminSupabase,
-  );
-  const calendarBookings = bookings.map(toCalendarBooking);
+  const bookings =
+    selectedView === "all" && allowAll
+      ? await getCompanyCalendarBookings(adminSupabase, user.id, range, {
+          status: selectedStatus,
+        })
+      : await getEmployeeCalendarBookings(
+          supabase,
+          user.id,
+          range,
+          {
+            status: selectedStatus,
+          },
+          adminSupabase,
+        );
+  const calendarBookings = bookings.map(toEmployeeCalendarItem);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
   const requestedDate = parseCalendarDateParam(params.date);
   const selectedDay = getSelectedCalendarDay(days, requestedDate);
   const selectedBookings = groupedBookings[selectedDay.key] ?? [];
+  const hrefOptions = {
+    month: selectedMonth.value,
+    status: selectedStatus,
+    view: allowAll ? selectedView : undefined,
+    date: undefined as string | undefined,
+  };
   const getDayHref = (dayKey: string) =>
     buildCalendarHref("/calendar", {
-      month: selectedMonth.value,
-      status: selectedStatus,
+      ...hrefOptions,
       date: dayKey,
     });
+  const description =
+    selectedView === "all" && allowAll
+      ? "All company room bookings for the month. Other people's bookings show limited details."
+      : "Your bookings and invitations for the month. Tap a day for details.";
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         title="Calendar"
-        description="Your bookings and invitations for the month. Tap a day for details."
+        description={description}
         className="pb-2"
       />
 
@@ -139,6 +124,8 @@ export default async function EmployeeCalendarPage({
           selectedMonth={selectedMonth}
           selectedStatus={selectedStatus}
           selectedDate={selectedDay.key}
+          selectedView={allowAll ? selectedView : undefined}
+          showViewToggle={allowAll}
           timezone={settings.defaultTimezone}
           compact
         />
@@ -152,6 +139,14 @@ export default async function EmployeeCalendarPage({
               relationship: "invited",
               label: bookingRelationshipTokens.invited.shortLabel,
             },
+            ...(selectedView === "all" && allowAll
+              ? [
+                  {
+                    relationship: "other" as const,
+                    label: bookingRelationshipTokens.other.shortLabel,
+                  },
+                ]
+              : []),
           ]}
         />
       </div>
