@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -5,6 +6,10 @@ import {
   isAdminRole,
   isSuperAdminRole,
 } from "@/lib/auth/profile";
+import {
+  REQUEST_NEXT_HEADER,
+  buildLoginRequiredPath,
+} from "@/lib/auth/protected-paths";
 import { getCurrentAuthState, type AuthState } from "@/lib/auth/session";
 
 type ActiveAuthState = AuthState & {
@@ -16,7 +21,8 @@ export async function requireUser(): Promise<ActiveAuthState> {
   const authState = await getCurrentAuthState();
 
   if (!authState.user) {
-    redirect("/login?auth=required");
+    const headerStore = await headers();
+    redirect(buildLoginRequiredPath(headerStore.get(REQUEST_NEXT_HEADER)));
   }
 
   if (!authState.profile || authState.profile.status !== "active") {

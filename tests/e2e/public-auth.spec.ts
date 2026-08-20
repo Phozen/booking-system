@@ -36,6 +36,9 @@ test.describe("public and logged-out access", () => {
     await expectRedirectedToLogin(page, "/dashboard");
     await expectRedirectedToLogin(page, "/my-bookings");
     await expectRedirectedToLogin(page, "/calendar");
+    await expectRedirectedToLogin(page, "/invitations");
+    await expectRedirectedToLogin(page, "/notifications");
+    await expectRedirectedToLogin(page, "/notification-preferences");
     await expectRedirectedToLogin(page, "/profile");
   });
 

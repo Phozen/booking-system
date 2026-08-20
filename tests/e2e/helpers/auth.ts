@@ -34,5 +34,11 @@ export function emptyStorageState() {
 
 export async function expectRedirectedToLogin(page: Page, path: string) {
   await page.goto(path);
-  await expect(page).toHaveURL(/\/login\?auth=required/);
+  await expect(page).toHaveURL((url) => {
+    return (
+      url.pathname === "/login" &&
+      url.searchParams.get("auth") === "required" &&
+      url.searchParams.get("next") === path
+    );
+  });
 }

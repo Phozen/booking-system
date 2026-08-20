@@ -6,17 +6,12 @@ import {
   getProfileSession,
   isAdminRole,
 } from "@/lib/auth/profile";
-
-const authPaths = new Set(["/login", "/register", "/reset-password"]);
-
-const protectedPrefixes = [
-  "/dashboard",
-  "/facilities",
-  "/bookings",
-  "/my-bookings",
-  "/profile",
-  "/admin",
-];
+import {
+  REQUEST_NEXT_HEADER,
+  buildLoginRequiredPath,
+  isAuthPath,
+  isProtectedPath,
+} from "@/lib/auth/protected-paths";
 
 function hasSupabaseMiddlewareConfig() {
   return Boolean(
@@ -25,26 +20,29 @@ function hasSupabaseMiddlewareConfig() {
   );
 }
 
-function isProtectedPath(pathname: string) {
-  return protectedPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+function getRequestedPath(request: NextRequest) {
+  return `${request.nextUrl.pathname}${request.nextUrl.search}`;
+}
+
+function continueWithRequestedPath(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(REQUEST_NEXT_HEADER, getRequestedPath(request));
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 function redirectToLogin(request: NextRequest) {
-  const redirectUrl = request.nextUrl.clone();
-  const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-  redirectUrl.pathname = "/login";
-  redirectUrl.searchParams.set("auth", "required");
-  redirectUrl.searchParams.set("next", nextPath);
-
-  return NextResponse.redirect(redirectUrl);
+  return NextResponse.redirect(
+    new URL(buildLoginRequiredPath(getRequestedPath(request)), request.url),
+  );
 }
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  });
+  let response = continueWithRequestedPath(request);
   const pathname = request.nextUrl.pathname;
 
   if (!hasSupabaseMiddlewareConfig()) {
@@ -68,9 +66,7 @@ export async function updateSession(request: NextRequest) {
             request.cookies.set(name, value);
           });
 
-          response = NextResponse.next({
-            request,
-          });
+          response = continueWithRequestedPath(request);
 
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
@@ -98,7 +94,7 @@ export async function updateSession(request: NextRequest) {
 
   const profile = await getProfileSession(supabase, user);
   if (!profile || profile.status !== "active") {
-    if (authPaths.has(pathname)) {
+    if (isAuthPath(pathname)) {
       return response;
     }
 
@@ -111,7 +107,7 @@ export async function updateSession(request: NextRequest) {
 
   const role = profile.role;
 
-  if (authPaths.has(pathname)) {
+  if (isAuthPath(pathname)) {
     return NextResponse.redirect(
       new URL(getDashboardPathForRole(role), request.url),
     );
