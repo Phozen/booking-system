@@ -34,7 +34,7 @@ describe("booking detail header actions", () => {
     expect(bookingDetailSource).toContain("const primaryAction =");
     expect(bookingDetailSource).toContain("teamsIsPrimary");
     expect(bookingDetailSource).toMatch(
-      /canEdit \? \([\s\S]*?buttonVariants\(\{ className: "w-full sm:w-auto" \}\)[\s\S]*?Edit booking/,
+      /canEdit \? \( <RouteLoadingLink[\s\S]*?buttonVariants\(\{ size: "lg", className: "w-full min-h-11 sm:w-auto" \}\)[\s\S]*?Edit booking/,
     );
     expect(bookingDetailSource).toMatch(
       /href=\{teamsJoinUrl\}[\s\S]*?buttonVariants\(\{ className: "w-full sm:w-auto" \}\)[\s\S]*?Join Teams meeting/,
@@ -43,8 +43,9 @@ describe("booking detail header actions", () => {
       /variant: "outline"[\s\S]*?Outlook calendar/,
     );
     expect(bookingDetailSource).toMatch(
-      /variant: "outline"[\s\S]*?Print approval form/,
+      /variant: "outline"[\s\S]*?Print form/,
     );
+    expect(bookingDetailSource).not.toContain("Print approval form");
     expect(bookingDetailSource).toContain("primaryAction={primaryAction}");
     expect(bookingDetailSource).toContain("secondaryAction={");
   });

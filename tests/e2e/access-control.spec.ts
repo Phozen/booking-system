@@ -5,6 +5,7 @@ import {
   getStorageState,
   missingStorageStateMessage,
 } from "./helpers/auth";
+import { adminSmokeRoutes, superAdminSmokeRoutes } from "./helpers/routes";
 
 const employeeStorageState = getStorageState("employee");
 const adminStorageState = getStorageState("admin");
@@ -26,7 +27,9 @@ test.describe("admin role access control", () => {
 
   test("admin can access operational admin routes", async ({ page }) => {
     await page.goto("/admin/bookings");
-    await expect(page.getByRole("heading", { name: /bookings/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: adminSmokeRoutes[1].heading }).first(),
+    ).toBeVisible();
   });
 });
 
@@ -36,6 +39,8 @@ test.describe("super-admin role access control", () => {
 
   test("super admin can access user management", async ({ page }) => {
     await page.goto("/admin/users");
-    await expect(page.getByRole("heading", { name: /users/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: superAdminSmokeRoutes[0].heading }).first(),
+    ).toBeVisible();
   });
 });

@@ -1,23 +1,23 @@
 export const publicRoutes = ["/", "/login", "/register", "/reset-password"];
 
 export const employeeSmokeRoutes = [
-  { path: "/dashboard", heading: /dashboard/i },
-  { path: "/facilities", heading: /facilities/i },
-  { path: "/calendar", heading: /calendar/i },
-  { path: "/profile", heading: /profile/i },
+  { path: "/dashboard", heading: /^(hi, |welcome)/i },
+  { path: "/facilities", heading: /^rooms$/i },
+  { path: "/calendar", heading: /^calendar$/i },
+  { path: "/profile", heading: /^your details$/i },
 ];
 
 export const adminSmokeRoutes = [
-  { path: "/admin/dashboard", heading: /admin dashboard/i },
-  { path: "/admin/bookings", heading: /bookings/i },
-  { path: "/admin/approvals", heading: /approvals/i },
-  { path: "/admin/facilities", heading: /facility management/i },
-  { path: "/admin/reports", heading: /reports/i },
+  { path: "/admin/dashboard", heading: /^room booking control$/i },
+  { path: "/admin/bookings", heading: /^booking management$/i },
+  { path: "/admin/approvals", heading: /^pending room requests$/i },
+  { path: "/admin/facilities", heading: /^facility management$/i },
+  { path: "/admin/reports", heading: /^reports and exports$/i },
 ];
 
 export const superAdminSmokeRoutes = [
-  { path: "/admin/users", heading: /users/i },
-  { path: "/admin/settings", heading: /settings/i },
-  { path: "/admin/system-health", heading: /system health/i },
-  { path: "/admin/integrations/microsoft-calendar", heading: /microsoft calendar/i },
+  { path: "/admin/users", heading: /^elevated user access$/i },
+  { path: "/admin/settings", heading: /^system settings$/i },
+  { path: "/admin/system-health", heading: /^system health$/i },
+  { path: "/admin/integrations/microsoft-calendar", heading: /^microsoft 365 calendar$/i },
 ];

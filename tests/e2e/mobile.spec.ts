@@ -5,6 +5,7 @@ import {
   getStorageState,
   missingStorageStateMessage,
 } from "./helpers/auth";
+import { adminSmokeRoutes, employeeSmokeRoutes } from "./helpers/routes";
 
 const employeeStorageState = getStorageState("employee");
 const adminStorageState = getStorageState("admin");
@@ -36,7 +37,9 @@ test.describe("mobile employee smoke checks", () => {
 
   test("employee dashboard is readable", async ({ page }) => {
     await page.goto("/dashboard");
-    await expect(page.getByRole("heading", { name: /dashboard/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: employeeSmokeRoutes[0].heading }).first(),
+    ).toBeVisible();
     await expect(page.locator("body")).toBeVisible();
   });
 });
@@ -47,7 +50,9 @@ test.describe("mobile admin smoke checks", () => {
 
   test("admin dashboard is readable", async ({ page }) => {
     await page.goto("/admin/dashboard");
-    await expect(page.getByRole("heading", { name: /admin dashboard/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: adminSmokeRoutes[0].heading }).first(),
+    ).toBeVisible();
     await expect(page.locator("body")).toBeVisible();
   });
 
