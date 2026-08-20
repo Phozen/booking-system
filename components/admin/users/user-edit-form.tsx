@@ -195,8 +195,8 @@ export function UserEditForm({
       <div>
         <h2 className="font-semibold tracking-normal">Edit user</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Update application profile fields, role, and access status. Supabase
-          Auth email and password changes are intentionally outside this page.
+          Update name, contact fields, role, and access. Sign-in email is
+          managed outside this page.
         </p>
       </div>
 

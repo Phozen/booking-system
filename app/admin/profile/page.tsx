@@ -84,7 +84,7 @@ export default async function AdminProfilePage() {
           <Alert variant="info">
             <LockKeyhole className="size-4" aria-hidden="true" />
             <AlertDescription>
-              Email, password, role, and account status are managed separately
+              Email, role, and account status are managed separately
               for security. {formatContactAdministratorMessage(settings)}
             </AlertDescription>
           </Alert>
