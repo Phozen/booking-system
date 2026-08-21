@@ -26,3 +26,21 @@ export function formatRequiresApproval(value: boolean | null) {
 
   return "Uses system default";
 }
+
+export function buildFacilitySlug(name: string, fallback = "facility") {
+  const slugify = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 140);
+
+  const fromName = slugify(name);
+  if (fromName.length >= 2) {
+    return fromName;
+  }
+
+  const fromFallback = slugify(fallback);
+  return fromFallback.length >= 2 ? fromFallback : "facility";
+}

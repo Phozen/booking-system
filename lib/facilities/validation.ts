@@ -14,15 +14,6 @@ export type FacilityStatus = (typeof facilityStatusOptions)[number];
 export const facilityFormSchema = z.object({
   code: z.string().trim().min(2, "Enter a facility code.").max(40),
   name: z.string().trim().min(2, "Enter a facility name.").max(120),
-  slug: z
-    .string()
-    .trim()
-    .min(2, "Enter a URL slug.")
-    .max(140)
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Use lowercase letters, numbers, and hyphens only.",
-    ),
   level: z.string().trim().min(2, "Enter the facility level.").max(80),
   type: z.enum(facilityTypeOptions),
   capacity: z.coerce

@@ -39,9 +39,12 @@ export function FacilityEquipmentManager({
         <h2 className="text-lg font-semibold tracking-normal">
           Facility equipment
         </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Tick what this room has, then set the quantity.
+        </p>
       </div>
 
-      <form action={formAction} className="mt-5 grid gap-4">
+      <form action={formAction} className="mt-4 grid gap-4">
         {state.status !== "idle" ? (
           <Alert variant={state.status === "error" ? "destructive" : "success"}>
             <AlertDescription>{state.message}</AlertDescription>
@@ -49,30 +52,35 @@ export function FacilityEquipmentManager({
         ) : null}
 
         {activeEquipment.length > 0 ? (
-          activeEquipment.map((item) => {
-            const current = assigned.get(item.id);
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {activeEquipment.map((item) => {
+              const current = assigned.get(item.id);
 
-            return (
-              <div key={item.id} className="grid gap-3 rounded-lg border p-4">
-                <label className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    name="equipmentId"
-                    value={item.id}
-                    defaultChecked={Boolean(current)}
-                    disabled={isPending}
-                    className="mt-1 size-4 accent-primary"
-                  />
-                  <span>
-                    <span className="block font-medium">{item.name}</span>
-                    <span className="mt-1 block text-sm text-muted-foreground">
-                      {item.description || "No description."}
+              return (
+                <div
+                  key={item.id}
+                  className="grid gap-3 rounded-lg border border-border/80 bg-background p-3 has-[:checked]:border-primary/50 has-[:checked]:bg-accent/40"
+                >
+                  <label className="flex min-w-0 items-start gap-2">
+                    <input
+                      type="checkbox"
+                      name="equipmentId"
+                      value={item.id}
+                      defaultChecked={Boolean(current)}
+                      disabled={isPending}
+                      className="mt-0.5 size-4 shrink-0 accent-primary"
+                    />
+                    <span className="min-w-0 text-sm font-medium leading-5">
+                      {item.name}
                     </span>
-                  </span>
-                </label>
-                <div className="grid gap-3 sm:grid-cols-[140px_minmax(0,1fr)]">
-                  <div className="grid gap-2">
-                    <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                  </label>
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+                    <Label
+                      htmlFor={`quantity-${item.id}`}
+                      className="text-xs text-muted-foreground"
+                    >
+                      Qty
+                    </Label>
                     <Input
                       id={`quantity-${item.id}`}
                       name={`quantity-${item.id}`}
@@ -80,21 +88,13 @@ export function FacilityEquipmentManager({
                       min={1}
                       defaultValue={current?.quantity ?? 1}
                       disabled={isPending}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor={`notes-${item.id}`}>Notes</Label>
-                    <Input
-                      id={`notes-${item.id}`}
-                      name={`notes-${item.id}`}
-                      defaultValue={current?.notes ?? ""}
-                      disabled={isPending}
+                      className="h-9"
                     />
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         ) : (
           <p className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
             No active equipment in the catalog yet. Add items in the equipment

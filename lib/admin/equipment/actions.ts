@@ -258,7 +258,7 @@ export async function updateFacilityEquipmentAction(
       facility_id: facilityId,
       equipment_id: equipmentId,
       quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : 1,
-      notes: getText(formData, `notes-${equipmentId}`) || null,
+      notes: null,
     };
   });
 

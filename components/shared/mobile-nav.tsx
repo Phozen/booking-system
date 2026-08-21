@@ -199,10 +199,11 @@ export function MobileNav({
         aria-hidden={!open}
         tabIndex={-1}
         className={cn(
-          "qbook-nav-photo absolute inset-x-4 top-full z-50 mt-2 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-lg border border-border p-3 shadow-lg transition-all duration-200 ease-out origin-top",
+          "qbook-nav-photo fixed end-4 z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] overflow-x-hidden overflow-y-auto rounded-lg border border-border p-3 shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
+          variant === "admin" ? "top-20" : "top-14 sm:top-16",
           open
-            ? "visible translate-y-0 scale-y-100 opacity-100"
-            : "invisible -translate-y-2 scale-y-95 opacity-0 pointer-events-none",
+            ? "visible translate-y-0 scale-100 opacity-100"
+            : "invisible -translate-y-2 scale-95 opacity-0 pointer-events-none",
         )}
       >
         {variant === "admin" ? (

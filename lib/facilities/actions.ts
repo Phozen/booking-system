@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { buildFacilitySlug } from "@/lib/facilities/format";
 import {
   facilityFormSchema,
   getOptionalFormValue,
@@ -13,7 +14,7 @@ import type { FacilityActionResult } from "@/lib/facilities/action-types";
 import { createClient } from "@/lib/supabase/server";
 
 function getFriendlyFacilityError() {
-  return "Facility could not be saved. Check for duplicate codes or slugs, then try again.";
+  return "Facility could not be saved. Check for a duplicate code, then try again.";
 }
 
 function getFriendlyFacilityArchiveError() {
@@ -41,7 +42,6 @@ function formDataToValues(formData: FormData) {
   return {
     code: getOptionalFormValue(formData, "code"),
     name: getOptionalFormValue(formData, "name"),
-    slug: getOptionalFormValue(formData, "slug"),
     level: getOptionalFormValue(formData, "level"),
     type: getOptionalFormValue(formData, "type"),
     capacity: getOptionalFormValue(formData, "capacity"),
@@ -110,7 +110,7 @@ export async function createFacilityAction(
   const facilityPayload = {
     code: parsed.data.code,
     name: parsed.data.name,
-    slug: parsed.data.slug,
+    slug: buildFacilitySlug(parsed.data.name, parsed.data.code),
     level: parsed.data.level,
     type: parsed.data.type,
     capacity: parsed.data.capacity,
@@ -201,7 +201,7 @@ export async function updateFacilityAction(
   const facilityPayload = {
     code: parsed.data.code,
     name: parsed.data.name,
-    slug: parsed.data.slug,
+    slug: existing.slug,
     level: parsed.data.level,
     type: parsed.data.type,
     capacity: parsed.data.capacity,
@@ -245,7 +245,7 @@ export async function updateFacilityAction(
   });
 
   revalidatePath("/facilities");
-  revalidatePath(`/facilities/${parsed.data.slug}`);
+  revalidatePath(`/facilities/${existing.slug}`);
   revalidatePath("/admin/facilities");
   revalidatePath(`/admin/facilities/${facilityId}`);
 
