@@ -7,6 +7,11 @@ import {
   formatCateringServingTime,
   formatCateringType,
 } from "@/lib/bookings/catering/format";
+import {
+  formatInviteeList,
+  formatPersonLabel,
+  getMeetingTypeLabel,
+} from "@/lib/email/booking-details";
 import type {
   EmailNotificationType,
   EmailTemplateInput,
@@ -54,6 +59,34 @@ function getDepartmentDisplayValue(data: Record<string, unknown>) {
   return labels.length > 0 ? labels.join(", ") : null;
 }
 
+function getInviteeDisplayValue(data: Record<string, unknown>) {
+  const invitees = data.invitees;
+
+  if (typeof invitees === "string" && invitees.trim()) {
+    return invitees.trim();
+  }
+
+  if (!Array.isArray(invitees)) {
+    return null;
+  }
+
+  return formatInviteeList(
+    invitees.flatMap((invitee) => {
+      if (!invitee || typeof invitee !== "object") {
+        return [];
+      }
+
+      const values = invitee as Record<string, unknown>;
+      return [
+        {
+          name: getStringValue(values, "name") ?? getStringValue(values, "fullName"),
+          email: getStringValue(values, "email"),
+        },
+      ];
+    }),
+  );
+}
+
 function getBookingLink(appUrl: string, bookingId: string | null) {
   const baseUrl = appUrl.replace(/\/$/, "");
   return bookingId ? `${baseUrl}/bookings/${bookingId}` : baseUrl;
@@ -90,7 +123,7 @@ function renderSectionRows(rows: EmailDetailRow[]) {
       (row) => `
         <tr>
           <th scope="row" style="width: 38%; padding: 9px 16px 9px 0; color: #475569; font-size: 13px; font-weight: 600; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
-          <td style="padding: 9px 0; color: #0f172a; font-size: 14px; font-weight: 600; line-height: 1.45; vertical-align: top;">${escapeHtml(row.value ?? "")}</td>
+          <td style="padding: 9px 0; color: #0f172a; font-size: 14px; font-weight: 600; line-height: 1.45; vertical-align: top; white-space: pre-wrap;">${escapeHtml(row.value ?? "").replaceAll("\n", "<br>")}</td>
         </tr>
       `,
     )
@@ -214,6 +247,9 @@ export function renderEmailTemplate(
     "cateringDietaryNotes",
   );
   const cateringNotes = getStringValue(input.templateData, "cateringNotes");
+  const description = getStringValue(input.templateData, "description");
+  const meetingType = getMeetingTypeLabel(input.templateData.teamsMeeting);
+  const invitees = getInviteeDisplayValue(input.templateData);
   const departments = getDepartmentDisplayValue(input.templateData);
   const link = getBookingLink(input.appUrl, bookingId);
   const calendarLink = getCalendarEventLink(
@@ -231,6 +267,7 @@ export function renderEmailTemplate(
     {
       title: "Meeting details",
       rows: [
+        { label: "Purpose", value: description },
         { label: "Facility", value: facility },
         { label: "Date", value: bookingDate },
         {
@@ -238,7 +275,9 @@ export function renderEmailTemplate(
           value: bookingTime ?? [startTime, endTime].filter(Boolean).join(" - "),
         },
         { label: "Status", value: status },
+        { label: "Meeting type", value: meetingType },
         { label: "Attendees", value: attendeeCount },
+        { label: "Invited people", value: invitees },
       ],
     },
     {
@@ -248,9 +287,9 @@ export function renderEmailTemplate(
     {
       title: "People",
       rows: [
-        { label: "Requester", value: requesterName ?? requesterEmail },
+        { label: "Requester", value: formatPersonLabel(requesterName, requesterEmail) },
         { label: "Invitation status", value: invitationStatus },
-        { label: "Responded by", value: actorName ?? actorEmail },
+        { label: "Responded by", value: formatPersonLabel(actorName, actorEmail) },
       ],
     },
     {

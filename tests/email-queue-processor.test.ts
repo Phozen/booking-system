@@ -256,11 +256,31 @@ describe("email queue processor", () => {
       id: "booking-1",
       user_id: "owner-1",
       title: "Planning Session",
+      description: "Quarterly planning",
+      attendee_count: 4,
+      teams_meeting: true,
+      catering_type: null,
+      catering_pax: null,
+      catering_serving_time: null,
+      catering_dietary_notes: null,
+      catering_notes: null,
+      cancellation_reason: null,
       status: "confirmed",
       starts_at: "2037-01-01T01:00:00.000Z",
       ends_at: "2037-01-01T02:00:00.000Z",
-      facilities: null,
+      facilities: { name: "Board Room", level: "Level 3" },
+      profiles: { email: "owner@example.com", full_name: "Owner User" },
       booking_departments: [],
+      booking_invitations: [
+        {
+          status: "accepted",
+          invited_user: { email: "guest@example.com", full_name: "Guest User" },
+        },
+        {
+          status: "declined",
+          invited_user: { email: "skip@example.com", full_name: "Skip User" },
+        },
+      ],
     };
     const supabase = createSupabaseMock({
       claimed: [ownerEmail, unrelatedEmail],
@@ -274,6 +294,14 @@ describe("email queue processor", () => {
       expect.objectContaining({
         templateData: expect.objectContaining({
           calendarEventPath: "/bookings/booking-1/calendar",
+          description: "Quarterly planning",
+          facilityName: "Board Room",
+          facilityLevel: "Level 3",
+          attendeeCount: 4,
+          teamsMeeting: true,
+          requesterName: "Owner User",
+          requesterEmail: "owner@example.com",
+          invitees: [{ name: "Guest User", email: "guest@example.com" }],
         }),
       }),
     );

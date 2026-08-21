@@ -368,6 +368,7 @@ describe("adminCreateBookingAction", () => {
       template_data: {
         bookingId: createdBooking.id,
         title: createdBooking.title,
+        description: "Quarterly planning",
         facilityName: facility.name,
         attendeeCount: 4,
         startsAt: createdBooking.starts_at,

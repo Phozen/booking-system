@@ -55,6 +55,7 @@ type AdminBookingActionRecord = {
   facility_id: string;
   user_id: string;
   title: string;
+  description?: string | null;
   status: BookingStatus;
   attendee_count?: number | null;
   starts_at: string;
@@ -425,6 +426,7 @@ async function insertCompanyBookingConfirmationNotifications({
         template_data: {
           bookingId: booking.id,
           title: booking.title,
+          description: booking.description ?? null,
           facilityName,
           attendeeCount: booking.attendee_count ?? null,
           startsAt: booking.starts_at,
@@ -615,6 +617,7 @@ export async function adminCreateBookingAction(
       templateData: {
         bookingId: booking.id,
         title: booking.title,
+        description: (booking.description ?? parsed.data.description) || null,
         facilityName: availability.facility.name,
         attendeeCount: booking.attendee_count,
         startsAt: booking.starts_at,
@@ -806,6 +809,7 @@ export async function adminCancelBookingAction(
     templateData: {
       bookingId: updated.id,
       title: updated.title,
+      description: updated.description ?? null,
       facilityName: facility?.name ?? null,
       facilityLevel: facility?.level ?? null,
       startsAt: updated.starts_at,
@@ -968,6 +972,7 @@ export async function approveBookingAction(
     templateData: {
       bookingId: updated.id,
       title: updated.title,
+      description: updated.description ?? null,
       facilityName: facility?.name ?? null,
       facilityLevel: facility?.level ?? null,
       startsAt: updated.starts_at,
@@ -1091,6 +1096,7 @@ export async function rejectBookingAction(
     templateData: {
       bookingId: updated.id,
       title: updated.title,
+      description: updated.description ?? null,
       facilityName: facility?.name ?? null,
       facilityLevel: facility?.level ?? null,
       startsAt: updated.starts_at,

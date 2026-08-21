@@ -9,60 +9,55 @@ import type {
   EmailTemplateData,
 } from "@/lib/email/types";
 
-type RelatedBookingRecord =
-  | {
-      id: string;
-      user_id: string;
-      title: string;
-      status: string;
-      starts_at: string;
-      ends_at: string;
-      facilities:
-        | {
-            name: string;
-            level: string;
-          }
-        | {
-            name: string;
-            level: string;
-          }[]
-        | null;
-      booking_departments:
-        | {
-            departments:
-              | { name: string; email: string }
-              | { name: string; email: string }[]
-              | null;
-          }[]
-        | null;
-    }
-  | {
-      id: string;
-      user_id: string;
-      title: string;
-      status: string;
-      starts_at: string;
-      ends_at: string;
-      facilities:
-        | {
-            name: string;
-            level: string;
-          }
-        | {
-            name: string;
-            level: string;
-          }[]
-        | null;
-      booking_departments:
-        | {
-            departments:
-              | { name: string; email: string }
-              | { name: string; email: string }[]
-              | null;
-          }[]
-        | null;
-    }[]
-  | null;
+type RelatedProfile = {
+  email: string;
+  full_name: string | null;
+};
+
+type RelatedBookingRow = {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  attendee_count: number | null;
+  teams_meeting: boolean | null;
+  catering_type: string | null;
+  catering_pax: number | null;
+  catering_serving_time: string | null;
+  catering_dietary_notes: string | null;
+  catering_notes: string | null;
+  cancellation_reason: string | null;
+  status: string;
+  starts_at: string;
+  ends_at: string;
+  facilities:
+    | {
+        name: string;
+        level: string;
+      }
+    | {
+        name: string;
+        level: string;
+      }[]
+    | null;
+  profiles: RelatedProfile | RelatedProfile[] | null;
+  booking_departments:
+    | {
+        departments:
+          | { name: string; email: string }
+          | { name: string; email: string }[]
+          | null;
+      }[]
+    | null;
+  booking_invitations:
+    | {
+        status: string;
+        invited_user: RelatedProfile | RelatedProfile[] | null;
+      }[]
+    | null;
+};
+
+type RelatedBookingRecord = RelatedBookingRow | RelatedBookingRow[] | null;
 
 type SingleRelatedBooking = Exclude<RelatedBookingRecord, null | unknown[]>;
 
@@ -103,6 +98,15 @@ const relatedBookingSelect = `
   id,
   user_id,
   title,
+  description,
+  attendee_count,
+  teams_meeting,
+  catering_type,
+  catering_pax,
+  catering_serving_time,
+  catering_dietary_notes,
+  catering_notes,
+  cancellation_reason,
   status,
   starts_at,
   ends_at,
@@ -110,10 +114,21 @@ const relatedBookingSelect = `
     name,
     level
   ),
+  profiles!bookings_user_id_fkey (
+    email,
+    full_name
+  ),
   booking_departments (
     departments (
       name,
       email
+    )
+  ),
+  booking_invitations (
+    status,
+    invited_user:profiles!booking_invitations_invited_user_id_fkey (
+      email,
+      full_name
     )
   )
 `;
@@ -243,26 +258,71 @@ function getRelatedDepartments(record: QueueNotificationRecord) {
   });
 }
 
+function getRelatedOwner(record: QueueNotificationRecord) {
+  const booking = getRelatedBooking(record);
+  const owner = booking?.profiles;
+  return Array.isArray(owner) ? owner[0] : owner;
+}
+
+function getRelatedInvitees(record: QueueNotificationRecord) {
+  const booking = getRelatedBooking(record);
+
+  return (booking?.booking_invitations ?? []).flatMap((invitation) => {
+    if (!["pending", "accepted"].includes(invitation.status)) {
+      return [];
+    }
+
+    const invitee = Array.isArray(invitation.invited_user)
+      ? invitation.invited_user[0]
+      : invitation.invited_user;
+
+    if (!invitee?.email) {
+      return [];
+    }
+
+    return [
+      {
+        name: invitee.full_name,
+        email: invitee.email,
+      },
+    ];
+  });
+}
+
 function enrichTemplateData(record: QueueNotificationRecord): EmailTemplateData {
   const booking = getRelatedBooking(record);
   const facility = getRelatedFacility(record);
+  const owner = getRelatedOwner(record);
+  const invitees = getRelatedInvitees(record);
+  const queued = record.template_data ?? {};
 
   return {
-    ...(record.template_data ?? {}),
-    bookingId:
-      record.template_data?.bookingId ?? record.related_booking_id ?? booking?.id,
-    title: record.template_data?.title ?? booking?.title,
-    facilityName: record.template_data?.facilityName ?? facility?.name,
-    facilityLevel: record.template_data?.facilityLevel ?? facility?.level,
-    startsAt: record.template_data?.startsAt ?? booking?.starts_at,
-    endsAt: record.template_data?.endsAt ?? booking?.ends_at,
-    status: record.template_data?.status ?? booking?.status,
-    departments: record.template_data?.departments ?? getRelatedDepartments(record),
+    ...queued,
+    bookingId: queued.bookingId ?? record.related_booking_id ?? booking?.id,
+    title: queued.title ?? booking?.title,
+    description: queued.description ?? booking?.description,
+    facilityName: queued.facilityName ?? facility?.name,
+    facilityLevel: queued.facilityLevel ?? facility?.level,
+    startsAt: queued.startsAt ?? booking?.starts_at,
+    endsAt: queued.endsAt ?? booking?.ends_at,
+    status: queued.status ?? booking?.status,
+    attendeeCount: queued.attendeeCount ?? booking?.attendee_count,
+    teamsMeeting: queued.teamsMeeting ?? booking?.teams_meeting,
+    requesterName: queued.requesterName ?? owner?.full_name,
+    requesterEmail: queued.requesterEmail ?? owner?.email,
+    cateringType: queued.cateringType ?? booking?.catering_type,
+    cateringPax: queued.cateringPax ?? booking?.catering_pax,
+    cateringServingTime: queued.cateringServingTime ?? booking?.catering_serving_time,
+    cateringDietaryNotes: queued.cateringDietaryNotes ?? booking?.catering_dietary_notes,
+    cateringNotes: queued.cateringNotes ?? booking?.catering_notes,
+    cancellationReason: queued.cancellationReason ?? booking?.cancellation_reason,
+    departments: queued.departments ?? getRelatedDepartments(record),
+    invitees: queued.invitees ?? invitees,
     calendarEventPath:
       record.calendarEventEligible &&
-      (record.template_data?.status ?? booking?.status) === "confirmed" &&
-      (record.template_data?.bookingId ?? record.related_booking_id ?? booking?.id)
-        ? `/bookings/${record.template_data?.bookingId ?? record.related_booking_id ?? booking?.id}/calendar`
+      (queued.status ?? booking?.status) === "confirmed" &&
+      (queued.bookingId ?? record.related_booking_id ?? booking?.id)
+        ? `/bookings/${queued.bookingId ?? record.related_booking_id ?? booking?.id}/calendar`
         : undefined,
   };
 }

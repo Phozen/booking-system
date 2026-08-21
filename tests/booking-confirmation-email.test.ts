@@ -236,6 +236,7 @@ describe("booking confirmation email queueing", () => {
       template_data: {
         bookingId: confirmedBooking.id,
         title: confirmedBooking.title,
+        description: confirmedBooking.description,
         facilityName: facility.name,
         attendeeCount: 4,
         startsAt: confirmedBooking.starts_at,
@@ -389,6 +390,59 @@ describe("booking confirmation email template", () => {
     expect(rendered.html).toContain('role="presentation"');
     expect(rendered.html).toContain('bgcolor="#f1f5f9"');
     expect(rendered.html).not.toContain("; color: #ffffff;");
+  });
+
+  it("renders purpose, meeting type, invited people, and requester email when present", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_confirmation",
+      recipientEmail: user.email,
+      subject: "Booking confirmed: Planning Session",
+      body: "Your booking has been confirmed.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+        description: "Quarterly planning\nBring last quarter notes",
+        facilityName: "Board Room",
+        facilityLevel: "Level 3",
+        startsAt: "2037-01-01T01:00:00.000Z",
+        endsAt: "2037-01-01T02:00:00.000Z",
+        attendeeCount: 4,
+        teamsMeeting: true,
+        status: "confirmed",
+        requesterName: "Employee User",
+        requesterEmail: user.email,
+        invitees: [
+          { name: "Guest User", email: "guest@example.com" },
+          {},
+        ],
+      },
+    });
+
+    expect(rendered.text).toContain("Purpose: Quarterly planning\nBring last quarter notes");
+    expect(rendered.text).toContain("Facility: Board Room · Level 3");
+    expect(rendered.text).toContain("Meeting type: Teams meeting");
+    expect(rendered.text).toContain("Invited people: Guest User (guest@example.com)");
+    expect(rendered.text).toContain("Requester: Employee User (employee@example.com)");
+    expect(rendered.html).toContain("Quarterly planning<br>Bring last quarter notes");
+  });
+
+  it("omits empty optional booking details", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_confirmation",
+      recipientEmail: user.email,
+      subject: "Booking confirmed: Planning Session",
+      body: "Your booking has been confirmed.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+      },
+    });
+
+    expect(rendered.text).not.toContain("Purpose:");
+    expect(rendered.text).not.toContain("Meeting type:");
+    expect(rendered.text).not.toContain("Invited people:");
   });
 
   it("adds the protected Outlook calendar action only when the queue provides it", () => {

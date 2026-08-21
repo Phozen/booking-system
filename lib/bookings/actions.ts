@@ -193,6 +193,7 @@ async function insertBookingConfirmationNotification({
         template_data: {
           bookingId: booking.id,
           title: booking.title,
+          description: booking.description,
           facilityName,
           attendeeCount: booking.attendee_count,
           startsAt: booking.starts_at,
@@ -277,6 +278,7 @@ async function insertCateringRequestNotifications({
           template_data: {
             bookingId: booking.id,
             title: booking.title,
+            description: booking.description,
             facilityName,
             attendeeCount: booking.attendee_count,
             startsAt: booking.starts_at,
@@ -366,6 +368,7 @@ async function insertCompanyBookingConfirmationNotifications({
         template_data: {
           bookingId: booking.id,
           title: booking.title,
+          description: booking.description,
           facilityName,
           attendeeCount: booking.attendee_count,
           startsAt: booking.starts_at,
