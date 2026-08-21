@@ -1,58 +1,72 @@
 # QBook
 
-QBook is an internal facility-booking system for organisations that need controlled booking of meeting rooms and event spaces. It is built with Next.js, Supabase, and optional email and calendar integrations.
+[![CI](https://github.com/Phozen/booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Phozen/booking-system/actions/workflows/ci.yml)
 
-The application enforces the booking and access rules at the server and database layers. It is intended for a Microsoft-managed internal workforce, not public self-service registration.
+Internal facility booking for meeting rooms and event spaces. People sign in with Microsoft. Access is allowlisted. There is no public signup.
+
+**Live app:** [booking-system-self-five.vercel.app](https://booking-system-self-five.vercel.app)
+
+The live site is for approved staff. Sign-in needs a Microsoft account on the organisation tenant, plus an active allowlist row.
+
+Booking and access rules run on the server and in the database, not only in the browser.
 
 ## What it does
 
 ### Employees
 
-- Sign in through the approved Microsoft/Supabase access flow.
-- Browse active facilities, their photos, capacity, equipment, and availability.
-- Create, edit, reschedule, and cancel eligible bookings.
-- Include attendee count, catering details, involved departments, and initial internal invitees.
-- View personal bookings, invitations, notifications, notification preferences, profile details, and calendar entries.
-- Accept or decline booking invitations.
+- Sign in with Microsoft.
+- Browse rooms, photos, capacity, equipment, and availability.
+- Create, edit, reschedule, and cancel bookings they are allowed to change.
+- Add purpose, headcount, Teams or room-only, catering, departments, and internal invitees.
+- Open their bookings, invitations, notifications, profile, and calendar.
+- Accept or decline invitations.
 
 ### Administrators
 
-- Run operational dashboards, bookings, approvals, facilities, equipment, blocked periods, maintenance, email queues, reports, audit logs, and availability controls.
-- Create bookings on behalf of active users and manage initial participants.
-- Export booking, utilisation, cancellation, user, and audit-log reports as CSV.
+- Run bookings, approvals, rooms, equipment, blocked times, maintenance, email queue, reports, and audit logs.
+- Create a booking for an active user and set the first participants.
+- Check people in or mark a no-show when the booking state allows it.
+- Export booking, utilisation, cancellation, user, and audit reports as CSV.
 
 ### Super Administrators
 
-- Manage active allowlisted users, roles, system settings, departments, and integration status/retries.
-- Configure the application’s operational settings without exposing provider credentials.
+- Manage allowlisted users, roles, departments, and non-secret settings.
+- Review calendar sync status and retries.
+- Set whether employees see only their own bookings on the calendar, or every booking.
 
-## Current feature highlights
+## Current highlights
 
-- Database-backed prevention of overlapping active bookings, with back-to-back slots permitted.
-- Approval-aware booking lifecycle, audit logging, check-in/no-show tracking, and catering records.
-- Normalised department tags that remain visible on historical bookings and can receive booking notifications.
-- Internal attendee invitations created atomically with a booking.
-- Private facility-photo storage with signed URL display and admin-only upload management.
-- Notification queue with protected reminder/processing routes and health reporting.
-- Optional one-way outbound Microsoft Graph or n8n calendar sync. It is disabled until its external configuration is verified.
-- Microsoft-only, pre-provisioned access controls backed by Supabase Auth, RLS, policies, and server-side checks.
+- Overlapping active bookings are blocked. A slot that starts when the previous one ends is allowed.
+- Approval, check-in, no-show, catering, and audit history are stored with the booking.
+- Department tags stay on historical bookings and can receive booking mail.
+- Internal invitations are created with the booking in one database step.
+- Room photos stay in private storage and are shown with signed URLs.
+- Booking emails include purpose, room, time, status, meeting type, invitees, requester, departments, and catering when those fields exist.
+- Optional one-way calendar sync to Microsoft Graph or n8n. It stays off until the external setup is verified.
+- Microsoft-only access, backed by Supabase Auth, RLS, policies, and server checks.
 
-Recurring booking operations are intentionally retired. Historical recurrence data remains for audit purposes, but the application no longer offers recurring-booking creation or management.
+Recurring booking tools are retired on purpose. Old recurrence rows stay for audit only.
+
+## Not in this product
+
+- Public self-service registration
+- Password login for staff
+- Recurring series create or edit
+- Two-way Outlook calendar sync
+- External guests outside the Microsoft allowlist
 
 ## Technology
 
 - Next.js 16 App Router and React 19
-- TypeScript, Tailwind CSS, and component primitives
+- TypeScript, Tailwind CSS, and shadcn/Base UI
 - Supabase Auth, PostgreSQL, Row Level Security, and Storage
 - Zod and React Hook Form
-- Resend or SMTP for app notification delivery
-- Microsoft Graph or n8n webhook calendar providers (optional)
+- Resend or SMTP for app mail
+- Microsoft Graph or n8n calendar providers (optional)
 - Vitest and Playwright
-- Vercel deployment configuration and GitHub Actions CI
+- Vercel deploy on push to `main`, plus GitHub Actions CI
 
 ## Repository guides
-
-Start here when evaluating or operating the system:
 
 | Guide | Purpose |
 | --- | --- |
@@ -76,7 +90,7 @@ Operational runbooks such as [email operations](docs/EMAIL_OPERATIONS.md), [Micr
 - A Supabase project for Auth, database, and Storage
 - Supabase CLI for migration work
 
-Optional integrations require their own provider credentials and administrator approval; they are not required for a safe local development run.
+Optional email and calendar integrations need their own credentials and admin approval. They are not required for a safe local run.
 
 ## Quick start
 
