@@ -176,3 +176,27 @@ describe("mobile calendar empty-day selection", () => {
     expect(dayPanelSource).toContain("Book this day");
   });
 });
+
+describe("employee calendar primary action", () => {
+  const controlsSource = readFileSync(
+    join(process.cwd(), "components/calendar/calendar-controls.tsx"),
+    "utf8",
+  );
+  const dayPanelSource = readFileSync(
+    join(process.cwd(), "components/calendar/calendar-day-detail-panel.tsx"),
+    "utf8",
+  );
+
+  it("keeps Book this day filled and makes compact Apply outline", () => {
+    expect(controlsSource).toContain(
+      'buttonVariants({ variant: "outline", size: "sm" })',
+    );
+    expect(controlsSource).toContain(
+      'buttonVariants({ size: "sm", className: "w-full md:w-auto" })',
+    );
+    expect(dayPanelSource).toContain(
+      'buttonVariants({ size: "sm", className: "shrink-0" })',
+    );
+    expect(dayPanelSource).toContain("buttonVariants()");
+  });
+});

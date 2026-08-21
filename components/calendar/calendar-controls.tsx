@@ -122,7 +122,7 @@ export function CalendarControls({
 
           <div className="flex gap-2 sm:pb-0.5">
             <button
-              className={buttonVariants({ size: "sm" })}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
               type="submit"
             >
               <CalendarDays data-icon="inline-start" aria-hidden="true" />
