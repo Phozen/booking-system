@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 
 import {
   toggleEquipmentActiveAction,
@@ -11,6 +11,7 @@ import {
 import type { EquipmentItem } from "@/lib/admin/equipment/queries";
 import { cn } from "@/lib/utils";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   FormFieldError,
   getFieldDescribedBy,
@@ -100,6 +101,7 @@ function EquipmentEditForm({ item }: { item: EquipmentItem }) {
 }
 
 function EquipmentStatusForm({ item }: { item: EquipmentItem }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, isPending] = useActionState(
     toggleEquipmentActiveAction.bind(null, item.id, !item.isActive),
     initialState,
@@ -117,7 +119,7 @@ function EquipmentStatusForm({ item }: { item: EquipmentItem }) {
             : "Reactivated items become available for facility assignment again."}
         </p>
       </div>
-      <form action={formAction} className="grid gap-2">
+      <form ref={formRef} action={formAction} className="grid gap-2">
         <ActionToastEffect
           state={state}
           successTitle={item.isActive ? "Equipment archived" : "Equipment reactivated"}
@@ -128,20 +130,34 @@ function EquipmentStatusForm({ item }: { item: EquipmentItem }) {
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}
-        <Button
-          type="submit"
-          variant={item.isActive ? "outline" : "secondary"}
-          size="sm"
-          disabled={isPending}
-          className="w-full sm:w-auto"
-        >
-          <PendingButtonContent
+        {item.isActive ? (
+          <ConfirmDialog
+            triggerLabel="Archive"
+            title="Archive this item?"
+            description={`${item.name} will stay on historical records but cannot be newly assigned.`}
+            confirmLabel="Archive"
+            cancelLabel="Keep equipment"
+            pendingLabel="Archiving..."
+            destructive
             pending={isPending}
-            pendingLabel={item.isActive ? "Archiving..." : "Restoring..."}
+            triggerSize="sm"
+            triggerClassName="w-full sm:w-auto"
+            triggerVariant="outline"
+            onConfirm={() => formRef.current?.requestSubmit()}
+          />
+        ) : (
+          <Button
+            type="submit"
+            variant="secondary"
+            size="sm"
+            disabled={isPending}
+            className="w-full sm:w-auto"
           >
-            {item.isActive ? "Archive" : "Reactivate"}
-          </PendingButtonContent>
-        </Button>
+            <PendingButtonContent pending={isPending} pendingLabel="Restoring...">
+              Reactivate
+            </PendingButtonContent>
+          </Button>
+        )}
       </form>
     </div>
   );
