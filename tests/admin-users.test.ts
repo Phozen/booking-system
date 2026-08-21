@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   approvedUserCreateSchema,
+  isLastActiveSuperAdmin,
   isSelfRoleOrStatusChange,
   parseUserFilters,
   removesActiveAdminAccess,
@@ -98,6 +99,32 @@ describe("admin user management validation", () => {
         existingStatus: "active",
         nextRole: "employee",
         nextStatus: "disabled",
+      }),
+    ).toBe(false);
+  });
+
+  it("detects the last active Super Admin", () => {
+    expect(
+      isLastActiveSuperAdmin({
+        role: "super_admin",
+        status: "active",
+        otherActiveSuperAdminCount: 0,
+      }),
+    ).toBe(true);
+
+    expect(
+      isLastActiveSuperAdmin({
+        role: "super_admin",
+        status: "active",
+        otherActiveSuperAdminCount: 1,
+      }),
+    ).toBe(false);
+
+    expect(
+      isLastActiveSuperAdmin({
+        role: "admin",
+        status: "active",
+        otherActiveSuperAdminCount: 0,
       }),
     ).toBe(false);
   });

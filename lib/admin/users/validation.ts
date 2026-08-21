@@ -149,6 +149,22 @@ export function removesActiveAdminAccess({
   );
 }
 
+export function isLastActiveSuperAdmin({
+  role,
+  status,
+  otherActiveSuperAdminCount,
+}: {
+  role: UserRole;
+  status: UserStatus;
+  otherActiveSuperAdminCount: number;
+}) {
+  return (
+    role === "super_admin" &&
+    status === "active" &&
+    otherActiveSuperAdminCount === 0
+  );
+}
+
 export function formatUserRole(role: UserRole) {
   const labels: Record<UserRole, string> = {
     employee: "Employee",

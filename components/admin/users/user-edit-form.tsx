@@ -125,12 +125,17 @@ function getConfirmCopy({
   };
 }
 
+const lastSuperAdminLockMessage =
+  "This is the last active Super Admin. Role and status stay locked so the system always has one Super Admin.";
+
 export function UserEditForm({
   user,
   currentUserId,
+  isLastActiveSuperAdmin = false,
 }: {
   user: AdminUserProfile;
   currentUserId: string;
+  isLastActiveSuperAdmin?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(
     updateUserProfileAction,
@@ -141,6 +146,12 @@ export function UserEditForm({
   const [selectedStatus, setSelectedStatus] = useState<UserStatus>(user.status);
   const formRef = useRef<HTMLFormElement>(null);
   const isSelf = currentUserId === user.authUserId;
+  const lockAccessControls = isSelf || isLastActiveSuperAdmin;
+  const accessLockMessage = isLastActiveSuperAdmin
+    ? lastSuperAdminLockMessage
+    : isSelf
+      ? "You are editing your own profile. Role and status controls are locked to prevent accidental loss of admin access."
+      : null;
   const confirmCopy = getConfirmCopy({
     initialStatus: user.status,
     selectedStatus,
@@ -185,7 +196,7 @@ export function UserEditForm({
         errorTitle="User update failed"
       />
       <input type="hidden" name="userId" value={user.id} />
-      {isSelf ? (
+      {lockAccessControls ? (
         <>
           <input type="hidden" name="role" value={user.role} />
           <input type="hidden" name="status" value={user.status} />
@@ -206,12 +217,9 @@ export function UserEditForm({
         </Alert>
       ) : null}
 
-      {isSelf ? (
+      {accessLockMessage ? (
         <Alert>
-          <AlertDescription>
-            You are editing your own profile. Role and status controls are locked
-            to prevent accidental loss of admin access.
-          </AlertDescription>
+          <AlertDescription>{accessLockMessage}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -308,7 +316,7 @@ export function UserEditForm({
               id="role"
               name="role"
               value={selectedRole}
-              disabled={isSelf}
+              disabled={lockAccessControls}
               onChange={(event) => setSelectedRole(event.target.value as UserRole)}
               aria-describedby={getFieldDescribedBy(
                 "role-helper",
@@ -336,7 +344,7 @@ export function UserEditForm({
               id="status"
               name="status"
               value={selectedStatus}
-              disabled={isSelf}
+              disabled={lockAccessControls}
               onChange={(event) =>
                 setSelectedStatus(event.target.value as UserStatus)
               }

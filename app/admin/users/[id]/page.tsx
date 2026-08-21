@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
-import { getAdminUserById } from "@/lib/admin/users/queries";
+import {
+  countOtherActiveSuperAdmins,
+  getAdminUserById,
+} from "@/lib/admin/users/queries";
+import { isLastActiveSuperAdmin } from "@/lib/admin/users/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UserDetail } from "@/components/admin/users/user-detail";
 import { UserEditForm } from "@/components/admin/users/user-edit-form";
@@ -20,7 +24,10 @@ export default async function AdminUserDetailPage({
   const { user: currentUser } = await requireSuperAdmin();
   const { id } = await params;
   const supabase = createAdminClient();
-  const user = await getAdminUserById(supabase, id);
+  const [user, otherActiveSuperAdminCount] = await Promise.all([
+    getAdminUserById(supabase, id),
+    countOtherActiveSuperAdmins(supabase, id),
+  ]);
 
   if (!user) {
     notFound();
@@ -55,7 +62,15 @@ export default async function AdminUserDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] lg:items-start">
         <UserDetail user={user} />
-        <UserEditForm user={user} currentUserId={currentUser.id} />
+        <UserEditForm
+          user={user}
+          currentUserId={currentUser.id}
+          isLastActiveSuperAdmin={isLastActiveSuperAdmin({
+            role: user.role,
+            status: user.status,
+            otherActiveSuperAdminCount,
+          })}
+        />
       </div>
     </main>
   );
