@@ -1,4 +1,4 @@
-import { buildBookingDetailRows, detailRowsToHtml } from "@/lib/email/booking-details";
+import { buildBookingDetailSections, detailSectionsToHtml } from "@/lib/email/booking-details";
 import type { MicrosoftGraphEventPayload } from "@/lib/integrations/microsoft-365-calendar/types";
 
 export type MicrosoftCalendarBookingForEvent = {
@@ -96,7 +96,7 @@ export function buildMicrosoftCalendarEventPayload({
   const facilityLevel = booking.facility?.level ?? "Level not set";
   const bookingLink = buildBookingLink(booking.id, appUrl);
 
-  const detailRows = buildBookingDetailRows({
+  const sections = buildBookingDetailSections({
     facilityName,
     facilityLevel,
     startsAt: booking.startsAt,
@@ -114,7 +114,7 @@ export function buildMicrosoftCalendarEventPayload({
     bookingLink: bookingLink,
   });
 
-  const bodyLines = [detailRowsToHtml(detailRows)].filter(Boolean);
+  const bodyLines = [detailSectionsToHtml(sections)].filter(Boolean);
 
   const attendees = buildAttendees(booking);
 

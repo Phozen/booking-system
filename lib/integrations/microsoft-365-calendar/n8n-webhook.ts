@@ -1,4 +1,4 @@
-import { buildBookingDetailRows, detailRowsToText } from "@/lib/email/booking-details";
+import { buildBookingDetailSections, detailSectionsToText } from "@/lib/email/booking-details";
 import type { N8nCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import { toCalendarLocalDateTime } from "@/lib/integrations/microsoft-365-calendar/event-mapper";
@@ -199,7 +199,7 @@ export function buildN8nCalendarCreatePayload({
 }): N8nCalendarCreatePayload {
   const bookingUrl = buildBookingUrl(booking.id, appUrl);
 
-  const detailRows = buildBookingDetailRows({
+  const sections = buildBookingDetailSections({
     facilityName: booking.facility?.name,
     facilityLevel: booking.facility?.level,
     startsAt: booking.startsAt,
@@ -226,7 +226,7 @@ export function buildN8nCalendarCreatePayload({
     bookingId: booking.id,
     bookingReference: booking.id,
     title: booking.title,
-    description: detailRowsToText(detailRows),
+    description: detailSectionsToText(sections),
     facilityName: booking.facility?.name ?? "Facility",
     facilityLevel: booking.facility?.level ?? "Level not set",
     facilityType: booking.facility?.type ?? null,
