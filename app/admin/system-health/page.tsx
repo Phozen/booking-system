@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getEmailAppUrlConfig } from "@/lib/email/app-url";
 import { getEmailCronMonitor } from "@/lib/email/cron-health";
-import { getMicrosoftGraphEmailConfig } from "@/lib/email/microsoft-graph-config";
 import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
 import { getEmailQueueHealth } from "@/lib/email/health";
@@ -77,11 +76,6 @@ export default async function SystemHealthPage() {
     emailProvider === "smtp"
       ? validateSmtpConfig(getSmtpConfigFromEnv(process.env))
       : null;
-  const microsoftGraphEmailConfig = getMicrosoftGraphEmailConfig();
-  const microsoftGraphEmailError =
-    emailProvider === "microsoft_graph"
-      ? microsoftGraphEmailConfig.validationError
-      : null;
   const microsoftConfig = getMicrosoftCalendarSyncConfig();
   const appUrlConfig = getEmailAppUrlConfig();
   const [emailHealth, emailCronMonitor, queuedEmails, failedSyncs] = await Promise.all([
@@ -123,22 +117,22 @@ export default async function SystemHealthPage() {
           title="Email provider"
           status={
             emailProvider === "none" ||
+            emailProvider !== "smtp" ||
             !emailFrom ||
-            (emailProvider === "smtp" && smtpError) ||
-            Boolean(microsoftGraphEmailError)
+            Boolean(smtpError)
               ? "warning"
               : "ok"
           }
           meta={
             emailProvider === "none"
               ? "EMAIL_PROVIDER is none or blank."
-              : !emailFrom
-                ? "EMAIL_FROM is missing."
-                : smtpError
-                  ? smtpError
-                  : microsoftGraphEmailError
-                    ? microsoftGraphEmailError
-                  : `Provider: ${emailProvider.toUpperCase()}. Failed: ${emailHealth.failed}. Overdue: ${emailHealth.overdueQueued}. Stale sending: ${emailHealth.staleSending}. Queued: ${queuedEmails ?? "unknown"}.`
+              : emailProvider !== "smtp"
+                ? `Unsupported EMAIL_PROVIDER=${emailProvider}. Use smtp.`
+                : !emailFrom
+                  ? "EMAIL_FROM is missing."
+                  : smtpError
+                    ? smtpError
+                    : `Provider: SMTP. Failed: ${emailHealth.failed}. Overdue: ${emailHealth.overdueQueued}. Stale sending: ${emailHealth.staleSending}. Queued: ${queuedEmails ?? "unknown"}.`
           }
           icon={<Mail className="size-5" aria-hidden="true" />}
         />
