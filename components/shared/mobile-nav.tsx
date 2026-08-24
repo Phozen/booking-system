@@ -47,7 +47,6 @@ export function MobileNav({
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   const close = () => {
@@ -148,26 +147,6 @@ export function MobileNav({
     };
   }, [open]);
 
-  // Scroll the menu from anywhere while it is open (body scroll is locked).
-  useEffect(() => {
-    if (!open) return;
-
-    function onWheel(event: WheelEvent) {
-      const scrollEl = scrollRef.current;
-      if (!scrollEl) return;
-
-      if (scrollEl.contains(event.target as Node)) {
-        return;
-      }
-
-      event.preventDefault();
-      scrollEl.scrollTop += event.deltaY;
-    }
-
-    document.addEventListener("wheel", onWheel, { passive: false });
-    return () => document.removeEventListener("wheel", onWheel);
-  }, [open]);
-
   return (
     <div className={cn("relative", className)}>
       <Button
@@ -220,42 +199,33 @@ export function MobileNav({
         aria-hidden={!open}
         tabIndex={-1}
         className={cn(
-          "fixed end-4 z-50 mt-2 flex w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] flex-col overflow-hidden rounded-lg border border-border shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
+          "qbook-nav-photo fixed end-4 z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] overflow-x-hidden overflow-y-auto rounded-lg border border-border p-3 shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
           variant === "admin" ? "top-20" : "top-14 sm:top-16",
           open
             ? "visible translate-y-0 scale-100 opacity-100"
             : "invisible -translate-y-2 scale-95 opacity-0 pointer-events-none",
         )}
       >
-        <div
-          className="qbook-nav-photo pointer-events-none absolute inset-0 rounded-[inherit]"
-          aria-hidden="true"
-        />
-        <div
-          ref={scrollRef}
-          className="relative z-10 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3"
-        >
-          {variant === "admin" ? (
-            <AdminNavigation compact onNavigate={close} role={role} />
-          ) : (
-            <EmployeeNavigation compact onNavigate={close} />
-          )}
-          {userMenu ? (
-            <div className="mt-4 border-t pt-3">
-              <UserMenu
-                email={userMenu.email}
-                role={userMenu.role}
-                currentArea={userMenu.currentArea}
-                profileHref={userMenu.profileHref}
-                notifications={userMenu.notifications}
-                unseenNotificationCount={userMenu.unseenNotificationCount}
-                className="grid gap-3"
-                controlsClassName="flex-row flex-wrap items-center justify-start"
-                onNavigate={close}
-              />
-            </div>
-          ) : null}
-        </div>
+        {variant === "admin" ? (
+          <AdminNavigation compact onNavigate={close} role={role} />
+        ) : (
+          <EmployeeNavigation compact onNavigate={close} />
+        )}
+        {userMenu ? (
+          <div className="mt-4 border-t pt-3">
+            <UserMenu
+              email={userMenu.email}
+              role={userMenu.role}
+              currentArea={userMenu.currentArea}
+              profileHref={userMenu.profileHref}
+              notifications={userMenu.notifications}
+              unseenNotificationCount={userMenu.unseenNotificationCount}
+              className="grid gap-3"
+              controlsClassName="flex-row flex-wrap items-center justify-start"
+              onNavigate={close}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeftRight } from "lucide-react";
 
@@ -15,9 +18,32 @@ export function AdminSidebar({
   email?: string | null;
   role?: string | null;
 }) {
+  const shellRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    const scrollEl = scrollRef.current;
+    if (!shell || !scrollEl) return;
+
+    function onWheel(event: WheelEvent) {
+      if (!shell.contains(event.target as Node)) return;
+      if (scrollEl.contains(event.target as Node)) return;
+
+      event.preventDefault();
+      scrollEl.scrollTop += event.deltaY;
+    }
+
+    shell.addEventListener("wheel", onWheel, { passive: false });
+    return () => shell.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <aside className="hidden min-h-svh w-72 shrink-0 border-r border-sidebar-border print:hidden lg:block">
-      <div className="qbook-nav-photo sticky top-0 flex h-svh flex-col gap-5 p-4">
+      <div
+        ref={shellRef}
+        className="qbook-nav-photo sticky top-0 flex h-svh flex-col gap-5 p-4"
+      >
         <div className="border-b border-sidebar-border pb-4">
           <Link
             href="/admin/dashboard"
@@ -30,7 +56,10 @@ export function AdminSidebar({
             Admin console
           </p>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          ref={scrollRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        >
           <AdminNavigation role={role} />
         </div>
         <div className="grid gap-3 border-t border-sidebar-border pt-4">
