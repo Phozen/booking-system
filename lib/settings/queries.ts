@@ -20,7 +20,6 @@ export {
   formatContactAdministratorMessage,
   formatEffectiveApprovalCopy,
   formatEffectiveApprovalLabel,
-  formatRegistrationDisabledMessage,
   getCompanyDisplayName,
   getEffectiveApprovalRequired,
   getSystemContactEmail,
@@ -80,15 +79,6 @@ export async function getBookingApprovalRequired(
   }
 
   return settings.defaultApprovalRequired;
-}
-
-export async function getRegistrationSettings() {
-  const settings = await getAppSettings();
-  return {
-    registrationEnabled: settings.registrationEnabled,
-    allowedEmailDomains: settings.allowedEmailDomains,
-    systemContactEmail: settings.systemContactEmail,
-  };
 }
 
 export function isEmailAllowedByDomain(email: string, allowedDomains: string[]) {

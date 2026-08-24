@@ -17,7 +17,6 @@ export type AppSettings = {
   appName: string;
   companyName: string;
   systemContactEmail: string;
-  registrationEnabled: boolean;
   allowedEmailDomains: string[];
   defaultApprovalRequired: boolean;
   allowFacilityApprovalOverride: boolean;
@@ -38,7 +37,6 @@ export const baseDefaultAppSettings: AppSettings = {
   appName: "QBook",
   companyName: "",
   systemContactEmail: "",
-  registrationEnabled: true,
   allowedEmailDomains: [],
   defaultApprovalRequired: false,
   allowFacilityApprovalOverride: true,
@@ -58,7 +56,6 @@ export const settingKeyMap = {
   appName: "app_name",
   companyName: "company_name",
   systemContactEmail: "system_contact_email",
-  registrationEnabled: "registration_enabled",
   allowedEmailDomains: "allowed_email_domains",
   defaultApprovalRequired: "default_approval_required",
   allowFacilityApprovalOverride: "facility_approval_override_enabled",
@@ -192,10 +189,6 @@ export function mapSettingsRowsToAppSettings(
       typeof values.get(settingKeyMap.systemContactEmail) === "string"
         ? String(values.get(settingKeyMap.systemContactEmail)).trim()
         : fallback.systemContactEmail,
-    registrationEnabled:
-      typeof values.get(settingKeyMap.registrationEnabled) === "boolean"
-        ? Boolean(values.get(settingKeyMap.registrationEnabled))
-        : fallback.registrationEnabled,
     allowedEmailDomains: isStringArray(allowedEmailDomains)
       ? allowedEmailDomains.map(normalizeDomain).filter(Boolean)
       : fallback.allowedEmailDomains,
@@ -246,16 +239,10 @@ export function appSettingsToRows(settings: AppSettings) {
       is_public: true,
     },
     {
-      key: settingKeyMap.registrationEnabled,
-      value: settings.registrationEnabled,
-      description: "Whether employee self-registration is enabled.",
-      is_public: false,
-    },
-    {
       key: settingKeyMap.allowedEmailDomains,
       value: settings.allowedEmailDomains,
       description:
-        "Allowed registration email domains. Empty means unrestricted until configured.",
+        "Allowed Microsoft email domains. Empty means unrestricted until configured.",
       is_public: false,
     },
     {
@@ -327,12 +314,6 @@ export function formatContactAdministratorMessage(
 ) {
   const email = getSystemContactEmail(settings);
   return email ? `Contact ${email} for help.` : "Contact an administrator for help.";
-}
-
-export function formatRegistrationDisabledMessage(
-  settings: Pick<AppSettings, "systemContactEmail">,
-) {
-  return `Registration is currently disabled. ${formatContactAdministratorMessage(settings)}`;
 }
 
 export function formatAccountInactiveMessage(

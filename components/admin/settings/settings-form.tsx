@@ -226,22 +226,6 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
           </p>
         </div>
 
-        <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-          <input
-            name="registrationEnabled"
-            type="checkbox"
-            defaultChecked={settings.registrationEnabled}
-            className="size-4 rounded border-input"
-          />
-          <span>
-            <span className="block font-medium">Allow legacy employee registration</span>
-            <span className="text-muted-foreground">
-              Password registration remains disabled. Company Microsoft sign-in is
-              controlled by the allowed domains below.
-            </span>
-          </span>
-        </label>
-
         <div className="grid gap-2">
           <Label htmlFor="allowedEmailDomains">Allowed Microsoft email domains</Label>
           <Textarea

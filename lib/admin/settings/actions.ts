@@ -48,7 +48,6 @@ export async function updateSystemSettingsAction(
     appName: parsed.data.appName,
     companyName: parsed.data.companyName,
     systemContactEmail: parsed.data.systemContactEmail,
-    registrationEnabled: parsed.data.registrationEnabled,
     allowedEmailDomains: parsed.data.allowedEmailDomainsText,
     defaultApprovalRequired: parsed.data.defaultApprovalRequired,
     allowFacilityApprovalOverride: parsed.data.allowFacilityApprovalOverride,
@@ -101,7 +100,6 @@ export async function updateSystemSettingsAction(
   }
 
   revalidatePath("/admin/settings");
-  revalidatePath("/register");
   revalidatePath("/bookings/new");
   revalidatePath("/calendar");
   revalidatePath("/admin/calendar");
@@ -110,6 +108,6 @@ export async function updateSystemSettingsAction(
   return {
     status: "success",
     message:
-      "System settings saved. New registrations and future bookings will use the updated settings.",
+      "System settings saved. Future bookings will use the updated settings.",
   };
 }

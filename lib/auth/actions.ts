@@ -11,21 +11,6 @@ import {
 } from "@/lib/integrations/microsoft-365-calendar/config";
 import { createClient } from "@/lib/supabase/server";
 
-export type AuthActionResult = {
-  status: "error" | "success";
-  message: string;
-};
-
-const microsoftOnlyMessage =
-  "Password access is disabled. Sign in with your authorized company Microsoft account.";
-
-export async function loginAction(
-  _formData: FormData,
-): Promise<AuthActionResult> {
-  void _formData;
-  return { status: "error", message: microsoftOnlyMessage };
-}
-
 export async function loginWithMicrosoftAction(formData?: FormData): Promise<void> {
   let microsoftLoginUrl = "";
   let errorRedirect = "";
@@ -121,20 +106,6 @@ export async function connectMicrosoftCalendarAction(): Promise<void> {
   }
 
   redirect(microsoftLoginUrl);
-}
-
-export async function registerAction(
-  _formData: FormData,
-): Promise<AuthActionResult> {
-  void _formData;
-  return { status: "error", message: microsoftOnlyMessage };
-}
-
-export async function requestPasswordResetAction(
-  _formData: FormData,
-): Promise<AuthActionResult> {
-  void _formData;
-  return { status: "error", message: microsoftOnlyMessage };
 }
 
 export async function logoutAction() {

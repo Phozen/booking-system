@@ -6,7 +6,6 @@ import {
   formatAllowedEmailDomains,
   formatEffectiveApprovalCopy,
   formatEffectiveApprovalLabel,
-  formatRegistrationDisabledMessage,
   getCompanyDisplayName,
   mapSettingsRowsToAppSettings,
 } from "@/lib/settings/app-settings";
@@ -15,12 +14,10 @@ describe("app settings helpers", () => {
   it("uses safe defaults when settings rows are missing or malformed", () => {
     const settings = mapSettingsRowsToAppSettings([
       { key: "app_name", value: "" },
-      { key: "registration_enabled", value: "yes" },
       { key: "default_timezone", value: "" },
     ]);
 
     expect(settings.appName).toBe(baseDefaultAppSettings.appName);
-    expect(settings.registrationEnabled).toBe(true);
     expect(settings.calendarVisibilityMode).toBe("my_bookings_only");
     expect(settings.defaultTimezone).toBe("Asia/Kuala_Lumpur");
     expect(settings.bookingWindowStart).toBe("08:00");
@@ -69,14 +66,11 @@ describe("app settings helpers", () => {
     expect(fallback.bookingWindowEnd).toBe("19:00");
   });
 
-  it("formats contact-aware access and registration messages", () => {
+  it("formats contact-aware account messages", () => {
     const settings = {
       systemContactEmail: "facilities@example.com",
     };
 
-    expect(formatRegistrationDisabledMessage(settings)).toContain(
-      "Contact facilities@example.com for help.",
-    );
     expect(formatAccountInactiveMessage(settings)).toContain(
       "Contact facilities@example.com for help.",
     );

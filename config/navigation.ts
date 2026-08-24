@@ -17,12 +17,6 @@ import {
   UsersRound,
 } from "lucide-react";
 
-export const authNavigation = [
-  { title: "Login", href: "/login" },
-  { title: "Register", href: "/register" },
-  { title: "Reset Password", href: "/reset-password" },
-] as const;
-
 export const employeeNavigation = [
   {
     title: "Book a room",

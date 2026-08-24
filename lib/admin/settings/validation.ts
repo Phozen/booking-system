@@ -41,7 +41,6 @@ export const settingsFormSchema = z.object({
     .refine((value) => value === "" || z.email().safeParse(value).success, {
       message: "Enter a valid email address or leave it blank.",
     }),
-  registrationEnabled: z.boolean(),
   allowedEmailDomainsText: z
     .string()
     .transform(parseDomainList)
@@ -105,7 +104,6 @@ export function formDataToSettingsValues(formData: FormData) {
     appName: getTextValue(formData, "appName"),
     companyName: getTextValue(formData, "companyName"),
     systemContactEmail: getTextValue(formData, "systemContactEmail"),
-    registrationEnabled: getCheckboxValue(formData, "registrationEnabled"),
     allowedEmailDomainsText: getTextValue(formData, "allowedEmailDomains"),
     defaultApprovalRequired: getCheckboxValue(formData, "defaultApprovalRequired"),
     allowFacilityApprovalOverride: getCheckboxValue(
