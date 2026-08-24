@@ -1,6 +1,5 @@
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
-import type { BookingUsageStatus } from "@/lib/bookings/usage";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 export type ReportFilters = {
@@ -26,7 +25,6 @@ export type ReportSummary = {
   rejectedBookings: number;
   pendingBookings: number;
   totalBookedHours: number;
-  noShowBookings: number;
   cateringRequests: number;
   cateringPax: number;
   averageApprovalHours: number | null;
@@ -68,7 +66,6 @@ export type BookingHistoryRow = {
   endsAt: string;
   createdAt: string;
   approvalRequired: boolean;
-  usageStatus: BookingUsageStatus;
   attendeeCount: number | null;
   catering: BookingCateringDetails;
   cancellationReason: string | null;

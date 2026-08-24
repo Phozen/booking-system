@@ -8,7 +8,6 @@ import { checkBookingAvailability } from "@/lib/bookings/availability";
 import { getFriendlyBookingError } from "@/lib/bookings/errors";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
-import type { BookingUsageStatus } from "@/lib/bookings/usage";
 import {
   bookingFormSchema,
   bookingParticipantIdsSchema,
@@ -63,11 +62,6 @@ type AdminBookingActionRecord = {
   approval_required: boolean;
   cancellation_reason: string | null;
   cancelled_at: string | null;
-  usage_status?: BookingUsageStatus | null;
-  checked_in_at?: string | null;
-  checked_in_by?: string | null;
-  no_show_marked_at?: string | null;
-  no_show_marked_by?: string | null;
   facilities:
     | {
         name: string;
@@ -127,11 +121,6 @@ async function getAdminActionBooking(bookingId: string) {
       approval_required,
       cancellation_reason,
       cancelled_at,
-      usage_status,
-      checked_in_at,
-      checked_in_by,
-      no_show_marked_at,
-      no_show_marked_by,
       facilities (
         name,
         level
@@ -156,97 +145,6 @@ async function getAdminActionBooking(bookingId: string) {
   }
 
   return data as unknown as AdminBookingActionRecord;
-}
-
-async function updateBookingUsageStatus({
-  bookingId,
-  status,
-  actorUserId,
-  actorEmail,
-}: {
-  bookingId: string;
-  status: BookingUsageStatus;
-  actorUserId: string;
-  actorEmail: string | undefined;
-}): Promise<AdminBookingActionResult> {
-  const existing = await getAdminActionBooking(bookingId);
-
-  if (!existing) {
-    return {
-      status: "error",
-      message: "Booking could not be found.",
-    };
-  }
-
-  if (!["confirmed", "completed", "expired"].includes(existing.status)) {
-    return {
-      status: "error",
-      message: "Usage can only be tracked for confirmed or historical bookings.",
-    };
-  }
-
-  const supabase = createAdminClient();
-  const mutationClient = await createClient();
-  const { data, error } = await mutationClient.rpc(
-    "update_booking_usage_as_admin",
-    {
-      p_booking_id: bookingId,
-      p_usage_status: status,
-    },
-  );
-
-  if (error || !data) {
-    console.error("Booking usage update failed", {
-      bookingId,
-      message: error?.message,
-    });
-
-    return {
-      status: "error",
-      message: "Usage status could not be updated. Please refresh and try again.",
-    };
-  }
-
-  const updated = {
-    ...(data as unknown as AdminBookingActionRecord),
-    facilities: existing.facilities,
-    profiles: existing.profiles,
-  } satisfies AdminBookingActionRecord;
-
-  await createAuditLogSafely(
-    supabase,
-    {
-      action: "update",
-      entityType: "booking",
-      entityId: bookingId,
-      actorUserId,
-      actorEmail,
-      summary: `Updated usage tracking for booking ${updated.title}.`,
-      oldValues: {
-        usageStatus: existing.usage_status ?? "not_tracked",
-        checkedInAt: existing.checked_in_at ?? null,
-        noShowMarkedAt: existing.no_show_marked_at ?? null,
-      },
-      newValues: {
-        usageStatus: updated.usage_status ?? "not_tracked",
-        checkedInAt: updated.checked_in_at ?? null,
-        noShowMarkedAt: updated.no_show_marked_at ?? null,
-      },
-    },
-    { bookingId },
-  );
-
-  revalidateAdminBookingPaths(bookingId);
-
-  return {
-    status: "success",
-    message:
-      status === "checked_in"
-        ? "Booking marked as checked in."
-        : status === "no_show"
-          ? "Booking marked as no-show."
-          : "Booking usage tracking was reset.",
-  };
 }
 
 async function insertAuditLog({
@@ -1121,76 +1019,4 @@ export async function rejectBookingAction(
     message:
       "Booking rejected. The requester will see the updated status and a rejection email has been queued if possible.",
   };
-}
-
-export async function markBookingCheckedInAction(
-  bookingId: string,
-  _previousState: AdminBookingActionResult,
-  _formData: FormData,
-): Promise<AdminBookingActionResult> {
-  void _previousState;
-  void _formData;
-  const { user } = await requireAdmin();
-
-  if (!user) {
-    return {
-      status: "error",
-      message: "You must be signed in as an admin.",
-    };
-  }
-
-  return updateBookingUsageStatus({
-    bookingId,
-    status: "checked_in",
-    actorUserId: user.id,
-    actorEmail: user.email,
-  });
-}
-
-export async function markBookingNoShowAction(
-  bookingId: string,
-  _previousState: AdminBookingActionResult,
-  _formData: FormData,
-): Promise<AdminBookingActionResult> {
-  void _previousState;
-  void _formData;
-  const { user } = await requireAdmin();
-
-  if (!user) {
-    return {
-      status: "error",
-      message: "You must be signed in as an admin.",
-    };
-  }
-
-  return updateBookingUsageStatus({
-    bookingId,
-    status: "no_show",
-    actorUserId: user.id,
-    actorEmail: user.email,
-  });
-}
-
-export async function resetBookingUsageAction(
-  bookingId: string,
-  _previousState: AdminBookingActionResult,
-  _formData: FormData,
-): Promise<AdminBookingActionResult> {
-  void _previousState;
-  void _formData;
-  const { user } = await requireAdmin();
-
-  if (!user) {
-    return {
-      status: "error",
-      message: "You must be signed in as an admin.",
-    };
-  }
-
-  return updateBookingUsageStatus({
-    bookingId,
-    status: "not_tracked",
-    actorUserId: user.id,
-    actorEmail: user.email,
-  });
 }

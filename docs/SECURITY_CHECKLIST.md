@@ -7,7 +7,7 @@ Phase 14 security and RLS hardening checklist for the internal Booking System.
 - [ ] Apply every migration present in `supabase/migrations` before deploying code paths that read current tables, columns, or RPCs.
 - [ ] Confirm only Admin/Super Admin can create bookings on behalf of another user.
 - [ ] Confirm admin-created bookings can target active users only.
-- [ ] Confirm employees cannot update booking usage tracking fields.
+- [ ] Confirm employees cannot write leftover booking usage columns.
 - [ ] Confirm users can manage only their own notification preferences.
 - [ ] Confirm notification preferences affect non-critical notifications only.
 - [ ] Confirm booking mutation RPC grants match intent: `update_own_booking` and `create_recurring_booking_series` for authenticated users, `admin_create_booking` for service role only.

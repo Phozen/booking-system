@@ -38,7 +38,6 @@ export function SummaryCards({ summary }: { summary: ReportSummary }) {
           value={summary.totalBookedHours}
           helper="Confirmed and completed bookings"
         />
-        <SummaryCard label="No-shows" value={summary.noShowBookings} />
         <SummaryCard
           label="Catering demand"
           value={summary.cateringRequests}

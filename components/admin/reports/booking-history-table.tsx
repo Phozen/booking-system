@@ -3,7 +3,6 @@ import {
   formatBookingDateTime,
   formatBookingWindow,
 } from "@/lib/bookings/format";
-import { formatBookingUsageStatus } from "@/lib/bookings/usage";
 import type { BookingHistoryRow } from "@/lib/admin/reports/types";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
@@ -24,7 +23,6 @@ export function BookingHistoryTable({ rows }: { rows: BookingHistoryRow[] }) {
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Time</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Usage</th>
               <th className="px-4 py-3 font-medium">Approval</th>
               <th className="px-4 py-3 font-medium">Created</th>
             </tr>
@@ -50,9 +48,6 @@ export function BookingHistoryTable({ rows }: { rows: BookingHistoryRow[] }) {
                     <BookingStatusBadge status={row.status} />
                   </td>
                   <td className="px-4 py-3">
-                    {formatBookingUsageStatus(row.usageStatus)}
-                  </td>
-                  <td className="px-4 py-3">
                     {row.approvalRequired
                       ? row.approvalStatus ?? "Pending"
                       : "Not required"}
@@ -64,7 +59,7 @@ export function BookingHistoryTable({ rows }: { rows: BookingHistoryRow[] }) {
               ))
             ) : (
               <tr>
-                <td className="px-4 py-8 text-center text-muted-foreground" colSpan={9}>
+                <td className="px-4 py-8 text-center text-muted-foreground" colSpan={8}>
                   No booking history found for these filters.
                 </td>
               </tr>

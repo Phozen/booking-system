@@ -25,7 +25,6 @@ Booking and access rules run on the server and in the database, not only in the 
 
 - Run bookings, approvals, rooms, equipment, blocked times, maintenance, email queue, reports, and audit logs.
 - Create a booking for an active user and set the first participants.
-- Check people in or mark a no-show when the booking state allows it.
 - Export booking, utilisation, cancellation, user, and audit reports as CSV.
 
 ### Super Administrators
@@ -37,7 +36,7 @@ Booking and access rules run on the server and in the database, not only in the 
 ## Current highlights
 
 - Overlapping active bookings are blocked. A slot that starts when the previous one ends is allowed.
-- Approval, check-in, no-show, catering, and audit history are stored with the booking.
+- Approval, catering, and audit history are stored with the booking.
 - Department tags stay on historical bookings and can receive booking mail.
 - Internal invitations are created with the booking in one database step.
 - Room photos stay in private storage and are shown with signed URLs.

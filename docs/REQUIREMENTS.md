@@ -23,7 +23,7 @@ QBook is an internal system for booking company facilities with controlled emplo
 - Blocked periods, maintenance closures, facility status, approvals, ownership, capacity-related validation, and valid state transitions must be enforced.
 - Employees can edit/reschedule or cancel only eligible own bookings; admins have operational authority subject to the same guarded transitions.
 - Approvals can produce pending, confirmed, or rejected outcomes, with review/audit information.
-- Check-in/no-show/usage information and printable booking forms support operations.
+- Printable booking forms support operations.
 
 ## Facility and availability requirements
 

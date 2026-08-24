@@ -49,7 +49,7 @@ Microsoft access is intended to be pre-provisioned and tenant-restricted. The re
 ```text
 Create -> pending or confirmed
   pending -> approved/confirmed, rejected, or cancelled
-  confirmed -> cancelled, checked in, no-show, or completed
+  confirmed -> cancelled or completed
 ```
 
 Booking creation validates facility availability, time range, capacity-related input, approval rules, catering input, active departments, and active internal invitees. The core `create_booking_with_participants` RPC creates the booking, its department tags, and initial invitations atomically.
@@ -64,7 +64,7 @@ Core domains include:
 
 - profiles and approved users
 - facilities, photos, equipment, and facility equipment
-- bookings, approvals, invitations, department tags, and usage tracking
+- bookings, approvals, invitations, and department tags
 - blocked periods and maintenance closures
 - email notifications and calendar sync records
 - settings, audit logs, and report/export activity

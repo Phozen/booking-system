@@ -10,7 +10,6 @@ import {
 import type { BookingStatus } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
-import { formatBookingUsageStatus } from "@/lib/bookings/usage";
 import { AdminFilterBar } from "@/components/admin/shared/admin-filter-bar";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
@@ -222,10 +221,6 @@ export function AdminBookingsTable({
                         : "None tagged",
                   },
                   {
-                    label: "Usage",
-                    value: formatBookingUsageStatus(booking.usageStatus),
-                  },
-                  {
                     label: "Created",
                     value: formatBookingDateTime(booking.createdAt),
                   },
@@ -252,7 +247,7 @@ export function AdminBookingsTable({
           )
         }
       >
-        <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
           <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
@@ -262,7 +257,6 @@ export function AdminBookingsTable({
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Time</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Usage</th>
               <th className="px-4 py-3 font-medium">Approval</th>
               <th className="px-4 py-3 font-medium">Created</th>
               <th className="sticky right-0 border-l bg-muted/60 px-4 py-3 text-right font-medium">
@@ -300,9 +294,6 @@ export function AdminBookingsTable({
                     <BookingStatusBadge status={booking.status} />
                   </td>
                   <td className="px-4 py-3">
-                    {formatBookingUsageStatus(booking.usageStatus)}
-                  </td>
-                  <td className="px-4 py-3">
                     {booking.approvalRequired ? "Required" : "Not required"}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
@@ -324,7 +315,7 @@ export function AdminBookingsTable({
               ))
             ) : (
               <tr>
-                <td className="px-4 py-8" colSpan={11}>
+                <td className="px-4 py-8" colSpan={10}>
                   <EmptyState
                     className="border-0 bg-transparent py-4"
                     title="No bookings match these filters."

@@ -11,7 +11,6 @@ Use this checklist after migrations are applied and the app is running with real
 - [ ] Owner cannot edit cancelled, rejected, completed, or expired bookings.
 - [ ] Rescheduling checks conflicts, blocked periods, maintenance closures, and capacity.
 - [ ] Admin can create a booking for an active user from `/admin/bookings/new`.
-- [ ] Admin can mark confirmed/historical bookings checked in, no-show, or reset usage tracking.
 - [ ] Admin can add, edit, archive/reactivate, and assign equipment to facilities.
 - [ ] User can save non-critical notification preferences from `/notification-preferences`.
 - [ ] Admin can queue due booking reminders from `/admin/email-notifications`; production cron queueing is verified separately.
@@ -485,7 +484,7 @@ Use this checklist after migrations are applied and the app is running with real
   available, booked, pending, blocked, and maintenance periods for a selected
   date without exposing employee-private details.
 - Recurrence retirement: confirm no employee/admin flow exposes new recurring booking creation or management, while historical records remain auditable where authorised.
-- Reports: verify no-show, catering demand, approval turnaround, status volume,
+- Reports: verify catering demand, approval turnaround, status volume,
   top facility, and utilization summaries render in light/dark mode.
 - Audit logs: verify old/new values are readable and sensitive fields such as
   tokens, secrets, passwords, API keys, and SMTP/Microsoft secrets are masked.

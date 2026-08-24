@@ -51,7 +51,6 @@ vi.mock("@/lib/integrations/microsoft-365-calendar/sync", () => ({
 const {
   adminCancelBookingAction,
   approveBookingAction,
-  markBookingCheckedInAction,
   rejectBookingAction,
 } = await import("@/lib/admin/bookings/actions");
 const { updateBookingCateringAction } = await import(
@@ -83,11 +82,6 @@ const pendingBooking = {
   approval_required: true,
   cancellation_reason: null,
   cancelled_at: null,
-  usage_status: "not_tracked",
-  checked_in_at: null,
-  checked_in_by: null,
-  no_show_marked_at: null,
-  no_show_marked_by: null,
   facilities: { name: "Board Room", level: "1" },
   profiles: { email: owner.email, full_name: "Owner" },
   booking_approvals: [
@@ -188,25 +182,6 @@ describe("guarded booking admin actions", () => {
     });
     expect(fromTables).not.toContain("audit_logs");
     expect(fromTables).not.toContain("email_notifications");
-  });
-
-  it("usage tracking calls only the guarded usage RPC on failure", async () => {
-    const { rpc, fromTables } = setupAdminAction({
-      booking: { ...pendingBooking, status: "confirmed" },
-    });
-
-    const result = await markBookingCheckedInAction(
-      bookingId,
-      { status: "idle", message: "" },
-      form(),
-    );
-
-    expect(result.status).toBe("error");
-    expect(rpc).toHaveBeenCalledWith("update_booking_usage_as_admin", {
-      p_booking_id: bookingId,
-      p_usage_status: "checked_in",
-    });
-    expect(fromTables).not.toContain("audit_logs");
   });
 });
 

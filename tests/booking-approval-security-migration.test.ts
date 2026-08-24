@@ -191,9 +191,9 @@ describe("booking approval server-action boundary", () => {
     expect(actions).not.toContain('.from("booking_approvals") .update(');
   });
 
-  it("routes admin cancellation and usage through guarded RPCs", () => {
+  it("routes admin cancellation through a guarded RPC", () => {
     expect(actions).toContain('rpc("cancel_booking_as_admin"');
-    expect(actions).toContain('rpc( "update_booking_usage_as_admin"');
+    expect(actions).not.toContain('rpc("update_booking_usage_as_admin"');
     expect(actions).not.toContain('.update({ status: "cancelled"');
   });
 

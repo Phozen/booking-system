@@ -47,7 +47,7 @@ The employee can use:
 Admins use `/admin/dashboard` for operational overview and can:
 
 - review and manage bookings, including creating a booking for an active user;
-- approve, reject, cancel, check in, or mark a no-show where the state allows it;
+- approve, reject, or cancel a booking where the state allows it;
 - manage facilities, photos, equipment, blocked periods, maintenance, and unified unavailability;
 - process/retry the email queue and review email health;
 - view and export reports, then inspect audit records.

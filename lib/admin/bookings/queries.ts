@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ApprovalStatus, BookingStatus } from "@/lib/bookings/queries";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
-import type { BookingUsageStatus } from "@/lib/bookings/usage";
 import type { FacilityType } from "@/lib/facilities/validation";
 
 type AdminBookingFacilityRecord =
@@ -78,11 +77,6 @@ type AdminBookingRecord = {
   cancellation_reason: string | null;
   cancelled_by: string | null;
   cancelled_at: string | null;
-  usage_status: BookingUsageStatus | null;
-  checked_in_at: string | null;
-  checked_in_by: string | null;
-  no_show_marked_at: string | null;
-  no_show_marked_by: string | null;
   created_at: string;
   updated_at: string;
   facilities?: AdminBookingFacilityRecord;
@@ -127,11 +121,6 @@ export type AdminBooking = {
   cancellationReason: string | null;
   cancelledBy: string | null;
   cancelledAt: string | null;
-  usageStatus: BookingUsageStatus;
-  checkedInAt: string | null;
-  checkedInBy: string | null;
-  noShowMarkedAt: string | null;
-  noShowMarkedBy: string | null;
   createdAt: string;
   updatedAt: string;
   facility: {
@@ -183,11 +172,6 @@ const adminBookingSelect = `
   cancellation_reason,
   cancelled_by,
   cancelled_at,
-  usage_status,
-  checked_in_at,
-  checked_in_by,
-  no_show_marked_at,
-  no_show_marked_by,
   created_at,
   updated_at,
   facilities (
@@ -249,11 +233,6 @@ function mapAdminBooking(record: AdminBookingRecord): AdminBooking {
     cancellationReason: record.cancellation_reason,
     cancelledBy: record.cancelled_by,
     cancelledAt: record.cancelled_at,
-    usageStatus: record.usage_status ?? "not_tracked",
-    checkedInAt: record.checked_in_at,
-    checkedInBy: record.checked_in_by,
-    noShowMarkedAt: record.no_show_marked_at,
-    noShowMarkedBy: record.no_show_marked_by,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
     facility: facilityRecord
