@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { AuditLog, AuditJsonValue } from "@/lib/admin/audit-logs/queries";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
@@ -100,15 +101,13 @@ function JsonPanel({
       : JSON.stringify(sanitized, null, 2);
 
   return (
-    <section className="rounded-lg border bg-card">
+    <section className="min-w-0 overflow-hidden rounded-lg border bg-card">
       <div className="border-b p-4">
         <h2 className="font-semibold tracking-normal">{title}</h2>
       </div>
-      <div className="max-w-full overflow-x-auto">
-        <pre className="max-h-[420px] min-w-0 whitespace-pre-wrap break-words p-4 text-xs leading-5 text-muted-foreground">
+      <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all p-4 text-xs leading-5 text-muted-foreground">
         {formatted}
-        </pre>
-      </div>
+      </pre>
     </section>
   );
 }
@@ -140,25 +139,25 @@ function AuditDiffViewer({
           {rows.map((row) => (
             <div
               key={row.key}
-              className="grid gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 text-sm md:grid-cols-[14rem_1fr_1fr]"
+              className="grid min-w-0 gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 text-sm md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_minmax(0,1fr)]"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-medium uppercase text-muted-foreground">
                   Field
                 </p>
-                <p className="break-words font-medium">{formatLabel(row.key)}</p>
+                <p className="break-all font-medium">{formatLabel(row.key)}</p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-medium uppercase text-muted-foreground">
                   Old
                 </p>
-                <p className="break-words">{formatAuditValue(row.oldValue)}</p>
+                <p className="break-all">{formatAuditValue(row.oldValue)}</p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-medium uppercase text-muted-foreground">
                   New
                 </p>
-                <p className="break-words">{formatAuditValue(row.newValue)}</p>
+                <p className="break-all">{formatAuditValue(row.newValue)}</p>
               </div>
             </div>
           ))}
@@ -171,24 +170,26 @@ function AuditDiffViewer({
 function DetailItem({
   label,
   value,
+  className,
 }: {
   label: string;
   value: string | null;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-1 rounded-lg border bg-card p-4">
+    <div className={cn("grid min-w-0 gap-1 rounded-lg border bg-card p-4", className)}>
       <dt className="text-xs font-medium uppercase text-muted-foreground">
         {label}
       </dt>
-      <dd className="break-words text-sm">{value || "Not captured"}</dd>
+      <dd className="min-w-0 break-all text-sm">{value || "Not captured"}</dd>
     </div>
   );
 }
 
 export function AuditLogDetail({ auditLog }: { auditLog: AuditLog }) {
   return (
-    <div className="grid gap-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid min-w-0 gap-6">
+      <section className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <DetailItem
           label="Created"
           value={formatBookingDateTime(auditLog.createdAt)}
@@ -199,11 +200,15 @@ export function AuditLogDetail({ auditLog }: { auditLog: AuditLog }) {
         <DetailItem label="Actor email" value={auditLog.actorEmail} />
         <DetailItem label="Actor user ID" value={auditLog.actorUserId} />
         <DetailItem label="IP address" value={auditLog.ipAddress} />
-        <DetailItem label="User agent" value={auditLog.userAgent} />
         <DetailItem label="Summary" value={auditLog.summary} />
+        <DetailItem
+          label="User agent"
+          value={auditLog.userAgent}
+          className="md:col-span-2 xl:col-span-3"
+        />
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-3">
         <JsonPanel title="Metadata" value={auditLog.metadata} />
         <JsonPanel title="Old values" value={auditLog.oldValues} />
         <JsonPanel title="New values" value={auditLog.newValues} />

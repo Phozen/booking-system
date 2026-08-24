@@ -6,24 +6,11 @@ import {
   auditLogFiltersToSearchParams,
   type AuditLogFilters,
 } from "@/lib/admin/audit-logs/validation";
-import type { AuditLogListResult, AuditJsonValue } from "@/lib/admin/audit-logs/queries";
+import type { AuditLogListResult } from "@/lib/admin/audit-logs/queries";
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
-
-function previewJson(value: AuditJsonValue) {
-  if (value === null || value === undefined) {
-    return "None";
-  }
-
-  const text = typeof value === "string" ? value : JSON.stringify(value);
-  if (!text || text === "{}" || text === "[]") {
-    return "None";
-  }
-
-  return text.length > 96 ? `${text.slice(0, 96)}...` : text;
-}
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
@@ -49,6 +36,7 @@ export function AuditLogsTable({
   return (
     <AdminTableShell
       title="Audit activity"
+      description="Open a row to see IP, user agent, and captured changes."
       actions={
         <>
           <Link
@@ -86,21 +74,13 @@ export function AuditLogsTable({
                 {
                   label: "Entity",
                   value: (
-                    <>
-                      <span className="capitalize">
-                        {formatLabel(row.entityType)}
-                      </span>
-                      {row.entityId ? (
-                        <span className="block break-all text-xs text-muted-foreground">
-                          {row.entityId}
-                        </span>
-                      ) : null}
-                    </>
+                    <span className="capitalize">
+                      {formatLabel(row.entityType)}
+                    </span>
                   ),
                 },
                 { label: "Actor", value: row.actorEmail || "System" },
                 { label: "Summary", value: row.summary || "No summary" },
-                { label: "Metadata", value: previewJson(row.metadata) },
               ]}
               actions={
                 <Link
@@ -124,96 +104,86 @@ export function AuditLogsTable({
         )
       }
     >
-        <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
-          <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 font-medium">Created</th>
-              <th className="px-4 py-3 font-medium">Action</th>
-              <th className="px-4 py-3 font-medium">Entity</th>
-              <th className="px-4 py-3 font-medium">Actor</th>
-              <th className="px-4 py-3 font-medium">Summary</th>
-              <th className="px-4 py-3 font-medium">IP</th>
-              <th className="px-4 py-3 font-medium">User agent</th>
-              <th className="px-4 py-3 font-medium">Metadata</th>
-              <th className="px-4 py-3 font-medium">Changes</th>
-              <th className="px-4 py-3 text-right font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.rows.length > 0 ? (
-              result.rows.map((row) => (
-                <tr key={row.id} className="border-t align-top">
-                  <td className="px-4 py-3">
+      <table className="w-full table-fixed border-collapse text-left text-sm">
+        <colgroup>
+          <col className="w-[18%]" />
+          <col className="w-[12%]" />
+          <col className="w-[12%]" />
+          <col className="w-[22%]" />
+          <col />
+          <col className="w-[7.5rem]" />
+        </colgroup>
+        <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+          <tr>
+            <th className="px-4 py-3 font-medium">Created</th>
+            <th className="px-4 py-3 font-medium">Action</th>
+            <th className="px-4 py-3 font-medium">Entity</th>
+            <th className="px-4 py-3 font-medium">Actor</th>
+            <th className="px-4 py-3 font-medium">Summary</th>
+            <th className="px-4 py-3 text-right font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.rows.length > 0 ? (
+            result.rows.map((row) => (
+              <tr key={row.id} className="border-t">
+                <td className="px-4 py-3 align-middle">
+                  <p className="min-w-0 break-words">
                     {formatBookingDateTime(row.createdAt)}
-                  </td>
-                  <td className="px-4 py-3 capitalize">
+                  </p>
+                </td>
+                <td className="px-4 py-3 align-middle capitalize">
+                  <p className="min-w-0 truncate" title={formatLabel(row.action)}>
                     {formatLabel(row.action)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="capitalize">
-                      {formatLabel(row.entityType)}
-                    </span>
-                    {row.entityId ? (
-                      <span className="block text-xs text-muted-foreground">
-                        {row.entityId}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3">
+                  </p>
+                </td>
+                <td className="px-4 py-3 align-middle capitalize">
+                  <p className="min-w-0 truncate" title={formatLabel(row.entityType)}>
+                    {formatLabel(row.entityType)}
+                  </p>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <p
+                    className="min-w-0 truncate text-muted-foreground"
+                    title={row.actorEmail || "System"}
+                  >
                     {row.actorEmail || "System"}
-                    {row.actorUserId ? (
-                      <span className="block text-xs text-muted-foreground">
-                        {row.actorUserId}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="max-w-[260px] px-4 py-3 text-muted-foreground">
+                  </p>
+                </td>
+                <td className="px-4 py-3 align-middle text-muted-foreground">
+                  <p
+                    className="min-w-0 line-clamp-2 break-words"
+                    title={row.summary || "No summary"}
+                  >
                     {row.summary || "No summary"}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {row.ipAddress || ""}
-                  </td>
-                  <td className="max-w-[220px] px-4 py-3 text-muted-foreground">
-                    {row.userAgent || ""}
-                  </td>
-                  <td className="max-w-[240px] px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {previewJson(row.metadata)}
-                  </td>
-                  <td className="max-w-[240px] px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {previewJson({
-                      oldValues: row.oldValues,
-                      newValues: row.newValues,
+                  </p>
+                </td>
+                <td className="px-4 py-3 text-right align-middle">
+                  <Link
+                    href={`/admin/audit-logs/${row.id}`}
+                    className={buttonVariants({
+                      variant: "outline",
+                      size: "sm",
                     })}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/audit-logs/${row.id}`}
-                      className={buttonVariants({
-                        variant: "outline",
-                        size: "sm",
-                      })}
-                    >
-                      <Eye data-icon="inline-start" />
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  className="px-4 py-8"
-                  colSpan={10}
-                >
-                  <EmptyState
-                    className="border-0 bg-transparent py-4"
-                    title="No audit logs found"
-                  />
+                  >
+                    <Eye data-icon="inline-start" />
+                    View
+                  </Link>
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
+            ))
+          ) : (
+            <tr>
+              <td className="px-4 py-8" colSpan={6}>
+                <EmptyState
+                  className="border-0 bg-transparent py-4"
+                  title="No audit logs found"
+                />
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </AdminTableShell>
   );
 }
