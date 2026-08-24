@@ -109,7 +109,6 @@ export function buildN8nCateringSummary(
     labelValue(catering.dietaryNotes)
       ? `Dietary notes: ${catering.dietaryNotes?.trim()}`
       : null,
-    labelValue(catering.notes) ? `Notes: ${catering.notes?.trim()}` : null,
   ].filter(Boolean);
 
   return parts.length > 0 ? parts.join("; ") : "Requested";
@@ -216,7 +215,6 @@ export function buildN8nCalendarCreatePayload({
     cateringPax: booking.catering.pax,
     cateringServingTime: booking.catering.servingTime,
     cateringDietaryNotes: booking.catering.dietaryNotes,
-    cateringNotes: booking.catering.notes,
     requesterName: booking.owner?.fullName,
     requesterEmail: booking.owner?.email,
     status: booking.status,

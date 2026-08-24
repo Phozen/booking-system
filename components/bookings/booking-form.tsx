@@ -115,8 +115,7 @@ type BookingFieldId =
   | "cateringType"
   | "cateringPax"
   | "cateringServingTime"
-  | "cateringDietaryNotes"
-  | "cateringNotes";
+  | "cateringDietaryNotes";
 
 type BookingFieldErrors = Partial<Record<BookingFieldId, string>>;
 
@@ -211,7 +210,6 @@ export function BookingForm({
   const [selectedFoodItems, setSelectedFoodItems] = useState<string[]>([]);
   const [otherDrinkRequest, setOtherDrinkRequest] = useState("");
   const [otherFoodRequest, setOtherFoodRequest] = useState("");
-  const [cateringNotes, setCateringNotes] = useState("");
   const [teamsMeeting, setTeamsMeeting] = useState(false);
   const [selectedAttendeeCount, setSelectedAttendeeCount] = useState(0);
   const [selectedDepartmentCount, setSelectedDepartmentCount] = useState(0);
@@ -262,7 +260,6 @@ export function BookingForm({
       ? `Drinks: ${drinkRequests.join(", ")}`
       : "",
     foodRequests.length > 0 ? `Food: ${foodRequests.join(", ")}` : "",
-    cateringNotes.trim(),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -372,8 +369,7 @@ export function BookingForm({
         errors.cateringType ||
           errors.cateringPax ||
           errors.cateringServingTime ||
-          errors.cateringDietaryNotes ||
-          errors.cateringNotes,
+          errors.cateringDietaryNotes,
       );
     }
     return false;
@@ -413,7 +409,6 @@ export function BookingForm({
       nextErrors.cateringDietaryNotes = getFirstError(
         errors.cateringDietaryNotes,
       );
-      nextErrors.cateringNotes = getFirstError(errors.cateringNotes);
     } else {
       const dateRange = getBookingDateRange(
         parsed.data,
@@ -1141,31 +1136,11 @@ export function BookingForm({
                 </FormFieldError>
               </div>
 
-              <div className="grid gap-2 sm:col-span-2">
-                <BookingFieldLabel htmlFor="cateringNotes" required={false}>
-                  Extra notes for catering
-                </BookingFieldLabel>
-                <Textarea
-                  id="cateringNotes"
-                  rows={3}
-                  value={cateringNotes}
-                  onChange={(event) => setCateringNotes(event.target.value)}
-                  disabled={!hasFacilities || isPending}
-                  aria-describedby={getFieldDescribedBy(
-                    fieldErrors.cateringNotes && "cateringNotes-error",
-                  )}
-                  aria-invalid={Boolean(fieldErrors.cateringNotes)}
-                  className="min-h-20"
-                />
-                <input
-                  type="hidden"
-                  name="cateringNotes"
-                  value={combinedCateringNotes}
-                />
-                <FormFieldError id="cateringNotes-error">
-                  {fieldErrors.cateringNotes}
-                </FormFieldError>
-              </div>
+              <input
+                type="hidden"
+                name="cateringNotes"
+                value={combinedCateringNotes}
+              />
             </>
           ) : null}
         </div>

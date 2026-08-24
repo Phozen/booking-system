@@ -80,7 +80,6 @@ export function CateringEditForm({
   );
   const [otherDrinkRequest, setOtherDrinkRequest] = useState("");
   const [otherFoodRequest, setOtherFoodRequest] = useState("");
-  const [cateringNotes, setCateringNotes] = useState(catering.notes ?? "");
   const [state, action, isPending] = useActionState(
     updateBookingCateringAction.bind(null, bookingId),
     cateringActionInitialState,
@@ -112,7 +111,6 @@ export function CateringEditForm({
       ? `Drinks: ${drinkRequests.join(", ")}`
       : "",
     foodRequests.length > 0 ? `Food: ${foodRequests.join(", ")}` : "",
-    cateringNotes.trim(),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -342,23 +340,11 @@ export function CateringEditForm({
                 />
               </div>
 
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor={`cateringNotes-${bookingId}`}>
-                  Additional catering notes
-                </Label>
-                <Textarea
-                  id={`cateringNotes-${bookingId}`}
-                  rows={3}
-                  value={cateringNotes}
-                  onChange={(event) => setCateringNotes(event.target.value)}
-                  className="min-h-20 w-full min-w-0 rounded-lg border border-input bg-input-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50"
-                />
-                <input
-                  type="hidden"
-                  name="cateringNotes"
-                  value={combinedCateringNotes}
-                />
-              </div>
+              <input
+                type="hidden"
+                name="cateringNotes"
+                value={combinedCateringNotes}
+              />
             </>
           ) : null}
         </fieldset>

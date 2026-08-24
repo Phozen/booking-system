@@ -57,11 +57,6 @@ export function CateringDetailsCard({
             const notes = catering.notes || "";
             const drinksMatch = notes.match(/Drinks:\s*([^\n]+)/);
             const foodMatch = notes.match(/Food:\s*([^\n]+)/);
-            
-            let remainingNotes = notes;
-            if (drinksMatch) remainingNotes = remainingNotes.replace(drinksMatch[0], "");
-            if (foodMatch) remainingNotes = remainingNotes.replace(foodMatch[0], "");
-            remainingNotes = remainingNotes.trim();
 
             return (
               <>
@@ -71,12 +66,6 @@ export function CateringDetailsCard({
                 {foodMatch ? (
                   <DetailItem label="Food" value={foodMatch[1]} />
                 ) : null}
-                <div className="sm:col-span-2">
-                  <DetailItem
-                    label="Additional catering notes"
-                    value={remainingNotes || "None"}
-                  />
-                </div>
               </>
             );
           })()}

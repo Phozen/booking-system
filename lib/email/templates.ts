@@ -247,7 +247,6 @@ export function renderEmailTemplate(
     input.templateData,
     "cateringDietaryNotes",
   );
-  const cateringNotes = getStringValue(input.templateData, "cateringNotes");
   const description = getStringValue(input.templateData, "description");
   const meetingType = getMeetingTypeLabel(input.templateData.teamsMeeting);
   const invitees = getInviteeDisplayValue(input.templateData);
@@ -275,12 +274,11 @@ export function renderEmailTemplate(
     invitees: invitees,
     departments: departments,
     teamsMeeting: input.templateData.teamsMeeting,
-    cateringRequired: Boolean(cateringType || cateringPax || cateringServingTime || cateringDietaryNotes || cateringNotes),
+    cateringRequired: Boolean(cateringType || cateringPax || cateringServingTime || cateringDietaryNotes),
     cateringType: cateringType,
     cateringPax: cateringPax ? Number(cateringPax) : null,
     cateringServingTime: cateringServingTime,
     cateringDietaryNotes: cateringDietaryNotes,
-    cateringNotes: cateringNotes,
     requesterName: requesterName,
     requesterEmail: requesterEmail,
     status: status,

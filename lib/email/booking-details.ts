@@ -60,7 +60,6 @@ export type BookingDetailInput = {
   cateringPax?: number | string | null;
   cateringServingTime?: string | null;
   cateringDietaryNotes?: string | null;
-  cateringNotes?: string | null;
   requesterName?: string | null;
   requesterEmail?: string | null;
   status?: string | null;
@@ -148,7 +147,6 @@ export function buildBookingDetailRows(input: BookingDetailInput): DetailRow[] {
         label: "Dietary notes",
         value: input.cateringDietaryNotes?.trim() || "None",
       },
-      { label: "Extra notes", value: input.cateringNotes?.trim() || "None" },
     );
   }
 
