@@ -45,6 +45,13 @@ const bookingDepartmentManager = readFileSync(
   join(process.cwd(), "components/bookings/booking-department-manager.tsx"),
   "utf8",
 );
+const aliasFixMigration = readFileSync(
+  join(
+    process.cwd(),
+    "supabase/migrations/20260824144500_fix_set_booking_departments_aliases.sql",
+  ),
+  "utf8",
+);
 
 const sql = migration.replace(/\s+/g, " ").toLowerCase();
 const employeeActions = bookingActions.replace(/\s+/g, " ").toLowerCase();
@@ -83,6 +90,15 @@ describe("booking departments and recurring retirement migration", () => {
     expect(sql).toContain("choose active internal users only");
     expect(sql).toContain("grant execute on function public.admin_create_booking_with_participants");
     expect(sql).toContain("to service_role");
+  });
+
+  it("qualifies set_booking_departments unnest columns to avoid ambiguous id", () => {
+    const aliasFixSql = aliasFixMigration.replace(/\s+/g, " ").toLowerCase();
+    expect(aliasFixSql).toContain("create or replace function public.set_booking_departments");
+    expect(aliasFixSql).toContain(
+      "from unnest(v_department_ids) as selected_department(department_id)",
+    );
+    expect(aliasFixSql).not.toContain("from unnest(v_department_ids) as id");
   });
 
   it("removes recurring operations while preserving historical series data", () => {
