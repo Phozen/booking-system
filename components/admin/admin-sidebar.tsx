@@ -26,16 +26,19 @@ export function AdminSidebar({
     const scrollEl = scrollRef.current;
     if (!shell || !scrollEl) return;
 
+    const sidebarShell = shell;
+    const navScroll = scrollEl;
+
     function onWheel(event: WheelEvent) {
-      if (!shell.contains(event.target as Node)) return;
-      if (scrollEl.contains(event.target as Node)) return;
+      if (!sidebarShell.contains(event.target as Node)) return;
+      if (navScroll.contains(event.target as Node)) return;
 
       event.preventDefault();
-      scrollEl.scrollTop += event.deltaY;
+      navScroll.scrollTop += event.deltaY;
     }
 
-    shell.addEventListener("wheel", onWheel, { passive: false });
-    return () => shell.removeEventListener("wheel", onWheel);
+    sidebarShell.addEventListener("wheel", onWheel, { passive: false });
+    return () => sidebarShell.removeEventListener("wheel", onWheel);
   }, []);
 
   return (
