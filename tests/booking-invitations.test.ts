@@ -72,14 +72,14 @@ describe("booking invitation validation", () => {
     ).toBe(false);
   });
 
-  it("blocks self, inactive, and duplicate invitations", () => {
+  it("allows self-invite but blocks inactive and duplicate invitations", () => {
     expect(
       canInviteUser({
         ownerUserId: userId,
         invitedUserId: userId,
         invitedUserStatus: "active",
       }).allowed,
-    ).toBe(false);
+    ).toBe(true);
 
     expect(
       canInviteUser({

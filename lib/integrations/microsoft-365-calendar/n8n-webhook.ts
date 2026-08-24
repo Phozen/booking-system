@@ -1,3 +1,4 @@
+import { buildBookingDetailRows, detailRowsToText } from "@/lib/email/booking-details";
 import type { N8nCalendarSyncConfig } from "@/lib/integrations/microsoft-365-calendar/config";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import { toCalendarLocalDateTime } from "@/lib/integrations/microsoft-365-calendar/event-mapper";
@@ -197,12 +198,37 @@ export function buildN8nCalendarCreatePayload({
   timezone: string;
   appUrl?: string;
 }): N8nCalendarCreatePayload {
+  const bookingUrl = buildBookingUrl(booking.id, appUrl);
+
+  const detailRows = buildBookingDetailRows({
+    facilityName: booking.facility?.name,
+    facilityLevel: booking.facility?.level,
+    startsAt: booking.startsAt,
+    endsAt: booking.endsAt,
+    title: booking.title,
+    description: booking.description,
+    attendeeCount: booking.attendeeCount,
+    invitees: null,
+    departments: null,
+    teamsMeeting: undefined,
+    cateringRequired: booking.catering.required,
+    cateringType: booking.catering.type,
+    cateringPax: booking.catering.pax,
+    cateringServingTime: booking.catering.servingTime,
+    cateringDietaryNotes: booking.catering.dietaryNotes,
+    cateringNotes: booking.catering.notes,
+    requesterName: booking.owner?.fullName,
+    requesterEmail: booking.owner?.email,
+    status: booking.status,
+    bookingLink: bookingUrl,
+  });
+
   return {
     action: "create",
     bookingId: booking.id,
     bookingReference: booking.id,
     title: booking.title,
-    description: booking.description,
+    description: detailRowsToText(detailRows),
     facilityName: booking.facility?.name ?? "Facility",
     facilityLevel: booking.facility?.level ?? "Level not set",
     facilityType: booking.facility?.type ?? null,
@@ -214,7 +240,7 @@ export function buildN8nCalendarCreatePayload({
     attendeeCount: booking.attendeeCount,
     cateringRequired: booking.catering.required,
     cateringSummary: buildN8nCateringSummary(booking.catering),
-    bookingUrl: buildBookingUrl(booking.id, appUrl),
+    bookingUrl,
   };
 }
 

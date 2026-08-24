@@ -245,7 +245,6 @@ export async function searchActiveInviteCandidates(
     .from("profiles")
     .select("id,email,full_name,department")
     .eq("status", "active")
-    .neq("id", ownerUserId)
     .or(`full_name.ilike.${pattern},email.ilike.${pattern},department.ilike.${pattern}`)
     .order("full_name", { ascending: true })
     .order("email", { ascending: true })
@@ -301,7 +300,6 @@ export async function searchInviteCandidatesForBooking(
     .from("profiles")
     .select("id,email,full_name,department")
     .eq("status", "active")
-    .neq("id", ownerUserId)
     .or(
       `full_name.ilike.${pattern},email.ilike.${pattern},department.ilike.${pattern}`,
     )

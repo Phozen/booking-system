@@ -11,7 +11,7 @@ export const employeeCopy = {
   invites: "Invites",
   home: "Home",
   calendar: "Calendar",
-  howManyPeople: "How many people",
+  howManyPeople: "How many people?",
   numberOfPeople: "Number of people",
   fitsPeople: (n: number) => `Fits ${n} people`,
   needFoodOrDrinks: "Need food or drinks?",

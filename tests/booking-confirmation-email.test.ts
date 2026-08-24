@@ -373,19 +373,19 @@ describe("booking confirmation email template", () => {
     });
 
     expect(rendered.subject).toBe("Booking confirmed: Planning Session");
-    expect(rendered.text).toContain("Facility: Board Room");
+    expect(rendered.text).toContain("Room: Board Room");
     expect(rendered.text).toContain("Date:");
     expect(rendered.text).toContain("Time:");
     expect(rendered.text).not.toContain("Start time:");
     expect(rendered.text).not.toContain("End time:");
-    expect(rendered.text).toContain("Attendees: 4");
+    expect(rendered.text).toContain("How many people?: 4");
     expect(rendered.text).toContain("Status: confirmed");
     expect(rendered.text).toContain(
       `https://booking.example.com/bookings/${confirmedBooking.id}`,
     );
     expect(rendered.html).toContain('role="article"');
     expect(rendered.html).toContain("View booking");
-    expect(rendered.html).toContain("Attendees");
+    expect(rendered.html).toContain("How many people?");
     expect(rendered.html).toContain("4");
     expect(rendered.html).toContain('role="presentation"');
     expect(rendered.html).toContain('bgcolor="#f1f5f9"');
@@ -419,12 +419,13 @@ describe("booking confirmation email template", () => {
       },
     });
 
-    expect(rendered.text).toContain("Purpose: Quarterly planning\nBring last quarter notes");
-    expect(rendered.text).toContain("Facility: Board Room · Level 3");
+    expect(rendered.text).toContain("Description: Quarterly planning\nBring last quarter notes");
+    expect(rendered.text).toContain("Room: Board Room, Level 3");
     expect(rendered.text).toContain("Meeting type: Teams meeting");
-    expect(rendered.text).toContain("Invited people: Guest User (guest@example.com)");
+    expect(rendered.text).toContain("Invited staff: Guest User (guest@example.com)");
     expect(rendered.text).toContain("Requester: Employee User (employee@example.com)");
-    expect(rendered.html).toContain("Quarterly planning<br>Bring last quarter notes");
+    expect(rendered.html).toContain("Quarterly planning");
+    expect(rendered.html).toContain("Bring last quarter notes");
   });
 
   it("omits empty optional booking details", () => {
@@ -440,9 +441,9 @@ describe("booking confirmation email template", () => {
       },
     });
 
-    expect(rendered.text).not.toContain("Purpose:");
-    expect(rendered.text).not.toContain("Meeting type:");
-    expect(rendered.text).not.toContain("Invited people:");
+    expect(rendered.text).toContain("Description: None");
+    expect(rendered.text).toContain("Meeting type: Not provided");
+    expect(rendered.text).toContain("Invited staff: None");
   });
 
   it("adds the protected Outlook calendar action only when the queue provides it", () => {

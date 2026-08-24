@@ -818,6 +818,27 @@ export function BookingForm({
             <FormFieldError id="title-error">{fieldErrors.title}</FormFieldError>
           </div>
 
+          <div className="grid gap-2 sm:col-span-2">
+            <BookingFieldLabel htmlFor="description" required={false}>
+              Description
+            </BookingFieldLabel>
+            <Textarea
+              id="description"
+              name="description"
+              rows={5}
+              placeholder="Optional notes for yourself or the room admin"
+              disabled={!hasFacilities || isPending}
+              aria-describedby={getFieldDescribedBy(
+                fieldErrors.description && "description-error",
+              )}
+              aria-invalid={Boolean(fieldErrors.description)}
+              className="min-h-28"
+            />
+            <FormFieldError id="description-error">
+              {fieldErrors.description}
+            </FormFieldError>
+          </div>
+
           <div className="grid gap-2">
             <BookingFieldLabel htmlFor="attendeeCount" required={false}>
               {employeeCopy.howManyPeople}
@@ -845,27 +866,6 @@ export function BookingForm({
             />
             <FormFieldError id="attendeeCount-error">
               {fieldErrors.attendeeCount}
-            </FormFieldError>
-          </div>
-
-          <div className="grid gap-2 sm:col-span-2">
-            <BookingFieldLabel htmlFor="description" required={false}>
-              More details
-            </BookingFieldLabel>
-            <Textarea
-              id="description"
-              name="description"
-              rows={5}
-              placeholder="Optional notes for yourself or the room admin"
-              disabled={!hasFacilities || isPending}
-              aria-describedby={getFieldDescribedBy(
-                fieldErrors.description && "description-error",
-              )}
-              aria-invalid={Boolean(fieldErrors.description)}
-              className="min-h-28"
-            />
-            <FormFieldError id="description-error">
-              {fieldErrors.description}
             </FormFieldError>
           </div>
         </div>

@@ -8,6 +8,7 @@ import {
   formatCateringType,
 } from "@/lib/bookings/catering/format";
 import {
+  buildBookingDetailRows,
   formatInviteeList,
   formatPersonLabel,
   getMeetingTypeLabel,
@@ -263,51 +264,39 @@ export function renderEmailTemplate(
     startsAt && endsAt ? formatBookingWindow(startsAt, endsAt) : null;
   const facility = [facilityName, facilityLevel].filter(Boolean).join(" · ") || null;
 
+  const detailRows = buildBookingDetailRows({
+    facilityName: facilityName,
+    facilityLevel: facilityLevel,
+    startsAt: startsAt,
+    endsAt: endsAt,
+    title: title,
+    description: description,
+    attendeeCount: attendeeCount,
+    invitees: invitees,
+    departments: departments,
+    teamsMeeting: input.templateData.teamsMeeting,
+    cateringRequired: Boolean(cateringType || cateringPax || cateringServingTime || cateringDietaryNotes || cateringNotes),
+    cateringType: cateringType,
+    cateringPax: cateringPax ? Number(cateringPax) : null,
+    cateringServingTime: cateringServingTime,
+    cateringDietaryNotes: cateringDietaryNotes,
+    cateringNotes: cateringNotes,
+    requesterName: requesterName,
+    requesterEmail: requesterEmail,
+    status: status,
+    bookingLink: null,
+  });
+
   const sections: EmailDetailSection[] = [
     {
-      title: "Meeting details",
-      rows: [
-        { label: "Purpose", value: description },
-        { label: "Facility", value: facility },
-        { label: "Date", value: bookingDate },
-        {
-          label: "Time",
-          value: bookingTime ?? [startTime, endTime].filter(Boolean).join(" - "),
-        },
-        { label: "Status", value: status },
-        { label: "Meeting type", value: meetingType },
-        { label: "Attendees", value: attendeeCount },
-        { label: "Invited people", value: invitees },
-      ],
-    },
-    {
-      title: "Departments",
-      rows: [{ label: "Included", value: departments }],
+      title: "Booking details",
+      rows: detailRows.map((r) => ({ label: r.label, value: r.value })),
     },
     {
       title: "People",
       rows: [
-        { label: "Requester", value: formatPersonLabel(requesterName, requesterEmail) },
         { label: "Invitation status", value: invitationStatus },
         { label: "Responded by", value: formatPersonLabel(actorName, actorEmail) },
-      ],
-    },
-    {
-      title: "Catering",
-      rows: [
-        {
-          label: "Catering type",
-          value: cateringType ? formatCateringType(cateringType) : null,
-        },
-        { label: "Catering pax", value: cateringPax },
-        {
-          label: "Serving time",
-          value: cateringServingTime
-            ? formatCateringServingTime(cateringServingTime)
-            : null,
-        },
-        { label: "Dietary notes", value: cateringDietaryNotes },
-        { label: "Notes", value: cateringNotes },
       ],
     },
     {

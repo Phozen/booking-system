@@ -146,4 +146,17 @@ describe("initial attendee creation actions", () => {
     expect(employeeActions).toContain("updatebookingdepartmentsaction");
     expect(employeeActions).toContain('rpc("set_booking_departments"');
   });
+
+  it("allows owner as invitee in the new migration", () => {
+    const selfInviteMigrationPath = join(
+      process.cwd(),
+      "supabase/migrations/20260824152600_allow_owner_as_invitee.sql",
+    );
+    expect(existsSync(selfInviteMigrationPath)).toBe(true);
+    const selfInviteSql = readFileSync(selfInviteMigrationPath, "utf8")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+    expect(selfInviteSql).toContain("create function public.create_booking_with_participants");
+    expect(selfInviteSql).not.toContain("raise exception 'the booking owner cannot be invited.'");
+  });
 });

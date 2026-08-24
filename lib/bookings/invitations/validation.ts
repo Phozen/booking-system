@@ -96,13 +96,6 @@ export function canInviteUser({
   invitedUserStatus: string | null | undefined;
   existingInvitation?: { status: BookingInvitationStatus } | null;
 }) {
-  if (ownerUserId === invitedUserId) {
-    return {
-      allowed: false,
-      message: "You cannot invite yourself to your own booking.",
-    };
-  }
-
   if (invitedUserStatus !== "active") {
     return {
       allowed: false,

@@ -1,3 +1,4 @@
+import { buildBookingDetailRows, detailRowsToHtml } from "@/lib/email/booking-details";
 import type { MicrosoftGraphEventPayload } from "@/lib/integrations/microsoft-365-calendar/types";
 
 export type MicrosoftCalendarBookingForEvent = {
@@ -21,15 +22,6 @@ export type MicrosoftCalendarBookingForEvent = {
   }[];
   teamsMeeting?: boolean;
 };
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
 
 export function toCalendarLocalDateTime(value: string, timezone: string) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -102,21 +94,27 @@ export function buildMicrosoftCalendarEventPayload({
 }): MicrosoftGraphEventPayload {
   const facilityName = booking.facility?.name ?? "Facility";
   const facilityLevel = booking.facility?.level ?? "Level not set";
-  const organizer =
-    booking.owner?.fullName || booking.owner?.email || "Booking requester";
   const bookingLink = buildBookingLink(booking.id, appUrl);
-  const description = booking.description?.trim();
-  const bodyLines = [
-    `<p><strong>Booking:</strong> ${escapeHtml(booking.title)}</p>`,
-    description ? `<p><strong>Purpose:</strong> ${escapeHtml(description)}</p>` : null,
-    `<p><strong>Facility:</strong> ${escapeHtml(facilityName)}</p>`,
-    `<p><strong>Level:</strong> ${escapeHtml(facilityLevel)}</p>`,
-    `<p><strong>Organizer:</strong> ${escapeHtml(organizer)}</p>`,
-    `<p><strong>Status:</strong> ${escapeHtml(booking.status)}</p>`,
-    bookingLink
-      ? `<p><a href="${escapeHtml(bookingLink)}">View booking in QBook</a></p>`
-      : null,
-  ].filter(Boolean);
+
+  const detailRows = buildBookingDetailRows({
+    facilityName,
+    facilityLevel,
+    startsAt: booking.startsAt,
+    endsAt: booking.endsAt,
+    title: booking.title,
+    description: booking.description,
+    attendeeCount: null,
+    invitees: booking.attendees.map((a) => ({ name: a.name, email: a.email })),
+    departments: null,
+    teamsMeeting: booking.teamsMeeting,
+    cateringRequired: false,
+    requesterName: booking.owner?.fullName,
+    requesterEmail: booking.owner?.email,
+    status: booking.status,
+    bookingLink: bookingLink,
+  });
+
+  const bodyLines = [detailRowsToHtml(detailRows)].filter(Boolean);
 
   const attendees = buildAttendees(booking);
 

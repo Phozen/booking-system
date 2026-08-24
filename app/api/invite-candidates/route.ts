@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
   const params = new URL(request.url).searchParams;
   const search = params.get("q") ?? "";
-  const excludeUserId = params.get("excludeUserId") ?? auth.user.id;
+  const excludeUserId = params.get("excludeUserId") ?? "";
   try {
     const candidates = await searchActiveInviteCandidates(
       createAdminClient(), excludeUserId, search,
