@@ -1,5 +1,7 @@
 import { BookOpen, CircleHelp, Mail } from "lucide-react";
 
+import { BookingFlowSlideshow } from "@/components/shared/booking-flow-slideshow";
+
 const basics = [
   {
     title: "Book a room",
@@ -31,6 +33,8 @@ const rules = [
         For ideas or issues with how QBook works, email{" "}
         <a
           href="mailto:it@qhazanahsabah.com.my"
+          target="_blank"
+          rel="noopener noreferrer"
           className="font-medium text-primary underline-offset-2 hover:underline"
         >
           it@qhazanahsabah.com.my
@@ -46,6 +50,8 @@ const rules = [
         For clashes or disputes about a booking, email{" "}
         <a
           href="mailto:hr@qhazanahsabah.com.my"
+          target="_blank"
+          rel="noopener noreferrer"
           className="font-medium text-primary underline-offset-2 hover:underline"
         >
           hr@qhazanahsabah.com.my
@@ -77,6 +83,10 @@ export function HomeOnboarding() {
             A short guide to booking rooms and the house rules.
           </p>
         </div>
+      </div>
+
+      <div className="mt-5">
+        <BookingFlowSlideshow />
       </div>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
