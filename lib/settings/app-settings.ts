@@ -11,6 +11,7 @@ export type EmailRecipientSettings = {
   bookingOwnerConfirmations: EmailRecipientRole[];
   companyBookingConfirmations: EmailRecipientRole[];
   cateringRequests: EmailRecipientRole[];
+  pendingApprovals: EmailRecipientRole[];
 };
 
 export type AppSettings = {
@@ -49,6 +50,7 @@ export const baseDefaultAppSettings: AppSettings = {
     bookingOwnerConfirmations: ["employee", "admin", "super_admin"],
     companyBookingConfirmations: [],
     cateringRequests: ["admin", "super_admin"],
+    pendingApprovals: ["admin", "super_admin"],
   },
 };
 
@@ -113,6 +115,10 @@ export function parseEmailRecipientSettings(
     cateringRequests: getRecipientRoles(
       settings.cateringRequests,
       fallback.cateringRequests,
+    ),
+    pendingApprovals: getRecipientRoles(
+      settings.pendingApprovals,
+      fallback.pendingApprovals,
     ),
   };
 }
@@ -292,7 +298,7 @@ export function appSettingsToRows(settings: AppSettings) {
       key: settingKeyMap.emailRecipients,
       value: settings.emailRecipients,
       description:
-        "Role-based recipients for booking owner confirmations, company booking confirmations, and catering requests.",
+        "Role-based recipients for booking owner confirmations, company booking confirmations, catering requests, and pending approval alerts.",
       is_public: false,
     },
   ];

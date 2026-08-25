@@ -531,4 +531,29 @@ describe("booking confirmation email template", () => {
     expect(rendered.text).toContain("Serving time: Before meeting");
     expect(rendered.text).toContain("Dietary notes: Halal");
   });
+
+  it("renders pending approval request emails for admins", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_approval_request",
+      recipientEmail: "admin@example.com",
+      subject: "Approval needed: Planning Session",
+      body: "A booking is waiting for your approval.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+        facilityName: "Board Room",
+        startsAt: "2037-01-01T01:00:00.000Z",
+        endsAt: "2037-01-01T02:00:00.000Z",
+        status: "pending",
+        requesterName: "Employee User",
+        requesterEmail: user.email,
+      },
+    });
+
+    expect(rendered.subject).toBe("Approval needed: Planning Session");
+    expect(rendered.text).toContain("A booking is waiting for your approval.");
+    expect(rendered.text).toContain("Status: pending");
+    expect(rendered.text).toContain("Requester: Employee User (employee@example.com)");
+  });
 });

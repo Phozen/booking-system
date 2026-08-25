@@ -28,6 +28,7 @@ import {
 } from "@/lib/settings/queries";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
+import { insertPendingApprovalRequestNotifications } from "@/lib/email/pending-approval-notifications";
 import {
   getActiveEmailRecipients,
   shouldSendEmailToRole,
@@ -549,6 +550,14 @@ export async function adminCreateBookingAction(
       action: "confirm",
       actorUserId: user.id,
       actorEmail: user.email,
+    });
+  } else if (booking.status === "pending") {
+    await insertPendingApprovalRequestNotifications({
+      booking,
+      facilityName: availability.facility.name,
+      requesterEmail: targetProfile.email,
+      requesterName: targetProfile.full_name,
+      settings,
     });
   }
 

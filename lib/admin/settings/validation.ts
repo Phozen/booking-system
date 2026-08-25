@@ -72,6 +72,7 @@ export const settingsFormSchema = z.object({
   bookingOwnerConfirmations: z.array(z.enum(emailRecipientRoles)),
   companyBookingConfirmations: z.array(z.enum(emailRecipientRoles)),
   cateringRequests: z.array(z.enum(emailRecipientRoles)),
+  pendingApprovals: z.array(z.enum(emailRecipientRoles)),
 }).refine(
   (values) =>
     timeStringToMinutes(values.bookingWindowStart) <
@@ -127,5 +128,6 @@ export function formDataToSettingsValues(formData: FormData) {
       "companyBookingConfirmations",
     ),
     cateringRequests: getRoleValues(formData, "cateringRequests"),
+    pendingApprovals: getRoleValues(formData, "pendingApprovals"),
   };
 }

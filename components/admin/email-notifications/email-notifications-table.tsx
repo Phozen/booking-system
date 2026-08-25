@@ -39,6 +39,7 @@ const emailStatusOptions: EmailNotificationStatus[] = [
 const emailTypeOptions: EmailNotificationType[] = [
   "booking_confirmation",
   "booking_approval",
+  "booking_approval_request",
   "booking_rejection",
   "booking_cancellation",
   "booking_catering_request",
@@ -52,6 +53,7 @@ function formatNotificationType(type: EmailNotificationType) {
   const labels: Record<EmailNotificationType, string> = {
     booking_confirmation: "Booking Confirmation",
     booking_approval: "Booking Approval",
+    booking_approval_request: "Approval Request",
     booking_rejection: "Booking Rejection",
     booking_cancellation: "Booking Cancellation",
     booking_catering_request: "Catering Request",

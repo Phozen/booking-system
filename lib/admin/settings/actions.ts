@@ -60,6 +60,7 @@ export async function updateSystemSettingsAction(
       bookingOwnerConfirmations: parsed.data.bookingOwnerConfirmations,
       companyBookingConfirmations: parsed.data.companyBookingConfirmations,
       cateringRequests: parsed.data.cateringRequests,
+      pendingApprovals: parsed.data.pendingApprovals,
     },
   };
   const rows = appSettingsToRows(newSettings).map((row) => ({

@@ -11,7 +11,8 @@ import {
 export type EmailRecipientGroup =
   | "bookingOwnerConfirmations"
   | "companyBookingConfirmations"
-  | "cateringRequests";
+  | "cateringRequests"
+  | "pendingApprovals";
 
 export type ActiveEmailRecipient = {
   id: string;

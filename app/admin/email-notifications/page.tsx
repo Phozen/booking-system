@@ -21,6 +21,7 @@ const statusOptions: EmailNotificationStatus[] = [
 const typeOptions: EmailNotificationType[] = [
   "booking_confirmation",
   "booking_approval",
+  "booking_approval_request",
   "booking_rejection",
   "booking_cancellation",
   "booking_catering_request",

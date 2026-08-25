@@ -37,6 +37,7 @@ import {
 } from "@/lib/settings/queries";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
+import { insertPendingApprovalRequestNotifications } from "@/lib/email/pending-approval-notifications";
 import {
   getActiveEmailRecipients,
   shouldSendEmailToRole,
@@ -645,6 +646,13 @@ export async function createBookingAction(
     recipientEmail: user.email,
     recipientRole: profile.role,
     facilityName: availability.facility.name,
+    settings,
+  });
+  await insertPendingApprovalRequestNotifications({
+    booking,
+    facilityName: availability.facility.name,
+    requesterEmail: user.email,
+    requesterName: profile?.full_name,
     settings,
   });
   await insertCateringRequestNotifications({

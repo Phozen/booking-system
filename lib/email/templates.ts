@@ -308,6 +308,7 @@ export function renderEmailTemplate(
   const introByType: Record<EmailNotificationType, string> = {
     booking_confirmation: "Your booking has been confirmed.",
     booking_approval: "Your booking has been approved.",
+    booking_approval_request: "A booking is waiting for your approval.",
     booking_rejection: "Your booking has been rejected.",
     booking_cancellation: "Your booking has been cancelled.",
     booking_catering_request: "A booking was created with catering requested.",
@@ -320,6 +321,7 @@ export function renderEmailTemplate(
   const headingByType: Record<EmailNotificationType, string> = {
     booking_confirmation: `Booking confirmed: ${title}`,
     booking_approval: `Booking approved: ${title}`,
+    booking_approval_request: `Approval needed: ${title}`,
     booking_rejection: `Booking rejected: ${title}`,
     booking_cancellation: `Booking cancelled: ${title}`,
     booking_catering_request: `Catering requested: ${title}`,

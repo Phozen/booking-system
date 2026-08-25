@@ -12,6 +12,7 @@ import { employeeCopy } from "@/lib/employee/plain-language";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
+import { HomeOnboarding } from "@/components/shared/home-onboarding";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { employeeDashboardActions } from "@/config/navigation";
@@ -58,6 +59,8 @@ export default async function DashboardPage() {
           );
         })}
       </section>
+
+      <HomeOnboarding />
 
       <section className="rounded-xl border border-border/70 bg-card p-4 text-card-foreground sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

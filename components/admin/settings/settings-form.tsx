@@ -55,18 +55,28 @@ const recipientGroups = [
     title: "Booking owner confirmations",
     description:
       "Send a direct email when a user in the selected role owns a confirmed booking.",
+    roles: emailRecipientRoles,
   },
   {
     name: "companyBookingConfirmations",
     title: "Company booking confirmations",
     description:
       "Send active users in the selected roles a copy whenever any booking is confirmed. This is off by default to avoid unnecessary email.",
+    roles: emailRecipientRoles,
   },
   {
     name: "cateringRequests",
     title: "Catering requests",
     description:
       "Send active users in the selected roles a request whenever catering is added to a booking.",
+    roles: emailRecipientRoles,
+  },
+  {
+    name: "pendingApprovals",
+    title: "Pending approval alerts",
+    description:
+      "Email active admins and/or super admins when a booking is waiting for approval.",
+    roles: ["admin", "super_admin"] as const,
   },
 ] as const;
 
@@ -456,7 +466,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
           </p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {recipientGroups.map((group) => (
             <fieldset
               key={group.name}
@@ -471,7 +481,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
                 {group.description}
               </p>
               <div className="grid gap-2">
-                {emailRecipientRoles.map((role) => (
+                {group.roles.map((role) => (
                   <label
                     key={role}
                     className="flex items-center gap-2 rounded-md px-1 py-1 text-sm"
