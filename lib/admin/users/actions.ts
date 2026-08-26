@@ -64,8 +64,25 @@ export async function provisionApprovedUserAction(
       message:
         error?.code === "23505"
           ? "That exact email already has an access record."
-          : "The individual access record could not be created.",
+          : "The access record could not be created.",
     };
+  }
+
+  const { error: profileSyncError } = await supabase
+    .from("profiles")
+    .update({
+      role: parsed.data.role,
+      status: parsed.data.status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("email", email);
+
+  if (profileSyncError) {
+    console.error("Linked profile sync after access provision failed", {
+      email,
+      code: profileSyncError.code,
+      message: profileSyncError.message,
+    });
   }
 
   await createAuditLogSafely(
@@ -76,7 +93,7 @@ export async function provisionApprovedUserAction(
       entityId: data.id,
       actorUserId: user.id,
       actorEmail: user.email,
-      summary: `Created an individual Qbook access record for ${email}.`,
+      summary: `Created Qbook access record for ${email} (${parsed.data.role}).`,
       newValues: { email, role: parsed.data.role, status: parsed.data.status },
     },
     { userId: user.id },
@@ -85,7 +102,10 @@ export async function provisionApprovedUserAction(
   revalidatePath("/admin/users");
   return {
     status: "success",
-    message: "Individual access record created. The employee can sign in with Microsoft.",
+    message:
+      parsed.data.role === "employee"
+        ? "Access record saved. Use Admin or Super Admin when promoting someone."
+        : "Access record saved. Role changes apply on their next protected page load.",
   };
 }
 

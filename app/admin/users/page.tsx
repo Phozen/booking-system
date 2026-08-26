@@ -27,6 +27,7 @@ export default async function AdminUsersPage({
       <PageHeader
         eyebrow="Super admin area"
         title="Elevated user access"
+        description="Anyone on the company Microsoft domain can sign in as Employee. Use this page to promote Admins / Super Admins, or to suspend someone."
       />
 
       <ApprovedUserCreateForm />

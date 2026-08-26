@@ -33,7 +33,13 @@ export function ApprovedUserCreateForm() {
       className="grid gap-5 rounded-lg border border-border/70 bg-card p-5 shadow-sm"
     >
       <div>
-        <h2 className="font-semibold tracking-normal">Add individual access record</h2>
+        <h2 className="font-semibold tracking-normal">
+          Set elevated role or suspend access
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Company-domain staff can already sign in as Employee. Add a record
+          here to make someone Admin / Super Admin, or to disable their access.
+        </p>
       </div>
 
       {state.status !== "idle" ? (
@@ -56,7 +62,7 @@ export function ApprovedUserCreateForm() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="approved-role">Role</Label>
-          <Select id="approved-role" name="role" defaultValue="employee" disabled={pending}>
+          <Select id="approved-role" name="role" defaultValue="admin" disabled={pending}>
             {editableUserRoleOptions.map((role) => (
               <option key={role} value={role}>
                 {formatUserRole(role)}
@@ -75,8 +81,8 @@ export function ApprovedUserCreateForm() {
           </Select>
         </div>
         <Button type="submit" disabled={pending}>
-          <PendingButtonContent pending={pending} pendingLabel="Adding...">
-            Add access record
+          <PendingButtonContent pending={pending} pendingLabel="Saving...">
+            Save access record
           </PendingButtonContent>
         </Button>
       </div>
