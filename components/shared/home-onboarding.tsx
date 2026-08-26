@@ -83,8 +83,9 @@ export function HomeOnboarding() {
           >
             Getting started
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            What QBook does, plus the house rules.
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Walk through a booking in six steps, then skim what QBook covers and
+            who to contact.
           </p>
         </div>
       </div>
@@ -93,7 +94,7 @@ export function HomeOnboarding() {
         <BookingFlowSlideshow />
       </div>
 
-      <div className="mt-5 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             <ListChecks className="size-4" aria-hidden="true" />

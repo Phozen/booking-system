@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 
 type Slide = {
   id: string;
-  step: string;
   title: string;
   body: string;
+  tip: string;
   icon: typeof DoorOpen;
   preview: ReactNode;
 };
@@ -31,26 +31,30 @@ function PreviewChrome({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-[var(--shadow-card)]">
-      <div className="flex items-center gap-2 border-b border-border/60 bg-muted/50 px-3 py-2">
-        <span className="size-2 rounded-full bg-border" aria-hidden="true" />
-        <span className="size-2 rounded-full bg-border" aria-hidden="true" />
-        <span className="size-2 rounded-full bg-border" aria-hidden="true" />
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[var(--shadow-card)] outline outline-1 outline-black/5 dark:outline-white/10">
+      <div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-3.5 py-2.5">
+        <span className="size-2 rounded-full bg-destructive/50" aria-hidden="true" />
+        <span className="size-2 rounded-full bg-warning/60" aria-hidden="true" />
+        <span className="size-2 rounded-full bg-success/60" aria-hidden="true" />
         <span className="ml-2 truncate text-xs font-medium text-muted-foreground">
           {title}
         </span>
       </div>
-      <div className="p-3 sm:p-4">{children}</div>
+      <div className="bg-gradient-to-b from-background to-muted/20 p-4 sm:p-5">
+        {children}
+      </div>
     </div>
   );
 }
 
 function FieldStub({ label, wide }: { label: string; wide?: boolean }) {
   return (
-    <div className={cn("grid gap-1", wide && "sm:col-span-2")}>
-      <div className="h-3 w-20 rounded bg-muted-foreground/20" />
-      <div className="h-8 rounded-md border border-border/70 bg-card px-2 text-[11px] leading-8 text-muted-foreground">
+    <div className={cn("grid gap-1.5", wide && "sm:col-span-2")}>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
         {label}
+      </p>
+      <div className="h-9 rounded-lg border border-border/80 bg-background/90 px-3 text-xs leading-9 text-muted-foreground/80 shadow-xs">
+        Sample
       </div>
     </div>
   );
@@ -59,22 +63,22 @@ function FieldStub({ label, wide }: { label: string; wide?: boolean }) {
 const slides: Slide[] = [
   {
     id: "home",
-    step: "1",
-    title: "Start from Home",
-    body: "Open Book a room from the home shortcuts.",
+    title: "Tap Book a room",
+    body: "On Home, use the Book a room shortcut to start.",
+    tip: "You can also open Rooms first if you want to browse spaces.",
     icon: DoorOpen,
     preview: (
       <PreviewChrome title="QBook · Home">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {["Book a room", "Calendar", "My bookings", "Rooms"].map(
             (label, index) => (
               <div
                 key={label}
                 className={cn(
-                  "grid min-h-16 place-items-center rounded-lg border px-2 text-center text-xs font-semibold",
+                  "grid min-h-[4.25rem] place-items-center rounded-xl border px-2 text-center text-xs font-semibold transition-colors",
                   index === 0
-                    ? "border-primary/40 bg-primary/10 text-primary ring-1 ring-primary/20"
-                    : "border-border/60 bg-card text-foreground",
+                    ? "border-primary/50 bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                    : "border-border/70 bg-card text-foreground",
                 )}
               >
                 {label}
@@ -87,45 +91,58 @@ const slides: Slide[] = [
   },
   {
     id: "room",
-    step: "2",
-    title: "Pick a room",
-    body: "Choose the room that fits your meeting size and floor.",
+    title: "Choose a room",
+    body: "Pick a room that fits how many people you need and which floor you want.",
+    tip: "Busy rooms go quickly. Book early when you can.",
     icon: DoorOpen,
     preview: (
       <PreviewChrome title="Book a room · Pick a room">
         <div className="grid gap-2">
-          {["Board Room · Level 3", "Meeting Room A · Level 2", "Training Hall · Level 1"].map(
-            (label, index) => (
-              <div
-                key={label}
+          {[
+            { label: "Board Room", meta: "Level 3 · Fits 12" },
+            { label: "Meeting Room A", meta: "Level 2 · Fits 6" },
+            { label: "Training Hall", meta: "Level 1 · Fits 30" },
+          ].map((room, index) => (
+            <div
+              key={room.label}
+              className={cn(
+                "rounded-xl border px-3.5 py-2.5",
+                index === 0
+                  ? "border-primary bg-primary/10 ring-1 ring-primary/25"
+                  : "border-border/70 bg-card",
+              )}
+            >
+              <p
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-xs",
-                  index === 0
-                    ? "border-primary bg-primary/10 font-semibold text-primary"
-                    : "border-border/60 bg-card text-muted-foreground",
+                  "text-xs font-semibold",
+                  index === 0 ? "text-primary" : "text-foreground",
                 )}
               >
-                {label}
-              </div>
-            ),
-          )}
+                {room.label}
+              </p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {room.meta}
+              </p>
+            </div>
+          ))}
         </div>
       </PreviewChrome>
     ),
   },
   {
     id: "schedule",
-    step: "3",
-    title: "Pick date and time",
-    body: "Set the day and time slot. First come, first served.",
+    title: "Set the date and time",
+    body: "Choose the day and start/end time. Open slots are first come, first served.",
+    tip: "QBook checks if the room is free before you continue.",
     icon: CalendarDays,
     preview: (
       <PreviewChrome title="Book a room · Date and time">
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldStub label="Date" />
           <FieldStub label="Start – End" />
-          <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 p-3 text-center text-[11px] text-muted-foreground sm:col-span-2">
-            Availability checked before you continue
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 px-3 py-3 text-center text-[11px] font-medium text-success sm:col-span-2">
+            <CheckCircle2 className="size-3.5 shrink-0" aria-hidden="true" />
+            Room is free for this time
           </div>
         </div>
       </PreviewChrome>
@@ -133,14 +150,14 @@ const slides: Slide[] = [
   },
   {
     id: "details",
-    step: "4",
     title: "Add meeting details",
-    body: "Enter the meeting name, description, people count, and extras.",
+    body: "Enter the purpose, a short description, headcount, and any extras like catering or Teams.",
+    tip: "Clear details help admins and attendees know what to expect.",
     icon: FileText,
     preview: (
       <PreviewChrome title="Book a room · Meeting details">
-        <div className="grid gap-2 sm:grid-cols-2">
-          <FieldStub label="Meeting name" wide />
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          <FieldStub label="Purpose / title" wide />
           <FieldStub label="Description" wide />
           <FieldStub label="How many people?" />
           <FieldStub label="Departments" />
@@ -150,9 +167,9 @@ const slides: Slide[] = [
   },
   {
     id: "review",
-    step: "5",
     title: "Review and send",
-    body: "Check the summary, then send the booking request.",
+    body: "Check the summary looks right, then send the booking.",
+    tip: "Some rooms need approval. Others confirm right away.",
     icon: ListChecks,
     preview: (
       <PreviewChrome title="Book a room · Review">
@@ -164,13 +181,13 @@ const slides: Slide[] = [
           ].map(([label, value]) => (
             <div
               key={label}
-              className="flex items-center justify-between gap-3 rounded-md border border-border/60 bg-card px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/80 px-3.5 py-2.5"
             >
               <span className="text-muted-foreground">{label}</span>
-              <span className="font-medium text-foreground">{value}</span>
+              <span className="font-semibold text-foreground">{value}</span>
             </div>
           ))}
-          <div className="mt-1 rounded-lg bg-primary px-3 py-2 text-center text-xs font-semibold text-primary-foreground">
+          <div className="mt-1.5 rounded-xl bg-primary px-3 py-2.5 text-center text-xs font-semibold text-primary-foreground shadow-md shadow-primary/20">
             Send booking
           </div>
         </div>
@@ -179,13 +196,13 @@ const slides: Slide[] = [
   },
   {
     id: "done",
-    step: "6",
-    title: "Track it in My bookings",
-    body: "Open My bookings anytime to view, edit, or cancel when allowed.",
+    title: "Follow it in My bookings",
+    body: "Open My bookings anytime to view the booking, edit it, or cancel when allowed.",
+    tip: "You also get email when the booking is confirmed, changed, or cancelled.",
     icon: CheckCircle2,
     preview: (
       <PreviewChrome title="My bookings">
-        <div className="rounded-lg border border-border/60 bg-card px-3 py-3">
+        <div className="rounded-xl border border-border/70 bg-background/90 px-3.5 py-3.5 shadow-xs">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold">Weekly planning</p>
@@ -193,7 +210,7 @@ const slides: Slide[] = [
                 Board Room · Tue 10:00 – 11:00
               </p>
             </div>
-            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
+            <span className="rounded-full bg-success/15 px-2.5 py-1 text-[10px] font-semibold text-success">
               Confirmed
             </span>
           </div>
@@ -206,10 +223,14 @@ const slides: Slide[] = [
 export function BookingFlowSlideshow() {
   const labelId = useId();
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const slide = slides[index];
   const Icon = slide.icon;
+  const isFirst = index === 0;
+  const isLast = index === slides.length - 1;
 
-  function goTo(next: number) {
+  function goTo(next: number, dir: "next" | "prev") {
+    setDirection(dir);
     setIndex((next + slides.length) % slides.length);
   }
 
@@ -217,10 +238,12 @@ export function BookingFlowSlideshow() {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "ArrowLeft") {
         event.preventDefault();
+        setDirection("prev");
         setIndex((current) => (current - 1 + slides.length) % slides.length);
       }
       if (event.key === "ArrowRight") {
         event.preventDefault();
+        setDirection("next");
         setIndex((current) => (current + 1) % slides.length);
       }
     }
@@ -231,77 +254,126 @@ export function BookingFlowSlideshow() {
 
   return (
     <div
-      className="rounded-xl border border-border/60 bg-background/70 p-3 sm:p-4"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-primary/[0.06] via-card to-card p-4 shadow-[var(--shadow-card)] sm:p-5"
       role="region"
       aria-roledescription="carousel"
       aria-labelledby={labelId}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p
             id={labelId}
-            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-primary"
           >
-            Booking walkthrough
+            How to book a room
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Step {slide.step} of {slides.length}
+            Six short steps. Use the arrows or jump to any step below.
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-9"
-            onClick={() => goTo(index - 1)}
-            aria-label="Previous step"
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-9"
-            onClick={() => goTo(index + 1)}
-            aria-label="Next step"
-          >
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
+        <p className="shrink-0 text-sm font-medium tabular-nums text-muted-foreground">
+          Step {index + 1} of {slides.length}
+        </p>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
-              <Icon className="size-4" aria-hidden="true" />
-            </span>
-            <h3 className="text-base font-semibold tracking-normal">
-              {slide.title}
-            </h3>
-          </div>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {slide.body}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Walkthrough steps">
-            {slides.map((item, itemIndex) => (
+      <ol className="mt-4 flex gap-1.5 overflow-x-auto pb-1" aria-label="Walkthrough steps">
+        {slides.map((item, itemIndex) => {
+          const active = itemIndex === index;
+          const done = itemIndex < index;
+          return (
+            <li key={item.id} className="min-w-0 flex-1">
               <button
-                key={item.id}
                 type="button"
-                role="tab"
-                aria-selected={itemIndex === index}
-                aria-label={`Go to step ${item.step}: ${item.title}`}
+                aria-current={active ? "step" : undefined}
+                aria-label={`Step ${itemIndex + 1}: ${item.title}`}
                 className={cn(
-                  "size-2.5 rounded-full transition-colors",
-                  itemIndex === index
-                    ? "bg-primary"
-                    : "bg-border hover:bg-muted-foreground/40",
+                  "flex w-full flex-col items-center gap-1.5 rounded-lg px-1 py-1.5 text-center transition-[background-color,color,transform] duration-150 ease-out hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96]",
+                  active && "bg-background/90 shadow-xs",
                 )}
-                onClick={() => setIndex(itemIndex)}
-              />
-            ))}
+                onClick={() =>
+                  goTo(itemIndex, itemIndex > index ? "next" : "prev")
+                }
+              >
+                <span
+                  className={cn(
+                    "flex size-7 items-center justify-center rounded-full text-[11px] font-bold tabular-nums transition-colors duration-150",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                      : done
+                        ? "bg-primary/20 text-primary"
+                        : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {itemIndex + 1}
+                </span>
+                <span
+                  className={cn(
+                    "hidden max-w-full truncate text-[10px] font-medium leading-tight sm:block",
+                    active ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {item.title}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)] lg:items-center">
+        <div className="min-w-0">
+          <div
+            key={slide.id}
+            className={cn(
+              "motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300",
+              direction === "next"
+                ? "motion-safe:slide-in-from-right-2"
+                : "motion-safe:slide-in-from-left-2",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 pt-0.5">
+                <h3 className="text-xl font-semibold tracking-normal text-foreground">
+                  {slide.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-foreground/85">
+                  {slide.body}
+                </p>
+                <p className="mt-3 rounded-lg border border-border/60 bg-background/80 px-3 py-2 text-sm leading-6 text-muted-foreground">
+                  {slide.tip}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-10 gap-1.5 border-2 border-primary/40 bg-card font-semibold shadow-xs hover:border-primary hover:bg-primary/10"
+              onClick={() => goTo(index - 1, "prev")}
+              aria-label="Previous step"
+            >
+              <ChevronLeft className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">
+                {isFirst ? "Last" : "Back"}
+              </span>
+            </Button>
+            <Button
+              type="button"
+              className="min-h-10 gap-1.5 font-semibold shadow-sm shadow-primary/20"
+              onClick={() => goTo(index + 1, "next")}
+              aria-label="Next step"
+            >
+              <span className="hidden sm:inline">
+                {isLast ? "Start over" : "Next"}
+              </span>
+              <span className="sm:hidden">{isLast ? "Restart" : "Next"}</span>
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </Button>
           </div>
         </div>
 
@@ -310,7 +382,17 @@ export function BookingFlowSlideshow() {
           aria-live="polite"
           aria-atomic="true"
         >
-          {slide.preview}
+          <div
+            key={`${slide.id}-preview`}
+            className={cn(
+              "motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300",
+              direction === "next"
+                ? "motion-safe:slide-in-from-right-3"
+                : "motion-safe:slide-in-from-left-3",
+            )}
+          >
+            {slide.preview}
+          </div>
         </div>
       </div>
     </div>
