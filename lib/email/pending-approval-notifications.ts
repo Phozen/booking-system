@@ -147,6 +147,20 @@ export async function insertPendingApprovalRequestNotifications({
     const departments = await getDepartmentSnapshotSafely(booking.id);
     const requesterLabel =
       requesterName?.trim() || requesterEmail?.trim() || "A user";
+    const approvalHref = `/admin/bookings/${booking.id}`;
+    const approvalTitle = `Approval needed: ${booking.title}`;
+    const approvalBody = `${requesterLabel} submitted a booking for ${facilityName} on ${bookingWindow}. It is waiting for approval.`;
+
+    for (const recipient of recipients) {
+      await createAppNotification({
+        userId: recipient.id,
+        type: "booking_approval_request",
+        title: approvalTitle,
+        body: approvalBody,
+        href: approvalHref,
+        relatedBookingId: booking.id,
+      });
+    }
 
     const { data, error } = await supabase
       .from("email_notifications")
@@ -156,8 +170,8 @@ export async function insertPendingApprovalRequestNotifications({
           status: "queued",
           recipient_email: recipient.email,
           recipient_user_id: recipient.id,
-          subject: `Approval needed: ${booking.title}`,
-          body: `${requesterLabel} submitted a booking for ${facilityName} on ${bookingWindow}. It is waiting for approval.`,
+          subject: approvalTitle,
+          body: approvalBody,
           template_name: "booking_approval_request",
           template_data: {
             bookingId: booking.id,

@@ -5,7 +5,10 @@ import { Popover } from "@base-ui/react/popover";
 import { Bell, CheckCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import type { AppNotification } from "@/lib/notifications/app-notifications";
+import type {
+  AppNotification,
+  AppNotificationType,
+} from "@/lib/notifications/app-notifications";
 import {
   markAllNotificationsSeenAction,
   markNotificationSeenAction,
@@ -16,6 +19,7 @@ import { cn } from "@/lib/utils";
 const typeLabels: Record<AppNotification["type"], string> = {
   booking_confirmation: "Booking confirmed",
   booking_approval: "Booking approved",
+  booking_approval_request: "Approval needed",
   booking_pending: "Awaiting approval",
   booking_rejection: "Booking rejected",
   booking_cancellation: "Booking cancelled",
@@ -35,21 +39,30 @@ function formatNotificationTime(value: string) {
 }
 
 function getNotificationHref(notification: AppNotification) {
-  return (
-    notification.href ??
-    (notification.relatedBookingId
-      ? `/bookings/${notification.relatedBookingId}`
-      : null)
-  );
+  if (notification.href) {
+    return notification.href;
+  }
+
+  if (!notification.relatedBookingId) {
+    return null;
+  }
+
+  if (notification.type === "booking_approval_request") {
+    return `/admin/bookings/${notification.relatedBookingId}`;
+  }
+
+  return `/bookings/${notification.relatedBookingId}`;
 }
 
 export function NotificationPopover({
   notifications,
   unseenCount,
+  markSeenTypes,
   onNavigate,
 }: {
   notifications: AppNotification[];
   unseenCount: number;
+  markSeenTypes?: AppNotificationType[];
   onNavigate?: () => void;
 }) {
   const router = useRouter();
@@ -73,7 +86,7 @@ export function NotificationPopover({
 
   function markAllAsRead() {
     startTransition(async () => {
-      await markAllNotificationsSeenAction();
+      await markAllNotificationsSeenAction(markSeenTypes);
       router.refresh();
     });
   }

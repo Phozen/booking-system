@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type AppNotificationType =
   | "booking_confirmation"
   | "booking_approval"
+  | "booking_approval_request"
   | "booking_pending"
   | "booking_rejection"
   | "booking_cancellation"
@@ -93,13 +94,20 @@ export async function createAppNotification({
 export async function getUserAppNotifications(
   supabase: SupabaseClient,
   userId: string,
+  types?: AppNotificationType[],
 ) {
-  const { data, error } = await supabase
+  let query = supabase
     .from("app_notifications")
     .select("id,type,title,body,href,related_booking_id,seen_at,created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(50);
+
+  if (types && types.length > 0) {
+    query = query.in("type", types);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("App notifications load failed", {
@@ -117,12 +125,19 @@ export async function getUserAppNotifications(
 export async function getUnseenAppNotificationCount(
   supabase: SupabaseClient,
   userId: string,
+  types?: AppNotificationType[],
 ) {
-  const { count, error } = await supabase
+  let query = supabase
     .from("app_notifications")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .is("seen_at", null);
+
+  if (types && types.length > 0) {
+    query = query.in("type", types);
+  }
+
+  const { count, error } = await query;
 
   if (error) {
     console.error("Unseen app notification count failed", {
@@ -138,12 +153,19 @@ export async function getUnseenAppNotificationCount(
 export async function markUserAppNotificationsSeen(
   supabase: SupabaseClient,
   userId: string,
+  types?: AppNotificationType[],
 ) {
-  const { error } = await supabase
+  let query = supabase
     .from("app_notifications")
     .update({ seen_at: new Date().toISOString() })
     .eq("user_id", userId)
     .is("seen_at", null);
+
+  if (types && types.length > 0) {
+    query = query.in("type", types);
+  }
+
+  const { error } = await query;
 
   if (error) {
     console.error("Mark app notifications seen failed", {

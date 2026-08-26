@@ -3,11 +3,18 @@ import { ArrowLeftRight, LogOut, UserRound } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
 import { formatAppRole, isAdminRole } from "@/lib/auth/profile";
-import type { AppNotification } from "@/lib/notifications/app-notifications";
+import type {
+  AppNotification,
+  AppNotificationType,
+} from "@/lib/notifications/app-notifications";
 import { NotificationPopover } from "@/components/notifications/notification-popover";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
+
+const ADMIN_NOTIFICATION_TYPES: AppNotificationType[] = [
+  "booking_approval_request",
+];
 
 export function UserMenu({
   email,
@@ -80,6 +87,9 @@ export function UserMenu({
         <NotificationPopover
           notifications={notifications}
           unseenCount={unseenNotificationCount}
+          markSeenTypes={
+            currentArea === "admin" ? ADMIN_NOTIFICATION_TYPES : undefined
+          }
           onNavigate={onNavigate}
         />
         <form action={logoutAction}>

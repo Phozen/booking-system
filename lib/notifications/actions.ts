@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guards";
+import type { AppNotificationType } from "@/lib/notifications/app-notifications";
 import { createClient } from "@/lib/supabase/server";
 import { withFlashToast } from "@/lib/ui/flash-toasts";
 
@@ -59,7 +60,9 @@ export async function updateNotificationPreferencesAction(
   redirect(withFlashToast("/dashboard", "preferences-saved"));
 }
 
-export async function markAllNotificationsSeenAction() {
+export async function markAllNotificationsSeenAction(
+  types?: AppNotificationType[],
+) {
   const { user } = await requireUser();
   if (!user) return;
   const supabase = await createClient();
@@ -67,7 +70,7 @@ export async function markAllNotificationsSeenAction() {
   const { markUserAppNotificationsSeen } = await import(
     "@/lib/notifications/app-notifications"
   );
-  await markUserAppNotificationsSeen(supabase, user.id);
+  await markUserAppNotificationsSeen(supabase, user.id, types);
 
   revalidatePath("/", "layout");
 }

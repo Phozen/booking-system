@@ -259,7 +259,7 @@ export function BookingFlowSlideshow() {
       aria-roledescription="carousel"
       aria-labelledby={labelId}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p
             id={labelId}
@@ -271,9 +271,33 @@ export function BookingFlowSlideshow() {
             Six short steps. Use the arrows or jump to any step below.
           </p>
         </div>
-        <p className="shrink-0 text-sm font-medium tabular-nums text-muted-foreground">
-          Step {index + 1} of {slides.length}
-        </p>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-9 border-2 border-primary/40 bg-card font-semibold shadow-xs hover:border-primary hover:bg-primary/10 sm:size-auto sm:min-h-9 sm:gap-1.5 sm:px-3"
+            onClick={() => goTo(index - 1, "prev")}
+            aria-label="Previous step"
+          >
+            <ChevronLeft className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">
+              {isFirst ? "Last" : "Back"}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            className="size-9 font-semibold shadow-sm shadow-primary/20 sm:size-auto sm:min-h-9 sm:gap-1.5 sm:px-3"
+            onClick={() => goTo(index + 1, "next")}
+            aria-label="Next step"
+          >
+            <span className="hidden sm:inline">
+              {isLast ? "Start over" : "Next"}
+            </span>
+            <ChevronRight className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
 
       <ol className="mt-4 flex gap-1.5 overflow-x-auto pb-1" aria-label="Walkthrough steps">
@@ -347,33 +371,6 @@ export function BookingFlowSlideshow() {
                 </p>
               </div>
             </div>
-          </div>
-
-          <div className="mt-5 flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-10 gap-1.5 border-2 border-primary/40 bg-card font-semibold shadow-xs hover:border-primary hover:bg-primary/10"
-              onClick={() => goTo(index - 1, "prev")}
-              aria-label="Previous step"
-            >
-              <ChevronLeft className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">
-                {isFirst ? "Last" : "Back"}
-              </span>
-            </Button>
-            <Button
-              type="button"
-              className="min-h-10 gap-1.5 font-semibold shadow-sm shadow-primary/20"
-              onClick={() => goTo(index + 1, "next")}
-              aria-label="Next step"
-            >
-              <span className="hidden sm:inline">
-                {isLast ? "Start over" : "Next"}
-              </span>
-              <span className="sm:hidden">{isLast ? "Restart" : "Next"}</span>
-              <ChevronRight className="size-4" aria-hidden="true" />
-            </Button>
           </div>
         </div>
 
