@@ -29,6 +29,7 @@ import {
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { processEmailNotificationNow } from "@/lib/email/queue";
 import { insertPendingApprovalRequestNotifications } from "@/lib/email/pending-approval-notifications";
+import { queueInviteeBookingConfirmations } from "@/lib/email/invitee-notifications";
 import {
   getActiveEmailRecipients,
   shouldSendEmailToRole,
@@ -896,6 +897,9 @@ export async function approveBookingAction(
     startsAt: updated.starts_at,
     endsAt: updated.ends_at,
     kind: "approval",
+  });
+  await queueInviteeBookingConfirmations({
+    bookingId: updated.id,
   });
   await runMicrosoftCalendarSyncSafely({
     bookingId,

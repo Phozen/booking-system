@@ -28,6 +28,7 @@ import {
 } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBookingDepartmentSnapshot } from "@/lib/departments/notifications";
+import { queueInviteeBookingConfirmations } from "@/lib/email/invitee-notifications";
 
 type BookingForInvitation = {
   id: string;
@@ -244,12 +245,23 @@ export async function queueInitialInvitationNotifications({
     }
 
     for (const recipient of (profilesResult.data ?? []) as ProfileForInvitation[]) {
+      if (booking.status === "confirmed") {
+        continue;
+      }
+
       await queueInvitationNotification({
         type: "booking_invitation",
         booking,
         recipient,
         actor,
         status: "pending",
+      });
+    }
+
+    if (booking.status === "confirmed") {
+      await queueInviteeBookingConfirmations({
+        bookingId,
+        inviteeUserIds: invitedUserIds,
       });
     }
   } catch (error) {
@@ -382,17 +394,24 @@ export async function inviteUserToBookingAction(
     { bookingId: booking.id, invitationId: invitation.id },
   );
 
-  await queueInvitationNotification({
-    type: "booking_invitation",
-    booking,
-    recipient: inviteeProfile,
-    actor: {
-      id: user.id,
-      email: user.email ?? "",
-      full_name: null,
-    },
-    status: "pending",
-  });
+  if (booking.status === "confirmed") {
+    await queueInviteeBookingConfirmations({
+      bookingId: booking.id,
+      inviteeUserIds: [inviteeProfile.id],
+    });
+  } else {
+    await queueInvitationNotification({
+      type: "booking_invitation",
+      booking,
+      recipient: inviteeProfile,
+      actor: {
+        id: user.id,
+        email: user.email ?? "",
+        full_name: null,
+      },
+      status: "pending",
+    });
+  }
   await syncConfirmedInvitationAttendeesSafely({
     booking,
     actor: {
@@ -605,19 +624,28 @@ export async function inviteUsersToBookingAction(
         { bookingId: booking.id, invitationId: invitation.id },
       );
 
-      await queueInvitationNotification({
-        type: "booking_invitation",
-        booking,
-        recipient: invitee,
-        actor: {
-          id: user.id,
-          email: user.email ?? "",
-          full_name: null,
-        },
-        status: invitation.status,
-      });
+      if (booking.status !== "confirmed") {
+        await queueInvitationNotification({
+          type: "booking_invitation",
+          booking,
+          recipient: invitee,
+          actor: {
+            id: user.id,
+            email: user.email ?? "",
+            full_name: null,
+          },
+          status: invitation.status,
+        });
+      }
     }),
   );
+
+  if (booking.status === "confirmed" && invitations.length > 0) {
+    await queueInviteeBookingConfirmations({
+      bookingId: booking.id,
+      inviteeUserIds: invitations.map((invitation) => invitation.invited_user_id),
+    });
+  }
 
   if (invitations.length > 0) {
     await syncConfirmedInvitationAttendeesSafely({

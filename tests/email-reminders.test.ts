@@ -36,7 +36,18 @@ const booking = {
 function createSupabaseMock({
   duplicateOnInsert = false,
   insertError = false,
-}: { duplicateOnInsert?: boolean; insertError?: boolean } = {}) {
+  invitees = [] as Array<{
+    invited_user_id: string;
+    invited_user: { id: string; email: string; status: string };
+  }>,
+}: {
+  duplicateOnInsert?: boolean;
+  insertError?: boolean;
+  invitees?: Array<{
+    invited_user_id: string;
+    invited_user: { id: string; email: string; status: string };
+  }>;
+} = {}) {
   const inserted: unknown[] = [];
   const from = vi.fn((table: string) => {
     if (table === "bookings") {
@@ -46,6 +57,14 @@ function createSupabaseMock({
         gte: vi.fn().mockReturnThis(),
         lte: vi.fn().mockReturnThis(),
         order: vi.fn().mockResolvedValue({ data: [booking], error: null }),
+      };
+    }
+
+    if (table === "booking_invitations") {
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        in: vi.fn().mockResolvedValue({ data: invitees, error: null }),
       };
     }
 
@@ -109,6 +128,40 @@ describe("queueDueBookingReminders", () => {
       idempotency_key:
         "booking-reminder:11111111-1111-4111-8111-111111111111:employee@example.com:60",
     });
+  });
+
+  it("also queues reminders for active invitees", async () => {
+    const supabase = createSupabaseMock({
+      invitees: [
+        {
+          invited_user_id: "33333333-3333-4333-8333-333333333333",
+          invited_user: {
+            id: "33333333-3333-4333-8333-333333333333",
+            email: "invitee@example.com",
+            status: "active",
+          },
+        },
+      ],
+    });
+
+    const result = await queueDueBookingReminders(
+      supabase as never,
+      new Date("2035-01-01T09:30:00.000Z"),
+    );
+
+    expect(result).toEqual({ queued: 2, skipped: 0 });
+    expect(supabase.inserted).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          recipient_email: "employee@example.com",
+        }),
+        expect.objectContaining({
+          recipient_email: "invitee@example.com",
+          idempotency_key:
+            "booking-reminder:11111111-1111-4111-8111-111111111111:invitee@example.com:60",
+        }),
+      ]),
+    );
   });
 
   it("treats duplicate idempotency key inserts as skipped", async () => {

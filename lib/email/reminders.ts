@@ -28,6 +28,11 @@ type ReminderBooking = {
     | null;
 };
 
+type ReminderRecipient = {
+  userId: string;
+  email: string;
+};
+
 function firstRecord<T>(record: T | T[] | null | undefined) {
   return Array.isArray(record) ? record[0] : record ?? null;
 }
@@ -42,6 +47,65 @@ function reminderIdempotencyKey({
   offsetMinutes: number;
 }) {
   return `booking-reminder:${bookingId}:${recipientEmail.toLowerCase()}:${offsetMinutes}`;
+}
+
+async function loadInviteeReminderRecipients(
+  supabase: SupabaseClient,
+  bookingId: string,
+  ownerUserId: string,
+) {
+  const { data: invitations, error } = await supabase
+    .from("booking_invitations")
+    .select(
+      "invited_user_id, invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,status)",
+    )
+    .eq("booking_id", bookingId)
+    .in("status", ["pending", "accepted"]);
+
+  if (error) {
+    console.error("Invitee reminder recipient lookup failed", {
+      bookingId,
+      message: error.message,
+    });
+    return [] as ReminderRecipient[];
+  }
+
+  return ((invitations ?? []) as {
+    invited_user_id: string;
+    invited_user:
+      | { id: string; email: string; status: string }
+      | { id: string; email: string; status: string }[]
+      | null;
+  }[])
+    .map((row) => {
+      const profile = firstRecord(row.invited_user);
+      if (
+        !profile?.email ||
+        profile.status !== "active" ||
+        profile.id === ownerUserId
+      ) {
+        return null;
+      }
+
+      return {
+        userId: profile.id,
+        email: profile.email,
+      } satisfies ReminderRecipient;
+    })
+    .filter((recipient): recipient is ReminderRecipient => recipient !== null);
+}
+
+async function isReminderEnabledForUser(
+  supabase: SupabaseClient,
+  userId: string,
+) {
+  const { data: preferences } = await supabase
+    .from("user_notification_preferences")
+    .select("booking_reminders_enabled")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return preferences?.booking_reminders_enabled !== false;
 }
 
 export async function queueDueBookingReminders(
@@ -82,66 +146,79 @@ export async function queueDueBookingReminders(
       },
     );
 
-    if (!profile?.email) {
+    const recipients: ReminderRecipient[] = [];
+
+    if (profile?.email) {
+      recipients.push({
+        userId: booking.user_id,
+        email: profile.email,
+      });
+    } else {
       skipped += 1;
-      continue;
     }
 
-    const { data: preferences } = await supabase
-      .from("user_notification_preferences")
-      .select("booking_reminders_enabled")
-      .eq("user_id", booking.user_id)
-      .maybeSingle();
+    const invitees = await loadInviteeReminderRecipients(
+      supabase,
+      booking.id,
+      booking.user_id,
+    );
+    recipients.push(...invitees);
 
-    if (preferences?.booking_reminders_enabled === false) {
-      skipped += 1;
+    if (recipients.length === 0) {
       continue;
     }
 
     const startsAt = new Date(booking.starts_at);
 
-    for (const offset of offsets) {
-      const dueAt = new Date(startsAt.getTime() - offset * 60_000);
-
-      if (dueAt > now) {
+    for (const recipient of recipients) {
+      if (!(await isReminderEnabledForUser(supabase, recipient.userId))) {
+        skipped += 1;
         continue;
       }
 
-      const { error: insertError } = await supabase
-        .from("email_notifications")
-        .insert({
-          type: "booking_reminder",
-          status: "queued",
-          recipient_email: profile.email,
-          recipient_user_id: booking.user_id,
-          subject: `Booking reminder: ${booking.title}`,
-          body: `Reminder: ${booking.title} is scheduled for ${formatBookingDateTime(booking.starts_at)}.`,
-          template_name: "booking_reminder",
-          template_data: {
-            bookingId: booking.id,
-            title: booking.title,
-            facilityName: facility?.name ?? null,
-            facilityLevel: facility?.level ?? null,
-            startsAt: booking.starts_at,
-            endsAt: booking.ends_at,
-            reminderOffsetMinutes: offset,
-            departments,
-          },
-          related_booking_id: booking.id,
-          scheduled_for: now.toISOString(),
-          idempotency_key: reminderIdempotencyKey({
-            bookingId: booking.id,
-            recipientEmail: profile.email,
-            offsetMinutes: offset,
-          }),
-        });
+      for (const offset of offsets) {
+        const dueAt = new Date(startsAt.getTime() - offset * 60_000);
 
-      if (insertError?.code === "23505") {
-        skipped += 1;
-      } else if (insertError) {
-        throw new Error("A due booking reminder could not be queued.");
-      } else {
-        queued += 1;
+        if (dueAt > now) {
+          continue;
+        }
+
+        const { error: insertError } = await supabase
+          .from("email_notifications")
+          .insert({
+            type: "booking_reminder",
+            status: "queued",
+            recipient_email: recipient.email,
+            recipient_user_id: recipient.userId,
+            subject: `Booking reminder: ${booking.title}`,
+            body: `Reminder: ${booking.title} is scheduled for ${formatBookingDateTime(booking.starts_at)}.`,
+            template_name: "booking_reminder",
+            template_data: {
+              bookingId: booking.id,
+              title: booking.title,
+              facilityName: facility?.name ?? null,
+              facilityLevel: facility?.level ?? null,
+              startsAt: booking.starts_at,
+              endsAt: booking.ends_at,
+              reminderOffsetMinutes: offset,
+              departments,
+            },
+            related_booking_id: booking.id,
+            scheduled_for: now.toISOString(),
+            idempotency_key: reminderIdempotencyKey({
+              bookingId: booking.id,
+              recipientEmail: recipient.email,
+              offsetMinutes: offset,
+            }),
+          });
+
+        if (insertError?.code === "23505") {
+          skipped += 1;
+        } else if (insertError) {
+          throw new Error("A due booking reminder could not be queued.");
+        } else {
+          queued += 1;
+        }
       }
     }
   }
