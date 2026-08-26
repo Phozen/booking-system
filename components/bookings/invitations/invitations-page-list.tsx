@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { BookingInvitationStatus, InvitedBooking } from "@/lib/bookings/invitations/types";
+import type { InvitedBooking } from "@/lib/bookings/invitations/types";
 import { CompactInvitationSection } from "@/components/bookings/invitations/compact-invitation-section";
 import { InvitationCard } from "@/components/bookings/invitations/invitation-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -18,6 +18,22 @@ function sortByMeetingTime(
   });
 }
 
+function isUpcomingInvitation(invitation: InvitedBooking, now: Date) {
+  if (invitation.invitation.status === "removed") {
+    return false;
+  }
+
+  if (
+    invitation.booking.status === "cancelled" ||
+    invitation.booking.status === "rejected" ||
+    invitation.booking.status === "completed"
+  ) {
+    return false;
+  }
+
+  return new Date(invitation.booking.startsAt).getTime() >= now.getTime();
+}
+
 function InvitationSection({
   sectionId,
   title,
@@ -33,7 +49,7 @@ function InvitationSection({
 
   const headingId = `${sectionId}-heading`;
   const countLabel =
-    invitations.length === 1 ? "1 invite" : `${invitations.length} invites`;
+    invitations.length === 1 ? "1 booking" : `${invitations.length} bookings`;
 
   return (
     <section className="grid gap-3" aria-labelledby={headingId}>
@@ -63,33 +79,28 @@ function InvitationSection({
 
 export function InvitationsPageList({
   invitations,
+  now = new Date(),
 }: {
   invitations: InvitedBooking[];
+  now?: Date;
 }) {
-  const byStatus = invitations.reduce<
-    Record<Exclude<BookingInvitationStatus, "removed">, InvitedBooking[]>
-  >(
-    (groups, invitation) => {
-      if (invitation.invitation.status !== "removed") {
-        groups[invitation.invitation.status].push(invitation);
-      }
-
-      return groups;
-    },
-    { pending: [], accepted: [], declined: [] },
-  );
-  const hasAnyInvitations = invitations.some(
+  const active = invitations.filter(
     (invitation) => invitation.invitation.status !== "removed",
   );
-  const pending = sortByMeetingTime(byStatus.pending, "asc");
-  const accepted = sortByMeetingTime(byStatus.accepted, "desc");
-  const declined = sortByMeetingTime(byStatus.declined, "desc");
+  const upcoming = sortByMeetingTime(
+    active.filter((invitation) => isUpcomingInvitation(invitation, now)),
+    "asc",
+  );
+  const past = sortByMeetingTime(
+    active.filter((invitation) => !isUpcomingInvitation(invitation, now)),
+    "desc",
+  );
 
-  if (!hasAnyInvitations) {
+  if (active.length === 0) {
     return (
       <EmptyState
-        title="No invites yet"
-        description="When someone invites you to a meeting, it will show up here."
+        title="No invited bookings yet"
+        description="When someone adds you to a meeting, it will show up here."
         action={
           <div className="flex flex-col gap-2 sm:flex-row">
             <Link href="/calendar" className={buttonVariants({ variant: "outline" })}>
@@ -107,27 +118,23 @@ export function InvitationsPageList({
   return (
     <div className="grid gap-8">
       <InvitationSection
-        sectionId="pending"
-        title="Pending"
-        invitations={pending}
+        sectionId="upcoming"
+        title="Upcoming"
+        invitations={upcoming}
       />
-      {accepted.length > 0 ? (
+      {past.length > 0 ? (
         <CompactInvitationSection
-          sectionId="accepted"
-          title="Accepted"
-          invitations={accepted}
+          sectionId="past"
+          title="Past"
+          invitations={past}
           muted
           compact
         />
       ) : null}
-      {declined.length > 0 ? (
-        <CompactInvitationSection
-          sectionId="declined"
-          title="Declined"
-          invitations={declined}
-          muted
-          compact
-        />
+      {upcoming.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No upcoming invited bookings.
+        </p>
       ) : null}
     </div>
   );

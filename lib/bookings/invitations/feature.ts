@@ -1,8 +1,8 @@
 /**
- * QBook internal staff invitations (Invites page, RSVP, invite pickers).
- * When false: UI is hidden and create/invite/respond actions are no-ops.
- * Outlook calendar sync still reads any existing invitation rows.
- * Confirmed invitees also receive booking_confirmation and booking_reminder emails.
+ * QBook internal attendees (add people to a booking, Invites inbox list).
+ * When false: pickers, Invites nav, and invite actions are off.
+ * Attendees get booking_confirmation / booking_reminder emails when confirmed.
+ * There is no accept/decline RSVP flow.
  */
 export const INTERNAL_INVITES_ENABLED = true;
 

@@ -12,16 +12,13 @@ import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
 import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { formatFacilityType } from "@/lib/facilities/format";
-import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
-import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
 import { StaticToastEffect } from "@/components/shared/static-toast-effect";
 import { PageHeader } from "@/components/shared/page-header";
 import { RouteLoadingLink } from "@/components/shared/route-loading-link";
-import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Alert,
   AlertDescription,
@@ -86,27 +83,14 @@ export function BookingDetail({
 }) {
   const approval = booking.approvals[0];
   const isOwnerView = viewerMode === "owner";
-  const invitationResponses = {
-    accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
-    pending: invitations.filter((invitation) => invitation.status === "pending").length,
-    declined: invitations.filter((invitation) => invitation.status === "declined").length,
-  };
   const canEdit =
     isOwnerView &&
     (booking.status === "pending" || booking.status === "confirmed");
-  const canRespondToInvitation =
-    INTERNAL_INVITES_ENABLED &&
-    !isOwnerView &&
-    viewerInvitation?.status === "pending" &&
-    canManageBookingInvitations(booking.status);
   const facilityLine = booking.facility
     ? `${booking.facility.name}, ${booking.facility.level}`
     : "Room unavailable";
 
-  const primaryAction =
-    canRespondToInvitation && viewerInvitation ? (
-    <InvitationResponseActions invitationId={viewerInvitation.id} />
-  ) : canEdit ? (
+  const primaryAction = canEdit ? (
     <RouteLoadingLink
       href={`/bookings/${booking.id}/edit`}
       loadingLabel="Loading edit form..."
@@ -128,9 +112,7 @@ export function BookingDetail({
     </a>
   ) : null;
 
-  const teamsIsPrimary = Boolean(
-    teamsJoinUrl && !canEdit && !canRespondToInvitation,
-  );
+  const teamsIsPrimary = Boolean(teamsJoinUrl && !canEdit);
 
   const secondaryActions = (
     <div className="flex flex-wrap gap-2">
@@ -185,9 +167,6 @@ export function BookingDetail({
           <span className="flex flex-col gap-2">
             <span className="flex flex-wrap items-center gap-2">
               <BookingStatusBadge status={booking.status} />
-              {INTERNAL_INVITES_ENABLED && !isOwnerView && viewerInvitation ? (
-                <StatusBadge kind="invitation" status={viewerInvitation.status} />
-              ) : null}
             </span>
             <span>
               {facilityLine}
@@ -279,29 +258,10 @@ export function BookingDetail({
         </Alert>
       ) : null}
 
-      {INTERNAL_INVITES_ENABLED &&
-      !isOwnerView &&
-      viewerInvitation &&
-      viewerInvitation.status !== "pending" ? (
-        <section className="rounded-lg border border-border bg-muted/30 p-5">
-          <h2 className="qbook-type-section">Your invitation</h2>
-          <p className="qbook-type-meta mt-2">
-            Your response is recorded as{" "}
-            <span className="font-medium text-foreground">
-              {viewerInvitation.status}
-            </span>
-            . Only the organizer can cancel or manage the booking.
-          </p>
-        </section>
-      ) : null}
-
-      {INTERNAL_INVITES_ENABLED &&
-      !isOwnerView &&
-      viewerInvitation?.status === "pending" ? (
+      {INTERNAL_INVITES_ENABLED && !isOwnerView && viewerInvitation ? (
         <p className="qbook-type-meta">
-          {canRespondToInvitation
-            ? "You can view this booking because you were invited. Only the organizer can cancel or manage the booking."
-            : "This booking is no longer active, so the invitation cannot be answered."}
+          You can view this booking because you were added as an attendee. Only
+          the organizer can cancel or manage the booking.
         </p>
       ) : null}
 
@@ -348,9 +308,9 @@ export function BookingDetail({
               : "Room only"}
           </DetailItem>
           <DetailItem label="Internal invitations">
-            {invitations.length > 0
-              ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`
-              : "No internal attendees invited"}
+              {invitations.length > 0
+                ? `${invitations.length} attendee${invitations.length === 1 ? "" : "s"}`
+                : "No attendees added"}
           </DetailItem>
           <DetailItem label="Approval">
             {booking.approvalRequired

@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type {
   BookingInvitation,
-  BookingInvitationStatus,
 } from "@/lib/bookings/invitations/types";
 import type { Department } from "@/lib/departments/queries";
 import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
@@ -14,11 +13,9 @@ import { BookingDepartmentManager } from "@/components/bookings/booking-departme
 import { InviteUserForm } from "@/components/bookings/invitations/invite-user-form";
 import { RemoveInvitationButton } from "@/components/bookings/invitations/remove-invitation-button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 
 const PAGE_SIZE = 25;
 
@@ -46,21 +43,12 @@ export function InvitationList({
   selectedDepartmentIds?: string[];
 }) {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"all" | BookingInvitationStatus>("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const normalizedSearch = search.trim().toLowerCase();
-  const counts = useMemo(
-    () => ({
-      pending: invitations.filter((invitation) => invitation.status === "pending").length,
-      accepted: invitations.filter((invitation) => invitation.status === "accepted").length,
-      declined: invitations.filter((invitation) => invitation.status === "declined").length,
-    }),
-    [invitations],
-  );
   const filteredInvitations = useMemo(
     () =>
       invitations.filter((invitation) => {
-        if (status !== "all" && invitation.status !== status) {
+        if (invitation.status === "removed" || invitation.status === "declined") {
           return false;
         }
 
@@ -72,7 +60,7 @@ export function InvitationList({
         const email = invitation.invitedUser?.email.toLowerCase() ?? "";
         return label.includes(normalizedSearch) || email.includes(normalizedSearch);
       }),
-    [invitations, normalizedSearch, status],
+    [invitations, normalizedSearch],
   );
   const visibleInvitations = filteredInvitations.slice(0, visibleCount);
   const showInvites = INTERNAL_INVITES_ENABLED;
@@ -98,8 +86,8 @@ export function InvitationList({
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {showInvites
             ? canManage
-              ? "Invite attendees and manage the departments included in this booking."
-              : "Review attendee invitations and response status for this booking."
+              ? "Add attendees and manage the departments included in this booking."
+              : "Attendees and departments included in this booking."
             : canManage
               ? "Manage the departments included in this booking."
               : "Departments tagged on this booking."}
@@ -121,49 +109,23 @@ export function InvitationList({
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-2 text-xs font-medium">
             <span className="rounded-full border border-border/75 bg-background px-3 py-1">
-              {invitations.length} total
-            </span>
-            <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-              {counts.pending} pending
-            </span>
-            <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
-              {counts.accepted} accepted
-            </span>
-            <span className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-rose-900 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100">
-              {counts.declined} declined
+              {filteredInvitations.length} attendee
+              {filteredInvitations.length === 1 ? "" : "s"}
             </span>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-search">Search attendees</Label>
-              <Input
-                id="invitation-search"
-                type="search"
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setVisibleCount(PAGE_SIZE);
-                }}
-                placeholder="Name or email"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-status">Response status</Label>
-              <Select
-                id="invitation-status"
-                value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value as "all" | BookingInvitationStatus);
-                  setVisibleCount(PAGE_SIZE);
-                }}
-              >
-                <option value="all">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="declined">Declined</option>
-              </Select>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-search">Search attendees</Label>
+            <Input
+              id="invitation-search"
+              type="search"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setVisibleCount(PAGE_SIZE);
+              }}
+              placeholder="Name or email"
+            />
           </div>
 
           {visibleInvitations.length > 0 ? (
@@ -177,19 +139,14 @@ export function InvitationList({
                     className="grid gap-3 rounded-lg border border-border/70 bg-background px-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
                   >
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate text-sm font-semibold tracking-normal">
-                          {inviteeLabel}
-                        </h3>
-                        <StatusBadge kind="invitation" status={invitation.status} />
-                      </div>
+                      <h3 className="truncate text-sm font-semibold tracking-normal">
+                        {inviteeLabel}
+                      </h3>
                       <p className="mt-1 break-all text-xs text-muted-foreground">
                         {invitation.invitedUser?.email ?? "Email unavailable"}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {invitation.respondedAt
-                          ? `Responded ${formatBookingDateTime(invitation.respondedAt)}`
-                          : `Invited ${formatBookingDateTime(invitation.createdAt)}`}
+                        Added {formatBookingDateTime(invitation.createdAt)}
                       </p>
                     </div>
                     {canManage ? (
@@ -204,7 +161,7 @@ export function InvitationList({
             </div>
           ) : (
             <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-              No invited attendees match these filters.
+              No attendees match this search.
             </p>
           )}
 

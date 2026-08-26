@@ -155,7 +155,7 @@ export function MyBookingsList({
                 className="inline-flex items-center gap-2 font-semibold tracking-normal"
               >
                 <UserPlus className="size-4" aria-hidden="true" />
-                Room invitations
+                Invited bookings
               </h2>
               <p className="mt-1 text-sm text-sky-800 dark:text-sky-200">
                 {invitationSummaryText}
@@ -169,7 +169,7 @@ export function MyBookingsList({
                   "w-full border-sky-300 bg-card text-foreground hover:bg-sky-100 sm:w-auto dark:border-sky-800 dark:hover:bg-sky-950/60",
               })}
             >
-              Review invitations
+              View invites
             </Link>
           </div>
         </section>

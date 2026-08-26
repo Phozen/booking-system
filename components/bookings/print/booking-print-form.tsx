@@ -15,7 +15,6 @@ import {
   formatCateringRequired,
   formatCateringServingTime,
 } from "@/lib/bookings/catering/format";
-import { getInvitationStatusLabel } from "@/lib/bookings/invitations/validation";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { buttonVariants } from "@/components/ui/button";
 import { PrintButton } from "@/components/bookings/print/print-button";
@@ -85,16 +84,6 @@ export function BookingPrintForm({
   companyName: string;
   backHref: string;
 }) {
-  const acceptedCount = invitations.filter(
-    (item) => item.status === "accepted",
-  ).length;
-  const pendingCount = invitations.filter(
-    (item) => item.status === "pending",
-  ).length;
-  const declinedCount = invitations.filter(
-    (item) => item.status === "declined",
-  ).length;
-
   return (
     <main className="min-h-screen bg-background px-4 py-6 text-foreground print:bg-white print:px-0 print:py-0 print:text-zinc-950">
       <style>{`
@@ -213,8 +202,7 @@ export function BookingPrintForm({
         {INTERNAL_INVITES_ENABLED ? (
           <Section title="Invited attendees">
             <p className="qbook-type-meta mb-4 qbook-type-tabular">
-              Total invited: {invitations.length} · Accepted: {acceptedCount} ·
-              Pending: {pendingCount} · Declined: {declinedCount}
+              Total attendees: {invitations.length}
             </p>
             {invitations.length > 0 ? (
               <table className="w-full border-collapse text-left text-sm">
@@ -222,7 +210,6 @@ export function BookingPrintForm({
                   <tr className="border-b border-border print:border-zinc-300">
                     <th className="py-2 pr-3 font-semibold">Name</th>
                     <th className="py-2 pr-3 font-semibold">Email</th>
-                    <th className="py-2 pr-3 font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -233,9 +220,6 @@ export function BookingPrintForm({
                       </td>
                       <td className="break-all py-2 pr-3">
                         {invitation.invitedUser?.email || "-"}
-                      </td>
-                      <td className="py-2 pr-3">
-                        {getInvitationStatusLabel(invitation.status)}
                       </td>
                     </tr>
                   ))}

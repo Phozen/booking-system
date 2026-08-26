@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
-import { formatBookingDateTime } from "@/lib/bookings/format";
 import type {
   InvitationActionResult,
   InvitationBatchActionResult,
@@ -12,22 +11,17 @@ import type {
 } from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
 import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
-import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
   canInviteUser,
   canManageBookingInvitations,
-  formDataToInvitationResponseValues,
   formDataToInviteUserValues,
   invitationIdSchema,
   invitationManagementLockedMessage,
-  invitationResponseLockedMessage,
-  invitationResponseSchema,
   inviteUserSchema,
   inviteUsersSchema,
 } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getBookingDepartmentSnapshot } from "@/lib/departments/notifications";
 import { queueInviteeBookingConfirmations } from "@/lib/email/invitee-notifications";
 
 type BookingForInvitation = {
@@ -73,10 +67,6 @@ function revalidateInvitationPaths(bookingId: string) {
 
 function formatProfileLabel(profile: { full_name: string | null; email: string }) {
   return profile.full_name?.trim() || profile.email;
-}
-
-function formatBookingWindow(startsAt: string, endsAt: string) {
-  return `${formatBookingDateTime(startsAt)} to ${formatBookingDateTime(endsAt)}`;
 }
 
 async function getBookingForInvitationAction(
@@ -134,85 +124,6 @@ async function syncConfirmedInvitationAttendeesSafely({
   }
 }
 
-async function queueInvitationNotification({
-  type,
-  booking,
-  recipient,
-  actor,
-  status,
-}: {
-  type: "booking_invitation" | "booking_invitation_accepted" | "booking_invitation_declined";
-  booking: BookingForInvitation;
-  recipient: { id: string; email: string; full_name: string | null };
-  actor: { id: string; email: string; full_name: string | null };
-  status: BookingInvitationStatus;
-}) {
-  try {
-    const supabase = createAdminClient();
-    const facility = firstRecord(booking.facilities);
-    const departments = await getBookingDepartmentSnapshot(booking.id).catch(
-      (error) => {
-        console.error("Booking department snapshot unavailable", {
-          bookingId: booking.id,
-          error,
-        });
-        return [];
-      },
-    );
-    const actorLabel = formatProfileLabel(actor);
-    const subjectByType: Record<typeof type, string> = {
-      booking_invitation: `Invitation: ${booking.title}`,
-      booking_invitation_accepted: `Invitation accepted: ${booking.title}`,
-      booking_invitation_declined: `Invitation declined: ${booking.title}`,
-    };
-    const bodyByType: Record<typeof type, string> = {
-      booking_invitation: `${actorLabel} invited you to ${booking.title}.`,
-      booking_invitation_accepted: `${actorLabel} accepted the invitation for ${booking.title}.`,
-      booking_invitation_declined: `${actorLabel} declined the invitation for ${booking.title}.`,
-    };
-    await createAppNotification({
-      userId: recipient.id,
-      type,
-      title: subjectByType[type],
-      body: bodyByType[type],
-      href: type === "booking_invitation" ? "/invitations" : `/bookings/${booking.id}`,
-      relatedBookingId: booking.id,
-    });
-    const { error } = await supabase.from("email_notifications").insert({
-      type,
-      status: "queued",
-      recipient_email: recipient.email,
-      recipient_user_id: recipient.id,
-      subject: subjectByType[type],
-      body: bodyByType[type],
-      template_name: type,
-      template_data: {
-        bookingId: booking.id,
-        title: booking.title,
-        facilityName: facility?.name,
-        facilityLevel: facility?.level,
-        startsAt: booking.starts_at,
-        endsAt: booking.ends_at,
-        invitationStatus: status,
-        actorName: actor.full_name,
-        actorEmail: actor.email,
-        departments,
-      },
-      related_booking_id: booking.id,
-    });
-
-    if (error) {
-      console.error("Invitation notification insert failed", {
-        bookingId: booking.id,
-        type,
-        message: error.message,
-      });
-    }
-  } catch (error) {
-    console.error("Invitation notification unavailable", error);
-  }
-}
-
 export async function queueInitialInvitationNotifications({
   bookingId,
   invitedUserIds,
@@ -244,21 +155,7 @@ export async function queueInitialInvitationNotifications({
       return;
     }
 
-    for (const recipient of (profilesResult.data ?? []) as ProfileForInvitation[]) {
-      if (booking.status === "confirmed") {
-        continue;
-      }
-
-      await queueInvitationNotification({
-        type: "booking_invitation",
-        booking,
-        recipient,
-        actor,
-        status: "pending",
-      });
-    }
-
-    if (booking.status === "confirmed") {
+    if (booking.status === "confirmed" && (profilesResult.data?.length ?? 0) > 0) {
       await queueInviteeBookingConfirmations({
         bookingId,
         inviteeUserIds: invitedUserIds,
@@ -356,7 +253,7 @@ export async function inviteUserToBookingAction(
       booking_id: booking.id,
       invited_user_id: inviteeProfile.id,
       invited_by: user.id,
-      status: "pending",
+      status: "accepted",
     })
     .select("id,booking_id,invited_user_id,invited_by,status,response_message,responded_at")
     .single();
@@ -399,18 +296,6 @@ export async function inviteUserToBookingAction(
       bookingId: booking.id,
       inviteeUserIds: [inviteeProfile.id],
     });
-  } else {
-    await queueInvitationNotification({
-      type: "booking_invitation",
-      booking,
-      recipient: inviteeProfile,
-      actor: {
-        id: user.id,
-        email: user.email ?? "",
-        full_name: null,
-      },
-      status: "pending",
-    });
   }
   await syncConfirmedInvitationAttendeesSafely({
     booking,
@@ -425,7 +310,7 @@ export async function inviteUserToBookingAction(
 
   return {
     status: "success",
-    message: `${formatProfileLabel(inviteeProfile)} has been invited.`,
+    message: `${formatProfileLabel(inviteeProfile)} has been added.`,
   };
 }
 
@@ -559,7 +444,7 @@ export async function inviteUsersToBookingAction(
         booking_id: booking.id,
         invited_user_id: profile.id,
         invited_by: user.id,
-        status: "pending",
+        status: "accepted",
       })),
       {
         onConflict: "booking_id,invited_user_id",
@@ -613,7 +498,7 @@ export async function inviteUsersToBookingAction(
           entityId: booking.id,
           actorUserId: user.id,
           actorEmail: user.email,
-          summary: `Invited ${formatProfileLabel(invitee)} to booking ${booking.title}.`,
+          summary: `Added ${formatProfileLabel(invitee)} to booking ${booking.title}.`,
           newValues: {
             invitationId: invitation.id,
             invitedUserId: invitee.id,
@@ -623,20 +508,6 @@ export async function inviteUsersToBookingAction(
         },
         { bookingId: booking.id, invitationId: invitation.id },
       );
-
-      if (booking.status !== "confirmed") {
-        await queueInvitationNotification({
-          type: "booking_invitation",
-          booking,
-          recipient: invitee,
-          actor: {
-            id: user.id,
-            email: user.email ?? "",
-            full_name: null,
-          },
-          status: invitation.status,
-        });
-      }
     }),
   );
 
@@ -660,13 +531,13 @@ export async function inviteUsersToBookingAction(
   }
 
   const invitedIds = invitations.map((invitation) => invitation.invited_user_id);
-  const sentLabel = `${invitedIds.length} invitation${invitedIds.length === 1 ? "" : "s"} sent`;
+  const sentLabel = `${invitedIds.length} attendee${invitedIds.length === 1 ? "" : "s"} added`;
 
   return {
     status: invitedIds.length > 0 ? "success" : "error",
     message:
       failures.length > 0
-        ? `${sentLabel}. ${failures.length} could not be sent and remain selected.`
+        ? `${sentLabel}. ${failures.length} could not be added and remain selected.`
         : `${sentLabel}.`,
     invitedUserIds: invitedIds,
     failures,
@@ -794,158 +665,14 @@ export async function respondToInvitationAction(
   _previousState: InvitationActionResult,
   formData: FormData,
 ): Promise<InvitationActionResult> {
-  if (!INTERNAL_INVITES_ENABLED) {
-    return {
-      status: "error",
-      message: "Internal invitations are turned off.",
-    };
-  }
-
-  const { user } = await requireUser();
-  const parsed = invitationResponseSchema.safeParse(
-    formDataToInvitationResponseValues(invitationId, responseStatus, formData),
-  );
-
-  if (!parsed.success) {
-    return {
-      status: "error",
-      message: "Response could not be saved. Keep the note under 500 characters.",
-    };
-  }
-
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("booking_invitations")
-    .select(
-      "id,booking_id,invited_user_id,invited_by,status,response_message,responded_at,bookings!booking_invitations_booking_id_fkey(id,user_id,title,status,starts_at,ends_at,facilities(name,level),profiles!bookings_user_id_fkey(id,email,full_name)),invited_user:profiles!booking_invitations_invited_user_id_fkey(id,email,full_name)",
-    )
-    .eq("id", parsed.data.invitationId)
-    .maybeSingle();
-
-  if (error || !data) {
-    return {
-      status: "error",
-      message: "Invitation could not be found.",
-    };
-  }
-
-  const invitation = data as unknown as ExistingInvitation & {
-    bookings: BookingForInvitation | BookingForInvitation[] | null;
-    invited_user: ProfileForInvitation | ProfileForInvitation[] | null;
-  };
-  const booking = firstRecord(invitation.bookings);
-  const invitee = firstRecord(invitation.invited_user);
-  const organizer = firstRecord(booking?.profiles);
-
-  if (!booking || invitation.invited_user_id !== user.id) {
-    return {
-      status: "error",
-      message: "You can only respond to your own invitations.",
-    };
-  }
-
-  if (invitation.status !== "pending") {
-    return {
-      status: "error",
-      message: "This invitation has already been answered.",
-    };
-  }
-
-  if (!canManageBookingInvitations(booking.status)) {
-    return {
-      status: "error",
-      message: invitationResponseLockedMessage,
-    };
-  }
-
-  const responseMessage = parsed.data.responseMessage || null;
-  const respondedAt = new Date().toISOString();
-  const { data: updated, error: updateError } = await supabase
-    .from("booking_invitations")
-    .update({
-      status: parsed.data.status,
-      response_message: responseMessage,
-      responded_at: respondedAt,
-    })
-    .eq("id", invitation.id)
-    .eq("invited_user_id", user.id)
-    .eq("status", "pending")
-    .select("id,status,response_message,responded_at")
-    .maybeSingle();
-
-  if (updateError || !updated) {
-    console.error("Booking invitation response failed", {
-      invitationId: invitation.id,
-      message: updateError?.message,
-    });
-
-    return {
-      status: "error",
-      message: "Invitation response could not be saved. Please refresh and try again.",
-    };
-  }
-
-  await createAuditLogSafely(
-    supabase,
-    {
-      action: "update",
-      entityType: "booking",
-      entityId: booking.id,
-      actorUserId: user.id,
-      actorEmail: user.email,
-      summary: `${parsed.data.status === "accepted" ? "Accepted" : "Declined"} invitation for booking ${booking.title}.`,
-      oldValues: {
-        invitationId: invitation.id,
-        status: invitation.status,
-        responseMessage: invitation.response_message,
-        respondedAt: invitation.responded_at,
-      },
-      newValues: {
-        invitationId: invitation.id,
-        status: parsed.data.status,
-        responseMessage,
-        respondedAt,
-      },
-      metadata: { invitationId: invitation.id },
-    },
-    { bookingId: booking.id, invitationId: invitation.id },
-  );
-
-  if (organizer?.email && invitee) {
-    await queueInvitationNotification({
-      type:
-        parsed.data.status === "accepted"
-          ? "booking_invitation_accepted"
-          : "booking_invitation_declined",
-      booking,
-      recipient: {
-        id: booking.user_id,
-        email: organizer.email,
-        full_name: organizer.full_name,
-      },
-      actor: invitee,
-      status: parsed.data.status,
-    });
-  }
-  await syncConfirmedInvitationAttendeesSafely({
-    booking,
-    actor: {
-      id: user.id,
-      email: user.email,
-    },
-    reason:
-      parsed.data.status === "accepted"
-        ? "invitation_accepted"
-        : "invitation_declined",
-  });
-
-  revalidateInvitationPaths(booking.id);
+  void invitationId;
+  void responseStatus;
+  void _previousState;
+  void formData;
 
   return {
-    status: "success",
-    message:
-      parsed.data.status === "accepted"
-        ? `Invitation accepted for ${formatBookingWindow(booking.starts_at, booking.ends_at)}.`
-        : "Invitation declined.",
+    status: "error",
+    message: "Invitation responses are not used. Open the booking for details.",
   };
 }
+

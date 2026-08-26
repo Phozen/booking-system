@@ -6,9 +6,7 @@ import {
   formatBookingWindow,
 } from "@/lib/bookings/format";
 import type { InvitedBooking } from "@/lib/bookings/invitations/types";
-import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
-import { InvitationResponseActions } from "@/components/bookings/invitations/invitation-response-actions";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,16 +28,13 @@ export function InvitationCard({
   muted?: boolean;
 }) {
   const booking = invitation.booking;
-  const isPending = invitation.invitation.status === "pending";
-  const canRespond =
-    isPending && canManageBookingInvitations(booking.status);
   const titleId = `invitation-${invitation.invitation.id}-title`;
 
   return (
     <article
       aria-labelledby={titleId}
       className={cn(
-        "grid gap-4 rounded-lg border p-4 shadow-sm",
+        "grid gap-3 rounded-lg border p-3 shadow-sm sm:p-4",
         muted
           ? "border-slate-300 bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200"
           : "border-border bg-card",
@@ -47,7 +42,7 @@ export function InvitationCard({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <StatusBadge kind="invitation" status={invitation.invitation.status} />
+          <BookingStatusBadge status={booking.status} />
           <h3
             id={titleId}
             className="mt-2 break-words text-base font-semibold tracking-normal"
@@ -64,19 +59,17 @@ export function InvitationCard({
               : "Room unavailable"}
           </p>
         </div>
-        {!canRespond ? (
-          <Link
-            href={`/bookings/${booking.id}`}
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className: "w-full bg-background/80 sm:w-fit",
-            })}
-          >
-            View details
-            <ArrowRight data-icon="inline-end" />
-          </Link>
-        ) : null}
+        <Link
+          href={`/bookings/${booking.id}`}
+          className={buttonVariants({
+            variant: "outline",
+            size: "sm",
+            className: "w-full bg-background/80 sm:w-fit",
+          })}
+        >
+          View details
+          <ArrowRight data-icon="inline-end" />
+        </Link>
       </div>
 
       <dl className="grid min-w-0 gap-2 text-sm text-muted-foreground sm:grid-cols-2">
@@ -86,34 +79,13 @@ export function InvitationCard({
           <dd className="min-w-0 break-words">{getOrganizerLabel(invitation)}</dd>
         </div>
         <div className="inline-flex min-w-0 items-center gap-2">
-          <dt className="sr-only">Room status</dt>
+          <dt className="sr-only">Room</dt>
           <MapPin className="size-4 shrink-0" aria-hidden="true" />
-          <dd className="min-w-0 break-words capitalize">
-            {booking.status.replaceAll("_", " ")}
+          <dd className="min-w-0 break-words">
+            {booking.facility?.name ?? "Room unavailable"}
           </dd>
         </div>
       </dl>
-
-      {canRespond ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <InvitationResponseActions invitationId={invitation.invitation.id} />
-          <Link
-            href={`/bookings/${booking.id}`}
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className: "w-full bg-background/80 sm:w-fit",
-            })}
-          >
-            View details
-            <ArrowRight data-icon="inline-end" />
-          </Link>
-        </div>
-      ) : isPending ? (
-        <p className="text-sm text-muted-foreground">
-          This booking is no longer active, so the invitation cannot be answered.
-        </p>
-      ) : null}
     </article>
   );
 }

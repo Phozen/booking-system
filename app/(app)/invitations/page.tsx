@@ -26,7 +26,7 @@ export default async function InvitationsPage() {
       <PageHeader
         eyebrow="Inbox"
         title="Invites"
-        description="Accept or decline meetings coworkers invited you to."
+        description="Meetings where you were added as an attendee."
         secondaryAction={
           <div className="flex flex-wrap gap-2">
             <Link
