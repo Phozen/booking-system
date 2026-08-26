@@ -1,5 +1,5 @@
-import { RouteLoadingTrigger } from "@/components/shared/global-route-loader";
+import { RouteLoading } from "@/components/shared/route-loading";
 
 export default function AdminAreaLoading() {
-  return <RouteLoadingTrigger label="Loading admin area..." variant="table" />;
+  return <RouteLoading label="Loading..." />;
 }

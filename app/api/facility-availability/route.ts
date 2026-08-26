@@ -38,5 +38,12 @@ export async function GET(request: Request) {
     timezone: settings.defaultTimezone,
   });
 
-  return NextResponse.json({ items });
+  return NextResponse.json(
+    { items },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=15, stale-while-revalidate=45",
+      },
+    },
+  );
 }

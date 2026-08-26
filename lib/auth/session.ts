@@ -6,36 +6,16 @@ import {
   getProfileSession,
   type ProfileSession,
 } from "@/lib/auth/profile";
+import { getSafeInternalPath } from "@/lib/auth/safe-path";
 import { createClient } from "@/lib/supabase/server";
+
+export { getSafeInternalPath };
 
 export type AuthState = {
   isConfigured: boolean;
   user: User | null;
   profile: ProfileSession | null;
 };
-
-export function getSafeInternalPath(value: string | null | undefined) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value, "https://qbook.invalid");
-    const decodedPath = decodeURIComponent(url.pathname);
-
-    if (
-      url.origin !== "https://qbook.invalid" ||
-      decodedPath.startsWith("//") ||
-      decodedPath.includes("\\")
-    ) {
-      return null;
-    }
-
-    return `${url.pathname}${url.search}${url.hash}`;
-  } catch {
-    return null;
-  }
-}
 
 export const getCurrentAuthState = cache(async function getCurrentAuthState(): Promise<AuthState> {
   let supabase: SupabaseClient;

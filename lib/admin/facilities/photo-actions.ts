@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireAdmin } from "@/lib/auth/guards";
+import { revalidateBookableFacilitiesCache } from "@/lib/catalog/cache";
 import {
   buildFacilityPhotoStoragePath,
   facilityPhotoAltTextSchema,
@@ -36,6 +37,7 @@ function revalidateFacilityPhotoPaths(facility: Pick<Facility, "id" | "slug">) {
   revalidatePath(`/facilities/${facility.slug}`);
   revalidatePath("/admin/facilities");
   revalidatePath(`/admin/facilities/${facility.id}`);
+  revalidateBookableFacilitiesCache();
 }
 
 function buildPhotoAuditValues(photo: FacilityPhoto) {

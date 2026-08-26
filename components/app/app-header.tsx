@@ -30,6 +30,7 @@ export function AppHeader({
             <CompanyBrand
               logoClassName="w-12 sm:w-14"
               textClassName="text-2xl sm:text-3xl"
+              sizes="(min-width: 640px) 56px, 48px"
               priority
             />
             <span className="sr-only">{appName}</span>

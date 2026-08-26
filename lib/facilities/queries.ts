@@ -189,35 +189,58 @@ async function addSignedPhotoUrls(
   supabase: SupabaseClient,
   facilities: Facility[],
 ) {
-  return Promise.all(
-    facilities.map(async (facility) => {
-      const photos = await Promise.all(
-        facility.photos.map(async (photo) => {
-          if (photo.publicUrl) {
-            return photo;
-          }
+  const unsignedByBucket = new Map<string, string[]>();
 
-          const { data, error } = await supabase.storage
-            .from(photo.storageBucket)
-            .createSignedUrl(photo.storagePath, 60 * 60);
+  for (const facility of facilities) {
+    for (const photo of facility.photos) {
+      if (photo.publicUrl) {
+        continue;
+      }
 
-          if (error || !data?.signedUrl) {
-            return photo;
-          }
+      const paths = unsignedByBucket.get(photo.storageBucket) ?? [];
+      if (!paths.includes(photo.storagePath)) {
+        paths.push(photo.storagePath);
+      }
+      unsignedByBucket.set(photo.storageBucket, paths);
+    }
+  }
 
-          return {
-            ...photo,
-            publicUrl: data.signedUrl,
-          };
-        }),
-      );
+  const signedUrls = new Map<string, string>();
 
-      return {
-        ...facility,
-        photos,
-      };
+  await Promise.all(
+    [...unsignedByBucket.entries()].map(async ([bucket, paths]) => {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrls(paths, 60 * 60);
+
+      if (error || !data) {
+        return;
+      }
+
+      for (const [index, item] of data.entries()) {
+        const path = item.path ?? paths[index];
+        if (path && item.signedUrl) {
+          signedUrls.set(`${bucket}:${path}`, item.signedUrl);
+        }
+      }
     }),
   );
+
+  return facilities.map((facility) => ({
+    ...facility,
+    photos: facility.photos.map((photo) => {
+      if (photo.publicUrl) {
+        return photo;
+      }
+
+      return {
+        ...photo,
+        publicUrl:
+          signedUrls.get(`${photo.storageBucket}:${photo.storagePath}`) ??
+          null,
+      };
+    }),
+  }));
 }
 
 export async function getEmployeeFacilities(supabase: SupabaseClient) {

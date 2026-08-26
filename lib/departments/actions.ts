@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { revalidateDepartmentsCache } from "@/lib/catalog/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type DepartmentActionState = {
@@ -48,6 +49,6 @@ export async function saveDepartmentAction(
     summary: `${id ? "Updated" : "Created"} department ${values.name}.`, newValues: values,
   });
   revalidatePath("/admin/departments");
-  revalidatePath("/bookings/new");
+  revalidateDepartmentsCache();
   return { status: "success", message: id ? "Department updated." : "Department added." };
 }

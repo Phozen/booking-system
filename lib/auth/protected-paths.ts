@@ -1,4 +1,4 @@
-import { getSafeInternalPath } from "@/lib/auth/session";
+import { getSafeInternalPath } from "@/lib/auth/safe-path";
 
 export const AUTH_PATHS = ["/login", "/register", "/reset-password"] as const;
 

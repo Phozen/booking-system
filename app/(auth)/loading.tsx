@@ -1,5 +1,6 @@
-import { RouteLoadingTrigger } from "@/components/shared/global-route-loader";
+import { LoginPanel } from "@/components/auth/login-panel";
+import { defaultAppSettings } from "@/lib/settings/queries";
 
 export default function AuthLoading() {
-  return <RouteLoadingTrigger label="Loading secure form..." variant="form" />;
+  return <LoginPanel contactEmail={defaultAppSettings.systemContactEmail} />;
 }

@@ -1,10 +1,14 @@
+import { Suspense } from "react";
 import { ShieldCheck } from "lucide-react";
 
 import { loginWithMicrosoftAction } from "@/lib/auth/actions";
 import {
-  formatAccountInactiveMessage,
-  type AppSettings,
-} from "@/lib/settings/queries";
+  LoginErrorAlert,
+  LoginNextField,
+} from "@/components/auth/login-search-state";
+import { MicrosoftLogo } from "@/components/auth/microsoft-logo";
+import { productName } from "@/components/shared/company-logo";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,51 +16,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MicrosoftLogo } from "@/components/auth/microsoft-logo";
-import { productName } from "@/components/shared/company-logo";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export type LoginSearchParams = Record<string, string | string[] | undefined>;
+export {
+  getLoginMessage,
+  type LoginSearchParams,
+} from "@/components/auth/login-message";
 
-export function getLoginMessage(
-  searchParams: LoginSearchParams,
-  settings: Pick<AppSettings, "systemContactEmail">,
-) {
-  if (searchParams.auth === "required") {
-    return "Log in to continue.";
-  }
-
-  if (searchParams.error === "disabled") {
-    return formatAccountInactiveMessage(settings);
-  }
-
-  if (searchParams.error === "legacy") {
-    return "Email and password sign-in is disabled. Continue with Microsoft.";
-  }
-
-  if (searchParams.error === "microsoft") {
-    return "Microsoft login was cancelled or denied. Try again with your authorized company account.";
-  }
-
-  if (searchParams.error === "tenant") {
-    return "That Microsoft tenant is not authorized for Qbook.";
-  }
-
-  if (searchParams.error === "callback") {
-    return "Microsoft login could not be completed. Check Supabase and Microsoft redirect settings.";
-  }
-
-  return undefined;
-}
-
-export function LoginPanel({
-  initialMessage,
-  next,
-}: {
-  initialMessage?: string;
-  next?: string;
-}) {
+export function LoginPanel({ contactEmail }: { contactEmail: string }) {
   return (
     <Card className="border-border/70 bg-card/95 shadow-xl shadow-primary/10 backdrop-blur">
       <CardHeader className="gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
@@ -74,17 +40,17 @@ export function LoginPanel({
       </CardHeader>
       <CardContent className="grid gap-4 px-5 pb-5 sm:px-6 sm:pb-6">
         <form action={loginWithMicrosoftAction}>
-          {next ? <input type="hidden" name="next" value={next} /> : null}
+          <Suspense fallback={null}>
+            <LoginNextField />
+          </Suspense>
           <Button type="submit" size="lg" className="h-12 w-full text-base">
             <MicrosoftLogo className="size-5" />
             Continue with Microsoft
           </Button>
         </form>
-        {initialMessage ? (
-          <Alert variant="destructive">
-            <AlertDescription>{initialMessage}</AlertDescription>
-          </Alert>
-        ) : null}
+        <Suspense fallback={null}>
+          <LoginErrorAlert contactEmail={contactEmail} />
+        </Suspense>
         <p className="text-sm text-muted-foreground">
           Access is limited to active employees with an authorized company
           Microsoft email. Email and password registration is disabled.

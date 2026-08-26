@@ -1,5 +1,5 @@
-import { RouteLoadingTrigger } from "@/components/shared/global-route-loader";
+import { RouteLoading } from "@/components/shared/route-loading";
 
 export default function EmployeeAreaLoading() {
-  return <RouteLoadingTrigger label="Loading employee area..." />;
+  return <RouteLoading label="Loading..." />;
 }

@@ -93,6 +93,9 @@ describe("facility availability API route", () => {
     const response = await GET(request());
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe(
+      "private, max-age=15, stale-while-revalidate=45",
+    );
     await expect(response.json()).resolves.toEqual({
       items: [{ id: "slot-1", type: "available" }],
     });

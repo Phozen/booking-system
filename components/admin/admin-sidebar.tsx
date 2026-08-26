@@ -57,7 +57,12 @@ export function AdminSidebar({
             href="/admin/dashboard"
             className="inline-flex rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CompanyBrand logoClassName="w-20" textClassName="text-4xl" priority />
+            <CompanyBrand
+              logoClassName="w-20"
+              textClassName="text-4xl"
+              sizes="80px"
+              priority
+            />
             <span className="sr-only">{appName}</span>
           </Link>
           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

@@ -5,6 +5,7 @@ import type { ZodError } from "zod";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { revalidateBookableFacilitiesCache } from "@/lib/catalog/cache";
 import {
   equipmentFormSchema,
   equipmentIdSchema,
@@ -42,7 +43,7 @@ function revalidateEquipmentPaths() {
   revalidatePath("/admin/facilities/[id]", "page");
   revalidatePath("/facilities");
   revalidatePath("/(app)/facilities/[slug]", "page");
-  revalidatePath("/bookings/new");
+  revalidateBookableFacilitiesCache();
 }
 
 export async function createEquipmentAction(
@@ -300,6 +301,7 @@ export async function updateFacilityEquipmentAction(
   revalidatePath(`/admin/facilities/${facilityId}`);
   revalidatePath("/admin/facilities");
   revalidatePath("/facilities");
+  revalidateBookableFacilitiesCache();
 
   return {
     status: "success",

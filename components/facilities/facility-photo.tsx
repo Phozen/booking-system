@@ -13,19 +13,19 @@ export function FacilityPhoto({
   priority?: boolean;
 }) {
   const photo = facility.photos[0];
+  const label = photo?.altText ?? `${facility.name}, ${facility.level}`;
 
   if (photo?.publicUrl) {
     return (
-      <div
-        role="img"
-        aria-label={photo.altText ?? `${facility.name}, ${facility.level}`}
-        data-priority={priority ? "true" : undefined}
+      <img
+        src={photo.publicUrl}
+        alt={label}
+        width={224}
+        height={168}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={priority ? "high" : "low"}
         className={cn("h-full w-full object-cover", className)}
-        style={{
-          backgroundImage: `url(${photo.publicUrl})`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
       />
     );
   }

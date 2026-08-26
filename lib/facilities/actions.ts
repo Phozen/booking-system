@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAuditLogSafely } from "@/lib/audit/log";
+import { revalidateBookableFacilitiesCache } from "@/lib/catalog/cache";
 import { buildFacilitySlug } from "@/lib/facilities/format";
 import {
   facilityFormSchema,
@@ -152,6 +153,7 @@ export async function createFacilityAction(
 
   revalidatePath("/facilities");
   revalidatePath("/admin/facilities");
+  revalidateBookableFacilitiesCache();
 
   return {
     status: "success",
@@ -248,6 +250,7 @@ export async function updateFacilityAction(
   revalidatePath(`/facilities/${existing.slug}`);
   revalidatePath("/admin/facilities");
   revalidatePath(`/admin/facilities/${facilityId}`);
+  revalidateBookableFacilitiesCache();
 
   return {
     status: "success",
@@ -344,6 +347,7 @@ export async function archiveFacilityAction(
       revalidatePath(`/facilities/${existing.slug}`);
       revalidatePath("/admin/facilities");
       revalidatePath(`/admin/facilities/${facilityId}`);
+      revalidateBookableFacilitiesCache();
     } catch (error) {
       logFacilityArchiveError({
         stage: "revalidate",
@@ -459,6 +463,7 @@ export async function deleteFacilityAction(
     try {
       revalidatePath("/facilities");
       revalidatePath("/admin/facilities");
+      revalidateBookableFacilitiesCache();
     } catch (error) {
       console.error("Revalidate failed after facility delete", error);
     }

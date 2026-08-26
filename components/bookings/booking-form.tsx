@@ -640,7 +640,7 @@ export function BookingForm({
           tabIndex={-1}
           aria-label="Choose a room"
         >
-          {facilities.map((facility) => {
+          {facilities.map((facility, index) => {
             const selected = facility.id === selectedFacility;
             return (
               <button
@@ -662,7 +662,11 @@ export function BookingForm({
                 )}
               >
                 <div className="aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted">
-                  <FacilityPhoto facility={facility} className="aspect-[4/3] min-h-24" />
+                  <FacilityPhoto
+                    facility={facility}
+                    priority={index < 2}
+                    className="aspect-[4/3] min-h-24"
+                  />
                 </div>
                 <div className="grid gap-1 self-center">
                   <p className="font-semibold leading-tight">{facility.name}</p>

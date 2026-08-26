@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { appConfig } from "@/config/app";
@@ -10,6 +12,7 @@ import {
   type AppSettings,
   type SystemSettingRow,
 } from "@/lib/settings/app-settings";
+import { APP_SETTINGS_CACHE_TAG } from "@/lib/settings/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type { AppSettings } from "@/lib/settings/app-settings";
@@ -40,26 +43,50 @@ export function mapSettingsRowsToAppSettings(
   return mapRowsToSettings(rows, defaultAppSettings);
 }
 
-export async function getAppSettings(supabase?: SupabaseClient) {
+async function queryAppSettings(client: SupabaseClient): Promise<AppSettings> {
+  const { data, error } = await client
+    .from("system_settings")
+    .select("key,value");
+
+  if (error) {
+    console.error("System settings lookup failed", { message: error.message });
+    return defaultAppSettings;
+  }
+
+  return mapSettingsRowsToAppSettings(
+    (data as SystemSettingRow[] | null) ?? [],
+  );
+}
+
+async function loadCachedAppSettings() {
   try {
-    const client = supabase ?? createAdminClient();
-    const { data, error } = await client
-      .from("system_settings")
-      .select("key,value");
-
-    if (error) {
-      console.error("System settings lookup failed", { message: error.message });
-      return defaultAppSettings;
-    }
-
-    return mapSettingsRowsToAppSettings(
-      (data as SystemSettingRow[] | null) ?? [],
-    );
+    return await queryAppSettings(createAdminClient());
   } catch (error) {
     console.error("System settings unavailable", error);
     return defaultAppSettings;
   }
 }
+
+const getCachedAppSettings = unstable_cache(
+  loadCachedAppSettings,
+  ["app-settings"],
+  { revalidate: 300, tags: [APP_SETTINGS_CACHE_TAG] },
+);
+
+export const getAppSettings = cache(async function getAppSettings(
+  supabase?: SupabaseClient,
+) {
+  if (supabase) {
+    try {
+      return await queryAppSettings(supabase);
+    } catch (error) {
+      console.error("System settings unavailable", error);
+      return defaultAppSettings;
+    }
+  }
+
+  return getCachedAppSettings();
+});
 
 export async function getDefaultApprovalRequired() {
   const settings = await getAppSettings();

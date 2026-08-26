@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
+import { preload } from "react-dom";
 import Link from "next/link";
 
 import { CompanyBrand } from "@/components/shared/company-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+
+const LOGIN_BACKGROUND_SRC = "/office-login-background.webp";
 
 export function AuthShell({
   appName,
@@ -14,12 +17,13 @@ export function AuthShell({
   children: ReactNode;
 }) {
   void companyName;
+  preload(LOGIN_BACKGROUND_SRC, { as: "image" });
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-6 sm:px-6 lg:px-8">
       <div
         className="pointer-events-none absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/office-login-background.png')" }}
+        style={{ backgroundImage: `url('${LOGIN_BACKGROUND_SRC}')` }}
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background/95 via-background/76 to-background/38 dark:from-background/96 dark:via-background/82 dark:to-background/52" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/42 via-transparent to-background/20" />
@@ -36,6 +40,7 @@ export function AuthShell({
               className="gap-4"
               logoClassName="w-24 sm:w-32"
               textClassName="text-5xl sm:text-6xl"
+              sizes="(min-width: 640px) 128px, 96px"
               priority
             />
             <span className="sr-only">{appName}</span>

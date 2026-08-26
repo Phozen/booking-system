@@ -4,7 +4,8 @@ import {
   getMicrosoftTenantId,
   isMicrosoftAuthUser,
 } from "@/lib/auth/access";
-import { getPostLoginPath, getSafeInternalPath } from "@/lib/auth/session";
+import { getSafeInternalPath } from "@/lib/auth/safe-path";
+import { getPostLoginPath } from "@/lib/auth/session";
 import { saveMicrosoftDelegatedCalendarConnection } from "@/lib/integrations/microsoft-365-calendar/delegated";
 import { sanitizeMicrosoftCalendarError } from "@/lib/integrations/microsoft-365-calendar/errors";
 import { createAdminClient } from "@/lib/supabase/admin";

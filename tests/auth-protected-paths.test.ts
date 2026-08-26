@@ -48,4 +48,9 @@ describe("protected path login return URLs", () => {
     expect(middlewareSource).not.toContain("protectedPrefixes");
     expect(guardsSource).toContain("buildLoginRequiredPath");
   });
+
+  it("skips Supabase auth calls on public pages when no session cookie is present", () => {
+    expect(middlewareSource).toContain("hasSupabaseAuthCookie");
+    expect(middlewareSource).toContain('from "@/lib/auth/session-cookies"');
+  });
 });

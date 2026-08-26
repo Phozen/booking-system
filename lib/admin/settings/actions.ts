@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLog } from "@/lib/audit/log";
+import { APP_SETTINGS_CACHE_TAG } from "@/lib/settings/cache";
 import {
   appSettingsToRows,
   getAppSettings,
@@ -102,6 +103,9 @@ export async function updateSystemSettingsAction(
     console.error("System settings audit log insert failed", auditError);
   }
 
+  revalidateTag(APP_SETTINGS_CACHE_TAG, "max");
+  revalidatePath("/", "layout");
+  revalidatePath("/login");
   revalidatePath("/admin/settings");
   revalidatePath("/admin/dashboard");
   revalidatePath("/bookings/new");

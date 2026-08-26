@@ -1,12 +1,41 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { BOOKABLE_FACILITIES_CACHE_TAG } from "@/lib/catalog/cache";
 import { getEmployeeFacilities } from "@/lib/facilities/queries";
 import type { BookingCateringDetails } from "@/lib/bookings/catering/format";
 import type { FacilityType } from "@/lib/facilities/validation";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function getBookableFacilities(supabase: SupabaseClient) {
-  return getEmployeeFacilities(supabase);
+async function loadBookableFacilities(supabase: SupabaseClient) {
+  const facilities = await getEmployeeFacilities(supabase);
+
+  return facilities.map((facility) => ({
+    ...facility,
+    photos: facility.photos.slice(0, 1),
+  }));
 }
+
+const getCachedBookableFacilities = unstable_cache(
+  async () => loadBookableFacilities(createAdminClient()),
+  ["bookable-facilities"],
+  { revalidate: 60, tags: [BOOKABLE_FACILITIES_CACHE_TAG] },
+);
+
+export const getBookableFacilities = cache(async function getBookableFacilities(
+  supabase?: SupabaseClient,
+) {
+  try {
+    return await getCachedBookableFacilities();
+  } catch (error) {
+    if (!supabase) {
+      throw error;
+    }
+
+    return loadBookableFacilities(supabase);
+  }
+});
 
 export type BookingStatus =
   | "pending"

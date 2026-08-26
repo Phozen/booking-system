@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { requireUser } from "@/lib/auth/guards";
 import { getBookableFacilities } from "@/lib/bookings/queries";
 import type { Facility } from "@/lib/facilities/queries";
@@ -9,6 +11,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getActiveDepartments, type Department } from "@/lib/departments/queries";
 import { BookingForm } from "@/components/bookings/booking-form";
+import { BookingFormSkeleton } from "@/components/bookings/booking-form-skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import {
   Alert,
@@ -18,15 +21,49 @@ import {
 
 export const dynamic = "force-dynamic";
 
+type NewBookingPageProps = {
+  searchParams: Promise<{ date?: string; facilityId?: string }>;
+};
+
 export default async function NewBookingPage({
   searchParams,
-}: {
-  searchParams: Promise<{ date?: string; facilityId?: string }>;
-}) {
+}: NewBookingPageProps) {
   const { profile } = await requireUser();
-  const { date, facilityId } = await searchParams;
   const settings = await getAppSettings();
 
+  return (
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
+      <PageHeader
+        title={employeeCopy.bookARoom}
+        description="Follow the steps. You can go back anytime before you send."
+      />
+
+      {profile?.status !== "active" ? (
+        <Alert variant="destructive">
+          <AlertTitle>Booking unavailable</AlertTitle>
+          <AlertDescription>
+            Your account is not active, so booking is currently unavailable.
+            {" "}
+            {formatContactAdministratorMessage(settings)}
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Suspense fallback={<BookingFormSkeleton />}>
+          <NewBookingForm searchParams={searchParams} settings={settings} />
+        </Suspense>
+      )}
+    </main>
+  );
+}
+
+async function NewBookingForm({
+  searchParams,
+  settings,
+}: {
+  searchParams: NewBookingPageProps["searchParams"];
+  settings: Awaited<ReturnType<typeof getAppSettings>>;
+}) {
+  const { date, facilityId } = await searchParams;
   let facilities: Facility[] = [];
   let departments: Department[] = [];
   let loadError = false;
@@ -50,39 +87,25 @@ export default async function NewBookingPage({
   const selectedDate =
     date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined;
 
-  return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <PageHeader
-        title={employeeCopy.bookARoom}
-        description="Follow the steps. You can go back anytime before you send."
-      />
+  if (loadError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Rooms unavailable</AlertTitle>
+        <AlertDescription>
+          Rooms could not be loaded. Refresh the page or try again in a
+          moment.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
-      {profile?.status !== "active" ? (
-        <Alert variant="destructive">
-          <AlertTitle>Booking unavailable</AlertTitle>
-          <AlertDescription>
-            Your account is not active, so booking is currently unavailable.
-            {" "}
-            {formatContactAdministratorMessage(settings)}
-          </AlertDescription>
-        </Alert>
-      ) : loadError ? (
-        <Alert variant="destructive">
-          <AlertTitle>Rooms unavailable</AlertTitle>
-          <AlertDescription>
-            Rooms could not be loaded. Refresh the page or try again in a
-            moment.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <BookingForm
-          facilities={facilities}
-          selectedFacilityId={selectedFacilityId}
-          initialDate={selectedDate}
-          settings={settings}
-          departments={departments}
-        />
-      )}
-    </main>
+  return (
+    <BookingForm
+      facilities={facilities}
+      selectedFacilityId={selectedFacilityId}
+      initialDate={selectedDate}
+      settings={settings}
+      departments={departments}
+    />
   );
 }

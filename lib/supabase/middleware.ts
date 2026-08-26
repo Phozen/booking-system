@@ -12,6 +12,7 @@ import {
   isAuthPath,
   isProtectedPath,
 } from "@/lib/auth/protected-paths";
+import { hasSupabaseAuthCookie } from "@/lib/auth/session-cookies";
 
 function hasSupabaseMiddlewareConfig() {
   return Boolean(
@@ -46,6 +47,14 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (!hasSupabaseMiddlewareConfig()) {
+    if (isProtectedPath(pathname)) {
+      return redirectToLogin(request);
+    }
+
+    return response;
+  }
+
+  if (!hasSupabaseAuthCookie(request.cookies.getAll())) {
     if (isProtectedPath(pathname)) {
       return redirectToLogin(request);
     }

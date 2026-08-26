@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { appConfig } from "@/config/app";
-import { getSafeInternalPath } from "@/lib/auth/session";
+import { getSafeInternalPath } from "@/lib/auth/safe-path";
 import {
   getMicrosoftCalendarSyncConfig,
   isDelegatedBookingOwnerCalendarSyncReady,
