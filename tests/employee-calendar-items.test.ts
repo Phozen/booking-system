@@ -80,11 +80,10 @@ describe("employee calendar all-bookings mapping", () => {
 });
 
 describe("employee calendar page wiring", () => {
-  it("loads company bookings only through the visibility-gated all view", () => {
-    expect(employeeCalendarPage).toContain("canViewAllCalendarBookings");
-    expect(employeeCalendarPage).toContain("getCompanyCalendarBookings");
-    expect(employeeCalendarPage).toContain("showViewToggle={allowAll}");
-    expect(employeeCalendarPage).toContain("adminSupabase");
-    expect(employeeCalendarPage).toContain('selectedView === "all" && allowAll');
+  it("loads only the signed-in user's bookings", () => {
+    expect(employeeCalendarPage).toContain("getEmployeeCalendarBookings");
+    expect(employeeCalendarPage).not.toContain("getCompanyCalendarBookings");
+    expect(employeeCalendarPage).not.toContain("showViewToggle");
+    expect(employeeCalendarPage).not.toContain("canViewAllCalendarBookings");
   });
 });

@@ -53,7 +53,6 @@ export default async function NewBookingPage({
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow={employeeCopy.bookARoom}
         title={employeeCopy.bookARoom}
         description="Follow the steps. You can go back anytime before you send."
       />

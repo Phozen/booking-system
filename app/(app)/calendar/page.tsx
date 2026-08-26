@@ -1,8 +1,5 @@
 import { requireUser } from "@/lib/auth/guards";
-import {
-  getCompanyCalendarBookings,
-  getEmployeeCalendarBookings,
-} from "@/lib/bookings/calendar-queries";
+import { getEmployeeCalendarBookings } from "@/lib/bookings/calendar-queries";
 import type { BookingStatus } from "@/lib/bookings/queries";
 import {
   getCalendarMonthDays,
@@ -16,11 +13,6 @@ import {
   parseCalendarDateParam,
 } from "@/lib/calendar/selection";
 import { groupCalendarBookingsByDay } from "@/lib/calendar/group-bookings";
-import {
-  canViewAllCalendarBookings,
-  getCalendarVisibilityMode,
-  parseCalendarViewMode,
-} from "@/lib/calendar/visibility";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -55,39 +47,26 @@ export default async function EmployeeCalendarPage({
   searchParams: Promise<{
     month?: string | string[];
     status?: string | string[];
-    view?: string | string[];
     date?: string | string[];
   }>;
 }) {
-  const { user, profile } = await requireUser();
+  const { user } = await requireUser();
   const params = await searchParams;
   const settings = await getAppSettings();
-  const visibilityMode = getCalendarVisibilityMode(settings);
-  const allowAll = canViewAllCalendarBookings(profile.role, visibilityMode);
   const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
-  const selectedView = parseCalendarViewMode({
-    value: params.view,
-    allowAll,
-    defaultView: "my",
-  });
   const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
   const supabase = await createClient();
   const adminSupabase = createAdminClient();
-  const bookings =
-    selectedView === "all" && allowAll
-      ? await getCompanyCalendarBookings(adminSupabase, user.id, range, {
-          status: selectedStatus,
-        })
-      : await getEmployeeCalendarBookings(
-          supabase,
-          user.id,
-          range,
-          {
-            status: selectedStatus,
-          },
-          adminSupabase,
-        );
+  const bookings = await getEmployeeCalendarBookings(
+    supabase,
+    user.id,
+    range,
+    {
+      status: selectedStatus,
+    },
+    adminSupabase,
+  );
   const calendarBookings = bookings.map(toEmployeeCalendarItem);
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
@@ -97,7 +76,6 @@ export default async function EmployeeCalendarPage({
   const hrefOptions = {
     month: selectedMonth.value,
     status: selectedStatus,
-    view: allowAll ? selectedView : undefined,
     date: undefined as string | undefined,
   };
   const getDayHref = (dayKey: string) =>
@@ -105,16 +83,12 @@ export default async function EmployeeCalendarPage({
       ...hrefOptions,
       date: dayKey,
     });
-  const description =
-    selectedView === "all" && allowAll
-      ? "All company room bookings for the month. Other people's bookings show limited details."
-      : "Your bookings and invitations for the month. Tap a day for details.";
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
         title="Calendar"
-        description={description}
+        description="Your bookings and invitations for the month. Tap a day for details."
         className="pb-2"
       />
 
@@ -124,8 +98,6 @@ export default async function EmployeeCalendarPage({
           selectedMonth={selectedMonth}
           selectedStatus={selectedStatus}
           selectedDate={selectedDay.key}
-          selectedView={allowAll ? selectedView : undefined}
-          showViewToggle={allowAll}
           timezone={settings.defaultTimezone}
           compact
         />
@@ -139,14 +111,6 @@ export default async function EmployeeCalendarPage({
               relationship: "invited",
               label: bookingRelationshipTokens.invited.shortLabel,
             },
-            ...(selectedView === "all" && allowAll
-              ? [
-                  {
-                    relationship: "other" as const,
-                    label: bookingRelationshipTokens.other.shortLabel,
-                  },
-                ]
-              : []),
           ]}
         />
       </div>

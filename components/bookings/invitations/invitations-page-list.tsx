@@ -1,10 +1,7 @@
-import Link from "next/link";
-
 import type { InvitedBooking } from "@/lib/bookings/invitations/types";
 import { CompactInvitationSection } from "@/components/bookings/invitations/compact-invitation-section";
 import { InvitationCard } from "@/components/bookings/invitations/invitation-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { buttonVariants } from "@/components/ui/button";
 
 function sortByMeetingTime(
   invitations: InvitedBooking[],
@@ -101,16 +98,6 @@ export function InvitationsPageList({
       <EmptyState
         title="No invited bookings yet"
         description="When someone adds you to a meeting, it will show up here."
-        action={
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href="/calendar" className={buttonVariants({ variant: "outline" })}>
-              View calendar
-            </Link>
-            <Link href="/my-bookings" className={buttonVariants({ variant: "ghost" })}>
-              My bookings
-            </Link>
-          </div>
-        }
       />
     );
   }
