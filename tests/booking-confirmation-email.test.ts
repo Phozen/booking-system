@@ -393,6 +393,8 @@ describe("booking confirmation email template", () => {
     expect(rendered.text).not.toContain("End time:");
     expect(rendered.text).toContain("Headcount: 4");
     expect(rendered.text).toContain("Status: Confirmed");
+    expect(rendered.text).toContain("Booking\n");
+    expect(rendered.text).toContain("People\n");
     expect(rendered.text).toContain(
       `https://booking.example.com/bookings/${confirmedBooking.id}`,
     );
@@ -403,6 +405,10 @@ describe("booking confirmation email template", () => {
     expect(rendered.html).toContain('role="presentation"');
     expect(rendered.html).toContain('bgcolor="#f8fafc"');
     expect(rendered.html).toContain("Open booking");
+    expect(rendered.html).toContain("https://booking.example.com/company-logo.png");
+    expect(rendered.html).toContain("https://booking.example.com/qbook-logo.png");
+    expect(rendered.html).toContain('alt="Qhazanah Sabah Berhad"');
+    expect(rendered.html).toContain('alt="QBook"');
   });
 
   it("renders purpose, meeting type, invited people, and requester email when present", () => {

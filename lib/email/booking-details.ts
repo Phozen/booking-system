@@ -310,19 +310,99 @@ export function detailSectionsToText(sections: DetailSection[]): string {
     .join("\n\n");
 }
 
-/** HTML rendering of sectioned details with headings. */
+function renderDetailSectionRowsHtml(rows: DetailRow[]) {
+  return rows
+    .map(
+      (row) => `
+        <tr>
+          <th scope="row" style="width: 34%; padding: 7px 14px 7px 0; color: #64748b; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.45; text-align: left; vertical-align: top;">${escapeForHtml(row.label)}</th>
+          <td style="padding: 7px 0; color: #0f172a; font-size: 14px; font-weight: 500; line-height: 1.5; vertical-align: top; white-space: pre-wrap;">${escapeForHtml(row.value).replaceAll("\n", "<br>")}</td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+/** HTML rendering of sectioned details with email-style category cards. */
 export function detailSectionsToHtml(sections: DetailSection[]): string {
   return sections
     .map(
-      (s) =>
-        `<h3 style="margin:16px 0 6px;font-size:14px;color:#1e293b;">${escapeForHtml(s.heading)}</h3>\n${s.rows
-          .map(
-            (r) =>
-              `<p style="margin:2px 0;font-size:13px;"><strong>${escapeForHtml(r.label)}:</strong> ${escapeForHtml(r.value)}</p>`,
-          )
-          .join("\n")}`,
+      (section) => `
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; margin: 0 0 14px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
+          <tr>
+            <td style="padding: 14px 16px 12px;">
+              <p style="margin: 0 0 10px; color: #0f172a; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;">${escapeForHtml(section.heading)}</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;" aria-label="${escapeForHtml(section.heading)}">
+                <tbody>${renderDetailSectionRowsHtml(section.rows)}</tbody>
+              </table>
+            </td>
+          </tr>
+        </table>
+      `,
     )
     .join("\n");
+}
+
+function getPublicAssetUrl(appUrl: string | null | undefined, path: string) {
+  const baseUrl = appUrl?.trim().replace(/\/+$/, "");
+  if (!baseUrl) {
+    return null;
+  }
+
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${baseUrl}${normalizedPath}`;
+}
+
+/**
+ * Branded booking details HTML shared by QBook emails and Outlook event bodies.
+ * Includes Qhazanah + QBook logos when appUrl is available.
+ */
+export function buildBrandedBookingDetailsHtml({
+  sections,
+  appUrl,
+  intro = "Facility booking via QBook",
+  bookingLink,
+}: {
+  sections: DetailSection[];
+  appUrl?: string | null;
+  intro?: string | null;
+  bookingLink?: string | null;
+}): string {
+  const companyLogoUrl = getPublicAssetUrl(appUrl, "/company-logo.png");
+  const qbookLogoUrl = getPublicAssetUrl(appUrl, "/qbook-logo.png");
+
+  const logoHeader =
+    companyLogoUrl && qbookLogoUrl
+      ? `
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; margin: 0 0 16px; border-bottom: 1px solid #e2e8f0;">
+          <tr>
+            <td align="left" valign="middle" style="padding: 0 0 14px;">
+              <img src="${escapeForHtml(companyLogoUrl)}" alt="Qhazanah Sabah Berhad" width="132" style="display: block; width: 132px; max-width: 40%; height: auto; border: 0;" />
+            </td>
+            <td align="right" valign="middle" style="padding: 0 0 14px;">
+              <img src="${escapeForHtml(qbookLogoUrl)}" alt="QBook" width="120" style="display: block; width: 120px; max-width: 38%; height: auto; border: 0; margin-left: auto;" />
+            </td>
+          </tr>
+        </table>
+      `
+      : "";
+
+  const introHtml = intro?.trim()
+    ? `<p style="margin: 0 0 14px; color: #475569; font-size: 14px; line-height: 1.55;">${escapeForHtml(intro.trim())}</p>`
+    : "";
+
+  const linkHtml = bookingLink?.trim()
+    ? `<p style="margin: 16px 0 0;"><a href="${escapeForHtml(bookingLink.trim())}" style="display: inline-block; padding: 10px 16px; border-radius: 6px; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 600; line-height: 1.2; text-decoration: none;">Open booking</a></p>`
+    : "";
+
+  return `
+    <div style="color: #0f172a; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; line-height: 1.5;">
+      ${logoHeader}
+      ${introHtml}
+      ${detailSectionsToHtml(sections)}
+      ${linkHtml}
+    </div>
+  `.trim();
 }
 
 function escapeForHtml(value: string) {

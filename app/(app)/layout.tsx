@@ -9,6 +9,7 @@ import { getMissingProfileFields } from "@/lib/profile/completion";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/app/app-header";
+import { UnseenApprovalToasts } from "@/components/notifications/unseen-approval-toasts";
 import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
 import { SkipLink } from "@/components/shared/skip-link";
 
@@ -39,6 +40,7 @@ export default async function EmployeeLayout({
         notifications={notifications}
         unseenNotificationCount={unseenNotificationCount}
       />
+      <UnseenApprovalToasts notifications={notifications} />
       {!profileCompletion.isComplete ? (
         <ProfileCompletionPrompt
           missingFields={profileCompletion.missingFields}

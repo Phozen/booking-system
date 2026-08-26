@@ -77,13 +77,11 @@ export function UserMenu({
         >
           <UserRound aria-hidden="true" />
         </Link>
-        {currentArea === "employee" ? (
-          <NotificationPopover
-            notifications={notifications}
-            unseenCount={unseenNotificationCount}
-            onNavigate={onNavigate}
-          />
-        ) : null}
+        <NotificationPopover
+          notifications={notifications}
+          unseenCount={unseenNotificationCount}
+          onNavigate={onNavigate}
+        />
         <form action={logoutAction}>
           <Button type="submit" variant="outline">
             <LogOut data-icon="inline-start" />

@@ -209,10 +209,6 @@ async function insertBookingEmail({
 }) {
   const owner = getBookingOwner(booking);
 
-  if (!owner?.email) {
-    return;
-  }
-
   await createAppNotification({
     userId: booking.user_id,
     type,
@@ -222,14 +218,20 @@ async function insertBookingEmail({
     relatedBookingId: booking.id,
   });
 
-  if (!sendEmail) {
+  if (!sendEmail || !owner?.email) {
     return;
   }
 
   const idempotencyKey =
     type === "booking_confirmation"
       ? `booking-confirmation:${booking.id}:${owner.email}`
-      : null;
+      : type === "booking_approval"
+        ? `booking-approval:${booking.id}:${owner.email}`
+        : type === "booking_rejection"
+          ? `booking-rejection:${booking.id}:${owner.email}`
+          : type === "booking_cancellation"
+            ? `booking-cancellation:${booking.id}:${owner.email}`
+            : null;
   const departments = await getBookingDepartmentSnapshot(booking.id).catch(
     (error) => {
       console.error("Booking department snapshot unavailable", {
@@ -585,8 +587,12 @@ function revalidateAdminBookingPaths(bookingId: string) {
   revalidatePath("/admin/bookings");
   revalidatePath(`/admin/bookings/${bookingId}`);
   revalidatePath("/admin/approvals");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/bookings/${bookingId}`);
   revalidatePath("/my-bookings");
   revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin", "layout");
 }
 
 async function runMicrosoftCalendarSyncSafely({
@@ -916,7 +922,7 @@ export async function approveBookingAction(
   return {
     status: "success",
     message:
-      "Booking approved. The requester will see it as confirmed and an approval email has been queued if possible.",
+      "Booking approved. The requester was notified in-app and by email when possible.",
   };
 }
 

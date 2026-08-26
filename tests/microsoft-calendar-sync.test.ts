@@ -237,6 +237,11 @@ describe("Microsoft 365 calendar sync helpers", () => {
     expect(payload.body.content).toContain(
       "https://booking.example.com/admin/bookings/booking-1",
     );
+    expect(payload.body.content).toContain("https://booking.example.com/company-logo.png");
+    expect(payload.body.content).toContain("https://booking.example.com/qbook-logo.png");
+    expect(payload.body.content).toContain("Booking");
+    expect(payload.body.content).toContain("People");
+    expect(payload.body.content).toContain("Catering");
     expect(payload).not.toHaveProperty("attendees");
   });
 

@@ -3,7 +3,7 @@ import {
 } from "@/lib/bookings/format";
 import type { BookingStatus } from "@/lib/bookings/queries";
 import {
-  buildBookingDetailRows,
+  buildBookingDetailSections,
   formatInviteeList,
   formatPersonLabel,
 } from "@/lib/email/booking-details";
@@ -128,6 +128,12 @@ function formatStatusLabel(status: string | null) {
 type EmailDetailRow = { label: string; value: string | null };
 type EmailDetailSection = { title: string; rows: EmailDetailRow[] };
 
+function getAssetUrl(appUrl: string, path: string) {
+  const baseUrl = appUrl.replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${baseUrl}${normalizedPath}`;
+}
+
 function hasRows(section: EmailDetailSection) {
   return section.rows.some((row) => row.value);
 }
@@ -138,8 +144,8 @@ function renderSectionRows(rows: EmailDetailRow[]) {
     .map(
       (row) => `
         <tr>
-          <th scope="row" style="width: 36%; padding: 8px 16px 8px 0; color: #64748b; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
-          <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; line-height: 1.5; vertical-align: top; white-space: pre-wrap;">${escapeHtml(row.value ?? "").replaceAll("\n", "<br>")}</td>
+          <th scope="row" style="width: 34%; padding: 7px 14px 7px 0; color: #64748b; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
+          <td style="padding: 7px 0; color: #0f172a; font-size: 14px; font-weight: 500; line-height: 1.5; vertical-align: top; white-space: pre-wrap;">${escapeHtml(row.value ?? "").replaceAll("\n", "<br>")}</td>
         </tr>
       `,
     )
@@ -152,23 +158,27 @@ function renderHtml({
   sections,
   link,
   calendarLink,
+  companyLogoUrl,
+  qbookLogoUrl,
 }: {
   title: string;
   intro: string;
   sections: EmailDetailSection[];
   link: string;
   calendarLink: string | null;
+  companyLogoUrl: string;
+  qbookLogoUrl: string;
 }) {
   const detailSections = sections
     .filter(hasRows)
     .map(
       (section) => `
         <tr>
-          <td style="padding: 0 0 14px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 0 0 16px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
               <tr>
-                <td style="padding: 0 0 12px;">
-                  <p style="margin: 0 0 10px; color: #0f172a; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">${escapeHtml(section.title)}</p>
+                <td style="padding: 14px 16px 12px;">
+                  <p style="margin: 0 0 10px; color: #0f172a; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;">${escapeHtml(section.title)}</p>
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;" aria-label="${escapeHtml(section.title)}">
                     <tbody>${renderSectionRows(section.rows)}</tbody>
                   </table>
@@ -193,14 +203,27 @@ function renderHtml({
             <td style="padding: 0; background-color: #0f172a; height: 4px; font-size: 0; line-height: 0;">&nbsp;</td>
           </tr>
           <tr>
-            <td style="padding: 28px 28px 20px; background-color: #ffffff;">
-              <p style="margin: 0 0 6px; color: #64748b; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;">QBook</p>
+            <td style="padding: 22px 28px 18px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">
+                <tr>
+                  <td align="left" valign="middle" style="padding: 0;">
+                    <img src="${escapeHtml(companyLogoUrl)}" alt="Qhazanah Sabah Berhad" width="132" style="display: block; width: 132px; max-width: 40%; height: auto; border: 0;" />
+                  </td>
+                  <td align="right" valign="middle" style="padding: 0;">
+                    <img src="${escapeHtml(qbookLogoUrl)}" alt="QBook" width="120" style="display: block; width: 120px; max-width: 38%; height: auto; border: 0; margin-left: auto;" />
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 24px 28px 16px; background-color: #ffffff;">
               <h1 style="margin: 0 0 10px; color: #0f172a; font-size: 22px; font-weight: 700; line-height: 1.3;">${escapeHtml(title)}</h1>
               <p style="margin: 0; color: #475569; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 8px 28px 8px;">
+            <td style="padding: 4px 28px 8px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">${detailSections}</table>
             </td>
           </tr>
@@ -305,7 +328,11 @@ export function renderEmailTemplate(
     getStringValue(input.templateData, "calendarEventPath"),
   );
 
-  const detailRows = buildBookingDetailRows({
+  const cateringRequired = Boolean(
+    cateringType || cateringPax || cateringServingTime || cateringDietaryNotes,
+  );
+
+  const detailSections = buildBookingDetailSections({
     facilityName: facilityName,
     facilityLevel: facilityLevel,
     startsAt: startsAt,
@@ -316,7 +343,7 @@ export function renderEmailTemplate(
     invitees: invitees,
     departments: departments,
     teamsMeeting: input.templateData.teamsMeeting,
-    cateringRequired: Boolean(cateringType || cateringPax || cateringServingTime || cateringDietaryNotes),
+    cateringRequired,
     cateringType: cateringType,
     cateringPax: cateringPax ? Number(cateringPax) : null,
     cateringServingTime: cateringServingTime,
@@ -327,12 +354,10 @@ export function renderEmailTemplate(
     bookingLink: null,
   });
 
-  const sections: EmailDetailSection[] = [
-    {
-      title: "Booking details",
-      rows: detailRows.map((r) => ({ label: r.label, value: r.value })),
-    },
-  ];
+  const sections: EmailDetailSection[] = detailSections.map((section) => ({
+    title: section.heading,
+    rows: section.rows.map((row) => ({ label: row.label, value: row.value })),
+  }));
 
   if (invitationResponseTypes.has(input.type)) {
     sections.push({
@@ -351,6 +376,9 @@ export function renderEmailTemplate(
       rows: [{ label: "Reason", value: noteValue }],
     });
   }
+
+  const companyLogoUrl = getAssetUrl(input.appUrl, "/company-logo.png");
+  const qbookLogoUrl = getAssetUrl(input.appUrl, "/qbook-logo.png");
 
   const introByType: Record<EmailNotificationType, string> = {
     booking_confirmation:
@@ -395,7 +423,15 @@ export function renderEmailTemplate(
 
   return {
     subject: input.subject || heading.replace(" — ", ": "),
-    html: renderHtml({ title: heading, intro, sections, link, calendarLink }),
+    html: renderHtml({
+      title: heading,
+      intro,
+      sections,
+      link,
+      calendarLink,
+      companyLogoUrl,
+      qbookLogoUrl,
+    }),
     text: renderText({ title: heading, intro, sections, link, calendarLink }),
   };
 }

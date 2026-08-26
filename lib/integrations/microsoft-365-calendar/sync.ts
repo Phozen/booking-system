@@ -154,6 +154,7 @@ function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForE
     status: record.status,
     startsAt: record.starts_at,
     endsAt: record.ends_at,
+    attendeeCount: record.attendee_count,
     facility: facility
       ? {
           name: facility.name,
@@ -168,6 +169,13 @@ function mapBookingForEvent(record: BookingRecord): MicrosoftCalendarBookingForE
       : null,
     attendees,
     teamsMeeting: Boolean(record.teams_meeting),
+    catering: {
+      required: Boolean(record.catering_required),
+      type: record.catering_type,
+      pax: record.catering_pax,
+      servingTime: record.catering_serving_time,
+      dietaryNotes: record.catering_dietary_notes,
+    },
   };
 }
 

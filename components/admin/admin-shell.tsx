@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import type { AppNotification } from "@/lib/notifications/app-notifications";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { CompanyBrand } from "@/components/shared/company-logo";
 import { MobileNav } from "@/components/shared/mobile-nav";
@@ -9,16 +10,26 @@ export function AdminShell({
   appName,
   email,
   role,
+  notifications = [],
+  unseenNotificationCount = 0,
   children,
 }: {
   appName: string;
   email?: string | null;
   role?: string | null;
+  notifications?: AppNotification[];
+  unseenNotificationCount?: number;
   children: ReactNode;
 }) {
   return (
     <div className="flex min-h-svh bg-background">
-      <AdminSidebar appName={appName} email={email} role={role} />
+      <AdminSidebar
+        appName={appName}
+        email={email}
+        role={role}
+        notifications={notifications}
+        unseenNotificationCount={unseenNotificationCount}
+      />
       <div className="min-w-0 flex-1">
         <header className="qbook-nav-photo sticky top-0 z-40 border-b border-sidebar-border shadow-sm shadow-foreground/5 print:hidden lg:hidden">
           <div className="relative flex min-h-20 items-center justify-between gap-4 px-4">
@@ -42,6 +53,8 @@ export function AdminShell({
                 role,
                 currentArea: "admin",
                 profileHref: "/admin/profile",
+                notifications,
+                unseenNotificationCount,
               }}
               role={role}
               className="lg:hidden"

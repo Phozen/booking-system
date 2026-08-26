@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
 
 import { requireAdmin } from "@/lib/auth/guards";
+import {
+  getUnseenAppNotificationCount,
+  getUserAppNotifications,
+} from "@/lib/notifications/app-notifications";
 import { getMissingProfileFields } from "@/lib/profile/completion";
 import { getAppSettings } from "@/lib/settings/queries";
+import { createClient } from "@/lib/supabase/server";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { UnseenApprovalToasts } from "@/components/notifications/unseen-approval-toasts";
 import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
 import { SkipLink } from "@/components/shared/skip-link";
 
@@ -11,7 +17,12 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const { user, profile } = await requireAdmin();
-  const settings = await getAppSettings();
+  const supabase = await createClient();
+  const [settings, notifications, unseenNotificationCount] = await Promise.all([
+    getAppSettings(),
+    getUserAppNotifications(supabase, user.id),
+    getUnseenAppNotificationCount(supabase, user.id),
+  ]);
   const profileCompletion = getMissingProfileFields(profile);
 
   return (
@@ -19,8 +30,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       appName={settings.appName}
       email={user.email}
       role={profile.role}
+      notifications={notifications}
+      unseenNotificationCount={unseenNotificationCount}
     >
       <SkipLink />
+      <UnseenApprovalToasts notifications={notifications} />
       {!profileCompletion.isComplete ? (
         <ProfileCompletionPrompt
           missingFields={profileCompletion.missingFields}

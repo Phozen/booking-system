@@ -221,12 +221,19 @@ export function buildN8nCalendarCreatePayload({
     bookingLink: bookingUrl,
   });
 
+  const description = [
+    "Qhazanah Sabah Berhad · QBook",
+    "Facility booking via QBook",
+    "",
+    detailSectionsToText(sections),
+  ].join("\n");
+
   return {
     action: "create",
     bookingId: booking.id,
     bookingReference: booking.id,
     title: booking.title,
-    description: detailSectionsToText(sections),
+    description,
     facilityName: booking.facility?.name ?? "Facility",
     facilityLevel: booking.facility?.level ?? "Level not set",
     facilityType: booking.facility?.type ?? null,

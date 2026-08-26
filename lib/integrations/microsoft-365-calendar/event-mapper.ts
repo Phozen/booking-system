@@ -1,4 +1,7 @@
-import { buildBookingDetailSections, detailSectionsToHtml } from "@/lib/email/booking-details";
+import {
+  buildBookingDetailSections,
+  buildBrandedBookingDetailsHtml,
+} from "@/lib/email/booking-details";
 import type { MicrosoftGraphEventPayload } from "@/lib/integrations/microsoft-365-calendar/types";
 
 export type MicrosoftCalendarBookingForEvent = {
@@ -8,6 +11,7 @@ export type MicrosoftCalendarBookingForEvent = {
   status: string;
   startsAt: string;
   endsAt: string;
+  attendeeCount?: number | null;
   facility: {
     name: string;
     level: string;
@@ -21,6 +25,13 @@ export type MicrosoftCalendarBookingForEvent = {
     name: string | null;
   }[];
   teamsMeeting?: boolean;
+  catering?: {
+    required: boolean;
+    type?: string | null;
+    pax?: number | null;
+    servingTime?: string | null;
+    dietaryNotes?: string | null;
+  };
 };
 
 export function toCalendarLocalDateTime(value: string, timezone: string) {
@@ -95,6 +106,13 @@ export function buildMicrosoftCalendarEventPayload({
   const facilityName = booking.facility?.name ?? "Facility";
   const facilityLevel = booking.facility?.level ?? "Level not set";
   const bookingLink = buildBookingLink(booking.id, appUrl);
+  const cateringRequired = Boolean(
+    booking.catering?.required ||
+      booking.catering?.type ||
+      booking.catering?.pax ||
+      booking.catering?.servingTime ||
+      booking.catering?.dietaryNotes,
+  );
 
   const sections = buildBookingDetailSections({
     facilityName,
@@ -103,18 +121,20 @@ export function buildMicrosoftCalendarEventPayload({
     endsAt: booking.endsAt,
     title: booking.title,
     description: booking.description,
-    attendeeCount: null,
+    attendeeCount: booking.attendeeCount ?? null,
     invitees: booking.attendees.map((a) => ({ name: a.name, email: a.email })),
     departments: null,
     teamsMeeting: booking.teamsMeeting,
-    cateringRequired: false,
+    cateringRequired,
+    cateringType: booking.catering?.type,
+    cateringPax: booking.catering?.pax,
+    cateringServingTime: booking.catering?.servingTime,
+    cateringDietaryNotes: booking.catering?.dietaryNotes,
     requesterName: booking.owner?.fullName,
     requesterEmail: booking.owner?.email,
     status: booking.status,
-    bookingLink: bookingLink,
+    bookingLink: null,
   });
-
-  const bodyLines = [detailSectionsToHtml(sections)].filter(Boolean);
 
   const attendees = buildAttendees(booking);
 
@@ -122,10 +142,12 @@ export function buildMicrosoftCalendarEventPayload({
     subject: `${booking.title} · ${facilityName}`,
     body: {
       contentType: "HTML",
-      content: [
-        `<p style="margin:0 0 12px;font-size:14px;color:#334155;">Facility booking via QBook</p>`,
-        ...bodyLines,
-      ].join("\n"),
+      content: buildBrandedBookingDetailsHtml({
+        sections,
+        appUrl,
+        intro: "Facility booking via QBook",
+        bookingLink,
+      }),
     },
     start: {
       dateTime: toCalendarLocalDateTime(booking.startsAt, timezone),

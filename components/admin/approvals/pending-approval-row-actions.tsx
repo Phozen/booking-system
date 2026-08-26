@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { approveBookingConfirmation } from "@/components/admin/approvals/approve-booking-confirmation";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -159,6 +160,16 @@ export function PendingApprovalRowActions({
   if (variant === "card") {
     return (
       <>
+        <ActionToastEffect
+          state={approveState}
+          successTitle="Booking approved"
+          errorTitle="Approval failed"
+        />
+        <ActionToastEffect
+          state={rejectState}
+          successTitle="Booking rejected"
+          errorTitle="Rejection failed"
+        />
         {feedbackAlert}
         {approveButton}
         {rejectButton}
@@ -170,6 +181,16 @@ export function PendingApprovalRowActions({
   // Table: fixed-width vertical stack — never wraps into a staggered row.
   return (
     <div className="grid w-36 gap-2 justify-self-end">
+      <ActionToastEffect
+        state={approveState}
+        successTitle="Booking approved"
+        errorTitle="Approval failed"
+      />
+      <ActionToastEffect
+        state={rejectState}
+        successTitle="Booking rejected"
+        errorTitle="Rejection failed"
+      />
       {feedbackAlert}
       {approveButton}
       {rejectButton}

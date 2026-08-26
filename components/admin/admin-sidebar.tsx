@@ -8,15 +8,20 @@ import { CompanyBrand } from "@/components/shared/company-logo";
 import { AdminNavigation } from "@/components/shared/nav-links";
 import { UserMenu } from "@/components/shared/user-menu";
 import { buttonVariants } from "@/components/ui/button";
+import type { AppNotification } from "@/lib/notifications/app-notifications";
 
 export function AdminSidebar({
   appName,
   email,
   role,
+  notifications = [],
+  unseenNotificationCount = 0,
 }: {
   appName: string;
   email?: string | null;
   role?: string | null;
+  notifications?: AppNotification[];
+  unseenNotificationCount?: number;
 }) {
   const shellRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -78,6 +83,8 @@ export function AdminSidebar({
             role={role}
             currentArea="admin"
             profileHref="/admin/profile"
+            notifications={notifications}
+            unseenNotificationCount={unseenNotificationCount}
             showModeSwitch={false}
             className="grid gap-3"
             controlsClassName="flex-row flex-wrap items-center justify-start"
