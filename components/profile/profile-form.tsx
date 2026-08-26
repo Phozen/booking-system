@@ -33,7 +33,13 @@ function getFirstError(error?: string[]) {
   return error?.[0];
 }
 
-export function ProfileForm({ profile }: { profile: UserProfile }) {
+export function ProfileForm({
+  profile,
+  profileArea = "employee",
+}: {
+  profile: UserProfile;
+  profileArea?: "employee" | "admin";
+}) {
   const [state, formAction, isPending] = useActionState(
     updateOwnProfileAction,
     profileActionInitialState,
@@ -71,6 +77,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
         noValidate
         onSubmit={validateBeforeSubmit}
       >
+        <input type="hidden" name="profileArea" value={profileArea} />
         <ActionToastEffect
           state={state}
           successTitle="Profile saved"
@@ -85,8 +92,8 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           </p>
         </div>
 
-        {state.status !== "idle" ? (
-          <Alert variant={state.status === "error" ? "destructive" : "success"}>
+        {state.status === "error" ? (
+          <Alert variant="destructive">
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}

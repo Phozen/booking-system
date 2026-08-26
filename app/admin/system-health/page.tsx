@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Activity, AlertTriangle, ArrowLeft, CheckCircle2, Mail, PlugZap } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Mail, PlugZap } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
@@ -9,8 +8,8 @@ import { getMicrosoftCalendarSyncConfig } from "@/lib/integrations/microsoft-365
 import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } from "@/lib/email/smtp-config";
 import { getEmailQueueHealth } from "@/lib/email/health";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -93,13 +92,7 @@ export default async function SystemHealthPage() {
         eyebrow="Super Admin"
         title="System health"
         backAction={
-          <Link
-            href="/admin/dashboard"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to dashboard
-          </Link>
+          <BackLink href="/admin/dashboard">Back to dashboard</BackLink>
         }
       />
 

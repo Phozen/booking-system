@@ -119,10 +119,13 @@ export function buildMicrosoftCalendarEventPayload({
   const attendees = buildAttendees(booking);
 
   return {
-    subject: `Booking: ${booking.title} - ${facilityName}`,
+    subject: `${booking.title} · ${facilityName}`,
     body: {
       contentType: "HTML",
-      content: bodyLines.join("\n"),
+      content: [
+        `<p style="margin:0 0 12px;font-size:14px;color:#334155;">Facility booking via QBook</p>`,
+        ...bodyLines,
+      ].join("\n"),
     },
     start: {
       dateTime: toCalendarLocalDateTime(booking.startsAt, timezone),

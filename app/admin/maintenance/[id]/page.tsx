@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminMaintenanceClosureById } from "@/lib/admin/maintenance/queries";
@@ -8,9 +6,9 @@ import { getAdminFacilities } from "@/lib/facilities/queries";
 import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { MaintenanceForm } from "@/components/admin/maintenance/maintenance-form";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -60,13 +58,7 @@ export default async function EditMaintenanceClosurePage({
           </span>
         }
         backAction={
-          <Link
-            href="/admin/unavailability"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to unavailability
-          </Link>
+          <BackLink href="/admin/unavailability">Back to unavailability</BackLink>
         }
       />
 

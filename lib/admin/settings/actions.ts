@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { createAuditLog } from "@/lib/audit/log";
@@ -14,6 +15,7 @@ import {
   formDataToSettingsValues,
   settingsFormSchema,
 } from "@/lib/admin/settings/validation";
+import { withFlashToast } from "@/lib/ui/flash-toasts";
 
 export type SettingsActionResult = {
   status: "idle" | "error" | "success";
@@ -101,14 +103,11 @@ export async function updateSystemSettingsAction(
   }
 
   revalidatePath("/admin/settings");
+  revalidatePath("/admin/dashboard");
   revalidatePath("/bookings/new");
   revalidatePath("/calendar");
   revalidatePath("/admin/calendar");
   revalidatePath("/admin/bookings");
 
-  return {
-    status: "success",
-    message:
-      "System settings saved. Future bookings will use the updated settings.",
-  };
+  redirect(withFlashToast("/admin/dashboard", "settings-saved"));
 }

@@ -96,7 +96,7 @@ export default async function ProfilePage({
         />
       ) : null}
 
-      <ProfileForm profile={profile} />
+      <ProfileForm profile={profile} profileArea="employee" />
 
       <section
         className="grid gap-4 border-t border-border pt-8"

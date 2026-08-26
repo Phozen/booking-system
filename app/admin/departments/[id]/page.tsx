@@ -1,13 +1,11 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { getAdminDepartmentById } from "@/lib/admin/departments/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DepartmentManager } from "@/components/admin/departments/department-manager";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +21,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ id:
         eyebrow="Super admin area"
         title={department.name}
         backAction={
-          <Link
-            href="/admin/departments"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to departments
-          </Link>
+          <BackLink href="/admin/departments">Back to departments</BackLink>
         }
       />
       <DepartmentManager department={department} />

@@ -1,17 +1,11 @@
 import {
-  formatBookingDate,
-  formatBookingTime,
-  formatBookingWindow,
+  formatBookingStatus,
 } from "@/lib/bookings/format";
-import {
-  formatCateringServingTime,
-  formatCateringType,
-} from "@/lib/bookings/catering/format";
+import type { BookingStatus } from "@/lib/bookings/queries";
 import {
   buildBookingDetailRows,
   formatInviteeList,
   formatPersonLabel,
-  getMeetingTypeLabel,
 } from "@/lib/email/booking-details";
 import type {
   EmailNotificationType,
@@ -110,6 +104,27 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+function formatStatusLabel(status: string | null) {
+  if (!status) {
+    return null;
+  }
+
+  const known: BookingStatus[] = [
+    "pending",
+    "confirmed",
+    "rejected",
+    "cancelled",
+    "completed",
+    "expired",
+  ];
+
+  if (known.includes(status as BookingStatus)) {
+    return formatBookingStatus(status as BookingStatus);
+  }
+
+  return status;
+}
+
 type EmailDetailRow = { label: string; value: string | null };
 type EmailDetailSection = { title: string; rows: EmailDetailRow[] };
 
@@ -123,8 +138,8 @@ function renderSectionRows(rows: EmailDetailRow[]) {
     .map(
       (row) => `
         <tr>
-          <th scope="row" style="width: 38%; padding: 9px 16px 9px 0; color: #475569; font-size: 13px; font-weight: 600; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
-          <td style="padding: 9px 0; color: #0f172a; font-size: 14px; font-weight: 600; line-height: 1.45; vertical-align: top; white-space: pre-wrap;">${escapeHtml(row.value ?? "").replaceAll("\n", "<br>")}</td>
+          <th scope="row" style="width: 36%; padding: 8px 16px 8px 0; color: #64748b; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.45; text-align: left; vertical-align: top;">${escapeHtml(row.label)}</th>
+          <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; line-height: 1.5; vertical-align: top; white-space: pre-wrap;">${escapeHtml(row.value ?? "").replaceAll("\n", "<br>")}</td>
         </tr>
       `,
     )
@@ -149,11 +164,11 @@ function renderHtml({
     .map(
       (section) => `
         <tr>
-          <td style="padding: 0 0 16px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="border: 1px solid #dbe3ef; border-collapse: separate; border-radius: 12px; background-color: #ffffff;">
+          <td style="padding: 0 0 14px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; border-bottom: 1px solid #e2e8f0;">
               <tr>
-                <td style="padding: 20px;">
-                  <h2 style="margin: 0 0 10px; color: #1e293b; font-size: 16px; line-height: 1.35;">${escapeHtml(section.title)}</h2>
+                <td style="padding: 0 0 12px;">
+                  <p style="margin: 0 0 10px; color: #0f172a; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">${escapeHtml(section.title)}</p>
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;" aria-label="${escapeHtml(section.title)}">
                     <tbody>${renderSectionRows(section.rows)}</tbody>
                   </table>
@@ -167,17 +182,45 @@ function renderHtml({
     .join("");
 
   const calendarCta = calendarLink
-    ? `<td style="padding: 0 12px 12px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" bgcolor="#dcfce7" style="border-collapse: separate; border-radius: 8px; background-color: #dcfce7;"><tr><td style="padding: 12px 18px;"><a href="${escapeHtml(calendarLink)}" style="color: #14532d; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View on Calendar</a></td></tr></table></td>`
+    ? `<td style="padding: 0 0 0 10px;"><a href="${escapeHtml(calendarLink)}" style="display: inline-block; padding: 11px 18px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; color: #0f172a; font-size: 14px; font-weight: 600; line-height: 1.2; text-decoration: none;">View calendar</a></td>`
     : "";
 
   return `
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f1f5f9" style="width: 100%; border-collapse: collapse; background-color: #f1f5f9; color: #0f172a; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
-      <tr><td align="center" style="padding: 32px 16px;">
-        <table role="article" aria-roledescription="email" aria-label="QBook booking update" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 640px; border-collapse: collapse;">
-          <tr><td bgcolor="#ecfdf5" style="padding: 24px; border: 1px solid #bbf7d0; border-radius: 14px; background-color: #ecfdf5;"><p style="margin: 0 0 10px; color: #166534; font-size: 13px; font-weight: 700; letter-spacing: .04em;">QBOOK</p><h1 style="margin: 0 0 8px; color: #0f172a; font-size: 24px; line-height: 1.25;">${escapeHtml(title)}</h1><p style="margin: 0; color: #334155; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p></td></tr>
-          <tr><td style="padding: 16px 0 0;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">${detailSections}</table></td></tr>
-          <tr><td style="padding: 8px 0 4px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;"><tr><td style="padding: 0 12px 12px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" bgcolor="#dbeafe" style="border-collapse: separate; border-radius: 8px; background-color: #dbeafe;"><tr><td style="padding: 12px 18px;"><a href="${escapeHtml(link)}" style="color: #0f172a; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;">View booking</a></td></tr></table></td>${calendarCta}</tr></table></td></tr>
-          <tr><td style="padding: 8px 4px 0; color: #475569; font-size: 12px; line-height: 1.5;">QBook &middot; Qhazanah Sabah Berhad</td></tr>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f8fafc" style="width: 100%; border-collapse: collapse; background-color: #f8fafc; color: #0f172a; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; line-height: 1.5;">
+      <tr><td align="center" style="padding: 28px 16px;">
+        <table role="article" aria-roledescription="email" aria-label="QBook booking notice" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 600px; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <tr>
+            <td style="padding: 0; background-color: #0f172a; height: 4px; font-size: 0; line-height: 0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 28px 20px; background-color: #ffffff;">
+              <p style="margin: 0 0 6px; color: #64748b; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;">QBook</p>
+              <h1 style="margin: 0 0 10px; color: #0f172a; font-size: 22px; font-weight: 700; line-height: 1.3;">${escapeHtml(title)}</h1>
+              <p style="margin: 0; color: #475569; font-size: 15px; line-height: 1.55;">${escapeHtml(intro)}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 28px 8px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">${detailSections}</table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 28px 28px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;">
+                <tr>
+                  <td>
+                    <a href="${escapeHtml(link)}" style="display: inline-block; padding: 11px 18px; border-radius: 6px; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 600; line-height: 1.2; text-decoration: none;">Open booking</a>
+                  </td>
+                  ${calendarCta}
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 16px 28px; border-top: 1px solid #e2e8f0; background-color: #f8fafc; color: #64748b; font-size: 12px; line-height: 1.5;">
+              This message was sent by QBook for Qhazanah Sabah Berhad. Please do not reply to this email.
+            </td>
+          </tr>
         </table>
       </td></tr>
     </table>
@@ -209,10 +252,16 @@ function renderText({
     })
     .join("\n\n");
 
-  const calendarText = calendarLink ? `\nView on Calendar: ${calendarLink}` : "";
+  const calendarText = calendarLink ? `\nView calendar: ${calendarLink}` : "";
 
-  return `${title}\n\n${intro}\n\n${details}\n\nView booking details: ${link}${calendarText}`;
+  return `${title}\n\n${intro}\n\n${details}\n\nOpen booking: ${link}${calendarText}\n\nQBook · Qhazanah Sabah Berhad`;
 }
+
+const invitationResponseTypes = new Set<EmailNotificationType>([
+  "booking_invitation",
+  "booking_invitation_accepted",
+  "booking_invitation_declined",
+]);
 
 export function renderEmailTemplate(
   input: EmailTemplateInput,
@@ -224,7 +273,7 @@ export function renderEmailTemplate(
   const startsAt = getStringValue(input.templateData, "startsAt");
   const endsAt = getStringValue(input.templateData, "endsAt");
   const attendeeCount = getDisplayValue(input.templateData, "attendeeCount");
-  const status = getStringValue(input.templateData, "status");
+  const status = formatStatusLabel(getStringValue(input.templateData, "status"));
   const rejectionReason =
     getStringValue(input.templateData, "rejectionReason") ??
     getStringValue(input.templateData, "remarks");
@@ -248,7 +297,6 @@ export function renderEmailTemplate(
     "cateringDietaryNotes",
   );
   const description = getStringValue(input.templateData, "description");
-  const meetingType = getMeetingTypeLabel(input.templateData.teamsMeeting);
   const invitees = getInviteeDisplayValue(input.templateData);
   const departments = getDepartmentDisplayValue(input.templateData);
   const link = getBookingLink(input.appUrl, bookingId);
@@ -256,12 +304,6 @@ export function renderEmailTemplate(
     input.appUrl,
     getStringValue(input.templateData, "calendarEventPath"),
   );
-  const bookingDate = startsAt ? formatBookingDate(startsAt) : null;
-  const startTime = startsAt ? formatBookingTime(startsAt) : null;
-  const endTime = endsAt ? formatBookingTime(endsAt) : null;
-  const bookingTime =
-    startsAt && endsAt ? formatBookingWindow(startsAt, endsAt) : null;
-  const facility = [facilityName, facilityLevel].filter(Boolean).join(" · ") || null;
 
   const detailRows = buildBookingDetailRows({
     facilityName: facilityName,
@@ -290,51 +332,66 @@ export function renderEmailTemplate(
       title: "Booking details",
       rows: detailRows.map((r) => ({ label: r.label, value: r.value })),
     },
-    {
-      title: "People",
+  ];
+
+  if (invitationResponseTypes.has(input.type)) {
+    sections.push({
+      title: "Response",
       rows: [
         { label: "Invitation status", value: invitationStatus },
         { label: "Responded by", value: formatPersonLabel(actorName, actorEmail) },
       ],
-    },
-    {
+    });
+  }
+
+  const noteValue = rejectionReason ?? cancellationReason;
+  if (noteValue) {
+    sections.push({
       title: "Notes",
-      rows: [
-        { label: "Reason", value: rejectionReason ?? cancellationReason },
-      ],
-    },
-  ];
+      rows: [{ label: "Reason", value: noteValue }],
+    });
+  }
 
   const introByType: Record<EmailNotificationType, string> = {
-    booking_confirmation: "Your booking has been confirmed.",
-    booking_approval: "Your booking has been approved.",
-    booking_approval_request: "A booking is waiting for your approval.",
-    booking_rejection: "Your booking has been rejected.",
-    booking_cancellation: "Your booking has been cancelled.",
-    booking_catering_request: "A booking was created with catering requested.",
-    booking_reminder: "This is a reminder for your upcoming booking.",
-    booking_invitation: "You have been invited to a booking.",
-    booking_invitation_accepted: "A booking invitation has been accepted.",
-    booking_invitation_declined: "A booking invitation has been declined.",
+    booking_confirmation:
+      "Your facility booking has been confirmed. Please review the details below.",
+    booking_approval:
+      "Your booking request has been approved and is now confirmed.",
+    booking_approval_request:
+      "A booking request requires your review and approval.",
+    booking_rejection:
+      "Your booking request was not approved. See the reason below if provided.",
+    booking_cancellation:
+      "This booking has been cancelled. The reserved time is no longer held.",
+    booking_catering_request:
+      "Catering has been requested for the booking below. Please arrange service as required.",
+    booking_reminder:
+      "Reminder: you have an upcoming facility booking. Please arrive on time.",
+    booking_invitation:
+      "You have been added as an attendee for the booking below.",
+    booking_invitation_accepted:
+      "An attendee response was recorded for this booking.",
+    booking_invitation_declined:
+      "An attendee declined participation for this booking.",
   };
 
   const headingByType: Record<EmailNotificationType, string> = {
-    booking_confirmation: `Booking confirmed: ${title}`,
-    booking_approval: `Booking approved: ${title}`,
-    booking_approval_request: `Approval needed: ${title}`,
-    booking_rejection: `Booking rejected: ${title}`,
-    booking_cancellation: `Booking cancelled: ${title}`,
-    booking_catering_request: `Catering requested: ${title}`,
-    booking_reminder: `Booking reminder: ${title}`,
-    booking_invitation: `Booking invitation: ${title}`,
-    booking_invitation_accepted: `Invitation accepted: ${title}`,
-    booking_invitation_declined: `Invitation declined: ${title}`,
+    booking_confirmation: `Booking confirmed — ${title}`,
+    booking_approval: `Booking approved — ${title}`,
+    booking_approval_request: `Approval required — ${title}`,
+    booking_rejection: `Booking not approved — ${title}`,
+    booking_cancellation: `Booking cancelled — ${title}`,
+    booking_catering_request: `Catering request — ${title}`,
+    booking_reminder: `Booking reminder — ${title}`,
+    booking_invitation: `Attendee notice — ${title}`,
+    booking_invitation_accepted: `Attendee accepted — ${title}`,
+    booking_invitation_declined: `Attendee declined — ${title}`,
   };
   const heading = headingByType[input.type];
   const intro = input.body || introByType[input.type];
 
   return {
-    subject: input.subject || heading,
+    subject: input.subject || heading.replace(" — ", ": "),
     html: renderHtml({ title: heading, intro, sections, link, calendarLink }),
     text: renderText({ title: heading, intro, sections, link, calendarLink }),
   };

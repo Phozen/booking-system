@@ -378,18 +378,18 @@ describe("booking confirmation email template", () => {
     expect(rendered.text).toContain("Time:");
     expect(rendered.text).not.toContain("Start time:");
     expect(rendered.text).not.toContain("End time:");
-    expect(rendered.text).toContain("How many people?: 4");
-    expect(rendered.text).toContain("Status: confirmed");
+    expect(rendered.text).toContain("Headcount: 4");
+    expect(rendered.text).toContain("Status: Confirmed");
     expect(rendered.text).toContain(
       `https://booking.example.com/bookings/${confirmedBooking.id}`,
     );
     expect(rendered.html).toContain('role="article"');
-    expect(rendered.html).toContain("View booking");
-    expect(rendered.html).toContain("How many people?");
+    expect(rendered.html).toContain("Open booking");
+    expect(rendered.html).toContain("Headcount");
     expect(rendered.html).toContain("4");
     expect(rendered.html).toContain('role="presentation"');
-    expect(rendered.html).toContain('bgcolor="#f1f5f9"');
-    expect(rendered.html).not.toContain("; color: #ffffff;");
+    expect(rendered.html).toContain('bgcolor="#f8fafc"');
+    expect(rendered.html).toContain("Open booking");
   });
 
   it("renders purpose, meeting type, invited people, and requester email when present", () => {
@@ -422,8 +422,8 @@ describe("booking confirmation email template", () => {
     expect(rendered.text).toContain("Description: Quarterly planning\nBring last quarter notes");
     expect(rendered.text).toContain("Room: Board Room, Level 3");
     expect(rendered.text).toContain("Meeting type: Teams meeting");
-    expect(rendered.text).toContain("Invited staff: Guest User (guest@example.com)");
-    expect(rendered.text).toContain("Requester: Employee User (employee@example.com)");
+    expect(rendered.text).toContain("Attendees: Guest User (guest@example.com)");
+    expect(rendered.text).toContain("Booked by: Employee User (employee@example.com)");
     expect(rendered.html).toContain("Quarterly planning");
     expect(rendered.html).toContain("Bring last quarter notes");
   });
@@ -443,7 +443,7 @@ describe("booking confirmation email template", () => {
 
     expect(rendered.text).toContain("Description: None");
     expect(rendered.text).toContain("Meeting type: Not provided");
-    expect(rendered.text).toContain("Invited staff: None");
+    expect(rendered.text).toContain("Attendees: None");
   });
 
   it("adds the protected Outlook calendar action only when the queue provides it", () => {
@@ -459,7 +459,7 @@ describe("booking confirmation email template", () => {
       },
     });
 
-    expect(rendered.html).toContain("View on Calendar");
+    expect(rendered.html).toContain("View calendar");
     expect(rendered.text).toContain(
       `https://booking.example.com/bookings/${confirmedBooking.id}/calendar`,
     );
@@ -475,7 +475,7 @@ describe("booking confirmation email template", () => {
       templateData: { bookingId: confirmedBooking.id },
     });
 
-    expect(rendered.html).not.toContain("View on Calendar");
+    expect(rendered.html).not.toContain("View calendar");
   });
 
   it("renders an immutable department snapshot when it was queued with the booking email", () => {
@@ -523,7 +523,7 @@ describe("booking confirmation email template", () => {
     });
 
     expect(rendered.subject).toBe("Catering requested: Planning Session");
-    expect(rendered.text).toContain("Requester: Employee User");
+    expect(rendered.text).toContain("Booked by: Employee User");
     expect(rendered.text).toContain(
       "Catering type: VIP / management meeting catering",
     );
@@ -553,7 +553,7 @@ describe("booking confirmation email template", () => {
 
     expect(rendered.subject).toBe("Approval needed: Planning Session");
     expect(rendered.text).toContain("A booking is waiting for your approval.");
-    expect(rendered.text).toContain("Status: pending");
-    expect(rendered.text).toContain("Requester: Employee User (employee@example.com)");
+    expect(rendered.text).toContain("Status: Pending Approval");
+    expect(rendered.text).toContain("Booked by: Employee User (employee@example.com)");
   });
 });

@@ -199,20 +199,22 @@ export function MobileNav({
         aria-hidden={!open}
         tabIndex={-1}
         className={cn(
-          "qbook-nav-photo fixed end-4 z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] overflow-x-hidden overflow-y-auto rounded-lg border border-border p-3 shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
+          "fixed end-4 z-50 mt-2 flex w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] flex-col overflow-hidden rounded-lg border border-border bg-card p-0 shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
           variant === "admin" ? "top-20" : "top-14 sm:top-16",
           open
             ? "visible translate-y-0 scale-100 opacity-100"
             : "invisible -translate-y-2 scale-95 opacity-0 pointer-events-none",
         )}
       >
-        {variant === "admin" ? (
-          <AdminNavigation compact onNavigate={close} role={role} />
-        ) : (
-          <EmployeeNavigation compact onNavigate={close} />
-        )}
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3">
+          {variant === "admin" ? (
+            <AdminNavigation compact onNavigate={close} role={role} />
+          ) : (
+            <EmployeeNavigation compact onNavigate={close} />
+          )}
+        </div>
         {userMenu ? (
-          <div className="mt-4 border-t pt-3">
+          <div className="shrink-0 border-t border-border bg-card p-3">
             <UserMenu
               email={userMenu.email}
               role={userMenu.role}
@@ -221,7 +223,7 @@ export function MobileNav({
               notifications={userMenu.notifications}
               unseenNotificationCount={userMenu.unseenNotificationCount}
               className="grid gap-3"
-              controlsClassName="flex-row flex-wrap items-center justify-start"
+              controlsClassName="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center [&>a:first-of-type]:w-full"
               onNavigate={close}
             />
           </div>

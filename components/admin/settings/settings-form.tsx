@@ -140,8 +140,8 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
         successTitle="Settings saved"
         errorTitle="Settings not saved"
       />
-      {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"}>
+      {state.status === "error" ? (
+        <Alert variant="destructive">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

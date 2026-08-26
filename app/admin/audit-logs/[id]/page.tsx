@@ -1,13 +1,11 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { requireActiveReportAdmin } from "@/lib/admin/reports/actions";
 import { getAdminAuditLogById } from "@/lib/admin/audit-logs/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AuditLogDetail } from "@/components/admin/audit-logs/audit-log-detail";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +29,7 @@ export default async function AdminAuditLogDetailPage({
         eyebrow="Admin area"
         title="Audit log detail"
         backAction={
-          <Link
-            href="/admin/audit-logs"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to audit logs
-          </Link>
+          <BackLink href="/admin/audit-logs">Back to audit logs</BackLink>
         }
       />
 

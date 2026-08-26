@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getEquipmentItems } from "@/lib/admin/equipment/queries";
@@ -12,8 +10,8 @@ import { FacilityEquipmentManager } from "@/components/admin/facilities/facility
 import { FacilityArchiveAction } from "@/components/admin/facilities/facility-archive-action";
 import { FacilityDeleteAction } from "@/components/admin/facilities/facility-delete-action";
 import { FacilityPhotoManager } from "@/components/admin/facilities/facility-photo-manager";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -40,13 +38,7 @@ export default async function EditFacilityPage({
         eyebrow="Admin area"
         title={`Edit ${facility.name}`}
         backAction={
-          <Link
-            href="/admin/facilities"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to facilities
-          </Link>
+          <BackLink href="/admin/facilities">Back to facilities</BackLink>
         }
       />
 

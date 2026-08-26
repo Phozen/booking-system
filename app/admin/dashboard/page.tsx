@@ -7,6 +7,7 @@ import {
   Settings,
   Wrench,
 } from "lucide-react";
+import { Suspense } from "react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { isSuperAdminRole } from "@/lib/auth/profile";
@@ -19,6 +20,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AdminDashboardGuide } from "@/components/admin/admin-dashboard-guide";
+import { FlashToast } from "@/components/shared/flash-toast";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -75,6 +77,9 @@ export default async function AdminDashboardPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+      <Suspense fallback={null}>
+        <FlashToast />
+      </Suspense>
       <PageHeader
         eyebrow="Admin operations"
         title="Room booking control"

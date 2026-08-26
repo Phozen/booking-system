@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, LockKeyhole } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getMissingProfileFields } from "@/lib/profile/completion";
@@ -9,6 +9,7 @@ import {
   getAppSettings,
 } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { ProfileDetail } from "@/components/profile/profile-detail";
@@ -35,13 +36,7 @@ export default async function AdminProfilePage() {
           title="Your account profile is not ready"
           description="Contact an administrator."
           backAction={
-            <Link
-              href="/admin/dashboard"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
-              <ArrowLeft data-icon="inline-start" />
-              Back to dashboard
-            </Link>
+            <BackLink href="/admin/dashboard">Back to dashboard</BackLink>
           }
         />
         <ErrorState
@@ -72,13 +67,7 @@ export default async function AdminProfilePage() {
         eyebrow="Admin account"
         title="Your profile"
         backAction={
-          <Link
-            href="/admin/dashboard"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to dashboard
-          </Link>
+          <BackLink href="/admin/dashboard">Back to dashboard</BackLink>
         }
       />
 
@@ -90,7 +79,7 @@ export default async function AdminProfilePage() {
               missingFields={profileCompletion.missingFields}
             />
           ) : null}
-          <ProfileForm profile={profile} />
+          <ProfileForm profile={profile} profileArea="admin" />
           <Alert variant="info">
             <LockKeyhole className="size-4" aria-hidden="true" />
             <AlertDescription>

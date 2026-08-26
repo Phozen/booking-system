@@ -35,8 +35,8 @@ export function NotificationPreferencesForm({
         errorTitle="Preferences not saved"
       />
 
-      {state.status !== "idle" ? (
-        <Alert variant={state.status === "error" ? "destructive" : "success"}>
+      {state.status === "error" ? (
+        <Alert variant="destructive">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

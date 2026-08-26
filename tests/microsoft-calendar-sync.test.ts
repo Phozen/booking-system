@@ -223,7 +223,7 @@ describe("Microsoft 365 calendar sync helpers", () => {
       },
     });
 
-    expect(payload.subject).toBe("Booking: Planning <Session> - Meeting Room 1");
+    expect(payload.subject).toBe("Planning <Session> · Meeting Room 1");
     expect(payload.location.displayName).toBe("Meeting Room 1, Level 5");
     expect(payload.start).toEqual({
       dateTime: "2026-05-14T10:00:00",

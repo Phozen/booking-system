@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { createAuditLogSafely } from "@/lib/audit/log";
 import { requireUser } from "@/lib/auth/guards";
@@ -13,6 +14,7 @@ import {
 import type { ProfileActionResult } from "@/lib/profile/action-state";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { withFlashToast } from "@/lib/ui/flash-toasts";
 
 export async function updateOwnProfileAction(
   _previousState: ProfileActionResult,
@@ -90,9 +92,13 @@ export async function updateOwnProfileAction(
   revalidatePath("/admin/profile");
   revalidatePath("/", "layout");
   revalidatePath("/admin", "layout");
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/dashboard");
 
-  return {
-    status: "success",
-    message: "Profile updated. Your contact details are now saved.",
-  };
+  const homePath =
+    String(formData.get("profileArea") ?? "").trim() === "admin"
+      ? "/admin/dashboard"
+      : "/dashboard";
+
+  redirect(withFlashToast(homePath, "profile-saved"));
 }

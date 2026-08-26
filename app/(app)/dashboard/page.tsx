@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarPlus, ChevronRight } from "lucide-react";
+import { Suspense } from "react";
 
 import { requireUser } from "@/lib/auth/guards";
 import {
@@ -12,6 +13,7 @@ import { employeeCopy } from "@/lib/employee/plain-language";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { employeeFeatureStyles } from "@/components/shared/employee-feature-styles";
+import { FlashToast } from "@/components/shared/flash-toast";
 import { HomeOnboarding } from "@/components/shared/home-onboarding";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -28,6 +30,9 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
+      <Suspense fallback={null}>
+        <FlashToast />
+      </Suspense>
       <PageHeader
         eyebrow="Room booking"
         title={greeting}

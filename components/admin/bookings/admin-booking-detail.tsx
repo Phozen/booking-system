@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Mail, Printer } from "lucide-react";
+import { Mail, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -25,6 +25,7 @@ import { InvitationList } from "@/components/bookings/invitations/invitation-lis
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
 import { ResendBookingConfirmationButton } from "@/components/admin/bookings/resend-booking-confirmation-button";
 import { approveBookingConfirmation } from "@/components/admin/approvals/approve-booking-confirmation";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -61,13 +62,7 @@ export function AdminBookingDetail({
         title={booking.title}
         description={<BookingStatusBadge status={booking.status} />}
         backAction={
-          <Link
-            href="/admin/bookings"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to bookings
-          </Link>
+          <BackLink href="/admin/bookings">Back to bookings</BackLink>
         }
         secondaryAction={
           booking.status === "confirmed" ? (

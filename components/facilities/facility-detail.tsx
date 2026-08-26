@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowLeft,
   CalendarPlus,
   CheckCircle2,
   ShieldCheck,
@@ -19,6 +18,7 @@ import {
   type AppSettings,
 } from "@/lib/settings/app-settings";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
+import { BackLink } from "@/components/shared/back-link";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { FacilityAvailabilityTimeline } from "@/components/facilities/facility-availability-timeline";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,13 +47,7 @@ export function FacilityDetail({
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <div>
-        <Link
-          href="/facilities"
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-        >
-          <ArrowLeft data-icon="inline-start" />
-          Back to {employeeCopy.rooms}
-        </Link>
+        <BackLink href="/facilities">Back to {employeeCopy.rooms}</BackLink>
       </div>
 
       <header className="qbook-reveal grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">

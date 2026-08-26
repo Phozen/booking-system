@@ -123,7 +123,7 @@ export function buildBookingDetailRows(input: BookingDetailInput): DetailRow[] {
     { label: "Room", value: facility || "Not provided" },
     { label: "Date", value: date || "Not provided" },
     { label: "Time", value: time || "Not provided" },
-    { label: "Meeting name", value: input.title?.trim() || "Not provided" },
+    { label: "Purpose", value: input.title?.trim() || "Not provided" },
     { label: "Description", value: input.description?.trim() || "None" },
     { label: "Meeting type", value: meetingType || "Not provided" },
   ];
@@ -134,25 +134,25 @@ export function buildBookingDetailRows(input: BookingDetailInput): DetailRow[] {
 
   const peopleRows: DetailRow[] = [
     {
-      label: "How many people?",
+      label: "Headcount",
       value:
         input.attendeeCount != null && input.attendeeCount !== ""
           ? String(input.attendeeCount)
           : "Not provided",
     },
-    { label: "Invited staff", value: inviteeDisplay || "None" },
+    { label: "Attendees", value: inviteeDisplay || "None" },
     { label: "Departments", value: departmentDisplay || "None" },
   ];
 
   if (input.requesterName || input.requesterEmail) {
     peopleRows.push({
-      label: "Requester",
+      label: "Booked by",
       value: formatPersonLabel(input.requesterName, input.requesterEmail) ?? "Not provided",
     });
   }
 
   const cateringRows: DetailRow[] = [
-    { label: "Food and drinks", value: cateringLabel },
+    { label: "Catering", value: cateringLabel },
   ];
 
   if (input.cateringRequired) {
@@ -234,36 +234,36 @@ export function buildBookingDetailSections(input: BookingDetailInput): DetailSec
     { label: "Room", value: facility || "Not provided" },
     { label: "Date", value: date || "Not provided" },
     { label: "Time", value: time || "Not provided" },
-    { label: "Meeting name", value: input.title?.trim() || "Not provided" },
+    { label: "Purpose", value: input.title?.trim() || "Not provided" },
     { label: "Description", value: input.description?.trim() || "None" },
     { label: "Meeting type", value: meetingType || "Not provided" },
   ];
   if (input.status) {
     bookingRows.push({ label: "Status", value: input.status });
   }
-  sections.push({ heading: "Booking Details", rows: bookingRows });
+  sections.push({ heading: "Booking", rows: bookingRows });
 
   const peopleRows: DetailRow[] = [
     {
-      label: "How many people?",
+      label: "Headcount",
       value:
         input.attendeeCount != null && input.attendeeCount !== ""
           ? String(input.attendeeCount)
           : "Not provided",
     },
-    { label: "Invited staff", value: inviteeDisplay || "None" },
+    { label: "Attendees", value: inviteeDisplay || "None" },
     { label: "Departments", value: departmentDisplay || "None" },
   ];
   if (input.requesterName || input.requesterEmail) {
     peopleRows.push({
-      label: "Requester",
+      label: "Booked by",
       value: formatPersonLabel(input.requesterName, input.requesterEmail) ?? "Not provided",
     });
   }
-  sections.push({ heading: "Attendees", rows: peopleRows });
+  sections.push({ heading: "People", rows: peopleRows });
 
   const cateringRows: DetailRow[] = [
-    { label: "Food and drinks", value: cateringLabel },
+    { label: "Catering", value: cateringLabel },
   ];
   if (input.cateringRequired) {
     cateringRows.push(
@@ -280,7 +280,7 @@ export function buildBookingDetailSections(input: BookingDetailInput): DetailSec
 
   if (input.bookingLink) {
     sections.push({
-      heading: "Links",
+      heading: "Reference",
       rows: [{ label: "Booking link", value: input.bookingLink }],
     });
   }

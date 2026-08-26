@@ -1,10 +1,7 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { requireAdmin } from "@/lib/auth/guards";
 import { FacilityForm } from "@/components/admin/facilities/facility-form";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +14,7 @@ export default async function NewFacilityPage() {
         eyebrow="Admin area"
         title="New facility"
         backAction={
-          <Link
-            href="/admin/facilities"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to facilities
-          </Link>
+          <BackLink href="/admin/facilities">Back to facilities</BackLink>
         }
       />
 

@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { requireAdmin } from "@/lib/auth/guards";
 import { getActiveBookingUserOptions } from "@/lib/admin/bookings/queries";
 import { getBookableFacilities } from "@/lib/bookings/queries";
@@ -8,8 +5,8 @@ import { getAppSettings } from "@/lib/settings/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getActiveDepartments } from "@/lib/departments/queries";
 import { AdminCreateBookingForm } from "@/components/admin/bookings/admin-create-booking-form";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +34,7 @@ export default async function NewAdminBookingPage({
         title="Create booking for user"
         description="Create an operational booking on behalf of an active internal user. Availability and approval rules still apply."
         backAction={
-          <Link
-            href="/admin/bookings"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to bookings
-          </Link>
+          <BackLink href="/admin/bookings">Back to bookings</BackLink>
         }
       />
 

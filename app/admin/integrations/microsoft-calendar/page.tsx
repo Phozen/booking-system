@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { formatBookingDateTime } from "@/lib/bookings/format";
@@ -11,6 +10,7 @@ import { RetryMicrosoftCalendarSyncForm } from "@/components/admin/integrations/
 import { AdminTableShell } from "@/components/admin/shared/admin-table-shell";
 import { MobileRecordCard } from "@/components/admin/shared/mobile-record-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -59,13 +59,7 @@ export default async function AdminMicrosoftCalendarIntegrationPage() {
         eyebrow="Super admin area"
         title="Microsoft 365 Calendar"
         secondaryAction={
-          <Link
-            href="/admin/dashboard"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to dashboard
-          </Link>
+          <BackLink href="/admin/dashboard">Back to dashboard</BackLink>
         }
       />
 

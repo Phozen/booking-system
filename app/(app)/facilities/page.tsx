@@ -9,6 +9,7 @@ import {
 } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { FacilityCard } from "@/components/facilities/facility-card";
+import { BackLink } from "@/components/shared/back-link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,12 +48,7 @@ export default async function FacilitiesPage() {
           title="No rooms are available right now"
           description={`Rooms may be closed or temporarily unavailable. ${formatContactAdministratorMessage(settings)}`}
           action={
-            <Link
-              href="/dashboard"
-              className={buttonVariants({ variant: "outline" })}
-            >
-              Back to home
-            </Link>
+            <BackLink href="/dashboard">Back to home</BackLink>
           }
         />
       )}

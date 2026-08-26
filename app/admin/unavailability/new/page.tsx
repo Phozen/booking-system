@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Building2, Wrench } from "lucide-react";
+import { Building2, Wrench } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminFacilities } from "@/lib/facilities/queries";
@@ -7,8 +7,8 @@ import { getAppSettings } from "@/lib/settings/queries";
 import { createClient } from "@/lib/supabase/server";
 import { BlockedPeriodForm } from "@/components/admin/blocked-periods/blocked-period-form";
 import { MaintenanceForm } from "@/components/admin/maintenance/maintenance-form";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -35,13 +35,7 @@ export default async function NewUnavailabilityPage({
         eyebrow="Admin area"
         title="Add unavailable time"
         backAction={
-          <Link
-            href="/admin/unavailability"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to unavailability
-          </Link>
+          <BackLink href="/admin/unavailability">Back to unavailability</BackLink>
         }
       />
 

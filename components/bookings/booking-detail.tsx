@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer } from "lucide-react";
+import { CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -16,6 +16,7 @@ import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { CateringDetailsCard } from "@/components/bookings/catering-details-card";
 import { CancelBookingForm } from "@/components/bookings/cancel-booking-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
+import { BackLink } from "@/components/shared/back-link";
 import { StaticToastEffect } from "@/components/shared/static-toast-effect";
 import { PageHeader } from "@/components/shared/page-header";
 import { RouteLoadingLink } from "@/components/shared/route-loading-link";
@@ -179,7 +180,7 @@ export function BookingDetail({
           </span>
         }
         backAction={
-          <Link
+          <BackLink
             href={
               isOwnerView
                 ? `/my-bookings?highlight=${booking.id}`
@@ -187,15 +188,13 @@ export function BookingDetail({
                   ? "/invitations"
                   : "/my-bookings"
             }
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            <ArrowLeft data-icon="inline-start" />
             {isOwnerView
               ? "Back to my bookings"
               : INTERNAL_INVITES_ENABLED
                 ? "Back to invites"
                 : "Back to my bookings"}
-          </Link>
+          </BackLink>
         }
         primaryAction={primaryAction}
         secondaryAction={

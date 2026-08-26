@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { CompanyBrand } from "@/components/shared/company-logo";
@@ -9,14 +8,16 @@ import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import {
   formatBookingDate,
   formatBookingDateTime,
+  formatBookingStatus,
   formatBookingWindow,
 } from "@/lib/bookings/format";
 import {
   formatCateringRequired,
   formatCateringServingTime,
 } from "@/lib/bookings/catering/format";
+import { getMeetingTypeLabel } from "@/lib/email/booking-details";
 import { formatFacilityType } from "@/lib/facilities/format";
-import { buttonVariants } from "@/components/ui/button";
+import { BackLink } from "@/components/shared/back-link";
 import { PrintButton } from "@/components/bookings/print/print-button";
 import { SignatureBlock } from "@/components/bookings/print/signature-block";
 
@@ -84,6 +85,10 @@ export function BookingPrintForm({
   companyName: string;
   backHref: string;
 }) {
+  const meetingType = getMeetingTypeLabel(
+    "teamsMeeting" in booking ? booking.teamsMeeting : null,
+  );
+
   return (
     <main className="min-h-screen bg-background px-4 py-6 text-foreground print:bg-white print:px-0 print:py-0 print:text-zinc-950">
       <style>{`
@@ -95,11 +100,9 @@ export function BookingPrintForm({
       `}</style>
 
       <div className="print-hidden mx-auto mb-6 flex max-w-3xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="qbook-type-meta">Booking approval form</p>
+        <p className="qbook-type-meta">Facility booking approval form</p>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Link href={backHref} className={buttonVariants({ variant: "ghost" })}>
-            Back to booking
-          </Link>
+          <BackLink href={backHref}>Back to booking</BackLink>
           <PrintButton />
         </div>
       </div>
@@ -114,32 +117,33 @@ export function BookingPrintForm({
             />
             <div className="text-left sm:text-right">
               <h1 className="qbook-type-title text-xl sm:text-2xl">
-                Booking Approval Form
+                Facility Booking Approval Form
               </h1>
-              <p className="qbook-type-meta mt-2">
-                {companyName}
-              </p>
+              <p className="qbook-type-meta mt-2">{companyName}</p>
               <p className="qbook-type-meta mt-1 qbook-type-tabular">
-                Ref: {booking.id}
+                Reference: {booking.id}
               </p>
               <p className="qbook-type-meta mt-1">
-                Generated {formatBookingDateTime(new Date().toISOString())}
+                Status: {formatBookingStatus(booking.status)}
+              </p>
+              <p className="qbook-type-meta mt-1">
+                Printed {formatBookingDateTime(new Date().toISOString())}
               </p>
               <p className="sr-only">{appName}</p>
             </div>
           </div>
         </header>
 
-        <Section title="Requester details">
+        <Section title="Requester">
           <dl className="grid gap-4 sm:grid-cols-2">
-            <PrintField label="Requested by" value={requester.fullName} />
+            <PrintField label="Name" value={requester.fullName} />
             <PrintField label="Email" value={requester.email} />
             <PrintField label="Department" value={requester.department} />
             <PrintField label="Phone" value={requester.phone} />
           </dl>
         </Section>
 
-        <Section title="Booking details">
+        <Section title="Booking">
           <dl className="grid gap-4 sm:grid-cols-2">
             <PrintField label="Purpose / title" value={booking.title} />
             <PrintField
@@ -164,8 +168,12 @@ export function BookingPrintForm({
               value={formatBookingWindow(booking.startsAt, booking.endsAt)}
             />
             <PrintField
-              label="Attendee count"
+              label="Headcount"
               value={booking.attendeeCount ?? "Not provided"}
+            />
+            <PrintField
+              label="Meeting type"
+              value={meetingType ?? "Not provided"}
             />
             <div className="sm:col-span-2">
               <PrintField
@@ -176,13 +184,13 @@ export function BookingPrintForm({
           </dl>
         </Section>
 
-        <Section title="Involved departments">
+        <Section title="Departments notified">
           {booking.departments.length > 0 ? (
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-border print:border-zinc-300">
                   <th className="py-2 pr-3 font-semibold">Department</th>
-                  <th className="py-2 pr-3 font-semibold">Notification mailbox</th>
+                  <th className="py-2 pr-3 font-semibold">Mailbox</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,9 +208,9 @@ export function BookingPrintForm({
         </Section>
 
         {INTERNAL_INVITES_ENABLED ? (
-          <Section title="Invited attendees">
+          <Section title="Attendees">
             <p className="qbook-type-meta mb-4 qbook-type-tabular">
-              Total attendees: {invitations.length}
+              Listed attendees: {invitations.length}
             </p>
             {invitations.length > 0 ? (
               <table className="w-full border-collapse text-left text-sm">
@@ -226,12 +234,12 @@ export function BookingPrintForm({
                 </tbody>
               </table>
             ) : (
-              <p className="qbook-type-meta">No invited attendees.</p>
+              <p className="qbook-type-meta">No attendees were added.</p>
             )}
           </Section>
         ) : null}
 
-        <Section title="Food & drinks / catering">
+        <Section title="Catering">
           <dl className="grid gap-4 sm:grid-cols-2">
             <PrintField
               label="Required"
@@ -275,10 +283,10 @@ export function BookingPrintForm({
         </Section>
 
         <section className="grid gap-4">
-          <h2 className="qbook-type-section">Approval / signature sections</h2>
-          <SignatureBlock title="Requested by" />
-          <SignatureBlock title="Superior / HOD / Boss approval" />
-          <SignatureBlock title="Admin / Facilities approval" />
+          <h2 className="qbook-type-section">Approvals</h2>
+          <SignatureBlock title="Requester" />
+          <SignatureBlock title="Department / superior approval" />
+          <SignatureBlock title="Facilities / admin approval" />
         </section>
       </article>
     </main>

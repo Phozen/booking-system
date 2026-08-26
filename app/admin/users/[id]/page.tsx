@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import {
@@ -11,8 +9,8 @@ import { isLastActiveSuperAdmin } from "@/lib/admin/users/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UserDetail } from "@/components/admin/users/user-detail";
 import { UserEditForm } from "@/components/admin/users/user-edit-form";
+import { BackLink } from "@/components/shared/back-link";
 import { PageHeader } from "@/components/shared/page-header";
-import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +43,7 @@ export default async function AdminUserDetailPage({
           </span>
         }
         backAction={
-          <Link
-            href="/admin/users"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to users
-          </Link>
+          <BackLink href="/admin/users">Back to users</BackLink>
         }
       />
 

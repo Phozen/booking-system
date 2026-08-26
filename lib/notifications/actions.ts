@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
+import { withFlashToast } from "@/lib/ui/flash-toasts";
 
 export type NotificationPreferencesActionResult = {
   status: "idle" | "success" | "error";
@@ -52,11 +54,9 @@ export async function updateNotificationPreferencesAction(
 
   revalidatePath("/profile");
   revalidatePath("/notification-preferences");
+  revalidatePath("/dashboard");
 
-  return {
-    status: "success",
-    message: "Notification preferences saved.",
-  };
+  redirect(withFlashToast("/dashboard", "preferences-saved"));
 }
 
 export async function markAllNotificationsSeenAction() {
