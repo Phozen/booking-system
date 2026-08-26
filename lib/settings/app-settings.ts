@@ -45,7 +45,7 @@ export const baseDefaultAppSettings: AppSettings = {
   defaultTimezone: "Asia/Kuala_Lumpur",
   bookingWindowStart: "08:00",
   bookingWindowEnd: "19:00",
-  reminderOffsetsMinutes: [1440, 60],
+  reminderOffsetsMinutes: [60],
   emailRecipients: {
     bookingOwnerConfirmations: ["employee", "admin", "super_admin"],
     companyBookingConfirmations: [],
