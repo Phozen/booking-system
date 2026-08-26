@@ -23,6 +23,7 @@ import { CateringDetailsCard } from "@/components/bookings/catering-details-card
 import { CateringEditForm } from "@/components/bookings/catering-edit-form";
 import { InvitationList } from "@/components/bookings/invitations/invitation-list";
 import { AdminBookingActionForm } from "@/components/admin/bookings/admin-booking-action-form";
+import { ResendBookingConfirmationButton } from "@/components/admin/bookings/resend-booking-confirmation-button";
 import { approveBookingConfirmation } from "@/components/admin/approvals/approve-booking-confirmation";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -64,19 +65,19 @@ export function AdminBookingDetail({
         eyebrow="Admin booking detail"
         title={booking.title}
         description={<BookingStatusBadge status={booking.status} />}
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Bookings", href: "/admin/bookings" },
-          { label: booking.title },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/bookings"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to bookings
           </Link>
+        }
+        secondaryAction={
+          booking.status === "confirmed" ? (
+            <ResendBookingConfirmationButton bookingId={booking.id} />
+          ) : null
         }
         primaryAction={
           <Link

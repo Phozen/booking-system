@@ -1,4 +1,5 @@
-import { Activity, AlertTriangle, CheckCircle2, Mail, PlugZap } from "lucide-react";
+import Link from "next/link";
+import { Activity, AlertTriangle, ArrowLeft, CheckCircle2, Mail, PlugZap } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { requireSuperAdmin } from "@/lib/auth/guards";
@@ -9,6 +10,7 @@ import { normalizeEmailProviderName, getSmtpConfigFromEnv, validateSmtpConfig } 
 import { getEmailQueueHealth } from "@/lib/email/health";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -90,10 +92,15 @@ export default async function SystemHealthPage() {
       <PageHeader
         eyebrow="Super Admin"
         title="System health"
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "System health" },
-        ]}
+        backAction={
+          <Link
+            href="/admin/dashboard"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to dashboard
+          </Link>
+        }
       />
 
       <div className="grid gap-5 lg:grid-cols-2">

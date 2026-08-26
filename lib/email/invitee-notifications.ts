@@ -114,13 +114,16 @@ async function loadInviteeRecipients({
 /**
  * Queue booking_confirmation emails to active invitees on a confirmed booking.
  * Pass inviteeUserIds to limit to newly added people; otherwise all pending/accepted invitees.
+ * Pass resendKey to force a new queue row (admin resend).
  */
 export async function queueInviteeBookingConfirmations({
   bookingId,
   inviteeUserIds,
+  resendKey,
 }: {
   bookingId: string;
   inviteeUserIds?: string[];
+  resendKey?: string;
 }) {
   try {
     const booking = await loadConfirmedBooking(bookingId);
@@ -157,14 +160,16 @@ export async function queueInviteeBookingConfirmations({
     const supabase = createAdminClient();
 
     for (const recipient of recipients) {
-      await createAppNotification({
-        userId: recipient.id,
-        type: "booking_confirmation",
-        title: `Booking confirmed: ${booking.title}`,
-        body: `You are invited to ${booking.title} at ${facilityName} on ${bookingWindow}.`,
-        href: `/bookings/${booking.id}`,
-        relatedBookingId: booking.id,
-      });
+      if (!resendKey) {
+        await createAppNotification({
+          userId: recipient.id,
+          type: "booking_confirmation",
+          title: `Booking confirmed: ${booking.title}`,
+          body: `You are invited to ${booking.title} at ${facilityName} on ${bookingWindow}.`,
+          href: `/bookings/${booking.id}`,
+          relatedBookingId: booking.id,
+        });
+      }
 
       const { data, error } = await supabase
         .from("email_notifications")
@@ -189,7 +194,9 @@ export async function queueInviteeBookingConfirmations({
             recipientRole: "invitee",
           },
           related_booking_id: booking.id,
-          idempotency_key: `booking-confirmation:${booking.id}:${recipient.email}`,
+          idempotency_key: resendKey
+            ? `booking-confirmation-resend:${booking.id}:${recipient.email}:${resendKey}`
+            : `booking-confirmation:${booking.id}:${recipient.email}`,
         })
         .select("id")
         .maybeSingle();

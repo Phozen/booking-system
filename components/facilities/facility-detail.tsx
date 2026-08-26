@@ -18,7 +18,6 @@ import {
   formatEffectiveApprovalLabel,
   type AppSettings,
 } from "@/lib/settings/app-settings";
-import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { FacilityAvailabilityTimeline } from "@/components/facilities/facility-availability-timeline";
@@ -47,19 +46,13 @@ export function FacilityDetail({
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <div className="grid gap-3">
-        <Breadcrumbs
-          items={[
-            { label: employeeCopy.rooms, href: "/facilities" },
-            { label: facility.name },
-          ]}
-        />
+      <div>
         <Link
           href="/facilities"
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
-          {employeeCopy.rooms}
+          Back to {employeeCopy.rooms}
         </Link>
       </div>
 

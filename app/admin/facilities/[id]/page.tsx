@@ -39,18 +39,13 @@ export default async function EditFacilityPage({
       <PageHeader
         eyebrow="Admin area"
         title={`Edit ${facility.name}`}
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Facilities", href: "/admin/facilities" },
-          { label: facility.name },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/facilities"
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
-            Facilities
+            Back to facilities
           </Link>
         }
       />

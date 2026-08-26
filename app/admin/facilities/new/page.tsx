@@ -16,15 +16,10 @@ export default async function NewFacilityPage() {
       <PageHeader
         eyebrow="Admin area"
         title="New facility"
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Facilities", href: "/admin/facilities" },
-          { label: "New" },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/facilities"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to facilities

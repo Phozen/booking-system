@@ -36,9 +36,7 @@ export function ReportFilters({
   filters: ReportFilters;
 }) {
   return (
-    <AdminFilterBar
-      title="Report filters"
-    >
+    <AdminFilterBar ariaLabel="Report filters">
       <form className="grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto_auto] lg:items-end [&>*]:min-w-0">
         <div className="grid gap-2">
           <label htmlFor="dateFrom" className="text-sm font-medium">
@@ -124,7 +122,7 @@ export function ReportFilters({
         </Link>
       </form>
 
-      <div className="grid gap-2 border-t pt-4 sm:flex sm:flex-wrap">
+      <div className="grid gap-2 pt-4 sm:flex sm:flex-wrap">
         {exports.map((item) => (
           <Link
             key={item.type}

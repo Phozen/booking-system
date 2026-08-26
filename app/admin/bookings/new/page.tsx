@@ -36,15 +36,10 @@ export default async function NewAdminBookingPage({
         eyebrow="Admin area"
         title="Create booking for user"
         description="Create an operational booking on behalf of an active internal user. Availability and approval rules still apply."
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Bookings", href: "/admin/bookings" },
-          { label: "New" },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/bookings"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to bookings

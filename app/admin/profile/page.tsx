@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LockKeyhole } from "lucide-react";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guards";
 import { getMissingProfileFields } from "@/lib/profile/completion";
@@ -34,10 +34,15 @@ export default async function AdminProfilePage() {
           eyebrow="Admin account"
           title="Your account profile is not ready"
           description="Contact an administrator."
-          breadcrumbs={[
-            { label: "Admin dashboard", href: "/admin/dashboard" },
-            { label: "Profile" },
-          ]}
+          backAction={
+            <Link
+              href="/admin/dashboard"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              <ArrowLeft data-icon="inline-start" />
+              Back to dashboard
+            </Link>
+          }
         />
         <ErrorState
           title="Your account profile is not ready. Contact an administrator."
@@ -66,10 +71,15 @@ export default async function AdminProfilePage() {
       <PageHeader
         eyebrow="Admin account"
         title="Your profile"
-        breadcrumbs={[
-          { label: "Admin dashboard", href: "/admin/dashboard" },
-          { label: "Profile" },
-        ]}
+        backAction={
+          <Link
+            href="/admin/dashboard"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to dashboard
+          </Link>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">

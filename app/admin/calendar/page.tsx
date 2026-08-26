@@ -3,10 +3,6 @@ import {
   getAdminCalendarBookings,
   type AdminCalendarBooking,
 } from "@/lib/admin/bookings/calendar-queries";
-import {
-  getEmployeeCalendarBookings,
-  type EmployeeCalendarBooking,
-} from "@/lib/bookings/calendar-queries";
 import { adminBookingStatusOptions } from "@/lib/admin/bookings/validation";
 import { formatBookingStatus } from "@/lib/bookings/format";
 import type { BookingStatus } from "@/lib/bookings/queries";
@@ -20,7 +16,6 @@ import {
   getSelectedCalendarDay,
   parseCalendarDateParam,
 } from "@/lib/calendar/selection";
-import { parseCalendarViewMode } from "@/lib/calendar/visibility";
 import {
   groupCalendarBookingsByDay,
   type CalendarBooking,
@@ -28,7 +23,6 @@ import {
 import { formatFacilityType } from "@/lib/facilities/format";
 import { getAdminFacilities } from "@/lib/facilities/queries";
 import { getAppSettings } from "@/lib/settings/queries";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { BookingAgendaList } from "@/components/calendar/booking-agenda-list";
 import { CalendarControls } from "@/components/calendar/calendar-controls";
@@ -88,27 +82,6 @@ function toCalendarBooking(booking: AdminCalendarBooking): CalendarBooking {
   };
 }
 
-function employeeBookingToAdminCalendarBooking(
-  booking: EmployeeCalendarBooking,
-): CalendarBooking {
-  return {
-    id: booking.id,
-    href: `/admin/bookings/${booking.id}`,
-    title: booking.title,
-    status: booking.status,
-    startsAt: booking.startsAt,
-    endsAt: booking.endsAt,
-    facilityName: booking.facility?.name ?? "Facility unavailable",
-    facilityLevel: booking.facility?.level ?? "Level unavailable",
-    facilityType: booking.facility
-      ? formatFacilityType(booking.facility.type)
-      : undefined,
-    approvalRequired: booking.approvalRequired,
-    contextLabel: booking.invitationStatus ? "Invited" : "Owned",
-    isManageable: true,
-  };
-}
-
 export default async function AdminCalendarPage({
   searchParams,
 }: {
@@ -120,7 +93,7 @@ export default async function AdminCalendarPage({
     date?: string | string[];
   }>;
 }) {
-  const { user } = await requireAdmin();
+  await requireAdmin();
   const params = await searchParams;
   const supabase = await createClient();
   const [facilities, settings] = await Promise.all([
@@ -130,35 +103,18 @@ export default async function AdminCalendarPage({
   const validFacilityIds = new Set(facilities.map((facility) => facility.id));
   const selectedMonth = parseCalendarMonth(params.month, settings.defaultTimezone);
   const selectedStatus = parseStatus(params.status);
-  const selectedView = parseCalendarViewMode({
-    value: params.view,
-    allowAll: true,
-    defaultView: "all",
-  });
   const selectedFacilityId = parseFacilityId(
     params.facilityId,
     validFacilityIds,
   );
   const range = getCalendarMonthRange(selectedMonth, settings.defaultTimezone);
-  const bookings =
-    selectedView === "my"
-      ? await getEmployeeCalendarBookings(
-          supabase,
-          user.id,
-          range,
-          { status: selectedStatus, facilityId: selectedFacilityId },
-          createAdminClient(),
-        )
-      : await getAdminCalendarBookings(supabase, range, {
-          status: selectedStatus,
-          facilityId: selectedFacilityId,
-        });
-  const calendarBookings =
-    selectedView === "my"
-      ? (bookings as EmployeeCalendarBooking[]).map(
-          employeeBookingToAdminCalendarBooking,
-        )
-      : (bookings as AdminCalendarBooking[]).map(toCalendarBooking);
+  const bookings = await getAdminCalendarBookings(supabase, range, {
+    status: selectedStatus,
+    facilityId: selectedFacilityId,
+  });
+  const calendarBookings = (bookings as AdminCalendarBooking[]).map(
+    toCalendarBooking,
+  );
   const groupedBookings = groupCalendarBookingsByDay(calendarBookings);
   const days = getCalendarMonthDays(selectedMonth, settings.defaultTimezone);
   const requestedDate = parseCalendarDateParam(params.date);
@@ -169,14 +125,12 @@ export default async function AdminCalendarPage({
       month: selectedMonth.value,
       status: selectedStatus,
       facilityId: selectedFacilityId,
-      view: selectedView,
+      view: "all",
       date: dayKey,
     });
   const descriptionBase = selectedStatus
     ? `Showing ${formatBookingStatus(selectedStatus).toLowerCase()} bookings for ${selectedMonth.label}.`
-    : selectedView === "my"
-      ? `Showing bookings you own or are invited to for ${selectedMonth.label}.`
-      : `Showing all bookings for ${selectedMonth.label}.`;
+    : `Showing all bookings for ${selectedMonth.label}.`;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -192,8 +146,7 @@ export default async function AdminCalendarPage({
         selectedStatus={selectedStatus}
         selectedFacilityId={selectedFacilityId}
         selectedDate={selectedDay.key}
-        selectedView={selectedView}
-        showViewToggle
+        selectedView="all"
         timezone={settings.defaultTimezone}
         facilities={facilities}
         showFacilityFilter

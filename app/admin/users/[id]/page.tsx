@@ -44,15 +44,10 @@ export default async function AdminUserDetailPage({
             and access status.
           </span>
         }
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Users", href: "/admin/users" },
-          { label: user.fullName || user.email },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/users"
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to users

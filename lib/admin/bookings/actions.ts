@@ -118,6 +118,8 @@ async function getAdminActionBooking(bookingId: string) {
       facility_id,
       user_id,
       title,
+      description,
+      attendee_count,
       status,
       starts_at,
       ends_at,
@@ -1032,5 +1034,136 @@ export async function rejectBookingAction(
     status: "success",
     message:
       "Booking rejected. The requester will see the updated status and a rejection email has been queued if possible.",
+  };
+}
+
+export async function resendBookingConfirmationAction(
+  bookingId: string,
+  _previousState: AdminBookingActionResult,
+  _formData: FormData,
+): Promise<AdminBookingActionResult> {
+  void _previousState;
+  void _formData;
+
+  const { user } = await requireAdmin();
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "You must be signed in as an admin.",
+    };
+  }
+
+  const booking = await getAdminActionBooking(bookingId);
+
+  if (!booking) {
+    return {
+      status: "error",
+      message: "Booking could not be found.",
+    };
+  }
+
+  if (booking.status !== "confirmed") {
+    return {
+      status: "error",
+      message: "Confirmation emails can only be resent for confirmed bookings.",
+    };
+  }
+
+  const owner = getBookingOwner(booking);
+  const facility = getBookingFacility(booking);
+
+  if (!owner?.email) {
+    return {
+      status: "error",
+      message: "The booking owner does not have an email address.",
+    };
+  }
+
+  const resendKey = `${Date.now()}`;
+  const bookingWindow = formatEmailBookingWindow(
+    booking.starts_at,
+    booking.ends_at,
+  );
+  const facilityName = facility?.name ?? "the facility";
+  const departments = await getBookingDepartmentSnapshot(booking.id).catch(
+    (error) => {
+      console.error("Booking department snapshot unavailable", {
+        bookingId: booking.id,
+        error,
+      });
+      return [];
+    },
+  );
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("email_notifications")
+    .insert({
+      type: "booking_confirmation",
+      status: "queued",
+      recipient_email: owner.email,
+      recipient_user_id: booking.user_id,
+      subject: `Booking confirmed: ${booking.title}`,
+      body: `Your booking for ${facilityName} on ${bookingWindow} is confirmed.`,
+      template_name: "booking_confirmation",
+      template_data: {
+        bookingId: booking.id,
+        title: booking.title,
+        description: booking.description ?? null,
+        facilityName,
+        facilityLevel: facility?.level ?? null,
+        attendeeCount: booking.attendee_count ?? null,
+        startsAt: booking.starts_at,
+        endsAt: booking.ends_at,
+        status: booking.status,
+        departments,
+      },
+      related_booking_id: booking.id,
+      idempotency_key: `booking-confirmation-resend:${booking.id}:${owner.email}:${resendKey}`,
+    })
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Resend booking confirmation insert failed", {
+      bookingId,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message: "Confirmation email could not be queued. Please try again.",
+    };
+  }
+
+  if (data?.id) {
+    await processEmailNotificationNow(data.id, supabase);
+  }
+
+  await queueInviteeBookingConfirmations({
+    bookingId: booking.id,
+    resendKey,
+  });
+
+  await createAuditLogSafely(
+    supabase,
+    {
+      action: "update",
+      entityType: "booking",
+      entityId: booking.id,
+      actorUserId: user.id,
+      actorEmail: user.email,
+      summary: `Resent booking confirmation for ${booking.title}.`,
+      newValues: { resentConfirmation: true, resendKey },
+    },
+    { bookingId: booking.id },
+  );
+
+  revalidatePath(`/admin/bookings/${bookingId}`);
+  revalidatePath("/admin/email-notifications");
+
+  return {
+    status: "success",
+    message:
+      "Confirmation email queued for the booking owner and invited attendees.",
   };
 }

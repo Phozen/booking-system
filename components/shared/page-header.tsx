@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import { Breadcrumbs, type BreadcrumbItem } from "@/components/shared/breadcrumbs";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
@@ -9,7 +8,7 @@ export function PageHeader({
   description,
   primaryAction,
   secondaryAction,
-  breadcrumbs,
+  backAction,
   className,
 }: {
   eyebrow?: string;
@@ -17,12 +16,15 @@ export function PageHeader({
   description?: ReactNode;
   primaryAction?: ReactNode;
   secondaryAction?: ReactNode;
-  breadcrumbs?: BreadcrumbItem[];
+  /** Shown alone at the top, separate from title actions. */
+  backAction?: ReactNode;
   className?: string;
 }) {
   return (
     <header className={cn("qbook-reveal grid gap-3 pb-6", className)}>
-      {breadcrumbs ? <Breadcrumbs items={breadcrumbs} /> : null}
+      {backAction ? (
+        <div className="flex w-full justify-start">{backAction}</div>
+      ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 max-w-3xl">
           {eyebrow ? (

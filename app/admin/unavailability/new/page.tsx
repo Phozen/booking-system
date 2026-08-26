@@ -34,13 +34,11 @@ export default async function NewUnavailabilityPage({
       <PageHeader
         eyebrow="Admin area"
         title="Add unavailable time"
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Unavailability", href: "/admin/unavailability" },
-          { label: "New" },
-        ]}
-        secondaryAction={
-          <Link href="/admin/unavailability" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        backAction={
+          <Link
+            href="/admin/unavailability"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             <ArrowLeft data-icon="inline-start" />
             Back to unavailability
           </Link>

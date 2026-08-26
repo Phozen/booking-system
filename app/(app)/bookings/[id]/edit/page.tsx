@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guards";
@@ -8,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveDepartments } from "@/lib/departments/queries";
 import { BookingEditForm } from "@/components/bookings/booking-edit-form";
 import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +47,15 @@ export default async function EditBookingPage({
         eyebrow="My bookings"
         title="Edit booking"
         description="Update details or reschedule. Availability is checked again before changes are saved."
-        breadcrumbs={[
-          { label: "My Bookings", href: "/my-bookings" },
-          { label: booking.title, href: `/bookings/${booking.id}` },
-          { label: "Edit" },
-        ]}
+        backAction={
+          <Link
+            href={`/bookings/${booking.id}`}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            Back to booking
+          </Link>
+        }
       />
 
       <BookingEditForm

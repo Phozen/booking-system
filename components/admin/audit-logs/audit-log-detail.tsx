@@ -1,8 +1,5 @@
-import Link from "next/link";
-
 import { formatBookingDateTime } from "@/lib/bookings/format";
 import type { AuditLog, AuditJsonValue } from "@/lib/admin/audit-logs/queries";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 function formatLabel(value: string) {
@@ -218,15 +215,6 @@ export function AuditLogDetail({ auditLog }: { auditLog: AuditLog }) {
         oldValues={auditLog.oldValues}
         newValues={auditLog.newValues}
       />
-
-      <div>
-        <Link
-          href="/admin/audit-logs"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Back to audit logs
-        </Link>
-      </div>
     </div>
   );
 }

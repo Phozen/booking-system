@@ -57,15 +57,10 @@ export default async function EditBlockedPeriodPage({
             </span>
           </span>
         }
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Unavailability", href: "/admin/unavailability" },
-          { label: "Edit" },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/unavailability"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to unavailability

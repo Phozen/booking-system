@@ -129,7 +129,7 @@ export function AuditLogFilters({ filters }: { filters: AuditLogFilters }) {
         </Link>
       </form>
 
-      <div className="grid gap-2 border-t pt-4 sm:flex sm:flex-wrap sm:items-center">
+      <div className="grid gap-2 pt-4 sm:flex sm:flex-wrap sm:items-center">
         <Link
           href={`/admin/reports/export/audit-logs?${exportParams.toString()}`}
           className={buttonVariants({

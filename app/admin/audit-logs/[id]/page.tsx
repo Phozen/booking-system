@@ -30,15 +30,10 @@ export default async function AdminAuditLogDetailPage({
       <PageHeader
         eyebrow="Admin area"
         title="Audit log detail"
-        breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Audit Logs", href: "/admin/audit-logs" },
-          { label: "Detail" },
-        ]}
-        secondaryAction={
+        backAction={
           <Link
             href="/admin/audit-logs"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft data-icon="inline-start" />
             Back to audit logs

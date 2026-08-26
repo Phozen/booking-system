@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -180,17 +180,6 @@ export function BookingDetail({
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        breadcrumbs={[
-          isOwnerView
-            ? {
-                label: "My bookings",
-                href: `/my-bookings?highlight=${booking.id}`,
-              }
-            : INTERNAL_INVITES_ENABLED
-              ? { label: "Invites", href: "/invitations" }
-              : { label: "My bookings", href: "/my-bookings" },
-          { label: booking.title },
-        ]}
         title={booking.title}
         description={
           <span className="flex flex-col gap-2">
@@ -209,6 +198,25 @@ export function BookingDetail({
               </span>
             </span>
           </span>
+        }
+        backAction={
+          <Link
+            href={
+              isOwnerView
+                ? `/my-bookings?highlight=${booking.id}`
+                : INTERNAL_INVITES_ENABLED
+                  ? "/invitations"
+                  : "/my-bookings"
+            }
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <ArrowLeft data-icon="inline-start" />
+            {isOwnerView
+              ? "Back to my bookings"
+              : INTERNAL_INVITES_ENABLED
+                ? "Back to invites"
+                : "Back to my bookings"}
+          </Link>
         }
         primaryAction={primaryAction}
         secondaryAction={
