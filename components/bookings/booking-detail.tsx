@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer, UserPlus } from "lucide-react";
+import { CalendarDays, CheckCircle2, Edit3, ExternalLink, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/lib/bookings/format";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { formatFacilityType } from "@/lib/facilities/format";
 import { canManageBookingInvitations } from "@/lib/bookings/invitations/validation";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
@@ -94,6 +95,7 @@ export function BookingDetail({
     isOwnerView &&
     (booking.status === "pending" || booking.status === "confirmed");
   const canRespondToInvitation =
+    INTERNAL_INVITES_ENABLED &&
     !isOwnerView &&
     viewerInvitation?.status === "pending" &&
     canManageBookingInvitations(booking.status);
@@ -184,7 +186,9 @@ export function BookingDetail({
                 label: "My bookings",
                 href: `/my-bookings?highlight=${booking.id}`,
               }
-            : { label: "Invites", href: "/invitations" },
+            : INTERNAL_INVITES_ENABLED
+              ? { label: "Invites", href: "/invitations" }
+              : { label: "My bookings", href: "/my-bookings" },
           { label: booking.title },
         ]}
         title={booking.title}
@@ -192,7 +196,7 @@ export function BookingDetail({
           <span className="flex flex-col gap-2">
             <span className="flex flex-wrap items-center gap-2">
               <BookingStatusBadge status={booking.status} />
-              {!isOwnerView && viewerInvitation ? (
+              {INTERNAL_INVITES_ENABLED && !isOwnerView && viewerInvitation ? (
                 <StatusBadge kind="invitation" status={viewerInvitation.status} />
               ) : null}
             </span>
@@ -249,7 +253,7 @@ export function BookingDetail({
               {booking.status === "pending"
                 ? "Booking request submitted and pending approval."
                 : "Booking created."}{" "}
-              You can add attendees and departments from this page whenever needed.
+              You can add departments from this page whenever needed.
             </span>
             <span>
               <Link
@@ -260,15 +264,17 @@ export function BookingDetail({
                   className: "w-full sm:w-auto",
                 })}
               >
-                <UserPlus data-icon="inline-start" />
-                Manage participants
+                Manage departments
               </Link>
             </span>
           </AlertDescription>
         </Alert>
       ) : null}
 
-      {!isOwnerView && viewerInvitation && viewerInvitation.status !== "pending" ? (
+      {INTERNAL_INVITES_ENABLED &&
+      !isOwnerView &&
+      viewerInvitation &&
+      viewerInvitation.status !== "pending" ? (
         <section className="rounded-lg border border-border bg-muted/30 p-5">
           <h2 className="qbook-type-section">Your invitation</h2>
           <p className="qbook-type-meta mt-2">
@@ -281,7 +287,9 @@ export function BookingDetail({
         </section>
       ) : null}
 
-      {!isOwnerView && viewerInvitation?.status === "pending" ? (
+      {INTERNAL_INVITES_ENABLED &&
+      !isOwnerView &&
+      viewerInvitation?.status === "pending" ? (
         <p className="qbook-type-meta">
           {canRespondToInvitation
             ? "You can view this booking because you were invited. Only the organizer can cancel or manage the booking."

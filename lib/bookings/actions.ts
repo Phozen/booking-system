@@ -49,6 +49,7 @@ import {
   queueDepartmentBookingNotification,
 } from "@/lib/departments/notifications";
 import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 
 export type BookingActionResult = {
   status: "idle" | "error" | "success";
@@ -606,7 +607,7 @@ export async function createBookingAction(
     p_catering_dietary_notes: cateringDetails.dietaryNotes,
     p_catering_notes: cateringDetails.notes,
     p_department_ids: departmentIds.data,
-    p_invited_user_ids: invitedUserIds.data,
+    p_invited_user_ids: INTERNAL_INVITES_ENABLED ? invitedUserIds.data : [],
     p_teams_meeting: parsed.data.teamsMeeting,
   });
 

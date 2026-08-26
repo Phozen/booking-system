@@ -1,4 +1,5 @@
 import { getCurrentAuthState } from "@/lib/auth/session";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { searchInviteCandidatesForBooking } from "@/lib/bookings/invitations/queries";
 import { invitationBookingIdSchema } from "@/lib/bookings/invitations/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -7,6 +8,13 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!INTERNAL_INVITES_ENABLED) {
+    return Response.json(
+      { message: "Internal invitations are turned off." },
+      { status: 404 },
+    );
+  }
+
   const authState = await getCurrentAuthState();
 
   if (!authState.user || authState.profile?.status !== "active") {

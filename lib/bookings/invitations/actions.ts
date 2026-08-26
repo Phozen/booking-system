@@ -11,6 +11,7 @@ import type {
   InvitationBatchFailure,
 } from "@/lib/bookings/invitations/action-state";
 import type { BookingInvitationStatus } from "@/lib/bookings/invitations/types";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { createAppNotification } from "@/lib/notifications/app-notifications";
 import { syncConfirmedBookingToMicrosoftCalendar } from "@/lib/integrations/microsoft-365-calendar/sync";
 import {
@@ -220,7 +221,7 @@ export async function queueInitialInvitationNotifications({
   invitedUserIds: string[];
   actor: { id: string; email: string; full_name: string | null };
 }) {
-  if (invitedUserIds.length === 0) return;
+  if (!INTERNAL_INVITES_ENABLED || invitedUserIds.length === 0) return;
 
   try {
     const [booking, profilesResult] = await Promise.all([
@@ -260,6 +261,13 @@ export async function inviteUserToBookingAction(
   _previousState: InvitationActionResult,
   formData: FormData,
 ): Promise<InvitationActionResult> {
+  if (!INTERNAL_INVITES_ENABLED) {
+    return {
+      status: "error",
+      message: "Internal invitations are turned off.",
+    };
+  }
+
   const { user } = await requireUser();
   const parsed = inviteUserSchema.safeParse(formDataToInviteUserValues(formData));
 
@@ -406,6 +414,15 @@ export async function inviteUsersToBookingAction(
   bookingId: string,
   invitedUserIds: string[],
 ): Promise<InvitationBatchActionResult> {
+  if (!INTERNAL_INVITES_ENABLED) {
+    return {
+      status: "error",
+      message: "Internal invitations are turned off.",
+      invitedUserIds: [],
+      failures: [],
+    };
+  }
+
   const { user } = await requireUser();
   const parsed = inviteUsersSchema.safeParse({
     bookingId,
@@ -634,6 +651,13 @@ export async function removeInvitationAction(
 ): Promise<InvitationActionResult> {
   void _previousState;
 
+  if (!INTERNAL_INVITES_ENABLED) {
+    return {
+      status: "error",
+      message: "Internal invitations are turned off.",
+    };
+  }
+
   const { user } = await requireUser();
   const parsed = invitationIdSchema.safeParse(invitationId);
 
@@ -742,6 +766,13 @@ export async function respondToInvitationAction(
   _previousState: InvitationActionResult,
   formData: FormData,
 ): Promise<InvitationActionResult> {
+  if (!INTERNAL_INVITES_ENABLED) {
+    return {
+      status: "error",
+      message: "Internal invitations are turned off.",
+    };
+  }
+
   const { user } = await requireUser();
   const parsed = invitationResponseSchema.safeParse(
     formDataToInvitationResponseValues(invitationId, responseStatus, formData),

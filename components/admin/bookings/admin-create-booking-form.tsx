@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormFieldHelper } from "@/components/shared/form-field-helper";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { InitialAttendeePicker } from "@/components/bookings/initial-attendee-picker";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 
 const initialState: AdminBookingActionResult = {
   status: "idle",
@@ -191,7 +192,12 @@ export function AdminCreateBookingForm({
 
       <input type="hidden" name="cateringRequired" value="no" />
 
-      <InitialAttendeePicker disabled={isPending || !targetUserId} excludeUserId={targetUserId} />
+      {INTERNAL_INVITES_ENABLED ? (
+        <InitialAttendeePicker
+          disabled={isPending || !targetUserId}
+          excludeUserId={targetUserId}
+        />
+      ) : null}
 
       <fieldset className="grid gap-2">
         <legend className="text-sm font-medium">Involved departments</legend>

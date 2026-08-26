@@ -17,7 +17,9 @@ import {
   UsersRound,
 } from "lucide-react";
 
-export const employeeNavigation = [
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
+
+const allEmployeeNavigation = [
   {
     title: "Book a room",
     href: "/bookings/new",
@@ -65,6 +67,10 @@ export const employeeNavigation = [
   },
 ] as const;
 
+export const employeeNavigation = allEmployeeNavigation.filter(
+  (item) => INTERNAL_INVITES_ENABLED || item.href !== "/invitations",
+);
+
 export const employeeHeaderNavigation = employeeNavigation.filter(
   (item) => item.header,
 );
@@ -74,7 +80,7 @@ const DASHBOARD_ACTION_HREFS = new Set([
   "/bookings/new",
   "/calendar",
   "/my-bookings",
-  "/invitations",
+  ...(INTERNAL_INVITES_ENABLED ? (["/invitations"] as const) : []),
 ]);
 
 export const employeeDashboardActions = employeeNavigation.filter((item) =>

@@ -7,6 +7,7 @@ import {
   type NotificationPreferencesActionResult,
 } from "@/lib/notifications/actions";
 import type { UserNotificationPreferences } from "@/lib/notifications/preferences";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { ActionToastEffect } from "@/components/shared/action-toast-effect";
 import { PendingButtonContent } from "@/components/shared/pending-button-content";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -66,28 +67,30 @@ export function NotificationPreferencesForm({
           </div>
         </div>
 
-        <div className="flex gap-3 rounded-lg border bg-muted/30 p-4">
-          <input
-            id="invitationUpdatesEnabled"
-            type="checkbox"
-            name="invitationUpdatesEnabled"
-            defaultChecked={preferences.invitationUpdatesEnabled}
-            className="mt-1 size-4 accent-primary"
-            aria-describedby="invitationUpdatesEnabled-helper"
-          />
-          <div>
-            <label htmlFor="invitationUpdatesEnabled" className="block font-medium">
-              Invitation updates
-            </label>
-            <p
-              id="invitationUpdatesEnabled-helper"
-              className="mt-1 text-sm text-muted-foreground"
-            >
-              Receive non-critical updates when invitations are accepted or
-              declined.
-            </p>
+        {INTERNAL_INVITES_ENABLED ? (
+          <div className="flex gap-3 rounded-lg border bg-muted/30 p-4">
+            <input
+              id="invitationUpdatesEnabled"
+              type="checkbox"
+              name="invitationUpdatesEnabled"
+              defaultChecked={preferences.invitationUpdatesEnabled}
+              className="mt-1 size-4 accent-primary"
+              aria-describedby="invitationUpdatesEnabled-helper"
+            />
+            <div>
+              <label htmlFor="invitationUpdatesEnabled" className="block font-medium">
+                Invitation updates
+              </label>
+              <p
+                id="invitationUpdatesEnabled-helper"
+                className="mt-1 text-sm text-muted-foreground"
+              >
+                Receive non-critical updates when invitations are accepted or
+                declined.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : null}
       </fieldset>
 
       <p className="text-sm text-muted-foreground">

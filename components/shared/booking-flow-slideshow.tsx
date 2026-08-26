@@ -66,7 +66,7 @@ const slides: Slide[] = [
     preview: (
       <PreviewChrome title="QBook · Home">
         <div className="grid grid-cols-2 gap-2">
-          {["Book a room", "Calendar", "My bookings", "Invites"].map(
+          {["Book a room", "Calendar", "My bookings", "Rooms"].map(
             (label, index) => (
               <div
                 key={label}
@@ -135,7 +135,7 @@ const slides: Slide[] = [
     id: "details",
     step: "4",
     title: "Add meeting details",
-    body: "Enter the meeting name, description, people, invites, and extras.",
+    body: "Enter the meeting name, description, people count, and extras.",
     icon: FileText,
     preview: (
       <PreviewChrome title="Book a room · Meeting details">
@@ -143,7 +143,7 @@ const slides: Slide[] = [
           <FieldStub label="Meeting name" wide />
           <FieldStub label="Description" wide />
           <FieldStub label="How many people?" />
-          <FieldStub label="Invite staff" />
+          <FieldStub label="Departments" />
         </div>
       </PreviewChrome>
     ),

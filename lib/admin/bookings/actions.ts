@@ -40,6 +40,7 @@ import {
   queueDepartmentBookingNotification,
 } from "@/lib/departments/notifications";
 import { queueInitialInvitationNotifications } from "@/lib/bookings/invitations/actions";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import {
   adminBookingActionSchema,
   formDataToAdminBookingActionValues,
@@ -451,7 +452,7 @@ export async function adminCreateBookingAction(
     p_ends_at: dateRange.endsAt.toISOString(),
     p_approval_required: approvalRequired,
     p_department_ids: departmentIds.data,
-    p_invited_user_ids: invitedUserIds.data,
+    p_invited_user_ids: INTERNAL_INVITES_ENABLED ? invitedUserIds.data : [],
   });
 
   if (error || !data) {

@@ -13,6 +13,7 @@ import { CompactBookingSection } from "@/components/bookings/compact-booking-sec
 import { HighlightScrollEffect } from "@/components/bookings/highlight-scroll-effect";
 import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 
 function formatInvitationSummary({
   pending,
@@ -142,7 +143,7 @@ export function MyBookingsList({
         </Alert>
       ) : null}
 
-      {invitationSummaryText ? (
+      {INTERNAL_INVITES_ENABLED && invitationSummaryText ? (
         <section
           className="grid gap-3 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sky-950 shadow-sm ring-1 ring-sky-200/60 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100"
           aria-labelledby="my-bookings-invitations-heading"

@@ -113,10 +113,14 @@ describe("booking departments and recurring retirement migration", () => {
 describe("initial attendee creation actions", () => {
   it("passes optional attendees atomically and queues existing attendee notifications", () => {
     expect(employeeActions).toContain('rpc("create_booking_with_participants"');
-    expect(employeeActions).toContain("p_invited_user_ids: inviteduserids.data");
+    expect(employeeActions).toContain(
+      "p_invited_user_ids: internal_invites_enabled ? inviteduserids.data : []",
+    );
     expect(employeeActions).toContain("queueinitialinvitationnotifications");
     expect(adminActions).toContain('rpc("admin_create_booking_with_participants"');
-    expect(adminActions).toContain("p_invited_user_ids: inviteduserids.data");
+    expect(adminActions).toContain(
+      "p_invited_user_ids: internal_invites_enabled ? inviteduserids.data : []",
+    );
     expect(adminActions).toContain("queueinitialinvitationnotifications");
   });
 
@@ -140,7 +144,8 @@ describe("initial attendee creation actions", () => {
   it("lets booking owners manage departments alongside attendee invitations", () => {
     expect(bookingDetail).toContain('departments={departments}');
     expect(bookingDetail).toContain('href="#booking-participants"');
-    expect(invitationList).toContain("<InviteUserForm bookingId={bookingId} />");
+    expect(invitationList).toContain("InviteUserForm");
+    expect(invitationList).toContain("INTERNAL_INVITES_ENABLED");
     expect(invitationList).toContain("<BookingDepartmentManager");
     expect(bookingDepartmentManager).toContain("updateBookingDepartmentsAction");
     expect(employeeActions).toContain("updatebookingdepartmentsaction");

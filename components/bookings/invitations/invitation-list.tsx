@@ -8,6 +8,7 @@ import type {
   BookingInvitationStatus,
 } from "@/lib/bookings/invitations/types";
 import type { Department } from "@/lib/departments/queries";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { cn } from "@/lib/utils";
 import { BookingDepartmentManager } from "@/components/bookings/booking-department-manager";
 import { InviteUserForm } from "@/components/bookings/invitations/invite-user-form";
@@ -74,6 +75,7 @@ export function InvitationList({
     [invitations, normalizedSearch, status],
   );
   const visibleInvitations = filteredInvitations.slice(0, visibleCount);
+  const showInvites = INTERNAL_INVITES_ENABLED;
 
   return (
     <section
@@ -81,23 +83,32 @@ export function InvitationList({
       className={cn(
         "scroll-mt-24 grid gap-5 rounded-lg border bg-card p-5",
         highlight &&
+          showInvites &&
           "border-primary/40 bg-primary/5 shadow-sm shadow-primary/10 ring-2 ring-primary/25",
       )}
     >
       <div>
         <h2 className="text-lg font-semibold tracking-normal">
-          {highlight ? "Invite participants to this meeting?" : "Participants"}
+          {showInvites
+            ? highlight
+              ? "Invite participants to this meeting?"
+              : "Participants"
+            : "Departments"}
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {canManage
-            ? "Invite attendees and manage the departments included in this booking."
-            : "Review attendee invitations and response status for this booking."}
+          {showInvites
+            ? canManage
+              ? "Invite attendees and manage the departments included in this booking."
+              : "Review attendee invitations and response status for this booking."
+            : canManage
+              ? "Manage the departments included in this booking."
+              : "Departments tagged on this booking."}
         </p>
       </div>
 
       {canManage ? (
         <div className="grid gap-5">
-          <InviteUserForm bookingId={bookingId} />
+          {showInvites ? <InviteUserForm bookingId={bookingId} /> : null}
           <BookingDepartmentManager
             bookingId={bookingId}
             departments={departments}
@@ -106,7 +117,7 @@ export function InvitationList({
         </div>
       ) : null}
 
-      {invitations.length > 0 ? (
+      {showInvites && invitations.length > 0 ? (
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-2 text-xs font-medium">
             <span className="rounded-full border border-border/75 bg-background px-3 py-1">
@@ -209,7 +220,7 @@ export function InvitationList({
             </div>
           ) : null}
         </div>
-      ) : (
+      ) : showInvites ? (
         <EmptyState
           title="No invited attendees yet"
           description={
@@ -218,7 +229,7 @@ export function InvitationList({
               : "This booking has no invited attendees."
           }
         />
-      )}
+      ) : null}
     </section>
   );
 }

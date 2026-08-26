@@ -5,6 +5,7 @@ import { CompanyBrand } from "@/components/shared/company-logo";
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
 import type { EmployeeBooking } from "@/lib/bookings/queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import {
   formatBookingDate,
   formatBookingDateTime,
@@ -209,40 +210,42 @@ export function BookingPrintForm({
           )}
         </Section>
 
-        <Section title="Invited attendees">
-          <p className="qbook-type-meta mb-4 qbook-type-tabular">
-            Total invited: {invitations.length} · Accepted: {acceptedCount} ·
-            Pending: {pendingCount} · Declined: {declinedCount}
-          </p>
-          {invitations.length > 0 ? (
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-border print:border-zinc-300">
-                  <th className="py-2 pr-3 font-semibold">Name</th>
-                  <th className="py-2 pr-3 font-semibold">Email</th>
-                  <th className="py-2 pr-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invitations.map((invitation) => (
-                  <tr key={invitation.id} className="border-b border-border/70 print:border-zinc-200">
-                    <td className="py-2 pr-3">
-                      {invitation.invitedUser?.fullName || "-"}
-                    </td>
-                    <td className="break-all py-2 pr-3">
-                      {invitation.invitedUser?.email || "-"}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {getInvitationStatusLabel(invitation.status)}
-                    </td>
+        {INTERNAL_INVITES_ENABLED ? (
+          <Section title="Invited attendees">
+            <p className="qbook-type-meta mb-4 qbook-type-tabular">
+              Total invited: {invitations.length} · Accepted: {acceptedCount} ·
+              Pending: {pendingCount} · Declined: {declinedCount}
+            </p>
+            {invitations.length > 0 ? (
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border print:border-zinc-300">
+                    <th className="py-2 pr-3 font-semibold">Name</th>
+                    <th className="py-2 pr-3 font-semibold">Email</th>
+                    <th className="py-2 pr-3 font-semibold">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="qbook-type-meta">No invited attendees.</p>
-          )}
-        </Section>
+                </thead>
+                <tbody>
+                  {invitations.map((invitation) => (
+                    <tr key={invitation.id} className="border-b border-border/70 print:border-zinc-200">
+                      <td className="py-2 pr-3">
+                        {invitation.invitedUser?.fullName || "-"}
+                      </td>
+                      <td className="break-all py-2 pr-3">
+                        {invitation.invitedUser?.email || "-"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {getInvitationStatusLabel(invitation.status)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="qbook-type-meta">No invited attendees.</p>
+            )}
+          </Section>
+        ) : null}
 
         <Section title="Food & drinks / catering">
           <dl className="grid gap-4 sm:grid-cols-2">

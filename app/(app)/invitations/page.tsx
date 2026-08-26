@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { getMyInvitations } from "@/lib/bookings/invitations/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { InvitationsPageList } from "@/components/bookings/invitations/invitations-page-list";
@@ -11,6 +13,10 @@ import { buttonVariants } from "@/components/ui/button";
 export const dynamic = "force-dynamic";
 
 export default async function InvitationsPage() {
+  if (!INTERNAL_INVITES_ENABLED) {
+    redirect("/dashboard");
+  }
+
   const { user } = await requireUser();
   const supabase = createAdminClient();
   const invitations = await getMyInvitations(supabase, user.id);

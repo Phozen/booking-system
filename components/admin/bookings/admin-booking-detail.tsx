@@ -10,6 +10,7 @@ import {
 import type { AdminBooking } from "@/lib/admin/bookings/queries";
 import type { BookingActivity } from "@/lib/admin/bookings/activity-queries";
 import type { BookingInvitation } from "@/lib/bookings/invitations/types";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import {
   formatBookingDate,
   formatBookingDateTime,
@@ -111,11 +112,13 @@ export function AdminBookingDetail({
           <DetailItem label="Attendee count">
             {booking.attendeeCount ?? "Not provided"}
           </DetailItem>
-          <DetailItem label="Internal invitations">
-            {invitations.length > 0
-              ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`
-              : "No internal attendees invited"}
-          </DetailItem>
+          {INTERNAL_INVITES_ENABLED ? (
+            <DetailItem label="Internal invitations">
+              {invitations.length > 0
+                ? `${invitations.length} invited — ${invitationResponses.accepted} accepted, ${invitationResponses.pending} pending, ${invitationResponses.declined} declined`
+                : "No internal attendees invited"}
+            </DetailItem>
+          ) : null}
         </dl>
       </section>
 
@@ -215,11 +218,13 @@ export function AdminBookingDetail({
         lockedMessage=""
       />
 
-      <InvitationList
-        bookingId={booking.id}
-        invitations={invitations}
-        canManage={false}
-      />
+      {INTERNAL_INVITES_ENABLED ? (
+        <InvitationList
+          bookingId={booking.id}
+          invitations={invitations}
+          canManage={false}
+        />
+      ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-lg border bg-card p-5">

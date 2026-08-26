@@ -15,10 +15,6 @@ const basics = [
     title: "Manage your bookings",
     body: "Open My bookings to view, edit, or cancel bookings you still control.",
   },
-  {
-    title: "Invites",
-    body: "Open Invites to accept or decline meetings other staff have invited you to.",
-  },
 ] as const;
 
 const rules = [

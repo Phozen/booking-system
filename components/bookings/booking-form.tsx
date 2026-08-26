@@ -53,6 +53,7 @@ import { BookingAvailabilityTimeline } from "@/components/bookings/booking-avail
 import { FacilityPhoto } from "@/components/facilities/facility-photo";
 import { OverlayLoader } from "@/components/shared/overlay-loader";
 import { InitialAttendeePicker } from "@/components/bookings/initial-attendee-picker";
+import { INTERNAL_INVITES_ENABLED } from "@/lib/bookings/invitations/feature";
 import { DepartmentPicker } from "@/components/bookings/department-picker";
 import { FieldRequirementBadge } from "@/components/shared/field-requirement-badge";
 import {
@@ -870,14 +871,20 @@ export function BookingForm({
         step={4}
         totalSteps={TOTAL_STEPS}
         title={employeeCopy.peopleAndExtras}
-        description="Invite coworkers, add food or drinks, or skip this step."
+        description={
+          INTERNAL_INVITES_ENABLED
+            ? "Invite coworkers, add food or drinks, or skip this step."
+            : "Add departments, food or drinks, or skip this step."
+        }
         hidden={wizardStep !== 4}
       >
-        <InitialAttendeePicker
-          disabled={!hasFacilities || isPending}
-          onSelectedCountChange={setSelectedAttendeeCount}
-          onDraftChange={() => setIsDirty(true)}
-        />
+        {INTERNAL_INVITES_ENABLED ? (
+          <InitialAttendeePicker
+            disabled={!hasFacilities || isPending}
+            onSelectedCountChange={setSelectedAttendeeCount}
+            onDraftChange={() => setIsDirty(true)}
+          />
+        ) : null}
 
         <DepartmentPicker
           departments={departments}
@@ -1201,14 +1208,16 @@ export function BookingForm({
                   : "Not requested"}
               </dd>
             </div>
-            <div>
-              <dt className="qbook-type-meta">Invited staff</dt>
-              <dd className="font-medium">
-                {selectedAttendeeCount > 0
-                  ? `${selectedAttendeeCount} selected`
-                  : "None selected"}
-              </dd>
-            </div>
+            {INTERNAL_INVITES_ENABLED ? (
+              <div>
+                <dt className="qbook-type-meta">Invited staff</dt>
+                <dd className="font-medium">
+                  {selectedAttendeeCount > 0
+                    ? `${selectedAttendeeCount} selected`
+                    : "None selected"}
+                </dd>
+              </div>
+            ) : null}
             <div>
               <dt className="qbook-type-meta">Departments</dt>
               <dd className="font-medium">
