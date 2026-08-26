@@ -77,3 +77,58 @@ begin
   on conflict (provider_id, provider) do update
     set identity_data = excluded.identity_data, updated_at = now();
 end $$;
+
+-- 3) Bootstrap a pre-provisioned Microsoft admin (HR / Administration) for local sign-in.
+do $$
+declare
+  v_tenant text := '11111111-1111-1111-1111-111111111111';
+  v_uid uuid := '44444444-4444-4444-4444-444444444444';
+  v_sub text := '55555555-5555-5555-5555-555555555555';
+  v_email text := 'admin@qbook.test';
+begin
+  insert into public.approved_users (email, role, status)
+  values (v_email, 'admin', 'active')
+  on conflict (normalized_email) do update
+    set role = excluded.role, status = excluded.status;
+
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change
+  )
+  values (
+    '00000000-0000-0000-0000-000000000000',
+    v_uid, 'authenticated', 'authenticated', v_email,
+    crypt('Password123!', gen_salt('bf')),
+    now(),
+    '{"provider":"azure","providers":["azure"]}'::jsonb,
+    jsonb_build_object(
+      'full_name', 'QBook Admin',
+      'tid', v_tenant,
+      'iss', 'https://login.microsoftonline.com/' || v_tenant || '/v2.0'
+    ),
+    now(), now(), '', '', '', ''
+  )
+  on conflict (id) do update
+    set encrypted_password = excluded.encrypted_password,
+        raw_app_meta_data = excluded.raw_app_meta_data,
+        raw_user_meta_data = excluded.raw_user_meta_data,
+        email_confirmed_at = excluded.email_confirmed_at;
+
+  insert into auth.identities (
+    provider_id, user_id, identity_data, provider,
+    last_sign_in_at, created_at, updated_at
+  )
+  values (
+    v_sub, v_uid,
+    jsonb_build_object(
+      'sub', v_sub, 'email', v_email, 'email_verified', true,
+      'tid', v_tenant,
+      'iss', 'https://login.microsoftonline.com/' || v_tenant || '/v2.0'
+    ),
+    'azure', now(), now(), now()
+  )
+  on conflict (provider_id, provider) do update
+    set identity_data = excluded.identity_data, updated_at = now();
+end $$;

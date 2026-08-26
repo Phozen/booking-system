@@ -75,12 +75,14 @@ export const employeeHeaderNavigation = employeeNavigation.filter(
   (item) => item.header,
 );
 
-/** Big quick-action cards on the employee home dashboard (Rooms stays in top nav only). */
+/** Big quick-action cards on the employee home dashboard. */
 const DASHBOARD_ACTION_HREFS = new Set([
   "/bookings/new",
   "/calendar",
   "/my-bookings",
-  ...(INTERNAL_INVITES_ENABLED ? (["/invitations"] as const) : []),
+  ...(INTERNAL_INVITES_ENABLED
+    ? (["/invitations"] as const)
+    : (["/facilities"] as const)),
 ]);
 
 export const employeeDashboardActions = employeeNavigation.filter((item) =>

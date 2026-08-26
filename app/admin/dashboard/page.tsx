@@ -18,6 +18,7 @@ import {
 } from "@/lib/bookings/format";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
+import { AdminDashboardGuide } from "@/components/admin/admin-dashboard-guide";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -131,6 +132,8 @@ export default async function AdminDashboardPage() {
           );
         })}
       </section>
+
+      <AdminDashboardGuide />
 
       <section
         aria-labelledby="admin-dashboard-pending"

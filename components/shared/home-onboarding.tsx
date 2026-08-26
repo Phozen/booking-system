@@ -1,19 +1,27 @@
-import { BookOpen, CircleHelp, Mail } from "lucide-react";
+import { BookOpen, ListChecks, Mail } from "lucide-react";
 
 import { BookingFlowSlideshow } from "@/components/shared/booking-flow-slideshow";
 
-const basics = [
+const features = [
   {
-    title: "Book a room",
-    body: "Open Book a room, pick the room, date, and time, then fill in the meeting details and send.",
+    title: "Room booking",
+    body: "Book meeting rooms by date and time, with first come, first served.",
   },
   {
-    title: "Check the calendar",
-    body: "Use Calendar to see what is already booked before you choose a slot.",
+    title: "Outlook calendar",
+    body: "Confirmed bookings create or update an Outlook calendar event.",
   },
   {
-    title: "Manage your bookings",
-    body: "Open My bookings to view, edit, or cancel bookings you still control.",
+    title: "Email updates",
+    body: "You get email when a booking is confirmed, changed, or cancelled.",
+  },
+  {
+    title: "Food and drinks",
+    body: "Request catering on a booking so the right people are notified.",
+  },
+  {
+    title: "Teams meetings",
+    body: "Add a Teams link when the meeting needs online joining.",
   },
 ] as const;
 
@@ -76,7 +84,7 @@ export function HomeOnboarding() {
             Getting started
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            A short guide to booking rooms and the house rules.
+            What QBook does, plus the house rules.
           </p>
         </div>
       </div>
@@ -88,18 +96,16 @@ export function HomeOnboarding() {
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            <CircleHelp className="size-4" aria-hidden="true" />
-            How to use QBook
+            <ListChecks className="size-4" aria-hidden="true" />
+            What QBook does
           </h3>
-          <ol className="mt-3 grid gap-3">
-            {basics.map((item, index) => (
+          <ul className="mt-3 grid gap-3">
+            {features.map((item) => (
               <li key={item.title} className="flex gap-3">
                 <span
-                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold tabular-nums text-foreground"
+                  className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
                   aria-hidden="true"
-                >
-                  {index + 1}
-                </span>
+                />
                 <div className="min-w-0">
                   <p className="font-medium">{item.title}</p>
                   <p className="mt-0.5 text-sm leading-6 text-muted-foreground">
@@ -108,7 +114,7 @@ export function HomeOnboarding() {
                 </div>
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
 
         <div>
