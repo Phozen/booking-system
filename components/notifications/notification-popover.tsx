@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 const typeLabels: Record<AppNotification["type"], string> = {
   booking_confirmation: "Booking confirmed",
   booking_approval: "Booking approved",
+  booking_pending: "Awaiting approval",
   booking_rejection: "Booking rejected",
   booking_cancellation: "Booking cancelled",
   booking_invitation: "Invitation",

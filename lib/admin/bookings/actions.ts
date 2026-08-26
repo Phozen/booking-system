@@ -269,12 +269,13 @@ async function insertBookingEmail({
     });
   }
 
-  if (type === "booking_confirmation" && data?.id) {
+  if (data?.id) {
     const result = await processEmailNotificationNow(data.id, supabase);
 
     if (result.sent === 0) {
-      console.error("Admin booking confirmation immediate send did not complete", {
+      console.error("Admin booking notification immediate send did not complete", {
         bookingId: booking.id,
+        type,
         notificationId: data.id,
         result,
       });

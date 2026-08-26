@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type AppNotificationType =
   | "booking_confirmation"
   | "booking_approval"
+  | "booking_pending"
   | "booking_rejection"
   | "booking_cancellation"
   | "booking_invitation"

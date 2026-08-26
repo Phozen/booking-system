@@ -253,7 +253,7 @@ describe("booking confirmation email queueing", () => {
     );
   });
 
-  it("does not queue booking_confirmation for pending approval-required bookings", async () => {
+  it("queues booking_pending for the requester on approval-required bookings", async () => {
     const pendingBooking = {
       ...confirmedBooking,
       status: "pending",
@@ -268,8 +268,21 @@ describe("booking confirmation email queueing", () => {
       createBookingAction({ status: "idle", message: "" }, createForm()),
     ).rejects.toThrow("NEXT_REDIRECT");
 
-    expect(emailQuery.insert).not.toHaveBeenCalled();
-    expect(mocks.processEmailNotificationNow).not.toHaveBeenCalled();
+    expect(emailQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "booking_pending",
+        recipient_email: user.email,
+        recipient_user_id: user.id,
+        subject: "Booking submitted: Planning Session",
+        template_name: "booking_pending",
+        related_booking_id: pendingBooking.id,
+        idempotency_key: `booking-pending:${pendingBooking.id}:${user.email}`,
+      }),
+    );
+    expect(emailQuery.insert).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: "booking_confirmation" }),
+    );
+    expect(mocks.processEmailNotificationNow).toHaveBeenCalled();
   });
 
   it("does not introduce TEST_EMAIL_TO or a hardcoded recipient path", async () => {
@@ -555,5 +568,29 @@ describe("booking confirmation email template", () => {
     expect(rendered.text).toContain("A booking is waiting for your approval.");
     expect(rendered.text).toContain("Status: Pending Approval");
     expect(rendered.text).toContain("Booked by: Employee User (employee@example.com)");
+  });
+
+  it("renders pending booking acknowledgement emails for the requester", () => {
+    const rendered = renderEmailTemplate({
+      type: "booking_pending",
+      recipientEmail: user.email,
+      subject: "Booking submitted: Planning Session",
+      body: "Your booking request was submitted and is waiting for approval.",
+      appUrl: "https://booking.example.com",
+      templateData: {
+        bookingId: confirmedBooking.id,
+        title: "Planning Session",
+        facilityName: "Board Room",
+        startsAt: "2037-01-01T01:00:00.000Z",
+        endsAt: "2037-01-01T02:00:00.000Z",
+        status: "pending",
+      },
+    });
+
+    expect(rendered.subject).toBe("Booking submitted: Planning Session");
+    expect(rendered.text).toContain(
+      "Your booking request was submitted and is waiting for approval.",
+    );
+    expect(rendered.text).toContain("Status: Pending Approval");
   });
 });

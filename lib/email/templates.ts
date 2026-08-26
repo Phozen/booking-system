@@ -359,6 +359,8 @@ export function renderEmailTemplate(
       "Your booking request has been approved and is now confirmed.",
     booking_approval_request:
       "A booking request requires your review and approval.",
+    booking_pending:
+      "Your booking request was submitted and is waiting for approval.",
     booking_rejection:
       "Your booking request was not approved. See the reason below if provided.",
     booking_cancellation:
@@ -379,6 +381,7 @@ export function renderEmailTemplate(
     booking_confirmation: `Booking confirmed — ${title}`,
     booking_approval: `Booking approved — ${title}`,
     booking_approval_request: `Approval required — ${title}`,
+    booking_pending: `Booking submitted — ${title}`,
     booking_rejection: `Booking not approved — ${title}`,
     booking_cancellation: `Booking cancelled — ${title}`,
     booking_catering_request: `Catering request — ${title}`,
