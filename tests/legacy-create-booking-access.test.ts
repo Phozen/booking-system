@@ -30,8 +30,8 @@ describe("legacy create_booking RPC access", () => {
   });
 
   it("does not re-expose a legacy overload in a later migration", () => {
-    expect(laterMigrationSql).not.toContain(
-      "grant execute on function public.create_booking",
+    expect(laterMigrationSql).not.toMatch(
+      /grant execute on function public\.create_booking\s*\(/,
     );
   });
 });

@@ -469,14 +469,16 @@ export function BookingForm({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  if (wizardStep !== TOTAL_STEPS && submitUnlocked) {
+    setSubmitUnlocked(false);
+  }
+
   // Brief lock so a double-tap on Continue cannot immediately submit Confirm.
   useEffect(() => {
     if (wizardStep !== TOTAL_STEPS) {
-      setSubmitUnlocked(false);
       return;
     }
 
-    setSubmitUnlocked(false);
     const timer = window.setTimeout(() => {
       setSubmitUnlocked(true);
     }, 400);

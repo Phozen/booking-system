@@ -20,6 +20,7 @@ vi.mock("server-only", () => ({}));
 
 vi.mock("next/cache", () => ({
   revalidatePath: mocks.revalidatePath,
+  unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }));
 
 vi.mock("next/navigation", () => ({

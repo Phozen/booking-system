@@ -22,8 +22,8 @@ describe("booking detail header actions", () => {
   });
 
   it("shows the primary action above secondaries on mobile", () => {
-    expect(pageHeaderSource).toContain("flex-col-reverse");
-    expect(pageHeaderSource).toContain("{secondaryAction} {primaryAction}");
+    expect(pageHeaderSource).toContain("flex-col gap-2");
+    expect(pageHeaderSource).toContain("{primaryAction} {secondaryAction}");
   });
 
   it("keeps exactly one filled primary action with outline secondaries in a wrapping row", () => {

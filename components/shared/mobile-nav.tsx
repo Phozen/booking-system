@@ -49,29 +49,27 @@ export function MobileNav({
   const panelRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  const [menuPath, setMenuPath] = useState(pathname);
   const close = () => {
     clearBodyScrollLock();
     setOpen(false);
   };
 
-  // Close when navigating so a leftover open state cannot keep body locked.
-  useEffect(() => {
-    clearBodyScrollLock();
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
-  // Close when the shell hides this nav at desktop breakpoints.
   useEffect(() => {
     const media = window.matchMedia(COLLAPSE_MEDIA[variant]);
 
-    function onBreakpointChange(event: MediaQueryListEvent | MediaQueryList) {
-      if (event.matches) {
+    function onBreakpointChange() {
+      if (media.matches) {
         clearBodyScrollLock();
         setOpen(false);
       }
     }
 
-    onBreakpointChange(media);
     media.addEventListener("change", onBreakpointChange);
     return () => media.removeEventListener("change", onBreakpointChange);
   }, [variant]);

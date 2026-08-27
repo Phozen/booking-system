@@ -3,13 +3,20 @@
 import {
   type DialogHTMLAttributes,
   type Ref,
-  useEffect,
-  useState,
+  useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 
 import { centeredDialogClassName } from "@/components/shared/dialog-styles";
 import { cn } from "@/lib/utils";
+
+function useIsClient() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 export function CenteredDialog({
   className,
@@ -18,11 +25,7 @@ export function CenteredDialog({
 }: DialogHTMLAttributes<HTMLDialogElement> & {
   ref?: Ref<HTMLDialogElement>;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   if (!mounted) {
     return null;
