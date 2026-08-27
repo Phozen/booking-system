@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { basename, extname } from "node:path";
+import { basename, extname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const scanHistory = process.argv.includes("--history");
 const maximumFindings = 50;
@@ -35,11 +36,28 @@ const textExtensions = new Set([
   ".yml",
 ]);
 
+function decodeJwtSegment(segment) {
+  try {
+    return JSON.parse(Buffer.from(segment, "base64url").toString("utf8"));
+  } catch {
+    return null;
+  }
+}
+
+export function isAllowedJwt(token) {
+  const payload = decodeJwtSegment(token.split(".")[1] ?? "");
+  // `supabase start` always prints the same published demo keys
+  // (issuer `supabase-demo`). Those are local-only defaults, not
+  // hosted project credentials.
+  return payload?.iss === "supabase-demo";
+}
+
 const rules = [
   {
     name: "JWT",
     pattern:
       /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g,
+    allow: (match) => isAllowedJwt(match[0]),
   },
   {
     name: "refresh or access token",
@@ -69,22 +87,22 @@ function normalizePath(filePath) {
   return filePath.replaceAll("\\", "/").replace(/^\.\//, "");
 }
 
-function record(rule, location) {
-  if (findings.size >= maximumFindings) {
+function record(rule, location, target = findings) {
+  if (target.size >= maximumFindings) {
     return;
   }
 
-  findings.set(`${rule}:${location}`, { rule, location });
+  target.set(`${rule}:${location}`, { rule, location });
 }
 
-function scanPath(filePath, locationPrefix = "working tree") {
+function scanPath(filePath, locationPrefix = "working tree", target = findings) {
   const normalizedPath = normalizePath(filePath);
   if (forbiddenArtifactNames.has(basename(normalizedPath).toLowerCase())) {
-    record("forbidden local artifact", `${locationPrefix}:${normalizedPath}`);
+    record("forbidden local artifact", `${locationPrefix}:${normalizedPath}`, target);
   }
 }
 
-function scanText(text, location) {
+function scanText(text, location, target = findings) {
   const lines = text.split(/\r?\n/);
 
   for (const [lineIndex, line] of lines.entries()) {
@@ -98,7 +116,7 @@ function scanText(text, location) {
 
       while ((match = rule.pattern.exec(line)) !== null) {
         if (!rule.allow?.(match)) {
-          record(rule.name, `${location}:${lineIndex + 1}`);
+          record(rule.name, `${location}:${lineIndex + 1}`, target);
         }
 
         if (match[0].length === 0) {
@@ -107,6 +125,12 @@ function scanText(text, location) {
       }
     }
   }
+}
+
+export function collectTextFindings(text, location = "test") {
+  const collected = new Map();
+  scanText(text, location, collected);
+  return [...collected.values()];
 }
 
 function git(args) {
@@ -161,23 +185,38 @@ function scanGitHistory() {
   scanText(patches, "git history patch");
 }
 
-if (scanHistory) {
-  scanGitHistory();
-} else {
-  scanWorkingTree();
-}
-
-if (findings.size > 0) {
-  console.error(`Secret scan failed with ${findings.size} finding(s):`);
-  for (const finding of findings.values()) {
-    console.error(`- ${finding.rule} at ${finding.location}`);
+function reportFindings() {
+  if (findings.size > 0) {
+    console.error(`Secret scan failed with ${findings.size} finding(s):`);
+    for (const finding of findings.values()) {
+      console.error(`- ${finding.rule} at ${finding.location}`);
+    }
+    console.error("No secret values were printed. Remove the material before continuing.");
+    process.exit(1);
   }
-  console.error("No secret values were printed. Remove the material before continuing.");
-  process.exit(1);
+
+  console.log(
+    scanHistory
+      ? "Git history secret scan passed."
+      : "Working-tree secret scan passed.",
+  );
 }
 
-console.log(
-  scanHistory
-    ? "Git history secret scan passed."
-    : "Working-tree secret scan passed.",
-);
+function isExecutedDirectly() {
+  const invoked = process.argv[1];
+  if (!invoked) {
+    return false;
+  }
+
+  return resolve(fileURLToPath(import.meta.url)) === resolve(invoked);
+}
+
+if (isExecutedDirectly()) {
+  if (scanHistory) {
+    scanGitHistory();
+  } else {
+    scanWorkingTree();
+  }
+
+  reportFindings();
+}
