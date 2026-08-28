@@ -14,4 +14,16 @@ describe("mobile navigation panel", () => {
     expect(source).toContain("w-[min(22rem,calc(100vw-2rem))]");
     expect(source).not.toContain("absolute inset-x-4");
   });
+
+  it("keeps profile, notifications, logout, and theme controls in a row", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components/shared/mobile-nav.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain(
+      'controlsClassName="flex-row flex-wrap items-center justify-start"',
+    );
+    expect(source).not.toContain("flex flex-col gap-2 sm:flex-row");
+  });
 });

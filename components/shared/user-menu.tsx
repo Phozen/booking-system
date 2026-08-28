@@ -60,22 +60,25 @@ export function UserMenu({
           ) : null}
         </div>
       ) : null}
+      {adminRole && showModeSwitch ? (
+        <Link
+          href={switchHref}
+          className={cn(
+            buttonVariants({ variant: "secondary" }),
+            "w-full xl:w-auto",
+          )}
+          onClick={onNavigate}
+        >
+          <ArrowLeftRight data-icon="inline-start" />
+          {switchLabel}
+        </Link>
+      ) : null}
       <div
         className={cn(
-          "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end",
+          "flex flex-row flex-wrap items-center gap-2 sm:justify-end",
           controlsClassName,
         )}
       >
-        {adminRole && showModeSwitch ? (
-          <Link
-            href={switchHref}
-            className={buttonVariants({ variant: "secondary" })}
-            onClick={onNavigate}
-          >
-            <ArrowLeftRight data-icon="inline-start" />
-            {switchLabel}
-          </Link>
-        ) : null}
         <Link
           href={resolvedProfileHref}
           className={buttonVariants({ variant: "outline", size: "icon" })}
@@ -92,7 +95,7 @@ export function UserMenu({
           }
           onNavigate={onNavigate}
         />
-        <form action={logoutAction}>
+        <form action={logoutAction} className="inline-flex">
           <Button type="submit" variant="outline">
             <LogOut data-icon="inline-start" />
             Log out

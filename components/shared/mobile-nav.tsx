@@ -221,7 +221,7 @@ export function MobileNav({
               notifications={userMenu.notifications}
               unseenNotificationCount={userMenu.unseenNotificationCount}
               className="grid gap-3"
-              controlsClassName="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center [&>a:first-of-type]:w-full"
+              controlsClassName="flex-row flex-wrap items-center justify-start"
               onNavigate={close}
             />
           </div>
