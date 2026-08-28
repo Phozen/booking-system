@@ -10,9 +10,13 @@ describe("mobile navigation panel", () => {
       "utf8",
     );
 
-    expect(source).toContain("fixed end-4");
-    expect(source).toContain("w-[min(22rem,calc(100vw-2rem))]");
+    expect(source).toContain("createPortal");
+    expect(source).toContain("document.body");
+    expect(source).toContain("w-[min(22rem,calc(100svw-2rem))]");
+    expect(source).toContain("max-w-[calc(100svw-2rem)]");
+    expect(source).toContain("end-4 start-auto");
     expect(source).not.toContain("absolute inset-x-4");
+    expect(source).not.toContain("origin-top-right");
   });
 
   it("keeps profile, notifications, logout, and theme controls in a row", () => {

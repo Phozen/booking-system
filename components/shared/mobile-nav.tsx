@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
@@ -9,6 +10,14 @@ import { UserMenu } from "@/components/shared/user-menu";
 import { Button } from "@/components/ui/button";
 import type { AppNotification } from "@/lib/notifications/app-notifications";
 import { cn } from "@/lib/utils";
+
+function useIsClient() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -48,6 +57,7 @@ export function MobileNav({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const mounted = useIsClient();
 
   const [menuPath, setMenuPath] = useState(pathname);
   const close = () => {
@@ -178,55 +188,58 @@ export function MobileNav({
         {label}
       </Button>
 
-      {open ? (
-        <button
-          type="button"
-          tabIndex={-1}
-          aria-label="Close menu"
-          className="fixed inset-0 z-40 bg-foreground/40"
-          onClick={close}
-        />
-      ) : null}
-
-      <div
-        ref={panelRef}
-        id={menuId}
-        role="dialog"
-        aria-modal={open ? "true" : undefined}
-        aria-label={label}
-        aria-hidden={!open}
-        tabIndex={-1}
-        className={cn(
-          "fixed end-4 z-50 mt-2 flex w-[min(22rem,calc(100vw-2rem))] max-h-[min(36rem,calc(100svh-6rem))] flex-col overflow-hidden rounded-lg border border-border bg-card p-0 shadow-lg transition-[opacity,transform] duration-200 ease-out origin-top-right",
-          variant === "admin" ? "top-20" : "top-14 sm:top-16",
-          open
-            ? "visible translate-y-0 scale-100 opacity-100"
-            : "invisible -translate-y-2 scale-95 opacity-0 pointer-events-none",
-        )}
-      >
-        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3">
-          {variant === "admin" ? (
-            <AdminNavigation compact onNavigate={close} role={role} />
-          ) : (
-            <EmployeeNavigation compact onNavigate={close} />
-          )}
-        </div>
-        {userMenu ? (
-          <div className="shrink-0 border-t border-border bg-card p-3">
-            <UserMenu
-              email={userMenu.email}
-              role={userMenu.role}
-              currentArea={userMenu.currentArea}
-              profileHref={userMenu.profileHref}
-              notifications={userMenu.notifications}
-              unseenNotificationCount={userMenu.unseenNotificationCount}
-              className="grid gap-3"
-              controlsClassName="flex-row flex-wrap items-center justify-start"
-              onNavigate={close}
-            />
-          </div>
-        ) : null}
-      </div>
+      {mounted && open
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Close menu"
+                className="fixed inset-0 z-[70] bg-foreground/40"
+                onClick={close}
+              />
+              <div
+                ref={panelRef}
+                id={menuId}
+                role="dialog"
+                aria-modal="true"
+                aria-label={label}
+                tabIndex={-1}
+                className={cn(
+                  "fixed z-[80] flex max-h-[min(36rem,calc(100svh-5.5rem-env(safe-area-inset-bottom,0px)))] w-[min(22rem,calc(100svw-2rem))] max-w-[calc(100svw-2rem)] flex-col overflow-hidden overscroll-contain rounded-lg border border-border bg-card p-0 shadow-lg outline-none",
+                  "end-4 start-auto",
+                  variant === "admin"
+                    ? "top-[calc(5.25rem+env(safe-area-inset-top,0px))]"
+                    : "top-[calc(3.75rem+env(safe-area-inset-top,0px))] sm:top-[calc(4.25rem+env(safe-area-inset-top,0px))]",
+                )}
+              >
+                <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3">
+                  {variant === "admin" ? (
+                    <AdminNavigation compact onNavigate={close} role={role} />
+                  ) : (
+                    <EmployeeNavigation compact onNavigate={close} />
+                  )}
+                </div>
+                {userMenu ? (
+                  <div className="shrink-0 border-t border-border bg-card p-3">
+                    <UserMenu
+                      email={userMenu.email}
+                      role={userMenu.role}
+                      currentArea={userMenu.currentArea}
+                      profileHref={userMenu.profileHref}
+                      notifications={userMenu.notifications}
+                      unseenNotificationCount={userMenu.unseenNotificationCount}
+                      className="grid gap-3"
+                      controlsClassName="flex-row flex-wrap items-center justify-start"
+                      onNavigate={close}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
